@@ -8,8 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Torna o ConfigModule global
-      envFilePath: '.env', // Caminho para o arquivo .env
+      isGlobal: true,
+      envFilePath: '.env',
     }),
     PrismaModule,
     CustomerModule,

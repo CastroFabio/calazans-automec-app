@@ -1,1 +1,5 @@
-export class CreateCustomerDto {}
+export class CreateCustomerDto {
+  tel_number: string;
+  cell_number: string;
+  name: string;
+}
