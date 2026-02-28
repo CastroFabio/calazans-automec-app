@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Param } from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -28,19 +28,67 @@ export class CustomerService {
     return newCustomer;
   }
 
-  findAll() {
-    return `This action returns all customer`;
+  async findAll() {
+    const customers = await this.prisma.customer.findMany();
+    return customers;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  async findOne(@Param('id') id: number) {
+    if (!id) {
+      throw new Error('Customer ID is required');
+    }
+
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+    });
+
+    if (!customer) {
+      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+    }
+
+    return customer;
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async update(id: number, updateCustomerDto: UpdateCustomerDto) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+    });
+
+    if (!customer) {
+      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (updateCustomerDto.cell_number) {
+      const cell_numberExists = await this.prisma.customer.findFirst({
+        where: { cell_number: updateCustomerDto.cell_number, NOT: { id } },
+      });
+      if (cell_numberExists) {
+        throw new HttpException(
+          'Cell phone already in use',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+    const updateCustomer = await this.prisma.customer.update({
+      where: { id },
+      data: { ...updateCustomerDto },
+    });
+    return updateCustomer;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  async remove(id: number) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+    });
+
+    if (!customer) {
+      throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
+    }
+
+    const deleteCustomer = await this.prisma.customer.delete({
+      where: { id },
+    });
+
+    return deleteCustomer;
   }
 }
