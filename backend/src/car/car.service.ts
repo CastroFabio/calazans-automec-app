@@ -8,7 +8,7 @@ export class CarService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createCarDto: CreateCarDto) {
-    const car = await this.prisma.car.findUnique({
+    /* const car = await this.prisma.car.findUnique({
       where: {
         license_plate: createCarDto.license_plate,
       },
@@ -20,9 +20,12 @@ export class CarService {
 
     const newCar = await this.prisma.car.create({
       data: { ...createCarDto },
-    });
+    }); 
 
-    return newCar;
+    return newCar;*/
+    console.log(createCarDto);
+
+    return `This action returns all car`;
   }
 
   findAll() {

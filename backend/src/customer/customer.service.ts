@@ -10,7 +10,7 @@ export class CustomerService {
   async create(createCustomerDto: CreateCustomerDto) {
     const customer = await this.prisma.customer.findUnique({
       where: {
-        cell_number: createCustomerDto.cell_number,
+        cell: createCustomerDto.cell,
       },
     });
 
@@ -58,11 +58,11 @@ export class CustomerService {
       throw new HttpException('Customer not found', HttpStatus.NOT_FOUND);
     }
 
-    if (updateCustomerDto.cell_number) {
-      const cell_numberExists = await this.prisma.customer.findFirst({
-        where: { cell_number: updateCustomerDto.cell_number, NOT: { id } },
+    if (updateCustomerDto.cell) {
+      const cellExists = await this.prisma.customer.findFirst({
+        where: { cell: updateCustomerDto.cell, NOT: { id } },
       });
-      if (cell_numberExists) {
+      if (cellExists) {
         throw new HttpException(
           'Cell phone already in use',
           HttpStatus.BAD_REQUEST,

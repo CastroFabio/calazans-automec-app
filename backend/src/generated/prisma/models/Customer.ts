@@ -28,34 +28,34 @@ export type AggregateCustomer = {
 
 export type CustomerAvgAggregateOutputType = {
   id: number | null
-  cell_number: number | null
-  tel_number: number | null
+  cell: number | null
+  phone: number | null
 }
 
 export type CustomerSumAggregateOutputType = {
   id: number | null
-  cell_number: number | null
-  tel_number: number | null
+  cell: number | null
+  phone: number | null
 }
 
 export type CustomerMinAggregateOutputType = {
   id: number | null
-  cell_number: number | null
-  tel_number: number | null
+  cell: number | null
+  phone: number | null
   name: string | null
 }
 
 export type CustomerMaxAggregateOutputType = {
   id: number | null
-  cell_number: number | null
-  tel_number: number | null
+  cell: number | null
+  phone: number | null
   name: string | null
 }
 
 export type CustomerCountAggregateOutputType = {
   id: number
-  cell_number: number
-  tel_number: number
+  cell: number
+  phone: number
   name: number
   _all: number
 }
@@ -63,34 +63,34 @@ export type CustomerCountAggregateOutputType = {
 
 export type CustomerAvgAggregateInputType = {
   id?: true
-  cell_number?: true
-  tel_number?: true
+  cell?: true
+  phone?: true
 }
 
 export type CustomerSumAggregateInputType = {
   id?: true
-  cell_number?: true
-  tel_number?: true
+  cell?: true
+  phone?: true
 }
 
 export type CustomerMinAggregateInputType = {
   id?: true
-  cell_number?: true
-  tel_number?: true
+  cell?: true
+  phone?: true
   name?: true
 }
 
 export type CustomerMaxAggregateInputType = {
   id?: true
-  cell_number?: true
-  tel_number?: true
+  cell?: true
+  phone?: true
   name?: true
 }
 
 export type CustomerCountAggregateInputType = {
   id?: true
-  cell_number?: true
-  tel_number?: true
+  cell?: true
+  phone?: true
   name?: true
   _all?: true
 }
@@ -183,8 +183,8 @@ export type CustomerGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type CustomerGroupByOutputType = {
   id: number
-  cell_number: number
-  tel_number: number
+  cell: number
+  phone: number
   name: string | null
   _count: CustomerCountAggregateOutputType | null
   _avg: CustomerAvgAggregateOutputType | null
@@ -213,35 +213,35 @@ export type CustomerWhereInput = {
   OR?: Prisma.CustomerWhereInput[]
   NOT?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   id?: Prisma.IntFilter<"Customer"> | number
-  cell_number?: Prisma.IntFilter<"Customer"> | number
-  tel_number?: Prisma.IntFilter<"Customer"> | number
+  cell?: Prisma.IntFilter<"Customer"> | number
+  phone?: Prisma.IntFilter<"Customer"> | number
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   cars?: Prisma.CarListRelationFilter
 }
 
 export type CustomerOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cars?: Prisma.CarOrderByRelationAggregateInput
 }
 
 export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   id?: number
-  cell_number?: number
-  tel_number?: number
+  cell?: number
+  phone?: number
   AND?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   OR?: Prisma.CustomerWhereInput[]
   NOT?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   cars?: Prisma.CarListRelationFilter
-}, "id" | "cell_number" | "tel_number">
+}, "id" | "cell" | "phone">
 
 export type CustomerOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.CustomerCountOrderByAggregateInput
   _avg?: Prisma.CustomerAvgOrderByAggregateInput
@@ -255,92 +255,92 @@ export type CustomerScalarWhereWithAggregatesInput = {
   OR?: Prisma.CustomerScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CustomerScalarWhereWithAggregatesInput | Prisma.CustomerScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Customer"> | number
-  cell_number?: Prisma.IntWithAggregatesFilter<"Customer"> | number
-  tel_number?: Prisma.IntWithAggregatesFilter<"Customer"> | number
+  cell?: Prisma.IntWithAggregatesFilter<"Customer"> | number
+  phone?: Prisma.IntWithAggregatesFilter<"Customer"> | number
   name?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
 }
 
 export type CustomerCreateInput = {
-  cell_number: number
-  tel_number: number
+  cell?: number
+  phone: number
   name?: string | null
   cars?: Prisma.CarCreateNestedManyWithoutCar_ownerInput
 }
 
 export type CustomerUncheckedCreateInput = {
   id?: number
-  cell_number: number
-  tel_number: number
+  cell?: number
+  phone: number
   name?: string | null
   cars?: Prisma.CarUncheckedCreateNestedManyWithoutCar_ownerInput
 }
 
 export type CustomerUpdateInput = {
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cars?: Prisma.CarUpdateManyWithoutCar_ownerNestedInput
 }
 
 export type CustomerUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cars?: Prisma.CarUncheckedUpdateManyWithoutCar_ownerNestedInput
 }
 
 export type CustomerCreateManyInput = {
   id?: number
-  cell_number: number
-  tel_number: number
+  cell?: number
+  phone: number
   name?: string | null
 }
 
 export type CustomerUpdateManyMutationInput = {
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CustomerUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CustomerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
 export type CustomerAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
 }
 
 export type CustomerMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
 export type CustomerMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   name?: Prisma.SortOrder
 }
 
 export type CustomerSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  cell_number?: Prisma.SortOrder
-  tel_number?: Prisma.SortOrder
+  cell?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
 }
 
 export type CustomerNullableScalarRelationFilter = {
@@ -377,15 +377,15 @@ export type CustomerUpdateOneWithoutCarsNestedInput = {
 }
 
 export type CustomerCreateWithoutCarsInput = {
-  cell_number: number
-  tel_number: number
+  cell?: number
+  phone: number
   name?: string | null
 }
 
 export type CustomerUncheckedCreateWithoutCarsInput = {
   id?: number
-  cell_number: number
-  tel_number: number
+  cell?: number
+  phone: number
   name?: string | null
 }
 
@@ -406,15 +406,15 @@ export type CustomerUpdateToOneWithWhereWithoutCarsInput = {
 }
 
 export type CustomerUpdateWithoutCarsInput = {
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type CustomerUncheckedUpdateWithoutCarsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  cell_number?: Prisma.IntFieldUpdateOperationsInput | number
-  tel_number?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -451,8 +451,8 @@ export type CustomerCountOutputTypeCountCarsArgs<ExtArgs extends runtime.Types.E
 
 export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  cell_number?: boolean
-  tel_number?: boolean
+  cell?: boolean
+  phone?: boolean
   name?: boolean
   cars?: boolean | Prisma.Customer$carsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
@@ -460,26 +460,26 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 
 export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  cell_number?: boolean
-  tel_number?: boolean
+  cell?: boolean
+  phone?: boolean
   name?: boolean
 }, ExtArgs["result"]["customer"]>
 
 export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  cell_number?: boolean
-  tel_number?: boolean
+  cell?: boolean
+  phone?: boolean
   name?: boolean
 }, ExtArgs["result"]["customer"]>
 
 export type CustomerSelectScalar = {
   id?: boolean
-  cell_number?: boolean
-  tel_number?: boolean
+  cell?: boolean
+  phone?: boolean
   name?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cell_number" | "tel_number" | "name", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cell" | "phone" | "name", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cars?: boolean | Prisma.Customer$carsArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
@@ -494,8 +494,8 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    cell_number: number
-    tel_number: number
+    cell: number
+    phone: number
     name: string | null
   }, ExtArgs["result"]["customer"]>
   composites: {}
@@ -922,8 +922,8 @@ export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime
  */
 export interface CustomerFieldRefs {
   readonly id: Prisma.FieldRef<"Customer", 'Int'>
-  readonly cell_number: Prisma.FieldRef<"Customer", 'Int'>
-  readonly tel_number: Prisma.FieldRef<"Customer", 'Int'>
+  readonly cell: Prisma.FieldRef<"Customer", 'Int'>
+  readonly phone: Prisma.FieldRef<"Customer", 'Int'>
   readonly name: Prisma.FieldRef<"Customer", 'String'>
 }
     

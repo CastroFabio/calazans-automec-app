@@ -2,10 +2,10 @@ import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateCustomerDto {
   @IsOptional()
-  tel_number: number;
+  phone: number;
 
   @IsNotEmpty()
-  cell_number: number;
+  cell: number;
 
   @IsNotEmpty()
   @IsString()

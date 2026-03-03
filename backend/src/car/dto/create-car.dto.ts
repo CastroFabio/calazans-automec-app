@@ -1,7 +1,15 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
+import { ApiProperty } from '@nestjs/swagger';
+
 export class CreateCarDto {
-  @IsOptional()
+  @ApiProperty({
+    description: 'Nome do usuário',
+    example: 'João Silva',
+  })
+  type: string;
+
+  /* @IsOptional()
   @IsString()
   type: string;
 
@@ -29,5 +37,5 @@ export class CreateCarDto {
 
   @IsOptional()
   @IsString()
-  arrived_at: string;
+  arrived_at: string; */
 }
