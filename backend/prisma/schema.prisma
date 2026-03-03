@@ -16,7 +16,23 @@ datasource db {
 
 model Customer {
   id    Int     @default(autoincrement()) @id
-  cell_number String  @unique
-  tel_number  String @unique
+  cell_number Int  @unique
+  tel_number  Int @unique
   name  String?
+
+  cars Car[]
+}
+
+model Car {
+  id    Int     @default(autoincrement()) @id
+  type String  
+  license_plate  String @unique
+  brand String
+  model String
+  year Int
+  color String
+  km Int
+  arrived_at DateTime
+  car_owner    Customer?    @relation(fields: [customer_id], references: [id])
+  customer_id Int?
 }

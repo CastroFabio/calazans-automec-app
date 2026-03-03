@@ -384,7 +384,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  Customer: 'Customer'
+  Customer: 'Customer',
+  Car: 'Car'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -400,7 +401,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "customer"
+    modelProps: "customer" | "car"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -478,6 +479,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Car: {
+      payload: Prisma.$CarPayload<ExtArgs>
+      fields: Prisma.CarFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CarFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CarFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        findFirst: {
+          args: Prisma.CarFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CarFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        findMany: {
+          args: Prisma.CarFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>[]
+        }
+        create: {
+          args: Prisma.CarCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        createMany: {
+          args: Prisma.CarCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CarCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>[]
+        }
+        delete: {
+          args: Prisma.CarDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        update: {
+          args: Prisma.CarUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        deleteMany: {
+          args: Prisma.CarDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CarUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CarUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>[]
+        }
+        upsert: {
+          args: Prisma.CarUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CarPayload>
+        }
+        aggregate: {
+          args: Prisma.CarAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCar>
+        }
+        groupBy: {
+          args: Prisma.CarGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CarCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CarCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -524,6 +599,22 @@ export const CustomerScalarFieldEnum = {
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
 
 
+export const CarScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  license_plate: 'license_plate',
+  brand: 'brand',
+  model: 'model',
+  year: 'year',
+  color: 'color',
+  km: 'km',
+  arrived_at: 'arrived_at',
+  customer_id: 'customer_id'
+} as const
+
+export type CarScalarFieldEnum = (typeof CarScalarFieldEnum)[keyof typeof CarScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -557,6 +648,13 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'String'
  */
 export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
     
 
 
@@ -662,6 +760,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   customer?: Prisma.CustomerOmit
+  car?: Prisma.CarOmit
 }
 
 /* Types for Logging */

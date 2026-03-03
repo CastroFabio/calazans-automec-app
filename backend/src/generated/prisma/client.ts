@@ -42,3 +42,8 @@ export { Prisma }
  * 
  */
 export type Customer = Prisma.CustomerModel
+/**
+ * Model Car
+ * 
+ */
+export type Car = Prisma.CarModel
