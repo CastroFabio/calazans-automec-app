@@ -32,7 +32,7 @@ model Car {
   year Int
   color String
   km Int
-  arrived_at DateTime
+  arrived_at DateTime @default(now())
   car_owner    Customer?    @relation(fields: [customer_id], references: [id])
   customer_id Int?
 }

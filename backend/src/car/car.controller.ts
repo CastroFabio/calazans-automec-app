@@ -22,10 +22,10 @@ export class CarController {
   @ApiBody({ type: CreateCarDto })
   @ApiResponse({
     status: 201,
-    description: 'Usuário criado com sucesso',
+    description: 'Carro cadastrado com sucesso',
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  @ApiResponse({ status: 409, description: 'Email já existe' })
+  @ApiResponse({ status: 409, description: 'Placa já existe' })
   create(@Body() createCarDto: CreateCarDto) {
     return this.carService.create(createCarDto);
   }
