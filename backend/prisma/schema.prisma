@@ -21,6 +21,8 @@ model Customer {
   name  String?
 
   cars Car[]
+
+  orders Order[]
 }
 
 model Car {
@@ -35,4 +37,36 @@ model Car {
   arrived_at DateTime @default(now())
   car_owner    Customer?    @relation(fields: [customer_id], references: [id])
   customer_id Int?
+
+  orders Order[]
 }
+
+enum Status {
+  in_progress
+  pending
+  done
+}
+
+enum Priority {
+  alta
+  normal
+  baixa
+}
+
+model Order {
+  id    Int     @default(autoincrement()) @id
+  employer String
+  priority Priority @default(normal) 
+  status Status @default(pending)
+  total_value Decimal
+  description String?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  customer     Customer?    @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customer_id Int?
+
+  car     Car?    @relation(fields: [car_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  car_id Int?
+}
+

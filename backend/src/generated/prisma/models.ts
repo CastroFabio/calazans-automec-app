@@ -10,4 +10,5 @@
  */
 export type * from './models/Customer.js'
 export type * from './models/Car.js'
+export type * from './models/Order.js'
 export type * from './commonInputTypes.js'

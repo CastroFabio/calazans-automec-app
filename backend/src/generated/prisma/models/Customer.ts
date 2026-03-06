@@ -217,6 +217,7 @@ export type CustomerWhereInput = {
   phone?: Prisma.IntFilter<"Customer"> | number
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   cars?: Prisma.CarListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
 }
 
 export type CustomerOrderByWithRelationInput = {
@@ -225,6 +226,7 @@ export type CustomerOrderByWithRelationInput = {
   phone?: Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   cars?: Prisma.CarOrderByRelationAggregateInput
+  orders?: Prisma.OrderOrderByRelationAggregateInput
 }
 
 export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -236,6 +238,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   cars?: Prisma.CarListRelationFilter
+  orders?: Prisma.OrderListRelationFilter
 }, "id" | "cell" | "phone">
 
 export type CustomerOrderByWithAggregationInput = {
@@ -265,6 +268,7 @@ export type CustomerCreateInput = {
   phone: number
   name?: string | null
   cars?: Prisma.CarCreateNestedManyWithoutCar_ownerInput
+  orders?: Prisma.OrderCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateInput = {
@@ -273,6 +277,7 @@ export type CustomerUncheckedCreateInput = {
   phone: number
   name?: string | null
   cars?: Prisma.CarUncheckedCreateNestedManyWithoutCar_ownerInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUpdateInput = {
@@ -280,6 +285,7 @@ export type CustomerUpdateInput = {
   phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cars?: Prisma.CarUpdateManyWithoutCar_ownerNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateInput = {
@@ -288,6 +294,7 @@ export type CustomerUncheckedUpdateInput = {
   phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cars?: Prisma.CarUncheckedUpdateManyWithoutCar_ownerNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerCreateManyInput = {
@@ -376,10 +383,27 @@ export type CustomerUpdateOneWithoutCarsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutCarsInput, Prisma.CustomerUpdateWithoutCarsInput>, Prisma.CustomerUncheckedUpdateWithoutCarsInput>
 }
 
+export type CustomerCreateNestedOneWithoutOrdersInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOrdersInput, Prisma.CustomerUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOrdersInput
+  connect?: Prisma.CustomerWhereUniqueInput
+}
+
+export type CustomerUpdateOneWithoutOrdersNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomerCreateWithoutOrdersInput, Prisma.CustomerUncheckedCreateWithoutOrdersInput>
+  connectOrCreate?: Prisma.CustomerCreateOrConnectWithoutOrdersInput
+  upsert?: Prisma.CustomerUpsertWithoutOrdersInput
+  disconnect?: Prisma.CustomerWhereInput | boolean
+  delete?: Prisma.CustomerWhereInput | boolean
+  connect?: Prisma.CustomerWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CustomerUpdateToOneWithWhereWithoutOrdersInput, Prisma.CustomerUpdateWithoutOrdersInput>, Prisma.CustomerUncheckedUpdateWithoutOrdersInput>
+}
+
 export type CustomerCreateWithoutCarsInput = {
   cell?: number
   phone: number
   name?: string | null
+  orders?: Prisma.OrderCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerUncheckedCreateWithoutCarsInput = {
@@ -387,6 +411,7 @@ export type CustomerUncheckedCreateWithoutCarsInput = {
   cell?: number
   phone: number
   name?: string | null
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutCustomerInput
 }
 
 export type CustomerCreateOrConnectWithoutCarsInput = {
@@ -409,6 +434,7 @@ export type CustomerUpdateWithoutCarsInput = {
   cell?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orders?: Prisma.OrderUpdateManyWithoutCustomerNestedInput
 }
 
 export type CustomerUncheckedUpdateWithoutCarsInput = {
@@ -416,6 +442,53 @@ export type CustomerUncheckedUpdateWithoutCarsInput = {
   cell?: Prisma.IntFieldUpdateOperationsInput | number
   phone?: Prisma.IntFieldUpdateOperationsInput | number
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutCustomerNestedInput
+}
+
+export type CustomerCreateWithoutOrdersInput = {
+  cell?: number
+  phone: number
+  name?: string | null
+  cars?: Prisma.CarCreateNestedManyWithoutCar_ownerInput
+}
+
+export type CustomerUncheckedCreateWithoutOrdersInput = {
+  id?: number
+  cell?: number
+  phone: number
+  name?: string | null
+  cars?: Prisma.CarUncheckedCreateNestedManyWithoutCar_ownerInput
+}
+
+export type CustomerCreateOrConnectWithoutOrdersInput = {
+  where: Prisma.CustomerWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutOrdersInput, Prisma.CustomerUncheckedCreateWithoutOrdersInput>
+}
+
+export type CustomerUpsertWithoutOrdersInput = {
+  update: Prisma.XOR<Prisma.CustomerUpdateWithoutOrdersInput, Prisma.CustomerUncheckedUpdateWithoutOrdersInput>
+  create: Prisma.XOR<Prisma.CustomerCreateWithoutOrdersInput, Prisma.CustomerUncheckedCreateWithoutOrdersInput>
+  where?: Prisma.CustomerWhereInput
+}
+
+export type CustomerUpdateToOneWithWhereWithoutOrdersInput = {
+  where?: Prisma.CustomerWhereInput
+  data: Prisma.XOR<Prisma.CustomerUpdateWithoutOrdersInput, Prisma.CustomerUncheckedUpdateWithoutOrdersInput>
+}
+
+export type CustomerUpdateWithoutOrdersInput = {
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cars?: Prisma.CarUpdateManyWithoutCar_ownerNestedInput
+}
+
+export type CustomerUncheckedUpdateWithoutOrdersInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  cell?: Prisma.IntFieldUpdateOperationsInput | number
+  phone?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cars?: Prisma.CarUncheckedUpdateManyWithoutCar_ownerNestedInput
 }
 
 
@@ -425,10 +498,12 @@ export type CustomerUncheckedUpdateWithoutCarsInput = {
 
 export type CustomerCountOutputType = {
   cars: number
+  orders: number
 }
 
 export type CustomerCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cars?: boolean | CustomerCountOutputTypeCountCarsArgs
+  orders?: boolean | CustomerCountOutputTypeCountOrdersArgs
 }
 
 /**
@@ -448,6 +523,13 @@ export type CustomerCountOutputTypeCountCarsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.CarWhereInput
 }
 
+/**
+ * CustomerCountOutputType without action
+ */
+export type CustomerCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OrderWhereInput
+}
+
 
 export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -455,6 +537,7 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   phone?: boolean
   name?: boolean
   cars?: boolean | Prisma.Customer$carsArgs<ExtArgs>
+  orders?: boolean | Prisma.Customer$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customer"]>
 
@@ -482,6 +565,7 @@ export type CustomerSelectScalar = {
 export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cell" | "phone" | "name", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cars?: boolean | Prisma.Customer$carsArgs<ExtArgs>
+  orders?: boolean | Prisma.Customer$ordersArgs<ExtArgs>
   _count?: boolean | Prisma.CustomerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CustomerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -491,6 +575,7 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Customer"
   objects: {
     cars: Prisma.$CarPayload<ExtArgs>[]
+    orders: Prisma.$OrderPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -892,6 +977,7 @@ readonly fields: CustomerFieldRefs;
 export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cars<T extends Prisma.Customer$carsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$carsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CarPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  orders<T extends Prisma.Customer$ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Customer$ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1332,6 +1418,30 @@ export type Customer$carsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.CarScalarFieldEnum | Prisma.CarScalarFieldEnum[]
+}
+
+/**
+ * Customer.orders
+ */
+export type Customer$ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Order
+   */
+  select?: Prisma.OrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Order
+   */
+  omit?: Prisma.OrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OrderInclude<ExtArgs> | null
+  where?: Prisma.OrderWhereInput
+  orderBy?: Prisma.OrderOrderByWithRelationInput | Prisma.OrderOrderByWithRelationInput[]
+  cursor?: Prisma.OrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OrderScalarFieldEnum | Prisma.OrderScalarFieldEnum[]
 }
 
 /**

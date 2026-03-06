@@ -160,6 +160,67 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.Priority | Prisma.EnumPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.Priority[]
+  notIn?: $Enums.Priority[]
+  not?: Prisma.NestedEnumPriorityFilter<$PrismaModel> | $Enums.Priority
+}
+
+export type EnumStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.Status | Prisma.EnumStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.Status[]
+  notIn?: $Enums.Status[]
+  not?: Prisma.NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
+}
+
+export type DecimalFilter<$PrismaModel = never> = {
+  equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  notIn?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  lt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  lte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedDecimalFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type EnumPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Priority | Prisma.EnumPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.Priority[]
+  notIn?: $Enums.Priority[]
+  not?: Prisma.NestedEnumPriorityWithAggregatesFilter<$PrismaModel> | $Enums.Priority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPriorityFilter<$PrismaModel>
+}
+
+export type EnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Status | Prisma.EnumStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.Status[]
+  notIn?: $Enums.Status[]
+  not?: Prisma.NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusFilter<$PrismaModel>
+}
+
+export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  notIn?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  lt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  lte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedDecimalWithAggregatesFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _sum?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _min?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _max?: Prisma.NestedDecimalFilter<$PrismaModel>
+}
+
 export type NestedIntFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
   in?: number[]
@@ -321,6 +382,67 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.Priority | Prisma.EnumPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.Priority[]
+  notIn?: $Enums.Priority[]
+  not?: Prisma.NestedEnumPriorityFilter<$PrismaModel> | $Enums.Priority
+}
+
+export type NestedEnumStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.Status | Prisma.EnumStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.Status[]
+  notIn?: $Enums.Status[]
+  not?: Prisma.NestedEnumStatusFilter<$PrismaModel> | $Enums.Status
+}
+
+export type NestedDecimalFilter<$PrismaModel = never> = {
+  equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  notIn?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  lt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  lte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedDecimalFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type NestedEnumPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Priority | Prisma.EnumPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.Priority[]
+  notIn?: $Enums.Priority[]
+  not?: Prisma.NestedEnumPriorityWithAggregatesFilter<$PrismaModel> | $Enums.Priority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPriorityFilter<$PrismaModel>
+}
+
+export type NestedEnumStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Status | Prisma.EnumStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.Status[]
+  notIn?: $Enums.Status[]
+  not?: Prisma.NestedEnumStatusWithAggregatesFilter<$PrismaModel> | $Enums.Status
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumStatusFilter<$PrismaModel>
+}
+
+export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  notIn?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[]
+  lt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  lte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gt?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  gte?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedDecimalWithAggregatesFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _avg?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _sum?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _min?: Prisma.NestedDecimalFilter<$PrismaModel>
+  _max?: Prisma.NestedDecimalFilter<$PrismaModel>
 }
 
 
