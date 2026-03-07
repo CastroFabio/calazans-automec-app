@@ -68,5 +68,67 @@ model Order {
 
   car     Car?    @relation(fields: [car_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   car_id Int?
+
+  itemMaintenance Item_Maintenance[]
+
+  itemMaterials Item_Material[]
 }
 
+model Item_Maintenance{
+  id    Int     @default(autoincrement()) @id
+  value_unit Decimal
+  subtotal Decimal
+  quantidade Int
+
+  order     Order?    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  order_id Int?
+
+  maintenance     Maintenance?    @relation(fields: [maintenance_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  maintenance_id Int?
+}
+
+model Item_Material{
+  id    Int     @default(autoincrement()) @id
+  value_unit Decimal
+  subtotal Decimal
+  quantidade Int
+
+  order     Order?    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  order_id Int?
+
+  material     Material?    @relation(fields: [material_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  material_id Int?
+}
+
+model Maintenance {
+  id    Int     @default(autoincrement()) @id
+  name String   @unique
+  value_price Decimal
+
+  group     Group?    @relation(fields: [group_id], references: [id])
+  group_id Int?
+
+  itemMaintenance Item_Maintenance[]
+
+}
+
+model Material {
+  id    Int     @default(autoincrement()) @id
+  name String   @unique
+  value_price Decimal
+
+  group     Group?    @relation(fields: [group_id], references: [id])
+  group_id Int?
+
+  itemMaterials Item_Material[]
+
+}
+
+model Group {
+  id Int     @default(autoincrement()) @id
+  name String   @unique
+
+  maintenance Maintenance[]
+
+  materials Material[]
+}

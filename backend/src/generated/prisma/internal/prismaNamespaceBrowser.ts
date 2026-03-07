@@ -53,7 +53,12 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Customer: 'Customer',
   Car: 'Car',
-  Order: 'Order'
+  Order: 'Order',
+  Item_Maintenance: 'Item_Maintenance',
+  Item_Material: 'Item_Material',
+  Maintenance: 'Maintenance',
+  Material: 'Material',
+  Group: 'Group'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -109,6 +114,58 @@ export const OrderScalarFieldEnum = {
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const Item_MaintenanceScalarFieldEnum = {
+  id: 'id',
+  value_unit: 'value_unit',
+  subtotal: 'subtotal',
+  quantidade: 'quantidade',
+  order_id: 'order_id',
+  maintenance_id: 'maintenance_id'
+} as const
+
+export type Item_MaintenanceScalarFieldEnum = (typeof Item_MaintenanceScalarFieldEnum)[keyof typeof Item_MaintenanceScalarFieldEnum]
+
+
+export const Item_MaterialScalarFieldEnum = {
+  id: 'id',
+  value_unit: 'value_unit',
+  subtotal: 'subtotal',
+  quantidade: 'quantidade',
+  order_id: 'order_id',
+  material_id: 'material_id'
+} as const
+
+export type Item_MaterialScalarFieldEnum = (typeof Item_MaterialScalarFieldEnum)[keyof typeof Item_MaterialScalarFieldEnum]
+
+
+export const MaintenanceScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  value_price: 'value_price',
+  group_id: 'group_id'
+} as const
+
+export type MaintenanceScalarFieldEnum = (typeof MaintenanceScalarFieldEnum)[keyof typeof MaintenanceScalarFieldEnum]
+
+
+export const MaterialScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  value_price: 'value_price',
+  group_id: 'group_id'
+} as const
+
+export type MaterialScalarFieldEnum = (typeof MaterialScalarFieldEnum)[keyof typeof MaterialScalarFieldEnum]
+
+
+export const GroupScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+} as const
+
+export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -52,3 +52,28 @@ export type Car = Prisma.CarModel
  * 
  */
 export type Order = Prisma.OrderModel
+/**
+ * Model Item_Maintenance
+ * 
+ */
+export type Item_Maintenance = Prisma.Item_MaintenanceModel
+/**
+ * Model Item_Material
+ * 
+ */
+export type Item_Material = Prisma.Item_MaterialModel
+/**
+ * Model Maintenance
+ * 
+ */
+export type Maintenance = Prisma.MaintenanceModel
+/**
+ * Model Material
+ * 
+ */
+export type Material = Prisma.MaterialModel
+/**
+ * Model Group
+ * 
+ */
+export type Group = Prisma.GroupModel

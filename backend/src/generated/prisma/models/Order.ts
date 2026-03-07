@@ -270,6 +270,8 @@ export type OrderWhereInput = {
   car_id?: Prisma.IntNullableFilter<"Order"> | number | null
   customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   car?: Prisma.XOR<Prisma.CarNullableScalarRelationFilter, Prisma.CarWhereInput> | null
+  itemMaintenance?: Prisma.Item_MaintenanceListRelationFilter
+  itemMaterials?: Prisma.Item_MaterialListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -285,6 +287,8 @@ export type OrderOrderByWithRelationInput = {
   car_id?: Prisma.SortOrderInput | Prisma.SortOrder
   customer?: Prisma.CustomerOrderByWithRelationInput
   car?: Prisma.CarOrderByWithRelationInput
+  itemMaintenance?: Prisma.Item_MaintenanceOrderByRelationAggregateInput
+  itemMaterials?: Prisma.Item_MaterialOrderByRelationAggregateInput
 }
 
 export type OrderWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +307,8 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   car_id?: Prisma.IntNullableFilter<"Order"> | number | null
   customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   car?: Prisma.XOR<Prisma.CarNullableScalarRelationFilter, Prisma.CarWhereInput> | null
+  itemMaintenance?: Prisma.Item_MaintenanceListRelationFilter
+  itemMaterials?: Prisma.Item_MaterialListRelationFilter
 }, "id">
 
 export type OrderOrderByWithAggregationInput = {
@@ -349,6 +355,8 @@ export type OrderCreateInput = {
   updated_at?: Date | string
   customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
   car?: Prisma.CarCreateNestedOneWithoutOrdersInput
+  itemMaintenance?: Prisma.Item_MaintenanceCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -362,6 +370,8 @@ export type OrderUncheckedCreateInput = {
   updated_at?: Date | string
   customer_id?: number | null
   car_id?: number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -374,6 +384,8 @@ export type OrderUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
   car?: Prisma.CarUpdateOneWithoutOrdersNestedInput
+  itemMaintenance?: Prisma.Item_MaintenanceUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -387,6 +399,8 @@ export type OrderUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   car_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -486,6 +500,11 @@ export type OrderSumOrderByAggregateInput = {
   total_value?: Prisma.SortOrder
   customer_id?: Prisma.SortOrder
   car_id?: Prisma.SortOrder
+}
+
+export type OrderNullableScalarRelationFilter = {
+  is?: Prisma.OrderWhereInput | null
+  isNot?: Prisma.OrderWhereInput | null
 }
 
 export type OrderCreateNestedManyWithoutCustomerInput = {
@@ -588,6 +607,38 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type OrderCreateNestedOneWithoutItemMaintenanceInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutItemMaintenanceInput, Prisma.OrderUncheckedCreateWithoutItemMaintenanceInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemMaintenanceInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneWithoutItemMaintenanceNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutItemMaintenanceInput, Prisma.OrderUncheckedCreateWithoutItemMaintenanceInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemMaintenanceInput
+  upsert?: Prisma.OrderUpsertWithoutItemMaintenanceInput
+  disconnect?: Prisma.OrderWhereInput | boolean
+  delete?: Prisma.OrderWhereInput | boolean
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutItemMaintenanceInput, Prisma.OrderUpdateWithoutItemMaintenanceInput>, Prisma.OrderUncheckedUpdateWithoutItemMaintenanceInput>
+}
+
+export type OrderCreateNestedOneWithoutItemMaterialsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutItemMaterialsInput, Prisma.OrderUncheckedCreateWithoutItemMaterialsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemMaterialsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneWithoutItemMaterialsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutItemMaterialsInput, Prisma.OrderUncheckedCreateWithoutItemMaterialsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemMaterialsInput
+  upsert?: Prisma.OrderUpsertWithoutItemMaterialsInput
+  disconnect?: Prisma.OrderWhereInput | boolean
+  delete?: Prisma.OrderWhereInput | boolean
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutItemMaterialsInput, Prisma.OrderUpdateWithoutItemMaterialsInput>, Prisma.OrderUncheckedUpdateWithoutItemMaterialsInput>
+}
+
 export type OrderCreateWithoutCustomerInput = {
   employer: string
   priority?: $Enums.Priority
@@ -597,6 +648,8 @@ export type OrderCreateWithoutCustomerInput = {
   created_at?: Date | string
   updated_at?: Date | string
   car?: Prisma.CarCreateNestedOneWithoutOrdersInput
+  itemMaintenance?: Prisma.Item_MaintenanceCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCustomerInput = {
@@ -609,6 +662,8 @@ export type OrderUncheckedCreateWithoutCustomerInput = {
   created_at?: Date | string
   updated_at?: Date | string
   car_id?: number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCustomerInput = {
@@ -661,6 +716,8 @@ export type OrderCreateWithoutCarInput = {
   created_at?: Date | string
   updated_at?: Date | string
   customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  itemMaintenance?: Prisma.Item_MaintenanceCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCarInput = {
@@ -673,6 +730,8 @@ export type OrderUncheckedCreateWithoutCarInput = {
   created_at?: Date | string
   updated_at?: Date | string
   customer_id?: number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedCreateNestedManyWithoutOrderInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCarInput = {
@@ -700,6 +759,146 @@ export type OrderUpdateManyWithWhereWithoutCarInput = {
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutCarInput>
 }
 
+export type OrderCreateWithoutItemMaintenanceInput = {
+  employer: string
+  priority?: $Enums.Priority
+  status?: $Enums.Status
+  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  car?: Prisma.CarCreateNestedOneWithoutOrdersInput
+  itemMaterials?: Prisma.Item_MaterialCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutItemMaintenanceInput = {
+  id?: number
+  employer: string
+  priority?: $Enums.Priority
+  status?: $Enums.Status
+  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  customer_id?: number | null
+  car_id?: number | null
+  itemMaterials?: Prisma.Item_MaterialUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutItemMaintenanceInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutItemMaintenanceInput, Prisma.OrderUncheckedCreateWithoutItemMaintenanceInput>
+}
+
+export type OrderUpsertWithoutItemMaintenanceInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutItemMaintenanceInput, Prisma.OrderUncheckedUpdateWithoutItemMaintenanceInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutItemMaintenanceInput, Prisma.OrderUncheckedCreateWithoutItemMaintenanceInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutItemMaintenanceInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutItemMaintenanceInput, Prisma.OrderUncheckedUpdateWithoutItemMaintenanceInput>
+}
+
+export type OrderUpdateWithoutItemMaintenanceInput = {
+  employer?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+  status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
+  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  car?: Prisma.CarUpdateOneWithoutOrdersNestedInput
+  itemMaterials?: Prisma.Item_MaterialUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutItemMaintenanceInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  employer?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+  status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
+  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customer_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  car_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMaterials?: Prisma.Item_MaterialUncheckedUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderCreateWithoutItemMaterialsInput = {
+  employer: string
+  priority?: $Enums.Priority
+  status?: $Enums.Status
+  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  car?: Prisma.CarCreateNestedOneWithoutOrdersInput
+  itemMaintenance?: Prisma.Item_MaintenanceCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutItemMaterialsInput = {
+  id?: number
+  employer: string
+  priority?: $Enums.Priority
+  status?: $Enums.Status
+  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  customer_id?: number | null
+  car_id?: number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutItemMaterialsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutItemMaterialsInput, Prisma.OrderUncheckedCreateWithoutItemMaterialsInput>
+}
+
+export type OrderUpsertWithoutItemMaterialsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutItemMaterialsInput, Prisma.OrderUncheckedUpdateWithoutItemMaterialsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutItemMaterialsInput, Prisma.OrderUncheckedCreateWithoutItemMaterialsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutItemMaterialsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutItemMaterialsInput, Prisma.OrderUncheckedUpdateWithoutItemMaterialsInput>
+}
+
+export type OrderUpdateWithoutItemMaterialsInput = {
+  employer?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+  status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
+  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  car?: Prisma.CarUpdateOneWithoutOrdersNestedInput
+  itemMaintenance?: Prisma.Item_MaintenanceUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutItemMaterialsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  employer?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
+  status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
+  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customer_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  car_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedUpdateManyWithoutOrderNestedInput
+}
+
 export type OrderCreateManyCustomerInput = {
   id?: number
   employer: string
@@ -721,6 +920,8 @@ export type OrderUpdateWithoutCustomerInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   car?: Prisma.CarUpdateOneWithoutOrdersNestedInput
+  itemMaintenance?: Prisma.Item_MaintenanceUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCustomerInput = {
@@ -733,6 +934,8 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   car_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutCustomerInput = {
@@ -768,6 +971,8 @@ export type OrderUpdateWithoutCarInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  itemMaintenance?: Prisma.Item_MaintenanceUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCarInput = {
@@ -780,6 +985,8 @@ export type OrderUncheckedUpdateWithoutCarInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  itemMaintenance?: Prisma.Item_MaintenanceUncheckedUpdateManyWithoutOrderNestedInput
+  itemMaterials?: Prisma.Item_MaterialUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutCarInput = {
@@ -795,6 +1002,44 @@ export type OrderUncheckedUpdateManyWithoutCarInput = {
 }
 
 
+/**
+ * Count Type OrderCountOutputType
+ */
+
+export type OrderCountOutputType = {
+  itemMaintenance: number
+  itemMaterials: number
+}
+
+export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  itemMaintenance?: boolean | OrderCountOutputTypeCountItemMaintenanceArgs
+  itemMaterials?: boolean | OrderCountOutputTypeCountItemMaterialsArgs
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderCountOutputType
+   */
+  select?: Prisma.OrderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountItemMaintenanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.Item_MaintenanceWhereInput
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountItemMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.Item_MaterialWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -809,6 +1054,9 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   car_id?: boolean
   customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
   car?: boolean | Prisma.Order$carArgs<ExtArgs>
+  itemMaintenance?: boolean | Prisma.Order$itemMaintenanceArgs<ExtArgs>
+  itemMaterials?: boolean | Prisma.Order$itemMaterialsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -858,6 +1106,9 @@ export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
   car?: boolean | Prisma.Order$carArgs<ExtArgs>
+  itemMaintenance?: boolean | Prisma.Order$itemMaintenanceArgs<ExtArgs>
+  itemMaterials?: boolean | Prisma.Order$itemMaterialsArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
@@ -873,6 +1124,8 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     customer: Prisma.$CustomerPayload<ExtArgs> | null
     car: Prisma.$CarPayload<ExtArgs> | null
+    itemMaintenance: Prisma.$Item_MaintenancePayload<ExtArgs>[]
+    itemMaterials: Prisma.$Item_MaterialPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1281,6 +1534,8 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   customer<T extends Prisma.Order$customerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$customerArgs<ExtArgs>>): Prisma.Prisma__CustomerClient<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   car<T extends Prisma.Order$carArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$carArgs<ExtArgs>>): Prisma.Prisma__CarClient<runtime.Types.Result.GetResult<Prisma.$CarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  itemMaintenance<T extends Prisma.Order$itemMaintenanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemMaintenanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$Item_MaintenancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  itemMaterials<T extends Prisma.Order$itemMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$Item_MaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1749,6 +2004,54 @@ export type Order$carArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   include?: Prisma.CarInclude<ExtArgs> | null
   where?: Prisma.CarWhereInput
+}
+
+/**
+ * Order.itemMaintenance
+ */
+export type Order$itemMaintenanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Item_Maintenance
+   */
+  select?: Prisma.Item_MaintenanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Item_Maintenance
+   */
+  omit?: Prisma.Item_MaintenanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.Item_MaintenanceInclude<ExtArgs> | null
+  where?: Prisma.Item_MaintenanceWhereInput
+  orderBy?: Prisma.Item_MaintenanceOrderByWithRelationInput | Prisma.Item_MaintenanceOrderByWithRelationInput[]
+  cursor?: Prisma.Item_MaintenanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Item_MaintenanceScalarFieldEnum | Prisma.Item_MaintenanceScalarFieldEnum[]
+}
+
+/**
+ * Order.itemMaterials
+ */
+export type Order$itemMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Item_Material
+   */
+  select?: Prisma.Item_MaterialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Item_Material
+   */
+  omit?: Prisma.Item_MaterialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.Item_MaterialInclude<ExtArgs> | null
+  where?: Prisma.Item_MaterialWhereInput
+  orderBy?: Prisma.Item_MaterialOrderByWithRelationInput | Prisma.Item_MaterialOrderByWithRelationInput[]
+  cursor?: Prisma.Item_MaterialWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Item_MaterialScalarFieldEnum | Prisma.Item_MaterialScalarFieldEnum[]
 }
 
 /**
