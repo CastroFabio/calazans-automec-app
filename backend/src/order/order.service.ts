@@ -143,9 +143,38 @@ export class OrderService {
 
     const updatedOrder = await this.prisma.order.update({
       where: { id },
-      data: { ...updateOrderDto },
+      data: {
+        ...updateOrderDto,
+        updated_at: new Date(),
+      },
     });
+    if (updateOrderDto.itensMaterial) {
+      await this.prisma.item_Material.deleteMany({ where: { order_id: id } });
+      if (updateOrderDto.itensMaterial.length > 0) {
+        await this.prisma.item_Material.createMany({
+          data: updateOrderDto.itensMaterial.map((item) => ({
+            ...item,
+            subtotal: item.subtotal || 0,
+            order_id: id,
+          })),
+        });
+      }
+    }
 
+    if (updateOrderDto.itensMaintenance) {
+      await this.prisma.item_Maintenance.deleteMany({
+        where: { order_id: id },
+      });
+      if (updateOrderDto.itensMaintenance.length > 0) {
+        await this.prisma.item_Maintenance.createMany({
+          data: updateOrderDto.itensMaintenance.map((item) => ({
+            ...item,
+            subtotal: item.subtotal || 0,
+            order_id: id,
+          })),
+        });
+      }
+    }
     return updatedOrder;
   }
 

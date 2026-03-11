@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
@@ -24,17 +25,18 @@ export class CreateItemMaterialDto {
     description: 'Valor unitário do serviço',
   })
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   value_unit: number;
 
   @ApiProperty({
     example: 2,
-    description: 'Quantidade de vezes que o serviço foi realizado',
   })
   @IsNotEmpty()
   @IsInt()
   @IsPositive()
+  @Min(1)
   quantidade: number;
 
   // Campo calculado (não precisa ser enviado, será calculado no backend)
