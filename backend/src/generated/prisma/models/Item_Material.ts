@@ -29,8 +29,8 @@ export type AggregateItem_Material = {
 export type Item_MaterialAvgAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   material_id: number | null
 }
@@ -38,8 +38,8 @@ export type Item_MaterialAvgAggregateOutputType = {
 export type Item_MaterialSumAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   material_id: number | null
 }
@@ -47,8 +47,8 @@ export type Item_MaterialSumAggregateOutputType = {
 export type Item_MaterialMinAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   material_id: number | null
 }
@@ -56,8 +56,8 @@ export type Item_MaterialMinAggregateOutputType = {
 export type Item_MaterialMaxAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   material_id: number | null
 }
@@ -65,8 +65,8 @@ export type Item_MaterialMaxAggregateOutputType = {
 export type Item_MaterialCountAggregateOutputType = {
   id: number
   value_unit: number
-  subtotal: number
   quantidade: number
+  subtotal: number
   order_id: number
   material_id: number
   _all: number
@@ -76,8 +76,8 @@ export type Item_MaterialCountAggregateOutputType = {
 export type Item_MaterialAvgAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   material_id?: true
 }
@@ -85,8 +85,8 @@ export type Item_MaterialAvgAggregateInputType = {
 export type Item_MaterialSumAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   material_id?: true
 }
@@ -94,8 +94,8 @@ export type Item_MaterialSumAggregateInputType = {
 export type Item_MaterialMinAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   material_id?: true
 }
@@ -103,8 +103,8 @@ export type Item_MaterialMinAggregateInputType = {
 export type Item_MaterialMaxAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   material_id?: true
 }
@@ -112,8 +112,8 @@ export type Item_MaterialMaxAggregateInputType = {
 export type Item_MaterialCountAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   material_id?: true
   _all?: true
@@ -208,8 +208,8 @@ export type Item_MaterialGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 export type Item_MaterialGroupByOutputType = {
   id: number
   value_unit: runtime.Decimal
-  subtotal: runtime.Decimal
   quantidade: number
+  subtotal: runtime.Decimal
   order_id: number | null
   material_id: number | null
   _count: Item_MaterialCountAggregateOutputType | null
@@ -240,8 +240,8 @@ export type Item_MaterialWhereInput = {
   NOT?: Prisma.Item_MaterialWhereInput | Prisma.Item_MaterialWhereInput[]
   id?: Prisma.IntFilter<"Item_Material"> | number
   value_unit?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Material"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
   material_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
@@ -251,8 +251,8 @@ export type Item_MaterialWhereInput = {
 export type Item_MaterialOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   material_id?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
@@ -265,8 +265,8 @@ export type Item_MaterialWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.Item_MaterialWhereInput[]
   NOT?: Prisma.Item_MaterialWhereInput | Prisma.Item_MaterialWhereInput[]
   value_unit?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Material"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
   material_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
@@ -276,8 +276,8 @@ export type Item_MaterialWhereUniqueInput = Prisma.AtLeast<{
 export type Item_MaterialOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   material_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.Item_MaterialCountOrderByAggregateInput
@@ -293,16 +293,16 @@ export type Item_MaterialScalarWhereWithAggregatesInput = {
   NOT?: Prisma.Item_MaterialScalarWhereWithAggregatesInput | Prisma.Item_MaterialScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Item_Material"> | number
   value_unit?: Prisma.DecimalWithAggregatesFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalWithAggregatesFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntWithAggregatesFilter<"Item_Material"> | number
+  subtotal?: Prisma.DecimalWithAggregatesFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableWithAggregatesFilter<"Item_Material"> | number | null
   material_id?: Prisma.IntNullableWithAggregatesFilter<"Item_Material"> | number | null
 }
 
 export type Item_MaterialCreateInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderCreateNestedOneWithoutItemMaterialsInput
   material?: Prisma.MaterialCreateNestedOneWithoutItemMaterialsInput
 }
@@ -310,16 +310,16 @@ export type Item_MaterialCreateInput = {
 export type Item_MaterialUncheckedCreateInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
   material_id?: number | null
 }
 
 export type Item_MaterialUpdateInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderUpdateOneWithoutItemMaterialsNestedInput
   material?: Prisma.MaterialUpdateOneWithoutItemMaterialsNestedInput
 }
@@ -327,8 +327,8 @@ export type Item_MaterialUpdateInput = {
 export type Item_MaterialUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   material_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -336,23 +336,23 @@ export type Item_MaterialUncheckedUpdateInput = {
 export type Item_MaterialCreateManyInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
   material_id?: number | null
 }
 
 export type Item_MaterialUpdateManyMutationInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type Item_MaterialUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   material_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -370,8 +370,8 @@ export type Item_MaterialOrderByRelationAggregateInput = {
 export type Item_MaterialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   material_id?: Prisma.SortOrder
 }
@@ -379,8 +379,8 @@ export type Item_MaterialCountOrderByAggregateInput = {
 export type Item_MaterialAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   material_id?: Prisma.SortOrder
 }
@@ -388,8 +388,8 @@ export type Item_MaterialAvgOrderByAggregateInput = {
 export type Item_MaterialMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   material_id?: Prisma.SortOrder
 }
@@ -397,8 +397,8 @@ export type Item_MaterialMaxOrderByAggregateInput = {
 export type Item_MaterialMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   material_id?: Prisma.SortOrder
 }
@@ -406,8 +406,8 @@ export type Item_MaterialMinOrderByAggregateInput = {
 export type Item_MaterialSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   material_id?: Prisma.SortOrder
 }
@@ -498,16 +498,16 @@ export type Item_MaterialUncheckedUpdateManyWithoutMaterialNestedInput = {
 
 export type Item_MaterialCreateWithoutOrderInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   material?: Prisma.MaterialCreateNestedOneWithoutItemMaterialsInput
 }
 
 export type Item_MaterialUncheckedCreateWithoutOrderInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   material_id?: number | null
 }
 
@@ -542,24 +542,24 @@ export type Item_MaterialScalarWhereInput = {
   NOT?: Prisma.Item_MaterialScalarWhereInput | Prisma.Item_MaterialScalarWhereInput[]
   id?: Prisma.IntFilter<"Item_Material"> | number
   value_unit?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Material"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
   material_id?: Prisma.IntNullableFilter<"Item_Material"> | number | null
 }
 
 export type Item_MaterialCreateWithoutMaterialInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderCreateNestedOneWithoutItemMaterialsInput
 }
 
 export type Item_MaterialUncheckedCreateWithoutMaterialInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
 }
 
@@ -591,62 +591,62 @@ export type Item_MaterialUpdateManyWithWhereWithoutMaterialInput = {
 export type Item_MaterialCreateManyOrderInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   material_id?: number | null
 }
 
 export type Item_MaterialUpdateWithoutOrderInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   material?: Prisma.MaterialUpdateOneWithoutItemMaterialsNestedInput
 }
 
 export type Item_MaterialUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   material_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaterialUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   material_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaterialCreateManyMaterialInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
 }
 
 export type Item_MaterialUpdateWithoutMaterialInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderUpdateOneWithoutItemMaterialsNestedInput
 }
 
 export type Item_MaterialUncheckedUpdateWithoutMaterialInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaterialUncheckedUpdateManyWithoutMaterialInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -655,8 +655,8 @@ export type Item_MaterialUncheckedUpdateManyWithoutMaterialInput = {
 export type Item_MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   material_id?: boolean
   order?: boolean | Prisma.Item_Material$orderArgs<ExtArgs>
@@ -666,8 +666,8 @@ export type Item_MaterialSelect<ExtArgs extends runtime.Types.Extensions.Interna
 export type Item_MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   material_id?: boolean
   order?: boolean | Prisma.Item_Material$orderArgs<ExtArgs>
@@ -677,8 +677,8 @@ export type Item_MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types
 export type Item_MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   material_id?: boolean
   order?: boolean | Prisma.Item_Material$orderArgs<ExtArgs>
@@ -688,13 +688,13 @@ export type Item_MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type Item_MaterialSelectScalar = {
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   material_id?: boolean
 }
 
-export type Item_MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value_unit" | "subtotal" | "quantidade" | "order_id" | "material_id", ExtArgs["result"]["item_Material"]>
+export type Item_MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value_unit" | "quantidade" | "subtotal" | "order_id" | "material_id", ExtArgs["result"]["item_Material"]>
 export type Item_MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.Item_Material$orderArgs<ExtArgs>
   material?: boolean | Prisma.Item_Material$materialArgs<ExtArgs>
@@ -717,8 +717,8 @@ export type $Item_MaterialPayload<ExtArgs extends runtime.Types.Extensions.Inter
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     value_unit: runtime.Decimal
-    subtotal: runtime.Decimal
     quantidade: number
+    subtotal: runtime.Decimal
     order_id: number | null
     material_id: number | null
   }, ExtArgs["result"]["item_Material"]>
@@ -1148,8 +1148,8 @@ export interface Prisma__Item_MaterialClient<T, Null = never, ExtArgs extends ru
 export interface Item_MaterialFieldRefs {
   readonly id: Prisma.FieldRef<"Item_Material", 'Int'>
   readonly value_unit: Prisma.FieldRef<"Item_Material", 'Decimal'>
-  readonly subtotal: Prisma.FieldRef<"Item_Material", 'Decimal'>
   readonly quantidade: Prisma.FieldRef<"Item_Material", 'Int'>
+  readonly subtotal: Prisma.FieldRef<"Item_Material", 'Decimal'>
   readonly order_id: Prisma.FieldRef<"Item_Material", 'Int'>
   readonly material_id: Prisma.FieldRef<"Item_Material", 'Int'>
 }

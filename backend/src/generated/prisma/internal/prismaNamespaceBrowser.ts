@@ -119,8 +119,8 @@ export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof Or
 export const Item_MaintenanceScalarFieldEnum = {
   id: 'id',
   value_unit: 'value_unit',
-  subtotal: 'subtotal',
   quantidade: 'quantidade',
+  subtotal: 'subtotal',
   order_id: 'order_id',
   maintenance_id: 'maintenance_id'
 } as const
@@ -131,8 +131,8 @@ export type Item_MaintenanceScalarFieldEnum = (typeof Item_MaintenanceScalarFiel
 export const Item_MaterialScalarFieldEnum = {
   id: 'id',
   value_unit: 'value_unit',
-  subtotal: 'subtotal',
   quantidade: 'quantidade',
+  subtotal: 'subtotal',
   order_id: 'order_id',
   material_id: 'material_id'
 } as const

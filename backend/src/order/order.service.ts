@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -36,25 +35,78 @@ export class OrderService {
       );
     }
 
-    if (createOrderDto.total_value < 0) {
-      throw new BadRequestException(
-        'Total value must be greater than or equal to 0',
-      );
-    }
-
-    const totalValue = parseFloat(createOrderDto.total_value.toString());
+    const {
+      customer_id,
+      car_id,
+      itensMaintenance,
+      itensMaterial,
+      ...orderData
+    } = createOrderDto;
 
     const newOrder = await this.prisma.order.create({
       data: {
-        ...createOrderDto,
-        total_value: totalValue,
+        ...orderData,
+        customer: {
+          connect: { id: createOrderDto.customer_id },
+        },
+        car: {
+          connect: { id: createOrderDto.car_id },
+        },
+        total_value: this.calcularTotal(createOrderDto),
         created_at: new Date(),
         updated_at: new Date(),
       },
     });
 
-    return newOrder;
+    if (createOrderDto.itensMaintenance?.length) {
+      await this.prisma.item_Maintenance.createMany({
+        data: createOrderDto.itensMaintenance.map((item) => ({
+          maintenance_id: item.maintenance_id,
+          value_unit: item.value_unit,
+          quantidade: item.quantidade,
+          subtotal: item.quantidade * item.value_unit,
+          order_id: newOrder.id,
+        })),
+      });
+    }
+
+    if (createOrderDto.itensMaterial?.length) {
+      await this.prisma.item_Material.createMany({
+        data: createOrderDto.itensMaterial.map((item) => ({
+          material_id: item.material_id,
+          value_unit: item.value_unit,
+          quantidade: item.quantidade,
+          subtotal: item.quantidade * item.value_unit,
+          order_id: newOrder.id,
+        })),
+      });
+    }
+
+    return this.prisma.order.findUnique({
+      where: { id: newOrder.id },
+      include: {
+        itemMaintenance: true,
+        itemMaterials: true,
+      },
+    });
   }
+
+  private calcularTotal(dto: CreateOrderDto): number {
+    const totalMateriais =
+      dto.itensMaterial?.reduce(
+        (sum, item) => sum + item.quantidade * item.value_unit,
+        0,
+      ) || 0;
+
+    const totalServicos =
+      dto.itensMaintenance?.reduce(
+        (sum, item) => sum + item.quantidade * item.value_unit,
+        0,
+      ) || 0;
+
+    return totalMateriais + totalServicos;
+  }
+
   async findAll() {
     const order = await this.prisma.order.findMany();
 

@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { Priority, Status } from 'src/generated/prisma/enums';
+import { CreateItemMaintenanceDto } from 'src/item-maintenance/dto/create-item-maintenance.dto';
+import { CreateItemMaterialDto } from 'src/item-material/dto/create-item-material.dto';
 
 export class CreateOrderDto {
   @ApiProperty({
@@ -46,38 +50,11 @@ export class CreateOrderDto {
   status: Status;
 
   @ApiProperty({
-    example: '25.00',
-  })
-  @IsNotEmpty()
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: 'Price must be a number with a maximum of 2 decimal places.' },
-  )
-  @Min(0, { message: 'Price must be a positive number.' })
-  total_value: number;
-
-  @ApiProperty({
-    example: '2025-03-05T14:48:00.000Z',
-  })
-  @IsNotEmpty()
-  @Type(() => Date)
-  @IsDate()
-  created_at: Date;
-
-  @ApiProperty({
-    example: '2025-03-05T14:48:00.000Z',
-  })
-  @IsNotEmpty()
-  @Type(() => Date)
-  @IsDate()
-  updated_at: Date;
-
-  @ApiProperty({
     example: '1',
   })
   @IsNotEmpty()
   @IsNumber()
-  customer_id: number;
+  customer_id?: number;
 
   @ApiProperty({
     example: '1',
@@ -85,4 +62,14 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsNumber()
   car_id: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateItemMaterialDto)
+  itensMaterial: CreateItemMaterialDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateItemMaintenanceDto)
+  itensMaintenance: CreateItemMaintenanceDto[];
 }

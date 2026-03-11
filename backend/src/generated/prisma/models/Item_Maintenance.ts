@@ -29,8 +29,8 @@ export type AggregateItem_Maintenance = {
 export type Item_MaintenanceAvgAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   maintenance_id: number | null
 }
@@ -38,8 +38,8 @@ export type Item_MaintenanceAvgAggregateOutputType = {
 export type Item_MaintenanceSumAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   maintenance_id: number | null
 }
@@ -47,8 +47,8 @@ export type Item_MaintenanceSumAggregateOutputType = {
 export type Item_MaintenanceMinAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   maintenance_id: number | null
 }
@@ -56,8 +56,8 @@ export type Item_MaintenanceMinAggregateOutputType = {
 export type Item_MaintenanceMaxAggregateOutputType = {
   id: number | null
   value_unit: runtime.Decimal | null
-  subtotal: runtime.Decimal | null
   quantidade: number | null
+  subtotal: runtime.Decimal | null
   order_id: number | null
   maintenance_id: number | null
 }
@@ -65,8 +65,8 @@ export type Item_MaintenanceMaxAggregateOutputType = {
 export type Item_MaintenanceCountAggregateOutputType = {
   id: number
   value_unit: number
-  subtotal: number
   quantidade: number
+  subtotal: number
   order_id: number
   maintenance_id: number
   _all: number
@@ -76,8 +76,8 @@ export type Item_MaintenanceCountAggregateOutputType = {
 export type Item_MaintenanceAvgAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   maintenance_id?: true
 }
@@ -85,8 +85,8 @@ export type Item_MaintenanceAvgAggregateInputType = {
 export type Item_MaintenanceSumAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   maintenance_id?: true
 }
@@ -94,8 +94,8 @@ export type Item_MaintenanceSumAggregateInputType = {
 export type Item_MaintenanceMinAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   maintenance_id?: true
 }
@@ -103,8 +103,8 @@ export type Item_MaintenanceMinAggregateInputType = {
 export type Item_MaintenanceMaxAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   maintenance_id?: true
 }
@@ -112,8 +112,8 @@ export type Item_MaintenanceMaxAggregateInputType = {
 export type Item_MaintenanceCountAggregateInputType = {
   id?: true
   value_unit?: true
-  subtotal?: true
   quantidade?: true
+  subtotal?: true
   order_id?: true
   maintenance_id?: true
   _all?: true
@@ -208,8 +208,8 @@ export type Item_MaintenanceGroupByArgs<ExtArgs extends runtime.Types.Extensions
 export type Item_MaintenanceGroupByOutputType = {
   id: number
   value_unit: runtime.Decimal
-  subtotal: runtime.Decimal
   quantidade: number
+  subtotal: runtime.Decimal
   order_id: number | null
   maintenance_id: number | null
   _count: Item_MaintenanceCountAggregateOutputType | null
@@ -240,8 +240,8 @@ export type Item_MaintenanceWhereInput = {
   NOT?: Prisma.Item_MaintenanceWhereInput | Prisma.Item_MaintenanceWhereInput[]
   id?: Prisma.IntFilter<"Item_Maintenance"> | number
   value_unit?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Maintenance"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
   maintenance_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
@@ -251,8 +251,8 @@ export type Item_MaintenanceWhereInput = {
 export type Item_MaintenanceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenance_id?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
@@ -265,8 +265,8 @@ export type Item_MaintenanceWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.Item_MaintenanceWhereInput[]
   NOT?: Prisma.Item_MaintenanceWhereInput | Prisma.Item_MaintenanceWhereInput[]
   value_unit?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Maintenance"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
   maintenance_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
@@ -276,8 +276,8 @@ export type Item_MaintenanceWhereUniqueInput = Prisma.AtLeast<{
 export type Item_MaintenanceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenance_id?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.Item_MaintenanceCountOrderByAggregateInput
@@ -293,16 +293,16 @@ export type Item_MaintenanceScalarWhereWithAggregatesInput = {
   NOT?: Prisma.Item_MaintenanceScalarWhereWithAggregatesInput | Prisma.Item_MaintenanceScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"Item_Maintenance"> | number
   value_unit?: Prisma.DecimalWithAggregatesFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalWithAggregatesFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntWithAggregatesFilter<"Item_Maintenance"> | number
+  subtotal?: Prisma.DecimalWithAggregatesFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableWithAggregatesFilter<"Item_Maintenance"> | number | null
   maintenance_id?: Prisma.IntNullableWithAggregatesFilter<"Item_Maintenance"> | number | null
 }
 
 export type Item_MaintenanceCreateInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderCreateNestedOneWithoutItemMaintenanceInput
   maintenance?: Prisma.MaintenanceCreateNestedOneWithoutItemMaintenanceInput
 }
@@ -310,16 +310,16 @@ export type Item_MaintenanceCreateInput = {
 export type Item_MaintenanceUncheckedCreateInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
   maintenance_id?: number | null
 }
 
 export type Item_MaintenanceUpdateInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderUpdateOneWithoutItemMaintenanceNestedInput
   maintenance?: Prisma.MaintenanceUpdateOneWithoutItemMaintenanceNestedInput
 }
@@ -327,8 +327,8 @@ export type Item_MaintenanceUpdateInput = {
 export type Item_MaintenanceUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maintenance_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -336,23 +336,23 @@ export type Item_MaintenanceUncheckedUpdateInput = {
 export type Item_MaintenanceCreateManyInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
   maintenance_id?: number | null
 }
 
 export type Item_MaintenanceUpdateManyMutationInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type Item_MaintenanceUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   maintenance_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
@@ -370,8 +370,8 @@ export type Item_MaintenanceOrderByRelationAggregateInput = {
 export type Item_MaintenanceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   maintenance_id?: Prisma.SortOrder
 }
@@ -379,8 +379,8 @@ export type Item_MaintenanceCountOrderByAggregateInput = {
 export type Item_MaintenanceAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   maintenance_id?: Prisma.SortOrder
 }
@@ -388,8 +388,8 @@ export type Item_MaintenanceAvgOrderByAggregateInput = {
 export type Item_MaintenanceMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   maintenance_id?: Prisma.SortOrder
 }
@@ -397,8 +397,8 @@ export type Item_MaintenanceMaxOrderByAggregateInput = {
 export type Item_MaintenanceMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   maintenance_id?: Prisma.SortOrder
 }
@@ -406,8 +406,8 @@ export type Item_MaintenanceMinOrderByAggregateInput = {
 export type Item_MaintenanceSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   value_unit?: Prisma.SortOrder
-  subtotal?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
+  subtotal?: Prisma.SortOrder
   order_id?: Prisma.SortOrder
   maintenance_id?: Prisma.SortOrder
 }
@@ -454,6 +454,14 @@ export type Item_MaintenanceUncheckedUpdateManyWithoutOrderNestedInput = {
   deleteMany?: Prisma.Item_MaintenanceScalarWhereInput | Prisma.Item_MaintenanceScalarWhereInput[]
 }
 
+export type DecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type Item_MaintenanceCreateNestedManyWithoutMaintenanceInput = {
   create?: Prisma.XOR<Prisma.Item_MaintenanceCreateWithoutMaintenanceInput, Prisma.Item_MaintenanceUncheckedCreateWithoutMaintenanceInput> | Prisma.Item_MaintenanceCreateWithoutMaintenanceInput[] | Prisma.Item_MaintenanceUncheckedCreateWithoutMaintenanceInput[]
   connectOrCreate?: Prisma.Item_MaintenanceCreateOrConnectWithoutMaintenanceInput | Prisma.Item_MaintenanceCreateOrConnectWithoutMaintenanceInput[]
@@ -498,16 +506,16 @@ export type Item_MaintenanceUncheckedUpdateManyWithoutMaintenanceNestedInput = {
 
 export type Item_MaintenanceCreateWithoutOrderInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance?: Prisma.MaintenanceCreateNestedOneWithoutItemMaintenanceInput
 }
 
 export type Item_MaintenanceUncheckedCreateWithoutOrderInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance_id?: number | null
 }
 
@@ -542,24 +550,24 @@ export type Item_MaintenanceScalarWhereInput = {
   NOT?: Prisma.Item_MaintenanceScalarWhereInput | Prisma.Item_MaintenanceScalarWhereInput[]
   id?: Prisma.IntFilter<"Item_Maintenance"> | number
   value_unit?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFilter<"Item_Maintenance"> | number
+  subtotal?: Prisma.DecimalFilter<"Item_Maintenance"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
   maintenance_id?: Prisma.IntNullableFilter<"Item_Maintenance"> | number | null
 }
 
 export type Item_MaintenanceCreateWithoutMaintenanceInput = {
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderCreateNestedOneWithoutItemMaintenanceInput
 }
 
 export type Item_MaintenanceUncheckedCreateWithoutMaintenanceInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
 }
 
@@ -591,62 +599,62 @@ export type Item_MaintenanceUpdateManyWithWhereWithoutMaintenanceInput = {
 export type Item_MaintenanceCreateManyOrderInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance_id?: number | null
 }
 
 export type Item_MaintenanceUpdateWithoutOrderInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance?: Prisma.MaintenanceUpdateOneWithoutItemMaintenanceNestedInput
 }
 
 export type Item_MaintenanceUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaintenanceUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   maintenance_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaintenanceCreateManyMaintenanceInput = {
   id?: number
   value_unit: runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade: number
+  subtotal: runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: number | null
 }
 
 export type Item_MaintenanceUpdateWithoutMaintenanceInput = {
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order?: Prisma.OrderUpdateOneWithoutItemMaintenanceNestedInput
 }
 
 export type Item_MaintenanceUncheckedUpdateWithoutMaintenanceInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type Item_MaintenanceUncheckedUpdateManyWithoutMaintenanceInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   value_unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
-  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
+  subtotal?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   order_id?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -655,8 +663,8 @@ export type Item_MaintenanceUncheckedUpdateManyWithoutMaintenanceInput = {
 export type Item_MaintenanceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   maintenance_id?: boolean
   order?: boolean | Prisma.Item_Maintenance$orderArgs<ExtArgs>
@@ -666,8 +674,8 @@ export type Item_MaintenanceSelect<ExtArgs extends runtime.Types.Extensions.Inte
 export type Item_MaintenanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   maintenance_id?: boolean
   order?: boolean | Prisma.Item_Maintenance$orderArgs<ExtArgs>
@@ -677,8 +685,8 @@ export type Item_MaintenanceSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
 export type Item_MaintenanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   maintenance_id?: boolean
   order?: boolean | Prisma.Item_Maintenance$orderArgs<ExtArgs>
@@ -688,13 +696,13 @@ export type Item_MaintenanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
 export type Item_MaintenanceSelectScalar = {
   id?: boolean
   value_unit?: boolean
-  subtotal?: boolean
   quantidade?: boolean
+  subtotal?: boolean
   order_id?: boolean
   maintenance_id?: boolean
 }
 
-export type Item_MaintenanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value_unit" | "subtotal" | "quantidade" | "order_id" | "maintenance_id", ExtArgs["result"]["item_Maintenance"]>
+export type Item_MaintenanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "value_unit" | "quantidade" | "subtotal" | "order_id" | "maintenance_id", ExtArgs["result"]["item_Maintenance"]>
 export type Item_MaintenanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.Item_Maintenance$orderArgs<ExtArgs>
   maintenance?: boolean | Prisma.Item_Maintenance$maintenanceArgs<ExtArgs>
@@ -717,8 +725,8 @@ export type $Item_MaintenancePayload<ExtArgs extends runtime.Types.Extensions.In
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
     value_unit: runtime.Decimal
-    subtotal: runtime.Decimal
     quantidade: number
+    subtotal: runtime.Decimal
     order_id: number | null
     maintenance_id: number | null
   }, ExtArgs["result"]["item_Maintenance"]>
@@ -1148,8 +1156,8 @@ export interface Prisma__Item_MaintenanceClient<T, Null = never, ExtArgs extends
 export interface Item_MaintenanceFieldRefs {
   readonly id: Prisma.FieldRef<"Item_Maintenance", 'Int'>
   readonly value_unit: Prisma.FieldRef<"Item_Maintenance", 'Decimal'>
-  readonly subtotal: Prisma.FieldRef<"Item_Maintenance", 'Decimal'>
   readonly quantidade: Prisma.FieldRef<"Item_Maintenance", 'Int'>
+  readonly subtotal: Prisma.FieldRef<"Item_Maintenance", 'Decimal'>
   readonly order_id: Prisma.FieldRef<"Item_Maintenance", 'Int'>
   readonly maintenance_id: Prisma.FieldRef<"Item_Maintenance", 'Int'>
 }

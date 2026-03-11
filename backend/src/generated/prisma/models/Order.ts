@@ -226,7 +226,7 @@ export type OrderGroupByOutputType = {
   employer: string
   priority: $Enums.Priority
   status: $Enums.Status
-  total_value: runtime.Decimal
+  total_value: runtime.Decimal | null
   description: string | null
   created_at: Date
   updated_at: Date
@@ -262,7 +262,7 @@ export type OrderWhereInput = {
   employer?: Prisma.StringFilter<"Order"> | string
   priority?: Prisma.EnumPriorityFilter<"Order"> | $Enums.Priority
   status?: Prisma.EnumStatusFilter<"Order"> | $Enums.Status
-  total_value?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringNullableFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Order"> | Date | string
@@ -279,7 +279,7 @@ export type OrderOrderByWithRelationInput = {
   employer?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  total_value?: Prisma.SortOrder
+  total_value?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -299,7 +299,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   employer?: Prisma.StringFilter<"Order"> | string
   priority?: Prisma.EnumPriorityFilter<"Order"> | $Enums.Priority
   status?: Prisma.EnumStatusFilter<"Order"> | $Enums.Status
-  total_value?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringNullableFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Order"> | Date | string
@@ -316,7 +316,7 @@ export type OrderOrderByWithAggregationInput = {
   employer?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  total_value?: Prisma.SortOrder
+  total_value?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
@@ -337,7 +337,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   employer?: Prisma.StringWithAggregatesFilter<"Order"> | string
   priority?: Prisma.EnumPriorityWithAggregatesFilter<"Order"> | $Enums.Priority
   status?: Prisma.EnumStatusWithAggregatesFilter<"Order"> | $Enums.Status
-  total_value?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.DecimalNullableWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
@@ -349,7 +349,7 @@ export type OrderCreateInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -364,7 +364,7 @@ export type OrderUncheckedCreateInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -378,7 +378,7 @@ export type OrderUpdateInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -393,7 +393,7 @@ export type OrderUncheckedUpdateInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -408,7 +408,7 @@ export type OrderCreateManyInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -420,7 +420,7 @@ export type OrderUpdateManyMutationInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -431,7 +431,7 @@ export type OrderUncheckedUpdateManyInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -599,8 +599,8 @@ export type EnumStatusFieldUpdateOperationsInput = {
   set?: $Enums.Status
 }
 
-export type DecimalFieldUpdateOperationsInput = {
-  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -643,7 +643,7 @@ export type OrderCreateWithoutCustomerInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -657,7 +657,7 @@ export type OrderUncheckedCreateWithoutCustomerInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -699,7 +699,7 @@ export type OrderScalarWhereInput = {
   employer?: Prisma.StringFilter<"Order"> | string
   priority?: Prisma.EnumPriorityFilter<"Order"> | $Enums.Priority
   status?: Prisma.EnumStatusFilter<"Order"> | $Enums.Status
-  total_value?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.StringNullableFilter<"Order"> | string | null
   created_at?: Prisma.DateTimeFilter<"Order"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Order"> | Date | string
@@ -711,7 +711,7 @@ export type OrderCreateWithoutCarInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -725,7 +725,7 @@ export type OrderUncheckedCreateWithoutCarInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -763,7 +763,7 @@ export type OrderCreateWithoutItemMaintenanceInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -777,7 +777,7 @@ export type OrderUncheckedCreateWithoutItemMaintenanceInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -806,7 +806,7 @@ export type OrderUpdateWithoutItemMaintenanceInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -820,7 +820,7 @@ export type OrderUncheckedUpdateWithoutItemMaintenanceInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -833,7 +833,7 @@ export type OrderCreateWithoutItemMaterialsInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -847,7 +847,7 @@ export type OrderUncheckedCreateWithoutItemMaterialsInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -876,7 +876,7 @@ export type OrderUpdateWithoutItemMaterialsInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -890,7 +890,7 @@ export type OrderUncheckedUpdateWithoutItemMaterialsInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -904,7 +904,7 @@ export type OrderCreateManyCustomerInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -915,7 +915,7 @@ export type OrderUpdateWithoutCustomerInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -929,7 +929,7 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -943,7 +943,7 @@ export type OrderUncheckedUpdateManyWithoutCustomerInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -955,7 +955,7 @@ export type OrderCreateManyCarInput = {
   employer: string
   priority?: $Enums.Priority
   status?: $Enums.Status
-  total_value: runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
@@ -966,7 +966,7 @@ export type OrderUpdateWithoutCarInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -980,7 +980,7 @@ export type OrderUncheckedUpdateWithoutCarInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -994,7 +994,7 @@ export type OrderUncheckedUpdateManyWithoutCarInput = {
   employer?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.EnumPriorityFieldUpdateOperationsInput | $Enums.Priority
   status?: Prisma.EnumStatusFieldUpdateOperationsInput | $Enums.Status
-  total_value?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  total_value?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1132,7 +1132,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     employer: string
     priority: $Enums.Priority
     status: $Enums.Status
-    total_value: runtime.Decimal
+    total_value: runtime.Decimal | null
     description: string | null
     created_at: Date
     updated_at: Date

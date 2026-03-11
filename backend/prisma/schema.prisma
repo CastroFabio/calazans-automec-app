@@ -58,7 +58,7 @@ model Order {
   employer String
   priority Priority @default(normal) 
   status Status @default(pending)
-  total_value Decimal
+  total_value Decimal?
   description String?
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
@@ -77,8 +77,8 @@ model Order {
 model Item_Maintenance{
   id    Int     @default(autoincrement()) @id
   value_unit Decimal
-  subtotal Decimal
   quantidade Int
+  subtotal Decimal
 
   order     Order?    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   order_id Int?
@@ -90,8 +90,8 @@ model Item_Maintenance{
 model Item_Material{
   id    Int     @default(autoincrement()) @id
   value_unit Decimal
-  subtotal Decimal
   quantidade Int
+  subtotal Decimal
 
   order     Order?    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   order_id Int?

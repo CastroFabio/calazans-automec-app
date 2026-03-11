@@ -9,6 +9,8 @@ import { OrderModule } from './order/order.module';
 import { MaterialModule } from './material/material.module';
 import { GroupModule } from './group/group.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
+import { ItemMaterialModule } from './item-material/item-material.module';
+import { ItemMaintenanceModule } from './item-maintenance/item-maintenance.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     MaterialModule,
     GroupModule,
     MaintenanceModule,
+    ItemMaterialModule,
+    ItemMaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
