@@ -1,6 +1,9 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const SideBar = () => {
+  const navigate = useNavigate();
+
   return (
     <aside className="sidebar" id="sidebar">
       <div className="sidebar-logo">
@@ -29,7 +32,11 @@ const SideBar = () => {
 
       <nav className="sidebar-nav">
         <div className="nav-label">Listagem</div>
-        <div className="nav-item active" data-page="os">
+        <div
+          className="nav-item active"
+          data-page="os"
+          onClick={() => navigate("/")}
+        >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -43,7 +50,11 @@ const SideBar = () => {
             8
           </span>
         </div>
-        <div className="nav-item" data-page="clientes">
+        <div
+          className="nav-item"
+          data-page="clientes"
+          onClick={() => navigate("/dsa")}
+        >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

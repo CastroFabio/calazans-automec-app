@@ -4,11 +4,16 @@ import "./index.css";
 import App from "./App.jsx";
 import "tailwindcss";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 
