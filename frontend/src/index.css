@@ -22,7 +22,7 @@
   box-sizing: border-box;
 }
 
-body {
+#root {
   font-family: "Barlow", sans-serif;
   background: var(--bg);
   color: var(--ink);
@@ -1046,6 +1046,7 @@ body {
 }
 
 /* ── DETAIL SIDE PANEL ── */
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -1993,7 +1994,7 @@ body {
 ══════════════════════════════════ */
 @media (max-width: 900px) {
   /* Layout */
-  body {
+  #root {
     flex-direction: row;
   }
 
