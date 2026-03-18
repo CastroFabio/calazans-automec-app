@@ -53,7 +53,7 @@ const SideBar = () => {
         <div
           className="nav-item"
           data-page="clientes"
-          onClick={() => navigate("/dsa")}
+          onClick={() => navigate("/customers")}
         >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

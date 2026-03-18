@@ -1,6 +1,7 @@
 import NavBar from "./components/navBar";
 import ServiceOrderList from "./components/serviceOrderList";
 import SideBar from "./components/sideBar";
+import Customers from "./pages/Customers";
 
 const App = () => {
   return (
@@ -9,7 +10,8 @@ const App = () => {
       <div className="main">
         <NavBar />
         <div className="content">
-          <ServiceOrderList />
+          {/* <ServiceOrderList /> */}
+          <Customers />
         </div>
       </div>
     </>

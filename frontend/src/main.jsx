@@ -5,11 +5,16 @@ import App from "./App.jsx";
 import "tailwindcss";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import Customers from "./pages/Customers.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+  },
+  {
+    path: "/customers",
+    element: <Customers />,
   },
   {
     path: "*",

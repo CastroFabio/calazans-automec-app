@@ -289,7 +289,6 @@
 
 /* ── PAGES ── */
 .page {
-  display: none;
   padding-bottom: 40px;
 }
 .page.active {
@@ -539,6 +538,38 @@
 }
 
 /* ── CLIENTES GRID ── */
+
+.client-info-observation-text {
+  color: var(--ink3);
+  font-style: italic;
+}
+
+.client-info-row-observation {
+  margin-top: 4px;
+}
+
+.customer-grid-not-found {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 48px;
+  color: var(--ink3);
+}
+
+.client-btn-add-vehicle {
+  flex-shrink: 0;
+}
+
+.client-vehicle-tags {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  max-width: 360px;
+}
+
 .clients-grid {
   padding: 0 24px;
   display: grid;
