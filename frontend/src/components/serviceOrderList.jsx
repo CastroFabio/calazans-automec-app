@@ -4,7 +4,6 @@ import { priClass, statusClass } from "../data/mockData";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredItems, setFilteredItems] = useState(serviceOrderListDTO);
   const [activeTab, setActiveTab] = useState("all");
 
   const tabsData = [
@@ -46,30 +45,6 @@ const ServiceOrderList = () => {
       return matchesSearch && matchesTab;
     });
   }, [serviceOrderListDTO, activeTab, searchTerm]);
-
-  /* const handleTabClick = (tabStatus) => {
-    setActiveTab(tabStatus);
-
-    console.log(activeTab);
-
-    const filteredByStatus =
-      activeTab === "all"
-        ? filteredItems
-        : filteredItems.filter((p) => p.serviceOrder.status === activeTab);
-
-    console.log(filteredByStatus);
-    setFilteredItems(filteredByStatus);
-  };
-
-  const handleFilter = (event) => {
-    const inputValue = event.target.value.toLowerCase();
-    setSearchTerm(inputValue);
-
-    const newFilteredItems = serviceOrderListDTO.filter((item) =>
-      item.vehicle.licensePlate.toLowerCase().includes(inputValue),
-    );
-    setFilteredItems(newFilteredItems);
-  }; */
 
   return (
     <div className="page active" id="page-os">

@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [customersData] = useState(customerListDTO);
 
   const getCustomerNameInitials = (customerName) => {
     return customerName
@@ -14,17 +15,29 @@ const Customers = () => {
       .toUpperCase();
   };
 
-  const handleFilteredCustomers = useMemo(() => {
-    return customerListDTO.filter((customer) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        customer.vehicle.some(
-          (vehicle) =>
-            vehicle.licensePlate.toLowerCase() === searchTerm.toLowerCase(),
-        );
-      return matchesSearch;
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredData = useMemo(() => {
+    if (!searchTerm) {
+      return customersData;
+    }
+
+    const lowerCaseSearch = searchTerm.toLowerCase();
+
+    return customersData.filter((customers) => {
+      if (customers.customer.name.toLowerCase().includes(lowerCaseSearch)) {
+        return true;
+      }
+
+      const vehicleMatch = customers.vehicle.some((car) =>
+        car.licensePlate.toLowerCase().includes(lowerCaseSearch),
+      );
+
+      return vehicleMatch;
     });
-  }, [customerListDTO, searchTerm]);
+  }, [customersData, searchTerm]);
 
   useEffect(() => {
     const newColors = {};
@@ -57,13 +70,13 @@ const Customers = () => {
             type="text"
             placeholder="Buscar por placa..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
         </div>
       </div>
       <div className="clients-grid" id="clientsGrid">
-        {handleFilteredCustomers.length > 0 ? (
-          handleFilteredCustomers.map((customer, index) => (
+        {filteredData.length > 0 ? (
+          filteredData.map((customer, index) => (
             <div className="client-card" key={index}>
               <div className="client-card-header">
                 <div
