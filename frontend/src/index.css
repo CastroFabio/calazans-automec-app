@@ -928,6 +928,10 @@
 }
 
 /* ── SERVICE ROWS ── */
+
+.cad-subtitle-group {
+}
+
 .services-list {
   display: flex;
   flex-direction: column;
@@ -1518,6 +1522,40 @@
 }
 
 /* ── CADASTRO PAGES (Serviços / Materiais) ── */
+
+.cad-btn-remover {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.cad-btn-editar {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.cad-group-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cad-subtitle-group {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+
+.cad-input {
+  flex: 1;
+}
+
+.cad-search-box {
+  max-width: 220px;
+}
+
 .cad-layout {
   padding: 0 24px;
   display: grid;

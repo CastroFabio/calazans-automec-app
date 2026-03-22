@@ -1,6 +1,20 @@
-import React from "react";
+import { useLocation } from "react-router-dom";
 
 const NavBar = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const pathData = [
+    { pathURL: "/", title: "Ordens de Serviço" },
+    { pathURL: "/customers", title: "Clientes" },
+    { pathURL: "/services", title: "Serviços" },
+    { pathURL: "/materials", title: "Materiais e Peças" },
+  ];
+  const isActive = (path) =>
+    pathData.find((element) =>
+      element.pathURL === path ? element.title : null,
+    );
+
   return (
     <>
       <header className="topbar">
@@ -14,7 +28,7 @@ const NavBar = () => {
             />
           </svg>
         </button>
-        <span className="page-title">Ordens de Serviço</span>
+        <span className="page-title">{isActive(currentPath)}</span>
         <div className="topbar-right">
           <button className="btn btn-primary">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

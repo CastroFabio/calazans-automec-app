@@ -52,7 +52,7 @@ const Customers = () => {
     <div className="page" id="page-clientes">
       <div className="page-header">
         <div>
-          <div className="ph-title">Clientes</div>
+          {/* <div className="ph-title">Clientes</div> */}
           <div className="ph-sub">Cadastro de clientes e seus veículos</div>
         </div>
       </div>

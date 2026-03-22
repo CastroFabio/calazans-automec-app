@@ -50,7 +50,7 @@ const ServiceOrderList = () => {
     <div className="page active" id="page-os">
       <div className="page-header">
         <div>
-          <div className="ph-title">Ordens de Serviço</div>
+          {/* <div className="ph-title">Ordens de Serviço</div> */}
           <div className="ph-sub">Gerencie e acompanhe todas as ordens</div>
         </div>
       </div>

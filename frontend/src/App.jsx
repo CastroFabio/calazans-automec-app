@@ -1,9 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavBar from "./components/navBar";
-import ServiceOrderList from "./components/serviceOrderList";
 import SideBar from "./components/sideBar";
 import Customers from "./pages/Customers";
 import NotFound from "./pages/NotFound";
+import MaintenanceJobs from "./pages/MaintenanceJobs";
+import Materials from "./pages/Materials";
+import ServiceOrderList from "./pages/serviceOrderList";
 
 const App = () => {
   return (
@@ -16,6 +18,8 @@ const App = () => {
             <Routes>
               <Route path="/" element={<ServiceOrderList />} />
               <Route path="/customers" element={<Customers />} />
+              <Route path="/services" element={<MaintenanceJobs />} />
+              <Route path="/materials" element={<Materials />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

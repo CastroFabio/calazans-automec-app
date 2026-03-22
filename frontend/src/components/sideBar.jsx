@@ -1,4 +1,8 @@
-import { customerListDTO, serviceOrderListDTO } from "../data/mockDataDTO";
+import {
+  customerListDTO,
+  maintenanceJobsListDTO,
+  serviceOrderListDTO,
+} from "../data/mockDataDTO";
 import SideBarList from "../components/sideBarList";
 import { useLocation } from "react-router-dom";
 
@@ -50,7 +54,7 @@ const SideBar = () => {
         id: "maintanenceJobsTab",
         title: "Serviços",
         navigateURL: "/services",
-        numberOf: customerListDTO.length,
+        numberOf: maintenanceJobsListDTO.length,
         svgIcon: () => (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
