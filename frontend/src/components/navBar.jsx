@@ -1,14 +1,22 @@
+import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import ModalNewGroup from "./modalNewGroup";
 
 const NavBar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+
+  const closeModal = () => setIsModalOpen(false);
+
   const pathData = [
     {
       pathURL: "/",
       title: "Ordens de Serviço",
-      btn: () => (
+      btn: (
         <button className="btn btn-primary">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -25,7 +33,7 @@ const NavBar = () => {
     {
       pathURL: "/customers",
       title: "Clientes",
-      btn: () => (
+      btn: (
         <button className="btn btn-primary">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -42,8 +50,8 @@ const NavBar = () => {
     {
       pathURL: "/services",
       title: "Serviços",
-      btn: () => (
-        <button className="btn btn-primary">
+      btn: (
+        <button onClick={openModal} className="btn btn-primary">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -59,8 +67,8 @@ const NavBar = () => {
     {
       pathURL: "/materials",
       title: "Materiais e Peças",
-      btn: () => (
-        <button className="btn btn-primary">
+      btn: (
+        <button onClick={openModal} className="btn btn-primary">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -96,7 +104,8 @@ const NavBar = () => {
           </svg>
         </button>
         <span className="page-title">{activeItem.title}</span>
-        <div className="topbar-right">{activeItem.btn()}</div>
+        <div className="topbar-right">{activeItem.btn}</div>
+        <ModalNewGroup isOpen={isModalOpen} onClose={closeModal} />
       </header>
     </>
   );

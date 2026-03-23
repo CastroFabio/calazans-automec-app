@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 import MaintenanceJobs from "./pages/MaintenanceJobs";
 import Materials from "./pages/Materials";
 import ServiceOrderList from "./pages/serviceOrderList";
+import NewServiceOrder from "./pages/NewServiceOrder";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
               <Route path="/customers" element={<Customers />} />
               <Route path="/services" element={<MaintenanceJobs />} />
               <Route path="/materials" element={<Materials />} />
+              <Route path="/neworder" element={<NewServiceOrder />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
