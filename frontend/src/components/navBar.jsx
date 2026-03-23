@@ -5,15 +5,82 @@ const NavBar = () => {
   const currentPath = location.pathname;
 
   const pathData = [
-    { pathURL: "/", title: "Ordens de Serviço" },
-    { pathURL: "/customers", title: "Clientes" },
-    { pathURL: "/services", title: "Serviços" },
-    { pathURL: "/materials", title: "Materiais e Peças" },
+    {
+      pathURL: "/",
+      title: "Ordens de Serviço",
+      btn: () => (
+        <button className="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Nova OS
+        </button>
+      ),
+    },
+    {
+      pathURL: "/customers",
+      title: "Clientes",
+      btn: () => (
+        <button className="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Novo Cliente
+        </button>
+      ),
+    },
+    {
+      pathURL: "/services",
+      title: "Serviços",
+      btn: () => (
+        <button className="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Novo Grupo
+        </button>
+      ),
+    },
+    {
+      pathURL: "/materials",
+      title: "Materiais e Peças",
+      btn: () => (
+        <button className="btn btn-primary">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Novo Grupo
+        </button>
+      ),
+    },
   ];
-  const isActive = (path) =>
-    pathData.find((element) =>
-      element.pathURL === path ? element.title : null,
-    );
+
+  const isActive = (path) => {
+    const activePath = pathData.find((element) => element.pathURL === path);
+    return activePath || pathData[0];
+  };
+
+  const activeItem = isActive(currentPath);
 
   return (
     <>
@@ -28,20 +95,8 @@ const NavBar = () => {
             />
           </svg>
         </button>
-        <span className="page-title">{isActive(currentPath)}</span>
-        <div className="topbar-right">
-          <button className="btn btn-primary">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Nova OS
-          </button>
-        </div>
+        <span className="page-title">{activeItem.title}</span>
+        <div className="topbar-right">{activeItem.btn()}</div>
       </header>
     </>
   );
