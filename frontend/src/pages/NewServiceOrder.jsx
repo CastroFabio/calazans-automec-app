@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { newServiceOrderCustomerListDTO } from "../data/mockDataDTO";
+import {
+  maintenanceJobsListDTO,
+  newServiceOrderCustomerListDTO,
+} from "../data/mockDataDTO";
 
 const NewServiceOrder = () => {
   const [inputValue, setInputValue] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState({});
+  const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
+  const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
 
   const formatLocalDateTime = (date) => {
     const year = date.getFullYear();
@@ -27,8 +32,6 @@ const NewServiceOrder = () => {
   };
 
   useEffect(() => {
-    selectedCustomerInfo({});
-
     if (inputValue.trim() === "") {
       setFilteredSuggestions([]);
       return;
@@ -69,10 +72,38 @@ const NewServiceOrder = () => {
   const handleClearCustomer = () => {
     setInputValue("");
     setSelectedCustomerInfo({});
+    setSelectedVehicleInfo({});
+  };
+
+  const handleSelectedVehicle = (vehicle) => setSelectedVehicleInfo(vehicle);
+
+  const handleAddMaintenanceJob = () => {
+    const newMaintenanceJob = {
+      id: Date.now(),
+      serviceType: "",
+      serviceValue: "",
+      observation: "",
+    };
+
+    setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
+  };
+
+  const handleRemoveMaintenanceJob = (id) => {
+    setListMaintenanceJobs(
+      listMaintenanceJobs.filter((element) => element.id !== id),
+    );
+  };
+
+  const handleInputMaintenanceJobChange = (id, field, value) => {
+    setListMaintenanceJobs(
+      listMaintenanceJobs.map((element) =>
+        element.id === id ? { ...element, [field]: value } : element,
+      ),
+    );
   };
 
   return (
-    <div className="page" id="page-nova-os">
+    <div className="page">
       <div className="page-header">
         <div>
           <div className="ph-title">Nova Ordem de Serviço</div>
@@ -104,8 +135,8 @@ const NewServiceOrder = () => {
               <div className="field">
                 <label>Cliente *</label>
                 {/* <!-- Autocomplete Cliente --> */}
-                <div className="ac-wrap" id="acClientWrap">
-                  <div className="ac-input-row" id="acClientRow">
+                <div className="ac-wrap">
+                  <div className="ac-input-row">
                     <span className="ac-icon">
                       <svg
                         fill="none"
@@ -120,21 +151,16 @@ const NewServiceOrder = () => {
                         />
                       </svg>
                     </span>
-                    {Object.keys(selectedCustomerInfo).length === 0 ? (
+                    {selectedCustomerInfo &&
+                    Object.keys(selectedCustomerInfo).length > 0 ? (
                       <div className="ac-selected-pill">
-                        {console.log(
-                          selectedCustomerInfo &&
-                            Object.keys(selectedCustomerInfo).length === 0,
-                        )}
-                        {console.log(selectedCustomerInfo)}
-                        {`${selectedCustomerInfo.customer.name}`}
+                        {selectedCustomerInfo.customer?.name}
                         <button onClick={handleClearCustomer}>×</button>
                       </div>
                     ) : (
                       <>
                         <input
                           className="ac-input"
-                          id="acClientInput"
                           type="text"
                           placeholder="Digite o nome do cliente..."
                           value={inputValue}
@@ -153,7 +179,6 @@ const NewServiceOrder = () => {
                   </div>
                   <div
                     className={`ac-dropdown ${showSuggestions ? "open" : ""}`}
-                    id="acClientDropdown"
                   >
                     {showSuggestions && filteredSuggestions.length > 0 ? (
                       filteredSuggestions.map((element, index) => (
@@ -197,10 +222,47 @@ const NewServiceOrder = () => {
               </div>
               <div className="field">
                 <label>Veículo *</label>
-                <div className="car-badge-row" id="carBadgeRow">
-                  <span className="car-badge-row-text">
-                    Selecione o cliente primeiro
-                  </span>
+                <div className="car-badge-row">
+                  {selectedCustomerInfo &&
+                  Object.keys(selectedCustomerInfo).length > 0 ? (
+                    selectedCustomerInfo.vehicle.length > 0 ? (
+                      selectedCustomerInfo.vehicle.map((element, index) => (
+                        <div
+                          className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
+                          key={index}
+                          onClick={() => handleSelectedVehicle(element)}
+                        >
+                          <svg
+                            className="car-badge-svg"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
+                            />
+                          </svg>
+                          {`${element.licensePlate} · ${element.brand} ${element.model}`}
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <span className="car-badge-row-text-no-car">
+                          Nenhum veículo cadastrado
+                        </span>
+                        <button className="add-row-btn add-row-btn-car-badge">
+                          + Cadastrar veículo
+                        </button>
+                      </>
+                    )
+                  ) : (
+                    <span className="car-badge-row-text">
+                      Selecione o cliente primeiro
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="field">
@@ -208,7 +270,6 @@ const NewServiceOrder = () => {
                 <input
                   type="text"
                   className="input"
-                  id="kmEntrada"
                   placeholder="Ex: 52.300 km"
                 />
               </div>
@@ -217,7 +278,6 @@ const NewServiceOrder = () => {
                 <input
                   type="datetime-local"
                   className="input"
-                  id="dataEntrada"
                   value={dateTimeValue}
                   onChange={handleChange}
                 />
@@ -251,8 +311,63 @@ const NewServiceOrder = () => {
             <span className="fs-title">Serviços</span>
           </div>
           <div className="fs-body">
-            <div className="services-list" id="servicesList"></div>
-            <button className="add-row-btn">
+            <div className="services-list">
+              {listMaintenanceJobs.length > 0
+                ? listMaintenanceJobs.map((element, index) => (
+                    <div key={index} className="service-row">
+                      <div className="service-row-header">
+                        <div className="service-num">{index + 1}</div>
+                        <span className="service-row-label">
+                          Serviço #{index + 1}
+                        </span>
+                        <button
+                          className="remove-btn"
+                          onClick={() => handleRemoveMaintenanceJob(element.id)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <div className="form-grid g3 form-grid-servico">
+                        <div className="field col-2">
+                          <label>Tipo de Serviço *</label>
+                          <select className="select">
+                            <option value="">Selecione o serviço...</option>
+
+                            {maintenanceJobsListDTO.map((element, index) => (
+                              <optgroup key={index} label={element.group}>
+                                {element.items.map((element, index) => (
+                                  <option key={index} value={element}>
+                                    {element}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="field">
+                          <label>Mão de Obra</label>
+                          <div className="input-prefix">
+                            <span>R$</span>
+                            <input
+                              type="text"
+                              className="svc-mo-input"
+                              placeholder="0,00"
+                            />
+                          </div>
+                        </div>
+                        <div className="field col-full">
+                          <label>Observações</label>
+                          <textarea
+                            className="textarea service-row-textarea"
+                            placeholder="Detalhes adicionais do serviço..."
+                          ></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                : ""}
+            </div>
+            <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -297,7 +412,7 @@ const NewServiceOrder = () => {
                     <th></th>
                   </tr>
                 </thead>
-                <tbody id="matBody"></tbody>
+                <tbody></tbody>
               </table>
             </div>
             <button className="add-row-btn">
@@ -313,18 +428,16 @@ const NewServiceOrder = () => {
             </button>
             <div className="total-row">
               <div className="total-item">
-                Mão de obra: <strong id="moValue">R$ 0,00</strong>
+                Mão de obra: <strong>R$ 0,00</strong>
               </div>
               <div className="total-row-divider"></div>
               <div className="total-item">
-                Peças: <strong id="pecasValue">R$ 0,00</strong>
+                Peças: <strong>R$ 0,00</strong>
               </div>
               <div className="total-row-divider"></div>
               <div className="total-item">
                 Total:
-                <span className="grand-total" id="grandTotal">
-                  R$ 0,00
-                </span>
+                <span className="grand-total">R$ 0,00</span>
               </div>
             </div>
           </div>

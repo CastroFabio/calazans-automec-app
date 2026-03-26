@@ -483,4 +483,12 @@ export const newServiceOrderCustomerListDTO = [
     ],
     numberOfVehicles: 2,
   },
+  {
+    customer: {
+      name: "Teste Sem Veículo",
+      cell: "(11) 2345-6789",
+    },
+    vehicle: [],
+    numberOfVehicles: 0,
+  },
 ];
