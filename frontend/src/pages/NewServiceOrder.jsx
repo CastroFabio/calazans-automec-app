@@ -1,4 +1,76 @@
+import React, { useEffect, useState } from "react";
+import { newServiceOrderCustomerListDTO } from "../data/mockDataDTO";
+
 const NewServiceOrder = () => {
+  const [inputValue, setInputValue] = useState("");
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCustomerInfo, setSelectedCustomerInfo] = useState({});
+
+  const formatLocalDateTime = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    // The "T" is a required separator between date and time
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Set the initial state with the current local time formatted correctly
+  const [dateTimeValue, setDateTimeValue] = useState(
+    formatLocalDateTime(new Date()),
+  );
+
+  const handleChange = (event) => {
+    setDateTimeValue(event.target.value);
+  };
+
+  useEffect(() => {
+    selectedCustomerInfo({});
+
+    if (inputValue.trim() === "") {
+      setFilteredSuggestions([]);
+      return;
+    }
+
+    const filtered = newServiceOrderCustomerListDTO.filter((suggestion) =>
+      suggestion.customer.name.toLowerCase().includes(inputValue.toLowerCase()),
+    );
+
+    setFilteredSuggestions(filtered);
+  }, [inputValue]);
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setInputValue(suggestion.customer.name);
+    setSelectedCustomerInfo(suggestion);
+    setShowSuggestions(false);
+    setFilteredSuggestions([]);
+  };
+
+  const handleBlur = () => {
+    // Delay para permitir clique na sugestão
+    setTimeout(() => {
+      setShowSuggestions(false);
+    }, 200);
+  };
+
+  const handleFocus = () => {
+    if (inputValue.trim() !== "") {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleClearCustomer = () => {
+    setInputValue("");
+    setSelectedCustomerInfo({});
+  };
+
   return (
     <div className="page" id="page-nova-os">
       <div className="page-header">
@@ -9,10 +81,11 @@ const NewServiceOrder = () => {
         <div className="os-num-badge">#OS-2025-0143</div>
       </div>
       <div className="form-wrap">
+        {/* <!-- Cliente & Veículo --> */}
         <div className="form-section">
           <div className="fs-header">
             <svg
-              className="form-new-os-svg"
+              className="fs-header-svg"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -30,6 +103,7 @@ const NewServiceOrder = () => {
             <div className="form-grid">
               <div className="field">
                 <label>Cliente *</label>
+                {/* <!-- Autocomplete Cliente --> */}
                 <div className="ac-wrap" id="acClientWrap">
                   <div className="ac-input-row" id="acClientRow">
                     <span className="ac-icon">
@@ -46,25 +120,79 @@ const NewServiceOrder = () => {
                         />
                       </svg>
                     </span>
-                    <input
-                      className="ac-input"
-                      id="acClientInput"
-                      type="text"
-                      placeholder="Digite o nome do cliente..."
-                      autocomplete="off"
-                      oninput="acSearch('client', this.value)"
-                      onfocus="acOpen('client')"
-                      onkeydown="acKey(event, 'client')"
-                    />
-                    <span
-                      className="ac-clear"
-                      id="acClientClear"
-                      onclick="acClear('client')"
-                    >
-                      ×
-                    </span>
+                    {Object.keys(selectedCustomerInfo).length === 0 ? (
+                      <div className="ac-selected-pill">
+                        {console.log(
+                          selectedCustomerInfo &&
+                            Object.keys(selectedCustomerInfo).length === 0,
+                        )}
+                        {console.log(selectedCustomerInfo)}
+                        {`${selectedCustomerInfo.customer.name}`}
+                        <button onClick={handleClearCustomer}>×</button>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          className="ac-input"
+                          id="acClientInput"
+                          type="text"
+                          placeholder="Digite o nome do cliente..."
+                          value={inputValue}
+                          onChange={handleInputChange}
+                          onFocus={handleFocus}
+                          onBlur={handleBlur}
+                        />
+                        <span
+                          className="ac-clear"
+                          onClick={handleClearCustomer}
+                        >
+                          ×
+                        </span>
+                      </>
+                    )}
                   </div>
-                  <div className="ac-dropdown" id="acClientDropdown"></div>
+                  <div
+                    className={`ac-dropdown ${showSuggestions ? "open" : ""}`}
+                    id="acClientDropdown"
+                  >
+                    {showSuggestions && filteredSuggestions.length > 0 ? (
+                      filteredSuggestions.map((element, index) => (
+                        <div
+                          key={index}
+                          className="ac-option"
+                          onClick={() => handleSuggestionClick(element)}
+                        >
+                          <div className="ac-option-name">
+                            {element.customer.name}
+                          </div>
+                          <div className="ac-option-sub">
+                            {`${element.customer.cell} · ${element.numberOfVehicles}  veículo(s) `}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="ac-empty">Nenhum cliente encontrado</div>
+                    )}
+                    <div
+                      className="ac-option-create" /* onmousedown="acCreateClient('${inst}','${q.replace(/'/g, "\\'")}')" */
+                    >
+                      <svg
+                        width="13"
+                        height="13"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      {`Cadastrar "${inputValue}" como novo cliente`}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="field">
@@ -90,12 +218,15 @@ const NewServiceOrder = () => {
                   type="datetime-local"
                   className="input"
                   id="dataEntrada"
+                  value={dateTimeValue}
+                  onChange={handleChange}
                 />
               </div>
             </div>
           </div>
         </div>
 
+        {/* <!-- Serviços --> */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -121,7 +252,7 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="services-list" id="servicesList"></div>
-            <button className="add-row-btn" onclick="addService()">
+            <button className="add-row-btn">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -135,6 +266,7 @@ const NewServiceOrder = () => {
           </div>
         </div>
 
+        {/* <!-- Peças & Materiais --> */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -161,14 +293,14 @@ const NewServiceOrder = () => {
                     <th className="mat-table-content-qtd">Qtd.</th>
                     <th className="mat-table-content-value">Valor Unit.</th>
                     <th className="mat-table-content-total">Total</th>
-                    <th className="mat-table-content-">Referência</th>
+                    <th className="mat-table-content-ref">Referência</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody id="matBody"></tbody>
               </table>
             </div>
-            <button className="add-row-btn" onclick="addMatRow()">
+            <button className="add-row-btn">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -198,6 +330,7 @@ const NewServiceOrder = () => {
           </div>
         </div>
 
+        {/* <!-- Info OS --> */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -262,7 +395,9 @@ const NewServiceOrder = () => {
         </div>
 
         <div className="form-actions">
-          <button className="btn btn-ghost" onclick="navigate('os', null)">
+          <button
+            className="btn btn-ghost" /* onclick="navigate('os', null)" */
+          >
             Cancelar
           </button>
           <button className="btn btn-secondary">
@@ -276,7 +411,7 @@ const NewServiceOrder = () => {
             </svg>
             Imprimir
           </button>
-          <button className="btn btn-primary" onclick="saveOS()">
+          <button className="btn btn-primary" /* onclick="saveOS()" */>
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"

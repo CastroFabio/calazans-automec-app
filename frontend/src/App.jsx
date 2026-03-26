@@ -7,6 +7,7 @@ import MaintenanceJobs from "./pages/MaintenanceJobs";
 import Materials from "./pages/Materials";
 import ServiceOrderList from "./pages/serviceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
+import AutocompleteSearch from "./pages/Teste";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
               <Route path="/services" element={<MaintenanceJobs />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/neworder" element={<NewServiceOrder />} />
+              <Route path="/teste" element={<AutocompleteSearch />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

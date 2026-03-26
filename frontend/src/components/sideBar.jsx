@@ -1,6 +1,7 @@
 import {
   customerListDTO,
   maintenanceJobsListDTO,
+  materialsListDTO,
   serviceOrderListDTO,
 } from "../data/mockDataDTO";
 import SideBarList from "../components/sideBarList";
@@ -21,7 +22,7 @@ const SideBar = () => {
         title: "Ordens de Serviço",
         navigateURL: "/",
         numberOf: serviceOrderListDTO.length,
-        svgIcon: () => (
+        svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -37,7 +38,7 @@ const SideBar = () => {
         title: "Clientes",
         navigateURL: "/customers",
         numberOf: customerListDTO.length,
-        svgIcon: () => (
+        svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -55,7 +56,7 @@ const SideBar = () => {
         title: "Serviços",
         navigateURL: "/services",
         numberOf: maintenanceJobsListDTO.length,
-        svgIcon: () => (
+        svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -76,8 +77,8 @@ const SideBar = () => {
         id: "materialsTab",
         title: "Materiais & Peças",
         navigateURL: "/materials",
-        numberOf: customerListDTO.length,
-        svgIcon: () => (
+        numberOf: materialsListDTO.length,
+        svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

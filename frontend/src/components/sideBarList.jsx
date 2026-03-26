@@ -14,7 +14,7 @@ const SideBarList = ({ categoryName, tabsDataCategory, isActive }) => {
           }}
           key={index}
         >
-          {tab.svgIcon()}
+          {tab.svgIcon}
           {tab.title}
           <span className="nav-count" id="osCount">
             {tab.numberOf}

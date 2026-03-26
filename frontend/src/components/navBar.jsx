@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ModalNewGroup from "./modalNewGroup";
 
 const NavBar = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -17,7 +18,10 @@ const NavBar = () => {
       pathURL: "/",
       title: "Ordens de Serviço",
       btn: (
-        <button className="btn btn-primary">
+        <button
+          onClick={() => navigate("/neworder")}
+          className="btn btn-primary"
+        >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -80,6 +84,11 @@ const NavBar = () => {
           Novo Grupo
         </button>
       ),
+    },
+    {
+      pathURL: "/neworder",
+      title: "Nova Ordem de Serviço",
+      btn: null,
     },
   ];
 
