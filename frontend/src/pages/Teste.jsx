@@ -1,161 +1,254 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-// Dados de exemplo - você pode substituir por sua API
-const suggestions = [
-  "Apple",
-  "Banana",
-  "Cherry",
-  "Date",
-  "Elderberry",
-  "Fig",
-  "Grape",
-  "Honeydew",
-  "Kiwi",
-  "Lemon",
-  "Mango",
-  "Orange",
-  "Papaya",
-  "Quince",
-  "Raspberry",
-  "Strawberry",
-  "Tomato",
-  "Watermelon",
-];
+const NestedListForm = () => {
+  const [items, setItems] = useState([]);
 
-const AutocompleteSearch = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  // Função para adicionar um novo item principal
+  const addItem = () => {
+    const newItem = {
+      id: Date.now(),
+      name: "",
+      description: "",
+      tags: [], // lista vazia
+      tasks: [], // outra lista
+    };
+    setItems([...items, newItem]);
+  };
 
-  // Filtrar sugestões baseado no input
-  useEffect(() => {
-    if (inputValue.trim() === "") {
-      setFilteredSuggestions([]);
-      return;
-    }
-
-    const filtered = suggestions.filter((suggestion) =>
-      suggestion.toLowerCase().includes(inputValue.toLowerCase()),
+  // Função para adicionar item à lista aninhada
+  const addToNestedList = (itemId, listName, newValue) => {
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            [listName]: [
+              ...item[listName],
+              { id: Date.now(), value: newValue },
+            ],
+          };
+        }
+        return item;
+      }),
     );
-
-    setFilteredSuggestions(filtered);
-  }, [inputValue]);
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    setShowSuggestions(true);
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion);
-    setShowSuggestions(false);
-    setFilteredSuggestions([]);
+  // Função para remover item da lista aninhada
+  const removeFromNestedList = (itemId, listName, nestedItemId) => {
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            [listName]: item[listName].filter(
+              (nestedItem) => nestedItem.id !== nestedItemId,
+            ),
+          };
+        }
+        return item;
+      }),
+    );
   };
 
-  const handleBlur = () => {
-    // Delay para permitir clique na sugestão
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
+  // Função para atualizar campo do item principal
+  const updateMainField = (itemId, field, value) => {
+    setItems(
+      items.map((item) =>
+        item.id === itemId ? { ...item, [field]: value } : item,
+      ),
+    );
   };
 
-  const handleFocus = () => {
-    if (inputValue.trim() !== "") {
-      setShowSuggestions(true);
-    }
+  // Função para remover item principal
+  const removeItem = (itemId) => {
+    setItems(items.filter((item) => item.id !== itemId));
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Busca Autocomplete</h2>
+    <div className="container">
+      <h2>Formulário com Listas Aninhadas</h2>
+      <button onClick={addItem}>Adicionar Novo Item</button>
 
-      <div style={styles.searchContainer}>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          placeholder="Digite para buscar..."
-          style={styles.input}
-        />
+      {items.map((item) => (
+        <div key={item.id} className="item-card">
+          <div className="item-header">
+            <h3>Item #{item.id}</h3>
+            <button onClick={() => removeItem(item.id)} className="remove-btn">
+              Remover Item
+            </button>
+          </div>
 
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <ul style={styles.suggestionsList}>
-            {filteredSuggestions.map((suggestion, index) => (
-              <li
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                style={styles.suggestionItem}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = "#f0f0f0";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = "white";
-                }}
-              >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+          {/* Campos principais */}
+          <div className="form-group">
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={item.name}
+              onChange={(e) => updateMainField(item.id, "name", e.target.value)}
+              placeholder="Digite o nome"
+            />
+          </div>
 
-      {inputValue && (
-        <div style={styles.selected}>
-          <strong>Selecionado:</strong> {inputValue}
+          <div className="form-group">
+            <label>Descrição:</label>
+            <textarea
+              value={item.description}
+              onChange={(e) =>
+                updateMainField(item.id, "description", e.target.value)
+              }
+              placeholder="Digite a descrição"
+              rows="3"
+            />
+          </div>
+
+          {/* Lista de Tags */}
+          <div className="nested-section">
+            <label>Tags:</label>
+            <div className="nested-list">
+              {item.tags.map((tag) => (
+                <div key={tag.id} className="nested-item">
+                  <span>{tag.value}</span>
+                  <button
+                    onClick={() =>
+                      removeFromNestedList(item.id, "tags", tag.id)
+                    }
+                    className="nested-remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <div className="add-nested">
+                <input
+                  type="text"
+                  placeholder="Adicionar tag"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && e.target.value.trim()) {
+                      addToNestedList(item.id, "tags", e.target.value.trim());
+                      e.target.value = "";
+                    }
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    const input = e.target.previousSibling;
+                    if (input.value.trim()) {
+                      addToNestedList(item.id, "tags", input.value.trim());
+                      input.value = "";
+                    }
+                  }}
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Lista de Tarefas com mais campos */}
+          <div className="nested-section">
+            <label>Tarefas:</label>
+            <div className="tasks-list">
+              {item.tasks.map((task) => (
+                <div key={task.id} className="task-item">
+                  <input
+                    type="checkbox"
+                    checked={task.completed || false}
+                    onChange={(e) => {
+                      setItems(
+                        items.map((i) => {
+                          if (i.id === item.id) {
+                            return {
+                              ...i,
+                              tasks: i.tasks.map((t) =>
+                                t.id === task.id
+                                  ? { ...t, completed: e.target.checked }
+                                  : t,
+                              ),
+                            };
+                          }
+                          return i;
+                        }),
+                      );
+                    }}
+                  />
+                  <span className={task.completed ? "completed" : ""}>
+                    {task.value}
+                  </span>
+                  <button
+                    onClick={() =>
+                      removeFromNestedList(item.id, "tasks", task.id)
+                    }
+                    className="nested-remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <div className="add-nested">
+                <input
+                  type="text"
+                  placeholder="Adicionar tarefa"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && e.target.value.trim()) {
+                      const newTask = {
+                        id: Date.now(),
+                        value: e.target.value.trim(),
+                        completed: false,
+                      };
+                      setItems(
+                        items.map((i) => {
+                          if (i.id === item.id) {
+                            return {
+                              ...i,
+                              tasks: [...i.tasks, newTask],
+                            };
+                          }
+                          return i;
+                        }),
+                      );
+                      e.target.value = "";
+                    }
+                  }}
+                />
+                <button
+                  onClick={(e) => {
+                    const input = e.target.previousSibling;
+                    if (input.value.trim()) {
+                      const newTask = {
+                        id: Date.now(),
+                        value: input.value.trim(),
+                        completed: false,
+                      };
+                      setItems(
+                        items.map((i) => {
+                          if (i.id === item.id) {
+                            return {
+                              ...i,
+                              tasks: [...i.tasks, newTask],
+                            };
+                          }
+                          return i;
+                        }),
+                      );
+                      input.value = "";
+                    }
+                  }}
+                >
+                  Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      ))}
+
+      {items.length === 0 && (
+        <p className="empty-state">
+          Nenhum item adicionado. Clique em "Adicionar Novo Item" para começar.
+        </p>
       )}
     </div>
   );
 };
 
-// Estilos básicos
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "50px auto",
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-  },
-  searchContainer: {
-    position: "relative",
-  },
-  input: {
-    width: "100%",
-    padding: "10px",
-    fontSize: "16px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    boxSizing: "border-box",
-  },
-  suggestionsList: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
-    margin: 0,
-    padding: 0,
-    listStyle: "none",
-    border: "1px solid #ddd",
-    borderTop: "none",
-    backgroundColor: "white",
-    borderRadius: "0 0 4px 4px",
-    maxHeight: "200px",
-    overflowY: "auto",
-    zIndex: 1000,
-  },
-  suggestionItem: {
-    padding: "10px",
-    cursor: "pointer",
-    borderBottom: "1px solid #f0f0f0",
-  },
-  selected: {
-    marginTop: "20px",
-    padding: "10px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "4px",
-  },
-};
-
-export default AutocompleteSearch;
+export default NestedListForm;

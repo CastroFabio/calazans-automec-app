@@ -1044,6 +1044,34 @@
 
 /* ── MATERIALS TABLE ── */
 
+.select-new-order-material {
+  font-size: 12px;
+  padding: 5px 7px;
+}
+
+.input-new-order-material-ref {
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
+.input-new-order-material-total {
+  background: rgba(212, 56, 13, 0.04);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 5px 7px;
+}
+
+.input-new-order-material-cost {
+  font-size: 12px;
+}
+
+.input-new-order-material-qtd {
+  padding: 5px 7px;
+  font-size: 12px;
+}
+
 .mat-table-content-desc {
   width: 38%;
 }
