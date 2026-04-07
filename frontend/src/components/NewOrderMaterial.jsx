@@ -1,57 +1,40 @@
 import { useState } from "react";
+import { materialsListDTO } from "../data/mockDataDTO";
 
 const NewOrderMaterial = ({ listMaintenanceJobs }) => {
   const [materialsList, setMaterialsList] = useState([]);
-  const [materialInput, setMaterialInput] = useState({
-    description: "",
-    quantity: 1,
-    unitValue: "",
-    reference: "",
-  });
 
   const handleAddMaterial = () => {
-    if (materialInput.description) {
-      const newMaterial = {
-        id: Date.now(),
-        ...materialInput,
-        total: materialInput.unitValue * materialInput.quantity,
-      };
-      setMaterialsList([...materialsList, newMaterial]);
-      // Reset material input
-      setMaterialInput({
-        description: "",
-        quantity: 1,
-        unitValue: "",
-        reference: "",
-      });
-    }
+    const newMaterial = {
+      id: Date.now(),
+      description: "",
+      quantity: "",
+      unitValue: "",
+      reference: "",
+    };
+    setMaterialsList([...materialsList, newMaterial]);
   };
 
   const handleRemoveMaterial = (id) => {
     setMaterialsList(materialsList.filter((material) => material.id !== id));
   };
 
-  const handleMaterialInputChange = (field, value) => {
-    setMaterialInput((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleMaterialInputChange = (id, field, value) => {
+    setMaterialsList((prev) =>
+      prev.map((element) =>
+        element.id === id ? { ...element, [field]: value } : element,
+      ),
+    );
   };
 
-  const calculateMaterialTotal = (unitValue, quantity) => {
-    const unit = parseFloat(unitValue) || 0;
-    const qty = parseFloat(quantity) || 0;
-    return unit * qty;
-  };
-
-  const calculateTotalLabor = () => {
+  const calculateTotalMaintenanceJob = () => {
     return listMaintenanceJobs.reduce((total, job) => {
       return total + (parseFloat(job.serviceValue) || 0);
     }, 0);
   };
 
   const calculateGrandTotal = () => {
-    return calculateTotalLabor() + calculateTotalMaterials();
+    return calculateTotalMaintenanceJob() + calculateTotalMaterials();
   };
 
   const calculateTotalMaterials = () => {
@@ -95,122 +78,125 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
               </tr>
             </thead>
             <tbody>
-              {materialsList.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    Nenhum material adicionado
-                  </td>
-                </tr>
-              ) : (
-                materialsList.map((material) => (
-                  <tr key={material.id}>
-                    <td>{material.description}</td>
-                    <td>{material.quantity}</td>
-                    <td>R$ {material.unitValue}</td>
-                    <td>
-                      R${" "}
-                      {calculateMaterialTotal(
-                        material.unitValue,
-                        material.quantity,
-                      ).toFixed(2)}
-                    </td>
-                    <td>{material.reference}</td>
-                    <td>
-                      <button
-                        className="remove-btn"
-                        onClick={() => handleRemoveMaterial(material.id)}
-                      >
-                        ×
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-              <tr className="add-material-row">
-                <td>
-                  <select
-                    className="select select-new-order-material"
-                    value={materialInput.description}
-                    onChange={(e) =>
-                      handleMaterialInputChange("description", e.target.value)
-                    }
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Óleo do motor">Óleo do motor</option>
-                    <option value="Filtro de óleo">Filtro de óleo</option>
-                    <option value="Pastilha de freio">Pastilha de freio</option>
-                  </select>
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    className="input input-new-order-material-qtd"
-                    value={materialInput.quantity}
-                    min="1"
-                    onChange={(e) =>
-                      handleMaterialInputChange("quantity", e.target.value)
-                    }
-                  />
-                </td>
-                <td>
-                  <div className="input-prefix">
-                    <span>R$</span>
-                    <input
-                      type="text"
-                      placeholder="0,00"
-                      className="input-new-order-material-cost"
-                      value={materialInput.unitValue}
-                      onChange={(e) =>
-                        handleMaterialInputChange("unitValue", e.target.value)
-                      }
-                    />
-                  </div>
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input input-new-order-material-total"
-                    readOnly
-                    value={
-                      materialInput.unitValue && materialInput.quantity
-                        ? (
-                            parseFloat(materialInput.unitValue) *
-                            parseFloat(materialInput.quantity)
-                          ).toFixed(2)
-                        : "—"
-                    }
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="input input-new-order-material-ref"
-                    placeholder="Ref."
-                    value={materialInput.reference}
-                    onChange={(e) =>
-                      handleMaterialInputChange("reference", e.target.value)
-                    }
-                  />
-                </td>
-                <td>
-                  <button
-                    className="add-row-btn-small"
-                    onClick={handleAddMaterial}
-                    disabled={!materialInput.description}
-                  >
-                    +
-                  </button>
-                </td>
-              </tr>
+              {materialsList.length > 0
+                ? materialsList.map((element, index) => (
+                    <tr className="add-material-row" key={index}>
+                      <td>
+                        <select
+                          className="select select-new-order-material"
+                          value={element.description}
+                          onChange={(e) =>
+                            handleMaterialInputChange(
+                              element.id,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                        >
+                          <option value="">Selecione...</option>
+                          {materialsListDTO.map((element, index) => (
+                            <optgroup key={index} label={element.group}>
+                              {element.items.map((element, index) => (
+                                <option key={index} value={element}>
+                                  {element}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          className="input input-new-order-material-qtd"
+                          value={element.quantity}
+                          min="1"
+                          onChange={(e) =>
+                            handleMaterialInputChange(
+                              element.id,
+                              "quantity",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        <div className="input-prefix">
+                          <span>R$</span>
+                          <input
+                            type="text"
+                            placeholder="0,00"
+                            className="input-new-order-material-cost"
+                            value={element.unitValue}
+                            onChange={(e) =>
+                              handleMaterialInputChange(
+                                element.id,
+                                "unitValue",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="input input-new-order-material-total"
+                          readOnly
+                          value={
+                            element.unitValue && element.quantity
+                              ? (
+                                  parseFloat(element.unitValue) *
+                                  parseFloat(element.quantity)
+                                ).toFixed(2)
+                              : "—"
+                          }
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="input input-new-order-material-ref"
+                          placeholder="Ref."
+                          value={element.reference}
+                          onChange={(e) =>
+                            handleMaterialInputChange(
+                              element.id,
+                              "reference",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        <button
+                          className="remove-btn"
+                          onClick={() => handleRemoveMaterial(element.id)}
+                        >
+                          ×
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                : ""}
             </tbody>
           </table>
         </div>
+        <button class="add-row-btn" onClick={handleAddMaterial}>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Adicionar peça / material
+        </button>
         <div className="total-row">
           <div className="total-item">
-            Mão de obra: <strong>R$ {calculateTotalLabor().toFixed(2)}</strong>
+            Mão de obra:{" "}
+            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
           </div>
           <div className="total-row-divider"></div>
           <div className="total-item">
