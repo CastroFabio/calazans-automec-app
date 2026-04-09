@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { materialsListDTO } from "../data/mockDataDTO";
+import { supabase } from "../../supabase-client";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState(null);
@@ -8,11 +9,35 @@ const MaintenanceJobs = () => {
     index: null,
     value: "",
   });
-  const [materialsData, setMaterialsData] = useState(materialsListDTO);
+  const [materialsGroupData, setMaterialsGroupData] = useState([]);
 
   const activeGroup = activeTab
-    ? materialsData.find((job) => job.group === activeTab)
+    ? materialsGroupData.find((element) => element.group === activeTab)
     : null;
+
+  const handleFetchGroupData = async () => {
+    const { data, error } = await supabase
+      .from("materialgroup")
+      .select(
+        `
+  id,
+  group,
+  material ( id, name )
+`,
+      )
+      .order("group", { ascending: true });
+
+    if (error) {
+      console.error("Error adding material group:", error.message);
+      return;
+    }
+
+    setMaterialsGroupData(data);
+  };
+
+  useEffect(() => {
+    handleFetchGroupData();
+  }, []);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
@@ -26,13 +51,13 @@ const MaintenanceJobs = () => {
     if (editingItem.group && editingItem.index !== null) {
       const updatedJobs = materialsData.map((group) => {
         if (group.group === editingItem.group) {
-          const updatedItems = [...group.items];
+          const updatedItems = [...group.material];
           updatedItems[editingItem.index] = editingItem.value;
-          return { ...group, items: updatedItems };
+          return { ...group, material: updatedItems };
         }
         return group;
       });
-      setMaterialsData(updatedJobs);
+      setMaterialsGroupData(updatedJobs);
       setEditingItem({ group: null, index: null, value: "" });
     }
   };
@@ -52,14 +77,14 @@ const MaintenanceJobs = () => {
   const handleRemoveItem = (groupName, itemIndex) => {
     const updatedJobs = materialsData.map((category) => {
       if (category.group === groupName) {
-        const updatedItems = category.items.filter(
+        const updatedItems = category.material.filter(
           (_, idx) => idx !== itemIndex,
         );
-        return { ...category, items: updatedItems };
+        return { ...category, material: updatedItems };
       }
       return category;
     });
-    setMaterialsData(updatedJobs);
+    setMaterialsGroupData(updatedJobs);
   };
 
   const handleAddItem = (groupName, newItemName) => {
@@ -68,12 +93,12 @@ const MaintenanceJobs = () => {
         if (category.group === groupName) {
           return {
             ...category,
-            items: [...category.items, newItemName.trim()],
+            material: [...category.material.name, newItemName.trim()],
           };
         }
         return category;
       });
-      setMaterialsData(updatedJobs);
+      setMaterialsGroupData(updatedJobs);
     }
   };
 
@@ -85,7 +110,7 @@ const MaintenanceJobs = () => {
         <div>
           {/* <div className="ph-title">Serviços</div> */}
           <div className="ph-sub">
-            Catálogo de serviços disponíveis na oficina
+            Catálogo de materiais disponíveis na oficina
           </div>
         </div>
       </div>
@@ -93,17 +118,17 @@ const MaintenanceJobs = () => {
         <div>
           <div className="cad-subtitle-group">Grupos</div>
           <div className="cad-groups" id="svcGroupList">
-            {materialsData.length > 0
-              ? materialsData.map((job, index) => (
+            {materialsGroupData.length > 0
+              ? materialsGroupData.map((element, index) => (
                   <div key={index} className="cad-group-wrap">
                     <button
-                      onClick={() => setActiveTab(job.group)}
-                      className={`cad-group-btn ${activeTab === job.group ? "active" : ""}`}
+                      onClick={() => setActiveTab(element.group)}
+                      className={`cad-group-btn ${activeTab === element.group ? "active" : ""}`}
                     >
-                      <span>{job.group}</span>
+                      <span>{element.group}</span>
                       <div className="cad-group-container">
                         <span className="cad-group-count">
-                          {job.items.length}
+                          {element.material.length}
                         </span>
                         <span className="cad-chevron">
                           <svg
@@ -147,11 +172,11 @@ const MaintenanceJobs = () => {
                 <input type="text" placeholder="Filtrar serviços..." />
               </div> */}
             </div>
-            {activeGroup && activeGroup.items.length > 0 ? (
-              activeGroup.items.map((job, jobIdx) => (
-                <div key={jobIdx} className="cad-item-row">
+            {activeGroup && activeGroup.material.length > 0 ? (
+              activeGroup.material.map((element, index) => (
+                <div key={index} className="cad-item-row">
                   {editingItem.group === activeTab &&
-                  editingItem.index === jobIdx ? (
+                  editingItem.index === index ? (
                     <input
                       type="text"
                       className="input cad-input cad-edit-input"
@@ -167,17 +192,17 @@ const MaintenanceJobs = () => {
                       autoFocus
                     />
                   ) : (
-                    <div className="cad-item-name">{job}</div>
+                    <div className="cad-item-name">{element.name}</div>
                   )}
                   <div className="cad-item-actions">
                     <button
-                      onClick={() => handleEditClick(activeTab, jobIdx, job)}
+                      onClick={() => handleEditClick(activeTab, index, element)}
                       className="btn btn-sm btn-ghost cad-btn-editar"
                     >
                       Editar
                     </button>
                     <button
-                      onClick={() => handleRemoveItem(activeTab, jobIdx)}
+                      onClick={() => handleRemoveItem(activeTab, index)}
                       className="btn btn-sm btn-danger cad-btn-remover"
                     >
                       Remover

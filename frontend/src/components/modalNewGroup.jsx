@@ -1,9 +1,28 @@
+import { useState } from "react";
+import { supabase } from "../../supabase-client";
+
 const ModalNewGroup = ({ isOpen, onClose }) => {
+  const [newMaterialGroup, setNewMaterialGroup] = useState({});
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const { error } = await supabase
+      .from("materialgroup")
+      .insert(newMaterialGroup)
+      .single();
+    if (error) {
+      console.error("Error adding material group:", error.message);
+      return;
+    }
+
     onClose();
+  };
+
+  const handleChange = (e) => {
+    setNewMaterialGroup((prev) => ({ ...prev, group: e.target.value }));
   };
 
   const handleContentClick = (e) => {
@@ -30,6 +49,7 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
                 type="text"
                 className="input"
                 id="novoGrupoNome"
+                onChange={handleChange}
                 placeholder="Ex: Suspensão, Motor, Freios..."
               />
               <div className="modal-new-group-context-undertext">
