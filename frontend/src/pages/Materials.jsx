@@ -1,43 +1,39 @@
 import { useEffect, useState } from "react";
-import { materialsListDTO } from "../data/mockDataDTO";
 import { supabase } from "../../supabase-client";
+import {
+  handleAddJobMaterial,
+  handleEditSaveUpdate,
+  handleFetchGroupItemsData,
+  handleRemoveJobMaterial,
+} from "../api/supabase";
 
-const MaintenanceJobs = () => {
-  const [activeTab, setActiveTab] = useState(null);
+const Materials = () => {
+  const [activeTab, setActiveTab] = useState({
+    groupName: "",
+    groupIndex: null,
+  });
   const [editingItem, setEditingItem] = useState({
     group: null,
     index: null,
     value: "",
   });
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
+  const [newItemName, setNewItemName] = useState("");
 
   const activeGroup = activeTab
-    ? materialsGroupData.find((element) => element.group === activeTab)
+    ? materialsGroupData.find(
+        (element) => element.group === activeTab.groupName,
+      )
     : null;
 
-  const handleFetchGroupData = async () => {
-    const { data, error } = await supabase
-      .from("materialgroup")
-      .select(
-        `
-  id,
-  group,
-  material ( id, name )
-`,
-      )
-      .order("group", { ascending: true });
-
-    if (error) {
-      console.error("Error adding material group:", error.message);
-      return;
-    }
-
-    setMaterialsGroupData(data);
-  };
-
   useEffect(() => {
-    handleFetchGroupData();
-  }, []);
+    const fetchData = async () => {
+      const data = await handleFetchGroupItemsData("materialgroup", "material");
+      setMaterialsGroupData(data);
+    };
+
+    fetchData();
+  }, [materialsGroupData]);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
@@ -47,19 +43,9 @@ const MaintenanceJobs = () => {
     });
   };
 
-  const handleEditSave = () => {
-    if (editingItem.group && editingItem.index !== null) {
-      const updatedJobs = materialsData.map((group) => {
-        if (group.group === editingItem.group) {
-          const updatedItems = [...group.material];
-          updatedItems[editingItem.index] = editingItem.value;
-          return { ...group, material: updatedItems };
-        }
-        return group;
-      });
-      setMaterialsGroupData(updatedJobs);
-      setEditingItem({ group: null, index: null, value: "" });
-    }
+  const handleEditSave = async () => {
+    handleEditSaveUpdate(editingItem, "material");
+    setEditingItem({ group: null, index: null, value: "" });
   };
 
   const handleEditCancel = () => {
@@ -74,41 +60,22 @@ const MaintenanceJobs = () => {
     }
   };
 
-  const handleRemoveItem = (groupName, itemIndex) => {
-    const updatedJobs = materialsData.map((category) => {
-      if (category.group === groupName) {
-        const updatedItems = category.material.filter(
-          (_, idx) => idx !== itemIndex,
-        );
-        return { ...category, material: updatedItems };
-      }
-      return category;
-    });
-    setMaterialsGroupData(updatedJobs);
+  const handleRemoveItem = async (materialID) => {
+    handleRemoveJobMaterial("material", materialID);
   };
 
-  const handleAddItem = (groupName, newItemName) => {
-    if (newItemName && newItemName.trim()) {
-      const updatedJobs = materialsData.map((category) => {
-        if (category.group === groupName) {
-          return {
-            ...category,
-            material: [...category.material.name, newItemName.trim()],
-          };
-        }
-        return category;
-      });
-      setMaterialsGroupData(updatedJobs);
-    }
+  const handleAddItem = async (groupIndex, newItemName) => {
+    const newItem = {
+      name: newItemName,
+      group_id: groupIndex,
+    };
+    handleAddJobMaterial(newItem, "material");
   };
-
-  const [newItemName, setNewItemName] = useState("");
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          {/* <div className="ph-title">Serviços</div> */}
           <div className="ph-sub">
             Catálogo de materiais disponíveis na oficina
           </div>
@@ -122,8 +89,13 @@ const MaintenanceJobs = () => {
               ? materialsGroupData.map((element, index) => (
                   <div key={index} className="cad-group-wrap">
                     <button
-                      onClick={() => setActiveTab(element.group)}
-                      className={`cad-group-btn ${activeTab === element.group ? "active" : ""}`}
+                      onClick={() =>
+                        setActiveTab({
+                          groupIndex: element.id,
+                          groupName: element.group,
+                        })
+                      }
+                      className={`cad-group-btn ${activeTab.groupName === element.group ? "active" : ""}`}
                     >
                       <span>{element.group}</span>
                       <div className="cad-group-container">
@@ -132,7 +104,7 @@ const MaintenanceJobs = () => {
                         </span>
                         <span className="cad-chevron">
                           <svg
-                            className={`cad-chevron-symbol ${activeTab ? "transform:rotate(180deg)" : ""}`}
+                            className={`cad-chevron-symbol ${activeTab.groupName ? "transform:rotate(180deg)" : ""}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -156,27 +128,16 @@ const MaintenanceJobs = () => {
           <div className="cad-items-wrap">
             <div className="cad-items-header">
               <span className="cad-items-title" id="svcGroupTitle">
-                {activeTab ? activeTab : "Selecione um grupo"}
+                {activeTab.groupName
+                  ? activeTab.groupName
+                  : "Selecione um grupo"}
               </span>
-
-              {/* Nao achei necessario filtrar os itens */}
-              {/* <div className="search-box cad-search-box">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input type="text" placeholder="Filtrar serviços..." />
-              </div> */}
             </div>
             {activeGroup && activeGroup.material.length > 0 ? (
-              activeGroup.material.map((element, index) => (
-                <div key={index} className="cad-item-row">
-                  {editingItem.group === activeTab &&
-                  editingItem.index === index ? (
+              activeGroup.material.map((element) => (
+                <div key={element.id} className="cad-item-row">
+                  {editingItem.group === activeTab.groupName &&
+                  editingItem.index === element.id ? (
                     <input
                       type="text"
                       className="input cad-input cad-edit-input"
@@ -196,13 +157,19 @@ const MaintenanceJobs = () => {
                   )}
                   <div className="cad-item-actions">
                     <button
-                      onClick={() => handleEditClick(activeTab, index, element)}
+                      onClick={() =>
+                        handleEditClick(
+                          activeTab.groupName,
+                          element.id,
+                          element.name,
+                        )
+                      }
                       className="btn btn-sm btn-ghost cad-btn-editar"
                     >
                       Editar
                     </button>
                     <button
-                      onClick={() => handleRemoveItem(activeTab, index)}
+                      onClick={() => handleRemoveItem(element.id)}
                       className="btn btn-sm btn-danger cad-btn-remover"
                     >
                       Remover
@@ -213,7 +180,7 @@ const MaintenanceJobs = () => {
             ) : (
               <div id="svcItemList">
                 <div className="cad-empty">
-                  {activeTab
+                  {activeTab.groupName
                     ? "Nenhum serviço encontrado neste grupo"
                     : "Selecione um grupo à esquerda"}
                 </div>
@@ -231,8 +198,8 @@ const MaintenanceJobs = () => {
               <button
                 className="btn btn-primary btn-sm"
                 onClick={() => {
-                  if (activeTab && newItemName.trim()) {
-                    handleAddItem(activeTab, newItemName);
+                  if (activeTab.groupName && newItemName.trim()) {
+                    handleAddItem(activeTab.groupIndex, newItemName);
                     setNewItemName("");
                   }
                 }}
@@ -255,4 +222,4 @@ const MaintenanceJobs = () => {
   );
 };
 
-export default MaintenanceJobs;
+export default Materials;

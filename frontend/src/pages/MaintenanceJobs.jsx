@@ -1,18 +1,42 @@
-import { useState } from "react";
-import { maintenanceJobsListDTO } from "../data/mockDataDTO";
+import { useEffect, useState } from "react";
+import { supabase } from "../../supabase-client";
+import {
+  handleAddJobMaterial,
+  handleEditSaveUpdate,
+  handleFetchGroupItemsData,
+  handleRemoveJobMaterial,
+} from "../api/supabase";
 
 const MaintenanceJobs = () => {
-  const [activeTab, setActiveTab] = useState(null);
+  const [activeTab, setActiveTab] = useState({
+    groupName: "",
+    groupIndex: null,
+  });
   const [editingItem, setEditingItem] = useState({
     group: null,
     index: null,
     value: "",
   });
-  const [jobsData, setJobsData] = useState(maintenanceJobsListDTO);
+  const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
+  const [newItemName, setNewItemName] = useState("");
 
   const activeGroup = activeTab
-    ? jobsData.find((job) => job.group === activeTab)
+    ? maintenanceJobsGroupData.find(
+        (element) => element.group === activeTab.groupName,
+      )
     : null;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await handleFetchGroupItemsData(
+        "maintenancejobgroup",
+        "maintenancejob",
+      );
+      setMaintenanceJobsGroupData(data);
+    };
+
+    fetchData();
+  }, [maintenanceJobsGroupData]);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
@@ -22,19 +46,9 @@ const MaintenanceJobs = () => {
     });
   };
 
-  const handleEditSave = () => {
-    if (editingItem.group && editingItem.index !== null) {
-      const updatedJobs = jobsData.map((group) => {
-        if (group.group === editingItem.group) {
-          const updatedItems = [...group.items];
-          updatedItems[editingItem.index] = editingItem.value;
-          return { ...group, items: updatedItems };
-        }
-        return group;
-      });
-      setJobsData(updatedJobs);
-      setEditingItem({ group: null, index: null, value: "" });
-    }
+  const handleEditSave = async () => {
+    handleEditSaveUpdate(editingItem, "maintenancejob");
+    setEditingItem({ group: null, index: null, value: "" });
   };
 
   const handleEditCancel = () => {
@@ -49,41 +63,22 @@ const MaintenanceJobs = () => {
     }
   };
 
-  const handleRemoveItem = (groupName, itemIndex) => {
-    const updatedJobs = jobsData.map((category) => {
-      if (category.group === groupName) {
-        const updatedItems = category.items.filter(
-          (_, idx) => idx !== itemIndex,
-        );
-        return { ...category, items: updatedItems };
-      }
-      return category;
-    });
-    setJobsData(updatedJobs);
+  const handleRemoveItem = async (maintenanceID) => {
+    handleRemoveJobMaterial("maintenancejob", maintenanceID);
   };
 
-  const handleAddItem = (groupName, newItemName) => {
-    if (newItemName && newItemName.trim()) {
-      const updatedJobs = jobsData.map((category) => {
-        if (category.group === groupName) {
-          return {
-            ...category,
-            items: [...category.items, newItemName.trim()],
-          };
-        }
-        return category;
-      });
-      setJobsData(updatedJobs);
-    }
+  const handleAddItem = async (groupIndex, newItemName) => {
+    const newItem = {
+      name: newItemName,
+      group_id: groupIndex,
+    };
+    handleAddJobMaterial(newItem, "maintenancejob");
   };
-
-  const [newItemName, setNewItemName] = useState("");
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          {/* <div className="ph-title">Serviços</div> */}
           <div className="ph-sub">
             Catálogo de serviços disponíveis na oficina
           </div>
@@ -93,21 +88,26 @@ const MaintenanceJobs = () => {
         <div>
           <div className="cad-subtitle-group">Grupos</div>
           <div className="cad-groups" id="svcGroupList">
-            {jobsData.length > 0
-              ? jobsData.map((job, index) => (
+            {maintenanceJobsGroupData.length > 0
+              ? maintenanceJobsGroupData.map((element, index) => (
                   <div key={index} className="cad-group-wrap">
                     <button
-                      onClick={() => setActiveTab(job.group)}
-                      className={`cad-group-btn ${activeTab === job.group ? "active" : ""}`}
+                      onClick={() =>
+                        setActiveTab({
+                          groupIndex: element.id,
+                          groupName: element.group,
+                        })
+                      }
+                      className={`cad-group-btn ${activeTab.groupName === element.group ? "active" : ""}`}
                     >
-                      <span>{job.group}</span>
+                      <span>{element.group}</span>
                       <div className="cad-group-container">
                         <span className="cad-group-count">
-                          {job.items.length}
+                          {element.maintenancejob.length}
                         </span>
                         <span className="cad-chevron">
                           <svg
-                            className={`cad-chevron-symbol ${activeTab ? "transform:rotate(180deg)" : ""}`}
+                            className={`cad-chevron-symbol ${activeTab.groupName ? "transform:rotate(180deg)" : ""}`}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -131,27 +131,16 @@ const MaintenanceJobs = () => {
           <div className="cad-items-wrap">
             <div className="cad-items-header">
               <span className="cad-items-title" id="svcGroupTitle">
-                {activeTab ? activeTab : "Selecione um grupo"}
+                {activeTab.groupName
+                  ? activeTab.groupName
+                  : "Selecione um grupo"}
               </span>
-
-              {/* Nao achei necessario filtrar os itens */}
-              {/* <div className="search-box cad-search-box">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <input type="text" placeholder="Filtrar serviços..." />
-              </div> */}
             </div>
-            {activeGroup && activeGroup.items.length > 0 ? (
-              activeGroup.items.map((job, jobIdx) => (
-                <div key={jobIdx} className="cad-item-row">
-                  {editingItem.group === activeTab &&
-                  editingItem.index === jobIdx ? (
+            {activeGroup && activeGroup.maintenancejob.length > 0 ? (
+              activeGroup.maintenancejob.map((element) => (
+                <div key={element.id} className="cad-item-row">
+                  {editingItem.group === activeTab.groupName &&
+                  editingItem.index === element.id ? (
                     <input
                       type="text"
                       className="input cad-input cad-edit-input"
@@ -167,17 +156,23 @@ const MaintenanceJobs = () => {
                       autoFocus
                     />
                   ) : (
-                    <div className="cad-item-name">{job}</div>
+                    <div className="cad-item-name">{element.name}</div>
                   )}
                   <div className="cad-item-actions">
                     <button
-                      onClick={() => handleEditClick(activeTab, jobIdx, job)}
+                      onClick={() =>
+                        handleEditClick(
+                          activeTab.groupName,
+                          element.id,
+                          element.name,
+                        )
+                      }
                       className="btn btn-sm btn-ghost cad-btn-editar"
                     >
                       Editar
                     </button>
                     <button
-                      onClick={() => handleRemoveItem(activeTab, jobIdx)}
+                      onClick={() => handleRemoveItem(element.id)}
                       className="btn btn-sm btn-danger cad-btn-remover"
                     >
                       Remover
@@ -188,7 +183,7 @@ const MaintenanceJobs = () => {
             ) : (
               <div id="svcItemList">
                 <div className="cad-empty">
-                  {activeTab
+                  {activeTab.groupName
                     ? "Nenhum serviço encontrado neste grupo"
                     : "Selecione um grupo à esquerda"}
                 </div>
@@ -206,8 +201,8 @@ const MaintenanceJobs = () => {
               <button
                 className="btn btn-primary btn-sm"
                 onClick={() => {
-                  if (activeTab && newItemName.trim()) {
-                    handleAddItem(activeTab, newItemName);
+                  if (activeTab.groupName && newItemName.trim()) {
+                    handleAddItem(activeTab.groupIndex, newItemName);
                     setNewItemName("");
                   }
                 }}

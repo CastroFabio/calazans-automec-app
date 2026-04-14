@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   customerListDTO,
   maintenanceJobsListDTO,
@@ -6,12 +7,30 @@ import {
 } from "../data/mockDataDTO";
 import SideBarList from "../components/sideBarList";
 import { useLocation } from "react-router-dom";
+import { handleFetchGroupData } from "../api/supabase";
 
 const SideBar = () => {
+  const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
+  const [materialGroupData, setMaterialGroupData] = useState([]);
+
   const location = useLocation();
   const currentPath = location.pathname;
 
   const isActive = (path) => (currentPath === path ? "active" : "");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const maintenanceJobData = await handleFetchGroupData(
+        "maintenancejobgroup",
+      );
+      setMaintenanceJobsGroupData(maintenanceJobData);
+
+      const materialData = await handleFetchGroupData("materialgroup");
+      setMaterialGroupData(materialData);
+    };
+
+    fetchData();
+  }, [maintenanceJobsGroupData]);
 
   const tabsData = {
     listagemCategory: "Listagem",
@@ -55,7 +74,7 @@ const SideBar = () => {
         id: "maintanenceJobsTab",
         title: "Serviços",
         navigateURL: "/services",
-        numberOf: maintenanceJobsListDTO.length,
+        numberOf: maintenanceJobsGroupData.length,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -77,7 +96,7 @@ const SideBar = () => {
         id: "materialsTab",
         title: "Materiais & Peças",
         navigateURL: "/materials",
-        numberOf: materialsListDTO.length,
+        numberOf: materialGroupData.length,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
