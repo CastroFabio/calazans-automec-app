@@ -31,6 +31,10 @@
   overflow: hidden;
 }
 
+.bg-orange-50 {
+  background-color: orange;
+}
+
 /* ── SIDEBAR ── */
 .sidebar {
   width: 220px;

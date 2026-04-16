@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { serviceOrderListDTO } from "../data/mockDataDTO";
+import { useEffect, useMemo, useState } from "react";
 import { priClass, statusClass } from "../data/mockData";
+import { handleFetchServiceOrders } from "../api/supabase";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [serviceOrderData, setServiceOrderData] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
 
   const tabsData = [
@@ -32,19 +33,27 @@ const ServiceOrderList = () => {
   const statusList = ["all", ...new Set(tabsData.map((p) => p.status))];
 
   const handleFilteredCustomers = useMemo(() => {
-    return serviceOrderListDTO.filter((customer) => {
-      const matchesTab =
-        activeTab === "all" || customer.serviceOrder.status === activeTab;
+    return serviceOrderData.filter((element) => {
+      const matchesTab = activeTab === "all" || element.status === activeTab;
 
       const matchesSearch =
         searchTerm === "" ||
-        customer.vehicle.licensePlate
+        element.vehicle.license_plate
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
       return matchesSearch && matchesTab;
     });
-  }, [serviceOrderListDTO, activeTab, searchTerm]);
+  }, [serviceOrderData, activeTab, searchTerm]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await handleFetchServiceOrders();
+      setServiceOrderData(data);
+    };
+
+    fetchData();
+  }, [serviceOrderData]);
 
   return (
     <div className="page active" id="page-os">
@@ -99,23 +108,23 @@ const ServiceOrderList = () => {
           </thead>
           <tbody id="osTableBody"></tbody>
           {handleFilteredCustomers.length > 0 ? (
-            handleFilteredCustomers.map((os) => (
-              <tbody key={os.serviceOrder.id}>
+            handleFilteredCustomers.map((element) => (
+              <tbody key={element.id}>
                 <tr>
                   <td>
-                    <span className="td-id">{`#${os.serviceOrder.id}`}</span>
+                    <span className="td-id">{`#${element.id}`}</span>
                   </td>
                   <td>
                     <div className="os-table-customer-name">
-                      {os.customer ? os.customer.name : "—"}
+                      {element.customer ? element.customer.name : "—"}
                     </div>
                     <div className="os-table-vehicle-info">
-                      {os.vehicle ? (
+                      {element.vehicle ? (
                         <span className="car-tag-group">
                           <span className="svc-tag car-tag-placa">
-                            {os.vehicle.licensePlate}
+                            {element.vehicle.license_plate}
                           </span>
-                          <span className="svc-tag car-tag-model">{`${os.vehicle.brand} ${os.vehicle.model}`}</span>
+                          <span className="svc-tag car-tag-model">{`${element.vehicle.brand} ${element.vehicle.model}`}</span>
                         </span>
                       ) : (
                         "—"
@@ -123,31 +132,29 @@ const ServiceOrderList = () => {
                     </div>
                   </td>
                   <td>
-                    {os.maintenanceJob.map((job, index) => (
-                      <span key={index} className="svc-tag">
-                        {job.name}
-                      </span>
-                    ))}
+                    {element.itemmaintenance.map((item) =>
+                      item.map((job) => (
+                        <span key={job.id} className="svc-tag">
+                          {job.name}
+                        </span>
+                      )),
+                    )}
                   </td>
                   <td className="os-table-professional-name">
-                    {os.serviceOrder.professional}
+                    {element.professional}
                   </td>
                   <td>
-                    <span
-                      className={`badge ${priClass[os.serviceOrder.priority]}`}
-                    >
-                      {os.serviceOrder.priority}
+                    <span className={`badge ${priClass[element.priority]}`}>
+                      {element.priority}
                     </span>
                   </td>
                   <td>
-                    <span
-                      className={`badge ${statusClass[os.serviceOrder.status]}`}
-                    >
-                      {os.serviceOrder.status}
+                    <span className={`badge ${statusClass[element.status]}`}>
+                      {element.status}
                     </span>
                   </td>
-                  <td className="td-value">{os.serviceOrder.value}</td>
-                  <td className="td-date">{os.serviceOrder.arrived_at}</td>
+                  <td className="td-value">{element.value}</td>
+                  <td className="td-date">{element.arrived_at}</td>
                 </tr>
               </tbody>
             ))

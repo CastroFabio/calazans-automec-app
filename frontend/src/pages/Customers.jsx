@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
+import {
+  handleFetchCustomers,
+  handleFetchGroupItemsData,
+} from "../api/supabase";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [customersData] = useState(customerListDTO);
+  const [customersData, setCustomersData] = useState([]);
 
   const getCustomerNameInitials = (customerName) => {
     return customerName
@@ -26,13 +30,13 @@ const Customers = () => {
 
     const lowerCaseSearch = searchTerm.toLowerCase();
 
-    return customersData.filter((customers) => {
-      if (customers.customer.name.toLowerCase().includes(lowerCaseSearch)) {
+    return customersData.filter((element) => {
+      if (element.name.toLowerCase().includes(lowerCaseSearch)) {
         return true;
       }
 
-      const vehicleMatch = customers.vehicle.some((car) =>
-        car.licensePlate.toLowerCase().includes(lowerCaseSearch),
+      const vehicleMatch = element.vehicle.some((car) =>
+        car.license_plate.toLowerCase().includes(lowerCaseSearch),
       );
 
       return vehicleMatch;
@@ -40,13 +44,20 @@ const Customers = () => {
   }, [customersData, searchTerm]);
 
   useEffect(() => {
-    const newColors = {};
-    customerListDTO.forEach((item, index) => {
+    const fetchData = async () => {
+      const data = await handleFetchCustomers();
+      setCustomersData(data);
+    };
+
+    fetchData();
+
+    /*     const newColors = {};
+    customersData.forEach((item, index) => {
       newColors[index] =
         "#" + Math.floor(Math.random() * 16777215).toString(16);
     });
-    setItemColors(newColors);
-  }, [customerListDTO]);
+    setItemColors(newColors); */
+  }, [customersData]);
 
   return (
     <div className="page" id="page-clientes">
@@ -76,25 +87,20 @@ const Customers = () => {
       </div>
       <div className="clients-grid" id="clientsGrid">
         {filteredData.length > 0 ? (
-          filteredData.map((customer, index) => (
-            <div className="client-card" key={index}>
+          filteredData.map((element) => (
+            <div className="client-card" key={element.id}>
               <div className="client-card-header">
-                <div
-                  className="client-avatar-lg"
-                  style={{
-                    backgroundColor: itemColors[index],
-                  }}
-                >
-                  {getCustomerNameInitials(customer.customer.name)}
+                <div className="client-avatar-lg bg-orange-50">
+                  {getCustomerNameInitials(element.name)}
                 </div>
                 <div>
-                  <div className="client-name">{customer.customer.name}</div>
+                  <div className="client-name">{element.name}</div>
                   <div className="client-sub">
-                    {`${customer.numberOfOS} OS · ${customer.numberOfVehicles} veículo(s)`}
+                    {`${element.numberOfOS} OS · ${element.vehicle.length} veículo(s)`}
                   </div>
                 </div>
               </div>
-              {customer.customer.telephone ? (
+              {element.telephone ? (
                 <div className="client-info-row ">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -104,12 +110,12 @@ const Customers = () => {
                       d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                     />
                   </svg>
-                  {customer.customer.telephone}
+                  {element.telephone}
                 </div>
               ) : (
                 ""
               )}
-              {customer.customer.cell ? (
+              {element.cell ? (
                 <div className="client-info-row">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -119,12 +125,12 @@ const Customers = () => {
                       d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
                     />
                   </svg>
-                  {customer.customer.cell}
+                  {element.cell}
                 </div>
               ) : (
                 ""
               )}
-              {customer.customer.observation ? (
+              {element.observation ? (
                 <div className="client-info-row client-info-row-observation">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -135,7 +141,7 @@ const Customers = () => {
                     />
                   </svg>
                   <span className="client-info-observation-text">
-                    {customer.customer.observation}
+                    {element.observation}
                   </span>
                 </div>
               ) : (
@@ -143,11 +149,11 @@ const Customers = () => {
               )}
               <div className="client-footer">
                 <div className="client-vehicle-tags">
-                  {customer.vehicle.length > 0
-                    ? customer.vehicle.map((car, index) => (
+                  {element.vehicle.length > 0
+                    ? element.vehicle.map((car, index) => (
                         <span className="car-tag-group" key={index}>
                           <span className="svc-tag car-tag-placa">
-                            {car.licensePlate}
+                            {car.license_plate}
                           </span>
                           <span className="svc-tag car-tag-model">
                             {car.brand} {car.model}

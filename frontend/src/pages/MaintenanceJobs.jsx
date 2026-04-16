@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../supabase-client";
 import {
   handleAddJobMaterial,
   handleEditSaveUpdate,
@@ -21,9 +20,14 @@ const MaintenanceJobs = () => {
   const [newItemName, setNewItemName] = useState("");
 
   const activeGroup = activeTab
-    ? maintenanceJobsGroupData.find(
-        (element) => element.group === activeTab.groupName,
-      )
+    ? maintenanceJobsGroupData
+        .map((group) => ({
+          ...group,
+          maintenancejob: group.maintenancejob.sort((a, b) =>
+            a.name.localeCompare(b.name),
+          ),
+        }))
+        .find((element) => element.group === activeTab.groupName)
     : null;
 
   useEffect(() => {
@@ -32,6 +36,7 @@ const MaintenanceJobs = () => {
         "maintenancejobgroup",
         "maintenancejob",
       );
+
       setMaintenanceJobsGroupData(data);
     };
 

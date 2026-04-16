@@ -62,3 +62,50 @@ export const handleAddJobMaterial = async (newItem, tableName) => {
     return;
   }
 };
+
+/* CUSTOMERS */
+
+export const handleFetchCustomers = async () => {
+  const { data, error } = await supabase
+    .from("customer")
+    .select(
+      `
+        id, name, cell, telephone, observation, 
+        vehicle (id, brand, model, license_plate)
+      `,
+    )
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error(`Error fetching customer:`, error.message);
+    return;
+  }
+
+  return data;
+};
+
+/* SERVICE ORDERS */
+
+export const handleFetchServiceOrders = async () => {
+  const { data, error } = await supabase
+    .from("serviceorder")
+    .select(
+      `
+        id, professional, priority, status, arrived_at, value, created_at, 
+        customer(id, name), 
+        vehicle (id, brand, model, license_plate),
+        itemmaintenance (id, created_at, quantity, value_unity, 
+          maintenancejob (name, id))
+      `,
+    )
+    .order("created_at", { ascending: true });
+
+  console.log("esse", data);
+
+  if (error) {
+    console.error(`Error fetching serviceorder:`, error.message);
+    return;
+  }
+
+  return data;
+};
