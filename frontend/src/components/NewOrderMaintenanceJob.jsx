@@ -4,6 +4,7 @@ import { maintenanceJobsListDTO } from "../data/mockDataDTO";
 const NewOrderMaintenanceJob = ({
   listMaintenanceJobs,
   setListMaintenanceJobs,
+  handleAddToArray,
 }) => {
   const [maintenanceJobInfo, setMaintenanceJobInfo] = useState({
     job: "",

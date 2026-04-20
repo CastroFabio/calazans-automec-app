@@ -94,13 +94,11 @@ export const handleFetchServiceOrders = async () => {
         id, professional, priority, status, arrived_at, value, created_at, 
         customer(id, name), 
         vehicle (id, brand, model, license_plate),
-        itemmaintenance (id, created_at, quantity, value_unity, 
+        item_maintenance (id, created_at, quantity, value_unity, 
           maintenancejob (name, id))
       `,
     )
     .order("created_at", { ascending: true });
-
-  console.log("esse", data);
 
   if (error) {
     console.error(`Error fetching serviceorder:`, error.message);

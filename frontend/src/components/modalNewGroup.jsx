@@ -10,7 +10,7 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
     e.preventDefault();
 
     const { error } = await supabase
-      .from("materialgroup")
+      .from("material_group")
       .insert(newMaterialGroup)
       .single();
     if (error) {

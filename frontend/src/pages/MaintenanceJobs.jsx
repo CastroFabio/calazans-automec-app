@@ -33,7 +33,7 @@ const MaintenanceJobs = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await handleFetchGroupItemsData(
-        "maintenancejobgroup",
+        "maintenancejob_group",
         "maintenancejob",
       );
 

@@ -21,11 +21,11 @@ const SideBar = () => {
   useEffect(() => {
     const fetchData = async () => {
       const maintenanceJobData = await handleFetchGroupData(
-        "maintenancejobgroup",
+        "maintenancejob_group",
       );
       setMaintenanceJobsGroupData(maintenanceJobData);
 
-      const materialData = await handleFetchGroupData("materialgroup");
+      const materialData = await handleFetchGroupData("material_group");
       setMaterialGroupData(materialData);
     };
 

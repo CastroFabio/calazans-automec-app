@@ -23,9 +23,9 @@ const NewOrderInfo = ({ handleFormFieldChange, formData }) => {
             <label>Técnico Responsável</label>
             <select
               className="select"
-              value={formData.technician}
+              value={formData.professional}
               onChange={(e) =>
-                handleFormFieldChange("technician", e.target.value)
+                handleFormFieldChange("professional", e.target.value)
               }
             >
               <option value="">Selecione...</option>
@@ -77,9 +77,9 @@ const NewOrderInfo = ({ handleFormFieldChange, formData }) => {
             <textarea
               className="textarea form-textarea-obs"
               placeholder="Notas internas da equipe..."
-              value={formData.internalObservations}
+              value={formData.observation}
               onChange={(e) =>
-                handleFormFieldChange("internalObservations", e.target.value)
+                handleFormFieldChange("observation", e.target.value)
               }
             />
           </div>

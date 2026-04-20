@@ -1,28 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 import AutoCompleteCustomer from "../components/AutoCompleteCustomer";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
 import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
+import { handleFetchGroupItemsData } from "../api/supabase";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
+  const [listMaterials, setListMaterials] = useState([]);
+  const [materialsData, setMaterialsData] = useState([]);
 
   // State for form fields
   const [formData, setFormData] = useState({
-    entryKm: "",
-    technician: "",
+    entry_km: "",
+    professional: "",
     priority: "Normal",
     status: "Pendente",
     diagnosis: "",
-    internalObservations: "",
+    observation: "",
+    customer_id: "",
+    vehicle_id: "",
+    item_material: [],
+    item_maintenancejob: [],
   });
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleAddToArray = (field, newItem) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: [...prev[field], newItem],
     }));
   };
 
@@ -37,16 +51,24 @@ const NewServiceOrder = () => {
       </div>
       <div className="form-wrap">
         {/* <!-- Cliente & Veículo --> */}
-        <NewOrderCustomerVehicle formData={formData} />
+        <NewOrderCustomerVehicle
+          handleFormFieldChange={handleFormFieldChange}
+          formData={formData}
+        />
 
         {/* <!-- Serviços --> */}
         <NewOrderMaintenanceJob
           listMaintenanceJobs={listMaintenanceJobs}
           setListMaintenanceJobs={setListMaintenanceJobs}
+          handleAddToArray={handleAddToArray}
         />
 
         {/* <!-- Peças & Materiais --> */}
-        <NewOrderMaterial listMaintenanceJobs={listMaintenanceJobs} />
+        <NewOrderMaterial
+          listMaintenanceJobs={listMaintenanceJobs}
+          materialsData={materialsData}
+          handleAddToArray={handleAddToArray}
+        />
 
         {/* <!-- Info OS --> */}
         <NewOrderInfo

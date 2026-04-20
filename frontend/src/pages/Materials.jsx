@@ -28,7 +28,10 @@ const Materials = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await handleFetchGroupItemsData("materialgroup", "material");
+      const data = await handleFetchGroupItemsData(
+        "material_group",
+        "material",
+      );
       setMaterialsGroupData(data);
     };
 

@@ -2134,12 +2134,14 @@
   margin-right: 5px;
   margin-bottom: 3px;
 }
+
 .car-tag-group .svc-tag {
   border-radius: 0;
   border: none;
   margin: 0;
   padding: 2px 7px;
 }
+
 .car-tag-placa {
   font-family: "JetBrains Mono", monospace;
   font-weight: 700;
@@ -2148,6 +2150,7 @@
   color: #fff !important;
   letter-spacing: 0.5px;
 }
+
 .car-tag-model {
   font-size: 11px;
   background: var(--surface2) !important;

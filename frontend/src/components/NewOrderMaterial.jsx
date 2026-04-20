@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { materialsListDTO } from "../data/mockDataDTO";
+import { handleFetchGroupItemsData } from "../api/supabase";
 
-const NewOrderMaterial = ({ listMaintenanceJobs }) => {
+const NewOrderMaterial = ({
+  listMaintenanceJobs,
+  handleAddToArray,
+  materialsData,
+}) => {
   const [materialsList, setMaterialsList] = useState([]);
 
   const handleAddMaterial = () => {
     const newMaterial = {
       id: Date.now(),
-      description: "",
+      name: "",
       quantity: "",
-      unitValue: "",
+      value_unity: "",
       reference: "",
+      serviceorder_id: "",
+      material_id: "",
     };
     setMaterialsList([...materialsList, newMaterial]);
   };
@@ -40,7 +47,7 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
   const calculateTotalMaterials = () => {
     return materialsList.reduce((total, material) => {
       const materialTotal =
-        (parseFloat(material.unitValue) || 0) *
+        (parseFloat(material.value_unity) || 0) *
         (parseFloat(material.quantity) || 0);
       return total + materialTotal;
     }, 0);
@@ -84,14 +91,19 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
                       <td>
                         <select
                           className="select select-new-order-material"
-                          value={element.description}
-                          onChange={(e) =>
+                          value={element.name}
+                          onChange={(e) => {
                             handleMaterialInputChange(
                               element.id,
-                              "description",
+                              "name",
                               e.target.value,
-                            )
-                          }
+                            );
+                            handleMaterialInputChange(
+                              element.id,
+                              "material_id",
+                              element.id,
+                            );
+                          }}
                         >
                           <option value="">Selecione...</option>
                           {materialsListDTO.map((element, index) => (
@@ -127,11 +139,11 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
                             type="text"
                             placeholder="0,00"
                             className="input-new-order-material-cost"
-                            value={element.unitValue}
+                            value={element.value_unity}
                             onChange={(e) =>
                               handleMaterialInputChange(
                                 element.id,
-                                "unitValue",
+                                "value_unity",
                                 e.target.value,
                               )
                             }
@@ -144,9 +156,9 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
                           className="input input-new-order-material-total"
                           readOnly
                           value={
-                            element.unitValue && element.quantity
+                            element.value_unity && element.quantity
                               ? (
-                                  parseFloat(element.unitValue) *
+                                  parseFloat(element.value_unity) *
                                   parseFloat(element.quantity)
                                 ).toFixed(2)
                               : "—"
@@ -182,12 +194,12 @@ const NewOrderMaterial = ({ listMaintenanceJobs }) => {
             </tbody>
           </table>
         </div>
-        <button class="add-row-btn" onClick={handleAddMaterial}>
+        <button className="add-row-btn" onClick={handleAddMaterial}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="M12 4v16m8-8H4"
             />
           </svg>

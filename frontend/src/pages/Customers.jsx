@@ -46,6 +46,7 @@ const Customers = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await handleFetchCustomers();
+
       setCustomersData(data);
     };
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import AutoCompleteCustomer from "./AutoCompleteCustomer";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 
-const NewOrderCustomerVehicle = ({ formData }) => {
+const NewOrderCustomerVehicle = ({ handleFormFieldChange, formData }) => {
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState({});
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
@@ -95,8 +95,10 @@ const NewOrderCustomerVehicle = ({ formData }) => {
               type="text"
               className="input"
               placeholder="Ex: 52.300 km"
-              value={formData.entryKm}
-              onChange={(e) => handleFormFieldChange("entryKm", e.target.value)}
+              value={formData.entry_km}
+              onChange={(e) =>
+                handleFormFieldChange("entry_km", e.target.value)
+              }
             />
           </div>
           <div className="field">
