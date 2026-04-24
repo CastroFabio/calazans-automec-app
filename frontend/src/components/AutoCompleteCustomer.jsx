@@ -5,6 +5,8 @@ const AutoCompleteCustomer = ({
   selectedCustomerInfo,
   setSelectedCustomerInfo,
   setSelectedVehicleInfo,
+  customerData,
+  handleFormFieldChange,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -16,17 +18,18 @@ const AutoCompleteCustomer = ({
       return;
     }
 
-    const filtered = newServiceOrderCustomerListDTO.filter((suggestion) =>
-      suggestion.customer.name.toLowerCase().includes(inputValue.toLowerCase()),
+    const filtered = customerData.filter((suggestion) =>
+      suggestion.name.toLowerCase().includes(inputValue.toLowerCase()),
     );
 
     setFilteredSuggestions(filtered);
   }, [inputValue]);
 
   const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion.customer.name);
+    setInputValue(suggestion.name);
     setSelectedCustomerInfo(suggestion);
     setShowSuggestions(false);
+    handleFormFieldChange("customer_id", suggestion.id);
     setFilteredSuggestions([]);
   };
 
@@ -70,7 +73,7 @@ const AutoCompleteCustomer = ({
         {selectedCustomerInfo &&
         Object.keys(selectedCustomerInfo).length > 0 ? (
           <div className="ac-selected-pill">
-            {selectedCustomerInfo.customer?.name}
+            {selectedCustomerInfo.name}
             <button onClick={handleClearCustomer}>×</button>
           </div>
         ) : (
@@ -98,9 +101,9 @@ const AutoCompleteCustomer = ({
               className="ac-option"
               onClick={() => handleSuggestionClick(element)}
             >
-              <div className="ac-option-name">{element.customer.name}</div>
+              <div className="ac-option-name">{element.name}</div>
               <div className="ac-option-sub">
-                {`${element.customer.cell} · ${element.numberOfVehicles}  veículo(s) `}
+                {`${element.cell} · ${element.vehicle.length}  veículo(s) `}
               </div>
             </div>
           ))

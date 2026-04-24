@@ -28,6 +28,20 @@ export const handleFetchGroupItemsData = async (
   return data;
 };
 
+export const handleFetchGroupMaintenanceJobData = async () => {
+  const { data, error } = await supabase
+    .from("maintenancejob_group")
+    .select(`id, group, maintenancejob (id, name, value_unit)`)
+    .order("group", { ascending: true });
+
+  if (error) {
+    console.error(`Error fetching maintenancejob_group:`, error.message);
+    return;
+  }
+
+  return data;
+};
+
 export const handleEditSaveUpdate = async (editingItem, tableName) => {
   if (editingItem.group && editingItem.index !== null) {
     const { error } = await supabase

@@ -1,23 +1,17 @@
 import React, { useState } from "react";
-import { maintenanceJobsListDTO } from "../data/mockDataDTO";
 
 const NewOrderMaintenanceJob = ({
   listMaintenanceJobs,
   setListMaintenanceJobs,
-  handleAddToArray,
+  maintenanceJobsGroupData,
 }) => {
-  const [maintenanceJobInfo, setMaintenanceJobInfo] = useState({
-    job: "",
-    cost: "",
-    observation: "",
-  });
-
   const handleAddMaintenanceJob = () => {
     const newMaintenanceJob = {
       id: Date.now(),
-      serviceType: "",
-      serviceValue: "",
-      observation: "",
+      maintenance_id: "",
+      value_unit: "",
+      description: "",
+      name: "",
     };
 
     setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
@@ -31,7 +25,34 @@ const NewOrderMaintenanceJob = ({
 
   const handleMaintenanceJobChange = (id, field, value) => {
     setListMaintenanceJobs((prev) =>
-      prev.map((job) => (job.id === id ? { ...job, [field]: value } : job)),
+      prev.map((job) => {
+        if (job.id !== id) return job;
+
+        if (field === "name") {
+          let foundValue = ""; // ← default to empty string, NOT undefined
+
+          for (const group of maintenanceJobsGroupData) {
+            const found = group.maintenancejob.find(
+              (item) => item.name === value,
+            );
+
+            if (found && found.value_unit !== undefined) {
+              foundValue = formattedPrice(found.value_unit);
+              break;
+            }
+          }
+
+          return {
+            ...job,
+            name: value,
+            value_unit: foundValue, // ← always a string
+          };
+        }
+
+        // Ensure we never set undefined for any field
+        const newValue = value === undefined || value === null ? "" : value;
+        return { ...job, [field]: newValue };
+      }),
     );
   };
 
@@ -81,21 +102,21 @@ const NewOrderMaintenanceJob = ({
                       <label>Tipo de Serviço *</label>
                       <select
                         className="select"
-                        value={element.serviceType}
-                        onChange={(e) =>
+                        value={element.name}
+                        onChange={(e) => {
                           handleMaintenanceJobChange(
                             element.id,
-                            "serviceType",
+                            "name",
                             e.target.value,
-                          )
-                        }
+                          );
+                        }}
                       >
                         <option value="">Selecione o serviço...</option>
-                        {maintenanceJobsListDTO.map((group, groupIndex) => (
-                          <optgroup key={groupIndex} label={group.group}>
-                            {group.items.map((item, itemIndex) => (
-                              <option key={itemIndex} value={item}>
-                                {item}
+                        {maintenanceJobsGroupData.map((element, groupIndex) => (
+                          <optgroup key={groupIndex} label={element.group}>
+                            {element.maintenancejob.map((item, itemIndex) => (
+                              <option key={itemIndex} value={item.name}>
+                                {item.name}
                               </option>
                             ))}
                           </optgroup>
@@ -110,11 +131,11 @@ const NewOrderMaintenanceJob = ({
                           type="text"
                           className="svc-mo-input"
                           placeholder="0,00"
-                          value={element.serviceValue}
+                          value={element.value_unit}
                           onChange={(e) =>
                             handleMaintenanceJobChange(
                               element.id,
-                              "serviceValue",
+                              "value_unit",
                               e.target.value,
                             )
                           }
@@ -126,11 +147,11 @@ const NewOrderMaintenanceJob = ({
                       <textarea
                         className="textarea service-row-textarea"
                         placeholder="Detalhes adicionais do serviço..."
-                        value={element.observation}
+                        value={element.description}
                         onChange={(e) =>
                           handleMaintenanceJobChange(
                             element.id,
-                            "observation",
+                            "description",
                             e.target.value,
                           )
                         }

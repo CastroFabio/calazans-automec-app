@@ -5,38 +5,59 @@ import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
 import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
-import { handleFetchGroupItemsData } from "../api/supabase";
+import {
+  handleFetchCustomers,
+  handleFetchGroupItemsData,
+  handleFetchGroupMaintenanceJobData,
+} from "../api/supabase";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
   const [listMaterials, setListMaterials] = useState([]);
   const [materialsData, setMaterialsData] = useState([]);
+  const [customerData, setCustomerData] = useState([]);
+  const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
 
   // State for form fields
   const [formData, setFormData] = useState({
-    entry_km: "",
     professional: "",
     priority: "Normal",
     status: "Pendente",
-    diagnosis: "",
-    observation: "",
+    arrived_at: new Date().toISOString(),
     customer_id: "",
     vehicle_id: "",
+    entry_km: "",
+    diagnosis: "",
+    observation: "",
+    value: "",
     item_material: [],
     item_maintenancejob: [],
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await handleFetchCustomers();
+
+      setCustomerData(data);
+    };
+
+    fetchData();
+  }, [customerData]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await handleFetchGroupMaintenanceJobData();
+
+      setMaintenanceJobsGroupData(data);
+    };
+
+    fetchData();
+  }, [maintenanceJobsGroupData]);
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
-
-  const handleAddToArray = (field, newItem) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: [...prev[field], newItem],
     }));
   };
 
@@ -53,6 +74,7 @@ const NewServiceOrder = () => {
         {/* <!-- Cliente & Veículo --> */}
         <NewOrderCustomerVehicle
           handleFormFieldChange={handleFormFieldChange}
+          customerData={customerData}
           formData={formData}
         />
 
@@ -60,14 +82,13 @@ const NewServiceOrder = () => {
         <NewOrderMaintenanceJob
           listMaintenanceJobs={listMaintenanceJobs}
           setListMaintenanceJobs={setListMaintenanceJobs}
-          handleAddToArray={handleAddToArray}
+          maintenanceJobsGroupData={maintenanceJobsGroupData}
         />
 
         {/* <!-- Peças & Materiais --> */}
         <NewOrderMaterial
           listMaintenanceJobs={listMaintenanceJobs}
           materialsData={materialsData}
-          handleAddToArray={handleAddToArray}
         />
 
         {/* <!-- Info OS --> */}

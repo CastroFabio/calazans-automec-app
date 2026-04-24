@@ -36,7 +36,7 @@ const NewOrderMaterial = ({
 
   const calculateTotalMaintenanceJob = () => {
     return listMaintenanceJobs.reduce((total, job) => {
-      return total + (parseFloat(job.serviceValue) || 0);
+      return total + (parseFloat(job.value_unit) || 0);
     }, 0);
   };
 

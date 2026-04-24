@@ -51,8 +51,6 @@ const ServiceOrderList = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await handleFetchServiceOrders();
-      console.log(data);
-
       setServiceOrderData(data);
     };
 
@@ -157,7 +155,6 @@ const ServiceOrderList = () => {
                   </td>
                   <td className="td-value">{formattedPrice(element.value)}</td>
                   <td className="td-date">
-                    {console.log(element.arrived_at)}
                     {formatLocalDateTimeStringISO(element.arrived_at)}
                   </td>
                 </tr>

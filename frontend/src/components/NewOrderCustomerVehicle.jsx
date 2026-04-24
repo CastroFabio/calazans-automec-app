@@ -2,17 +2,25 @@ import { useState } from "react";
 import AutoCompleteCustomer from "./AutoCompleteCustomer";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 
-const NewOrderCustomerVehicle = ({ handleFormFieldChange, formData }) => {
+const NewOrderCustomerVehicle = ({
+  handleFormFieldChange,
+  formData,
+  customerData,
+}) => {
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState({});
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
     formatLocalDateTime(new Date()),
   );
 
-  const handleSelectedVehicle = (vehicle) => setSelectedVehicleInfo(vehicle);
+  const handleSelectedVehicle = (vehicle) => {
+    setSelectedVehicleInfo(vehicle);
+    handleFormFieldChange("vehicle_id", vehicle.id);
+  };
 
   const handleChange = (event) => {
     setDateTimeValue(event.target.value);
+    handleFormFieldChange("arrived_at", event.target.value);
   };
 
   return (
@@ -42,6 +50,8 @@ const NewOrderCustomerVehicle = ({ handleFormFieldChange, formData }) => {
               selectedCustomerInfo={selectedCustomerInfo}
               setSelectedCustomerInfo={setSelectedCustomerInfo}
               setSelectedVehicleInfo={setSelectedVehicleInfo}
+              customerData={customerData}
+              handleFormFieldChange={handleFormFieldChange}
             />
           </div>
           <div className="field">
@@ -69,7 +79,7 @@ const NewOrderCustomerVehicle = ({ handleFormFieldChange, formData }) => {
                           d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
                         />
                       </svg>
-                      {`${element.licensePlate} · ${element.brand} ${element.model}`}
+                      {`${element.license_plate} · ${element.brand} ${element.model}`}
                     </div>
                   ))
                 ) : (
