@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { CreateCustomerDto } from './customer/dto/create-customer.dto';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+  create(data: CreateCustomerDto) {}
 
   @Get()
   getHello(): string {

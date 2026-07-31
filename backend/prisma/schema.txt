@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+
+
+model Customer {
+  id          Int       @id @default(autoincrement())
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  name        String    @db.Text
+  cell        String    @unique @db.Text
+  telephone   String?   @db.Text
+  observation String?   @db.Text
+
+  @@map("customer")
+  vehicles Vehicle[]
+}
+
+model Vehicle {
+  id            Int    @id @default(autoincrement())
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  license_plate String    @unique @db.Text
+  brand         String?   @db.Text
+  model         String?   @db.Text
+  customer_id   Int?
+
+  // Relacionamentos
+  customer      Customer? @relation(fields: [customer_id], references: [id])
+
+  @@map("vehicle")
+}
+
+
+model MaterialGroup {
+  id          Int          @id @default(autoincrement())
+  created_at  DateTime        @default(now()) @db.Timestamptz(6)
+  group       String          @unique @db.Text
+  
+  materials   Material[]      // Relacionamento inverso
+
+  @@map("material_group")
+}
+
+model Material {
+  id          Int          @id @default(autoincrement())
+  created_at  DateTime        @default(now()) @db.Timestamptz(6)
+  name        String          @unique @db.Text
+  group_id    Int
+  
+  // Relacionamentos
+  group       MaterialGroup   @relation(fields: [group_id], references: [id])
+  itemMaterials ItemMaterial[] // Relacionamento inverso
+
+  @@map("material")
+}
+
+model MaintenanceJobGroup {
+  id          Int            @id @default(autoincrement())
+  created_at  DateTime          @default(now()) @db.Timestamptz(6)
+  group       String            @unique @db.Text
+  
+  maintenanceJobs MaintenanceJob[] // Relacionamento inverso
+
+  @@map("maintenancejob_group")
+}
+
+model MaintenanceJob {
+  id          Int            @id @default(autoincrement())
+  created_at  DateTime          @default(now()) @db.Timestamptz(6)
+  name        String            @unique @db.Text
+  group_id    Int
+  value_unit  Float             @default(0) @db.DoublePrecision
+  
+  // Relacionamentos
+  group       MaintenanceJobGroup @relation(fields: [group_id], references: [id])
+  itemMaintenances ItemMaintenance[] // Relacionamento inverso
+
+  @@map("maintenancejob")
+}
+
+model ServiceOrder {
+  id          Int            @id @default(autoincrement())
+  created_at  DateTime          @default(now()) @db.Timestamptz(6)
+  // ... outros campos
+  
+  itemMaterials    ItemMaterial[]    // Relacionamento inverso
+  itemMaintenances ItemMaintenance[] // Relacionamento inverso
+
+  @@map("serviceorder")
+}
+
+model ItemMaterial {
+  id              Int    @id @default(autoincrement())
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  quantity        Decimal   @db.Decimal(10, 2) // Ajuste precisão conforme necessário
+  value_unity     Float     @db.DoublePrecision
+  serviceorder_id Int
+  material_id     Int
+  reference       String?   @db.Text
+
+  // Relacionamentos
+  serviceorder    ServiceOrder @relation(fields: [serviceorder_id], references: [id])
+  material        Material     @relation(fields: [material_id], references: [id])
+
+  @@map("item_material")
+}
+
+model ItemMaintenance {
+  id              Int       @id @default(autoincrement())
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  value_unity     Float     @db.DoublePrecision
+  serviceorder_id Int
+  maintenance_id  Int?
+  description     String?   @db.Text
+
+  // Relacionamentos
+  serviceorder   ServiceOrder   @relation(fields: [serviceorder_id], references: [id])
+  maintenancejob MaintenanceJob? @relation(fields: [maintenance_id], references: [id])
+
+  @@map("item_maintenance")
+}

@@ -1,9 +1,12 @@
+// src/customers/customers.module.ts
 import { Module } from '@nestjs/common';
-import { CustomerService } from './customer.service';
-import { CustomerController } from './customer.controller';
+import { CustomersController } from './customer.controller';
+import { CustomersService } from './customer.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
-  controllers: [CustomerController],
-  providers: [CustomerService],
+  controllers: [CustomersController],
+  providers: [CustomersService, PrismaService],
+  exports: [CustomersService],
 })
-export class CustomerModule {}
+export class CustomersModule {}
