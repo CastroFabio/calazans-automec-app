@@ -2,7 +2,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsPhoneNumber,
+  IsInt,
+  IsPositive,
+  MinLength,
+  MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -10,25 +13,39 @@ export class CreateVehicleDto {
   @ApiProperty({
     description: 'Placa do veículo',
     example: 'ABC-1234',
-    minLength: 8,
+    minLength: 7,
+    maxLength: 8,
+    pattern: '^[A-Z]{3}-[0-9]{4}$',
   })
   @IsNotEmpty({ message: 'Placa é obrigatória' })
   @IsString({ message: 'Placa deve ser uma string' })
+  @MinLength(7, { message: 'Placa deve ter pelo menos 7 caracteres' })
+  @MaxLength(8, { message: 'Placa deve ter no máximo 8 caracteres' })
   license_plate: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Marca do veículo',
     example: 'Toyota',
   })
-  @IsString({ message: 'Marca deve ser uma string' })
   @IsOptional()
-  brand: string;
+  @IsString({ message: 'Marca deve ser uma string' })
+  brand?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Modelo do veículo',
     example: 'Corolla',
   })
-  @IsString({ message: 'Modelo deve ser uma string' })
   @IsOptional()
-  model: string;
+  @IsString({ message: 'Modelo deve ser uma string' })
+  model?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID do cliente proprietário',
+    example: 1,
+    type: Number,
+  })
+  @IsOptional()
+  @IsInt({ message: 'ID do cliente deve ser um número inteiro' })
+  @IsPositive({ message: 'ID do cliente deve ser um número positivo' })
+  customer_id?: number;
 }
