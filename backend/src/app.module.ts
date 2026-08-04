@@ -5,7 +5,8 @@ import { AppService } from './app.service';
 import { CustomersModule } from './customer/customer.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { VehicleModule } from './vehicle/vehicle.module';
-import { ServiceOrderModule } from './service-order/service-order.module';
+import { MaterialGroupModule } from './material-group/material-group.module';
+import { MaintenanceGroupModule } from './maintenance-group/maintenance-group.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { ServiceOrderModule } from './service-order/service-order.module';
     CustomersModule,
     PrismaModule,
     VehicleModule,
-    ServiceOrderModule,
+    MaterialGroupModule,
+    MaintenanceGroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],
