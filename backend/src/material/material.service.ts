@@ -109,7 +109,7 @@ export class MaterialService {
         where: { id },
       });
 
-      if (!material) throw new NotFoundException('Veículo não encontrado');
+      if (!material) throw new NotFoundException('Material não encontrado');
 
       await this.prisma.material.delete({ where: { id } });
     } catch (error) {

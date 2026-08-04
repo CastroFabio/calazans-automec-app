@@ -1,28 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MaterialResponseDto {
+export class MaintenanceResponseDto {
   @ApiProperty({
-    description: 'ID único do material',
+    description: 'ID único da manutenção',
     example: 1,
     type: Number,
   })
   id: number;
 
   @ApiProperty({
-    description: 'Data de criação do material',
+    description: 'Data de criação da manutenção',
     example: '2026-07-30T22:39:48.000Z',
     type: Date,
   })
   created_at: Date;
 
   @ApiProperty({
-    description: 'Nome do material',
+    description: 'Nome da manutenção',
     example: 'Óleo de motor 5W30 sintético',
   })
   name: string;
 
   @ApiProperty({
-    description: 'ID do grupo de material',
+    description: 'ID da grupo de manutenção',
     example: 1,
   })
   group_id: number;
