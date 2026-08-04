@@ -7,6 +7,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 import { MaterialGroupModule } from './material-group/material-group.module';
 import { MaintenanceGroupModule } from './maintenance-group/maintenance-group.module';
+import { MaterialModule } from './material/material.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { MaintenanceGroupModule } from './maintenance-group/maintenance-group.mo
     VehicleModule,
     MaterialGroupModule,
     MaintenanceGroupModule,
+    MaterialModule,
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
