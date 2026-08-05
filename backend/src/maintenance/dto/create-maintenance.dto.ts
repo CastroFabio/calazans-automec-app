@@ -1,5 +1,13 @@
-import { IsNotEmpty, IsString, IsInt, IsPositive } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  IsPositive,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateMaintenanceDto {
   @ApiProperty({
@@ -9,6 +17,15 @@ export class CreateMaintenanceDto {
   @IsString({ message: 'Nome da manutenção deve ser uma string' })
   @IsNotEmpty({ message: 'Nome da manutenção é obrigatório' })
   name: string;
+
+  @ApiProperty({
+    description: 'Valor da manutenção',
+    example: '30.25',
+  })
+  @IsNumber()
+  @Min(0, { message: 'Valor unitário não pode ser negativo' })
+  @Type(() => Number)
+  value_unit: number;
 
   @ApiProperty({
     description: 'ID do grupo de manutenção proprietário',

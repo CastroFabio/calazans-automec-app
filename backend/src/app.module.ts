@@ -9,6 +9,7 @@ import { MaterialGroupModule } from './material-group/material-group.module';
 import { MaintenanceGroupModule } from './maintenance-group/maintenance-group.module';
 import { MaterialModule } from './material/material.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
+import { MaterialItemModule } from './material-item/material-item.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     MaintenanceGroupModule,
     MaterialModule,
     MaintenanceModule,
+    MaterialItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

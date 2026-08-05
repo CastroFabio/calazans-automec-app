@@ -16,6 +16,13 @@ export class MaintenanceResponseDto {
   created_at: Date;
 
   @ApiProperty({
+    description: 'Valor da manutenção',
+    example: '30.25',
+    type: Number,
+  })
+  value_unit: number;
+
+  @ApiProperty({
     description: 'Nome da manutenção',
     example: 'Óleo de motor 5W30 sintético',
   })

@@ -97,6 +97,7 @@ export class MaintenanceService {
         data: {
           name: updateMaintenanceDto.name,
           group_id: updateMaintenanceDto.group_id,
+          value_unit: updateMaintenanceDto.value_unit,
         },
       });
     } catch (error) {
