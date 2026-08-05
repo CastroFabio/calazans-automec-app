@@ -8,18 +8,22 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ServiceOrderService } from './service-order.service';
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import {
   ApiBadRequestResponse,
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { ServiceOrderResponseDto } from './dto/response-service-order.dto';
@@ -69,22 +73,88 @@ export class ServiceOrderController {
     return this.serviceOrderService.findAll();
   }
 
-  /*
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.serviceOrderService.findOne(+id);
+  @ApiOperation({
+    summary: 'Buscar ordem de serviço por ID',
+    description: 'Retorna uma ordem de serviço baseado por ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da ordem de serviço',
+    example: 1,
+    type: Number,
+  })
+  @ApiOkResponse({
+    description: 'Ordem de serviço encontrada com sucesso',
+    type: ServiceOrderResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Ordem de serviço não encontrada',
+  })
+  @ApiBadRequestResponse({
+    description: 'ID inválido',
+  })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.serviceOrderService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiOperation({
+    summary: 'Atualizar uma ordem de serviço',
+    description: 'Atualiza os dados de uma ordem de serviço existente',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da ordem de serviço',
+    example: 1,
+    type: Number,
+  })
+  @ApiBody({
+    description: 'Dados da ordem de serviço a serem atualizados',
+    type: UpdateServiceOrderDto,
+  })
+  @ApiOkResponse({
+    description: 'Ordem de serviço atualizado com sucesso',
+    type: ServiceOrderResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados inválidos',
+  })
+  @ApiNotFoundResponse({
+    description: 'Ordem de serviço não encontrado',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno do servidor',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateServiceOrderDto: UpdateServiceOrderDto,
   ) {
-    return this.serviceOrderService.update(+id, updateServiceOrderDto);
+    return this.serviceOrderService.update(id, updateServiceOrderDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  @ApiOperation({
+    summary: 'Remover uma ordem de serviço',
+    description: 'Remove uma ordem de serviço do sistema',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da ordem de serviço',
+    example: 1,
+    type: Number,
+  })
+  @ApiNoContentResponse({
+    description: 'Ordem de serviço removida com sucesso',
+  })
+  @ApiNotFoundResponse({
+    description: 'Ordem de serviço não encontrada',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno do servidor',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.serviceOrderService.remove(+id);
-  } */
+  }
 }

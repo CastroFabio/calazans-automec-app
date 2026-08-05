@@ -88,16 +88,99 @@ export class ServiceOrderService {
     return this.prisma.serviceOrder.findMany({ orderBy: { id: 'asc' } });
   }
 
-  /*
-  findOne(id: number) {
-    return `This action returns a #${id} serviceOrder`;
+  // READ - Buscar ordem de serviço por ID
+  async findOne(id: number) {
+    const serviceOrder = await this.prisma.serviceOrder.findUnique({
+      where: { id },
+    });
+
+    if (!serviceOrder)
+      throw new NotFoundException('Ordem de serviço não encontrada');
+
+    return serviceOrder;
   }
 
-  update(id: number, updateServiceOrderDto: UpdateServiceOrderDto) {
-    return `This action updates a #${id} serviceOrder`;
+  // UPDATE - Atualizar uma ordem de serviço
+  async update(id: number, updateServiceOrderDto: UpdateServiceOrderDto) {
+    try {
+      const serviceOrder = await this.prisma.serviceOrder.findUnique({
+        where: { id },
+      });
+
+      if (!serviceOrder)
+        throw new NotFoundException('Ordem de serviço não encontrada');
+
+      if (updateServiceOrderDto.customer_id) {
+        const customer = await this.prisma.customer.findUnique({
+          where: { id: updateServiceOrderDto.customer_id },
+        });
+
+        if (!customer) throw new NotFoundException('Cliente não encontrado');
+      }
+
+      if (updateServiceOrderDto.vehicle_id) {
+        const vehicle = await this.prisma.vehicle.findUnique({
+          where: { id: updateServiceOrderDto.vehicle_id },
+        });
+
+        if (!vehicle) throw new NotFoundException('Veículo não encontrado');
+
+        const vehicleOwned = await this.prisma.vehicle.findFirst({
+          where: {
+            id: updateServiceOrderDto.vehicle_id,
+            customer_id: updateServiceOrderDto.customer_id,
+          },
+        });
+        if (!vehicleOwned)
+          throw new ConflictException('Veículo não pertence ao cliente');
+      }
+
+      return this.prisma.serviceOrder.update({
+        where: { id },
+        data: {
+          professional: updateServiceOrderDto.professional,
+          priority: updateServiceOrderDto.priority,
+          status: updateServiceOrderDto.status,
+          arrived_at: updateServiceOrderDto.arrived_at,
+          customer_id: updateServiceOrderDto.customer_id,
+          vehicle_id: updateServiceOrderDto.vehicle_id,
+          entry_km: updateServiceOrderDto.entry_km,
+          diagnosis: updateServiceOrderDto.diagnosis,
+          observation: updateServiceOrderDto.observation,
+          subtotal: updateServiceOrderDto.subtotal,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao atualizar ordem de serviço',
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} serviceOrder`;
-  } */
+  // DELETE - Remover uma ordem de serviço
+  async remove(id: number): Promise<void> {
+    try {
+      const serviceOrder = await this.prisma.serviceOrder.findUnique({
+        where: { id },
+      });
+
+      if (!serviceOrder)
+        throw new NotFoundException('Ordem de serviço não encontrada');
+
+      await this.prisma.serviceOrder.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao remover ordem de serviço',
+      );
+    }
+  }
 }
