@@ -19,12 +19,12 @@ const App = () => {
           <div className="content">
             <Routes>
               <Route path="/" element={<ServiceOrderList />} />
-              <Route path="/customers" element={<Customers />} />
+              {/* <Route path="/customers" element={<Customers />} />
               <Route path="/services" element={<MaintenanceJobs />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/neworder" element={<NewServiceOrder />} />
               <Route path="/teste" element={<NestedListForm />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<NotFound />} /> */}
             </Routes>
           </div>
         </div>

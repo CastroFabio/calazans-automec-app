@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
-import {
-  handleFetchCustomers,
-  handleFetchGroupItemsData,
-} from "../api/supabase";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});

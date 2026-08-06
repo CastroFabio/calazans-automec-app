@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { priClass, statusClass } from "../data/mockData";
-import { handleFetchServiceOrders } from "../api/supabase";
 import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
+import { customerApi } from "../api/customers";
+import { orderApi } from "../api/orders";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [serviceOrderData, setServiceOrderData] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const tabsData = [
     {
@@ -36,11 +39,13 @@ const ServiceOrderList = () => {
 
   const handleFilteredCustomers = useMemo(() => {
     return serviceOrderData.filter((element) => {
+      console.log(element);
+
       const matchesTab = activeTab === "all" || element.status === activeTab;
 
       const matchesSearch =
         searchTerm === "" ||
-        element.vehicle.license_plate
+        element.vehicle[0].license_plate
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
@@ -48,14 +53,31 @@ const ServiceOrderList = () => {
     });
   }, [serviceOrderData, activeTab, searchTerm]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await handleFetchServiceOrders();
-      setServiceOrderData(data);
-    };
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await orderApi.getAll();
+      setServiceOrderData(response.data);
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço");
+      console.error("Erro ao buscar ordens:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, [serviceOrderData]);
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">Carregando ordens...</div>;
+  }
+
+  if (error) {
+    return <div className="error">Erro: {error}</div>;
+  }
 
   return (
     <div className="page active" id="page-os">

@@ -1,72 +1,61 @@
 export const ENDPOINTS = {
   // Customers
-  CUSTOMERS: "/customers",
-  CUSTOMER_BY_ID: (id) => `/customers/${id}`,
-
-  // Cars
-  CARS: "/cars",
-  CAR_BY_ID: (id) => `/cars/${id}`,
-
-  // Orders
-  ORDERS: "/orders",
-  ORDER_BY_ID: (id) => `/orders/${id}`,
-
-  // Maintenance Jobs
-  MAINTENANCE_JOBS: "/maintenance-jobs",
-  MAINTENANCE_JOB_BY_ID: (id) => `/maintenance-jobs/${id}`,
-
-  // Materials
-  MATERIALS: "/materials",
-  MATERIAL_BY_ID: (id) => `/materials/${id}`,
-
-  // Endpoints específicos (exemplos extras)
-  CUSTOMER_ORDERS: (customerId) => `/customers/${customerId}/orders`,
-  CAR_MAINTENANCE: (carId) => `/cars/${carId}/maintenance`,
-};
-
-// Opção 2: Objeto aninhado por entidade
-export const ENDPOINTS = {
   customers: {
     base: "/customers",
     byId: (id) => `/customers/${id}`,
     orders: (id) => `/customers/${id}/orders`,
   },
+
+  // Cars
   cars: {
     base: "/cars",
     byId: (id) => `/cars/${id}`,
     maintenance: (id) => `/cars/${id}/maintenance`,
   },
+
+  // Orders (Service Orders)
   orders: {
-    base: "/orders",
-    byId: (id) => `/orders/${id}`,
-    status: (id) => `/orders/${id}/status`,
+    base: "/service-order",
+    byId: (id) => `/service-order/${id}`,
+    status: (id) => `/service-order/${id}/status`,
+    byCustomer: (customerId) => `/service-order/customer/${customerId}`,
+    byVehicle: (vehicleId) => `/service-order/vehicle/${vehicleId}`,
+    byStatus: (status) => `/service-order/status/${status}`,
+    recalculate: (id) => `/service-order/${id}/recalculate`,
   },
+
+  // Maintenance Jobs
   maintenanceJobs: {
     base: "/maintenance-jobs",
     byId: (id) => `/maintenance-jobs/${id}`,
+    byGroup: (groupId) => `/maintenance-jobs/group/${groupId}`,
   },
+
+  // Maintenance Groups
+  maintenanceGroups: {
+    base: "/maintenance-group",
+    byId: (id) => `/maintenance-groups/${id}`,
+    jobs: (id) => `/maintenance-groups/${id}/jobs`,
+  },
+
+  // Materials
   materials: {
     base: "/materials",
     byId: (id) => `/materials/${id}`,
+    byGroup: (groupId) => `/materials/group/${groupId}`,
   },
-};
 
-// Opção 3: Constantes de string com prefixo
-export const API_PATHS = {
-  CUSTOMERS: {
-    ROOT: "/customers",
-    GET_ALL: "/customers",
-    GET_ONE: "/customers/{id}",
-    CREATE: "/customers",
-    UPDATE: "/customers/{id}",
-    DELETE: "/customers/{id}",
+  // Material Groups
+  materialGroups: {
+    base: "/material-group",
+    byId: (id) => `/material-group/${id}`,
+    materials: (id) => `/material-group/${id}/materials`,
   },
-  CARS: {
-    ROOT: "/cars",
-    GET_ALL: "/cars",
-    GET_ONE: "/cars/{id}",
-    CREATE: "/cars",
-    UPDATE: "/cars/{id}",
-    DELETE: "/cars/{id}",
+
+  // Item Materials (materiais dentro da OS)
+  itemMaterials: {
+    base: "/item-material",
+    byId: (id) => `/item-material/${id}`,
+    byOrder: (orderId) => `/item-material/order/${orderId}`,
   },
 };

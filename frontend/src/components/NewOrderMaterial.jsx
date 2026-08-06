@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { materialsListDTO } from "../data/mockDataDTO";
-import { handleFetchGroupItemsData } from "../api/supabase";
 
 const NewOrderMaterial = ({
   listMaintenanceJobs,

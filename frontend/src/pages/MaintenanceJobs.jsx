@@ -1,10 +1,4 @@
 import { useEffect, useState } from "react";
-import {
-  handleAddJobMaterial,
-  handleEditSaveUpdate,
-  handleFetchGroupItemsData,
-  handleRemoveJobMaterial,
-} from "../api/supabase";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState({

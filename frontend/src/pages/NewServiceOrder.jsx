@@ -5,11 +5,6 @@ import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
 import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
-import {
-  handleFetchCustomers,
-  handleFetchGroupItemsData,
-  handleFetchGroupMaintenanceJobData,
-} from "../api/supabase";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);

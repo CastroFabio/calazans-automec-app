@@ -6,31 +6,40 @@ import {
   serviceOrderListDTO,
 } from "../data/mockDataDTO";
 import SideBarList from "../components/sideBarList";
+import { maintenanceGroupApi } from "../api/maintenanceGroups";
+import { materialGroupApi } from "../api/materialGroups";
 import { useLocation } from "react-router-dom";
-import { handleFetchGroupData } from "../api/supabase";
 
 const SideBar = () => {
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [materialGroupData, setMaterialGroupData] = useState([]);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const location = useLocation();
   const currentPath = location.pathname;
 
   const isActive = (path) => (currentPath === path ? "active" : "");
 
+  const fetchGroups = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const responseMaterial = await materialGroupApi.getAll();
+      setMaterialGroupData(responseMaterial.data);
+      const responseMaintenance = await maintenanceGroupApi.getAll();
+      setMaintenanceJobsGroupData(responseMaintenance.data);
+    } catch (err) {
+      setError(err.message || "Erro ao carregar grupos de material");
+      console.error("Erro:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      const maintenanceJobData = await handleFetchGroupData(
-        "maintenancejob_group",
-      );
-      setMaintenanceJobsGroupData(maintenanceJobData);
-
-      const materialData = await handleFetchGroupData("material_group");
-      setMaterialGroupData(materialData);
-    };
-
-    fetchData();
-  }, [maintenanceJobsGroupData]);
+    fetchGroups();
+  }, []);
 
   const tabsData = {
     listagemCategory: "Listagem",

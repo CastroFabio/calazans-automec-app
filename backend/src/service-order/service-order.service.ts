@@ -85,7 +85,10 @@ export class ServiceOrderService {
 
   // READ - Buscar todas as ordens de serviço
   async findAll() {
-    return this.prisma.serviceOrder.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.serviceOrder.findMany({
+      orderBy: { id: 'asc' },
+      include: { customer: true, vehicle: true },
+    });
   }
 
   // READ - Buscar ordem de serviço por ID

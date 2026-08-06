@@ -60,7 +60,7 @@ export class MaintenanceGroupController {
     type: MaintenanceGroupResponseDto,
   })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createMaintenanceGroupDto: MaintenanceGroupResponseDto) {
+  create(@Body() createMaintenanceGroupDto: CreateMaintenanceGroupDto) {
     return this.maintenanceGroupService.create(createMaintenanceGroupDto);
   }
 

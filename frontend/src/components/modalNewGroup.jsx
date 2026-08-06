@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "../../supabase-client";
 
 const ModalNewGroup = ({ isOpen, onClose }) => {
   const [newMaterialGroup, setNewMaterialGroup] = useState({});
