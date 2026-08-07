@@ -86,11 +86,15 @@ export class ServiceOrderService {
   // READ - Buscar todas as ordens de serviço
   async findAll() {
     return this.prisma.serviceOrder.findMany({
-      orderBy: { id: 'asc' },
+      orderBy: { created_at: 'asc' },
       include: {
-        customer: true,
-        vehicle: true,
-        itemMaintenances: { include: { maintenancejob: true } },
+        customer: { select: { id: true, name: true } },
+        vehicle: {
+          select: { id: true, license_plate: true, brand: true, model: true },
+        },
+        itemMaintenances: {
+          include: { maintenancejob: { select: { id: true, name: true } } },
+        },
       },
     });
   }
