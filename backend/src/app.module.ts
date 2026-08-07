@@ -11,6 +11,7 @@ import { MaterialModule } from './material/material.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
 import { MaterialItemModule } from './material-item/material-item.module';
 import { ServiceOrderModule } from './service-order/service-order.module';
+import { MaintenanceItemModule } from './maintenance-item/maintenance-item.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ServiceOrderModule } from './service-order/service-order.module';
     MaintenanceModule,
     MaterialItemModule,
     ServiceOrderModule,
+    MaintenanceItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

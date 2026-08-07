@@ -57,8 +57,10 @@ const ServiceOrderList = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await orderApi.getAll();
-      setServiceOrderData(response.data);
+      const { data } = await orderApi.getAll();
+      console.log(data);
+
+      setServiceOrderData(data);
     } catch (err) {
       setError(err.message || "Erro ao carregar ordens de serviço");
       console.error("Erro ao buscar ordens:", err);
