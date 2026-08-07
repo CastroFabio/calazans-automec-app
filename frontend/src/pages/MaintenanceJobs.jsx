@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { maintenanceGroupApi } from "../api/maintenanceGroups";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState({
@@ -12,30 +13,33 @@ const MaintenanceJobs = () => {
   });
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [newItemName, setNewItemName] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const activeGroup = activeTab
-    ? maintenanceJobsGroupData
-        .map((group) => ({
-          ...group,
-          maintenancejob: group.maintenancejob.sort((a, b) =>
-            a.name.localeCompare(b.name),
-          ),
-        }))
-        .find((element) => element.group === activeTab.groupName)
+    ? maintenanceJobsGroupData.find(
+        (element) => element.group === activeTab.groupName,
+      )
     : null;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await handleFetchGroupItemsData(
-        "maintenancejob_group",
-        "maintenancejob",
-      );
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await maintenanceGroupApi.getAll();
 
       setMaintenanceJobsGroupData(data);
-    };
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço");
+      console.error("Erro ao buscar ordens:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, [maintenanceJobsGroupData]);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
@@ -102,7 +106,7 @@ const MaintenanceJobs = () => {
                       <span>{element.group}</span>
                       <div className="cad-group-container">
                         <span className="cad-group-count">
-                          {element.maintenancejob.length}
+                          {element.maintenanceJobs.length}
                         </span>
                         <span className="cad-chevron">
                           <svg
@@ -135,8 +139,8 @@ const MaintenanceJobs = () => {
                   : "Selecione um grupo"}
               </span>
             </div>
-            {activeGroup && activeGroup.maintenancejob.length > 0 ? (
-              activeGroup.maintenancejob.map((element) => (
+            {activeGroup && activeGroup.maintenanceJobs.length > 0 ? (
+              activeGroup.maintenanceJobs.map((element) => (
                 <div key={element.id} className="cad-item-row">
                   {editingItem.group === activeTab.groupName &&
                   editingItem.index === element.id ? (

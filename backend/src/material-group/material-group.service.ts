@@ -50,7 +50,7 @@ export class MaterialGroupService {
   async findAll() {
     return this.prisma.materialGroup.findMany({
       include: {
-        materials: true,
+        materials: { orderBy: { name: 'asc' } },
       },
       orderBy: {
         group: 'asc',

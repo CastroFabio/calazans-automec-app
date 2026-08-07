@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { materialGroupApi } from "../api/materialGroups";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -12,6 +13,8 @@ const Materials = () => {
   });
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
   const [newItemName, setNewItemName] = useState("");
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const activeGroup = activeTab
     ? materialsGroupData.find(
@@ -19,17 +22,24 @@ const Materials = () => {
       )
     : null;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await handleFetchGroupItemsData(
-        "material_group",
-        "material",
-      );
-      setMaterialsGroupData(data);
-    };
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await materialGroupApi.getAll();
 
-    fetchData();
-  }, [materialsGroupData]);
+      setMaterialsGroupData(data);
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço");
+      console.error("Erro ao buscar ordens:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
@@ -96,7 +106,7 @@ const Materials = () => {
                       <span>{element.group}</span>
                       <div className="cad-group-container">
                         <span className="cad-group-count">
-                          {element.material.length}
+                          {element.materials.length}
                         </span>
                         <span className="cad-chevron">
                           <svg
@@ -129,8 +139,8 @@ const Materials = () => {
                   : "Selecione um grupo"}
               </span>
             </div>
-            {activeGroup && activeGroup.material.length > 0 ? (
-              activeGroup.material.map((element) => (
+            {activeGroup && activeGroup.materials.length > 0 ? (
+              activeGroup.materials.map((element) => (
                 <div key={element.id} className="cad-item-row">
                   {editingItem.group === activeTab.groupName &&
                   editingItem.index === element.id ? (

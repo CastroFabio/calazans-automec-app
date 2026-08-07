@@ -51,7 +51,7 @@ export class MaintenanceGroupService {
   async findAll() {
     return this.prisma.maintenanceJobGroup.findMany({
       include: {
-        maintenanceJobs: true,
+        maintenanceJobs: { orderBy: { name: 'asc' } },
       },
       orderBy: {
         group: 'asc',

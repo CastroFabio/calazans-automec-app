@@ -4,6 +4,7 @@ import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
+import { convertPriotity, convertStatus } from "../utils/convertPriorityStatus";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,52 +79,6 @@ const ServiceOrderList = () => {
       console.error("Erro ao buscar ordens:", err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const convertPriotity = (priority) => {
-    switch (priority) {
-      case 1:
-        return "Pendente";
-        break;
-      case 2:
-        return "Em andamento";
-        break;
-      case 3:
-        return "Concluída";
-        break;
-      case 4:
-        return "Aberta";
-        break;
-      case 5:
-        return "Aguardando Peças";
-        break;
-      case 6:
-        return "Cancelada";
-        break;
-      default:
-        return "N/A";
-        break;
-    }
-  };
-
-  const convertStatus = (status) => {
-    switch (status) {
-      case 1:
-        return "Normal";
-        break;
-      case 2:
-        return "Baixa";
-        break;
-      case 3:
-        return "Alta";
-        break;
-      case 4:
-        return "Urgente";
-        break;
-      default:
-        return "N/A";
-        break;
     }
   };
 

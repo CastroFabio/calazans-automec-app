@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
+import { customerApi } from "../api/customers";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [customersData, setCustomersData] = useState([]);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const getCustomerNameInitials = (customerName) => {
     return customerName
@@ -31,7 +34,7 @@ const Customers = () => {
         return true;
       }
 
-      const vehicleMatch = element.vehicle.some((car) =>
+      const vehicleMatch = element.vehicles.some((car) =>
         car.license_plate.toLowerCase().includes(lowerCaseSearch),
       );
 
@@ -39,22 +42,24 @@ const Customers = () => {
     });
   }, [customersData, searchTerm]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await handleFetchCustomers();
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { data } = await customerApi.getAll();
 
       setCustomersData(data);
-    };
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço");
+      console.error("Erro ao buscar ordens:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-
-    /*     const newColors = {};
-    customersData.forEach((item, index) => {
-      newColors[index] =
-        "#" + Math.floor(Math.random() * 16777215).toString(16);
-    });
-    setItemColors(newColors); */
-  }, [customersData]);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   return (
     <div className="page" id="page-clientes">
@@ -93,7 +98,7 @@ const Customers = () => {
                 <div>
                   <div className="client-name">{element.name}</div>
                   <div className="client-sub">
-                    {`${element.numberOfOS} OS · ${element.vehicle.length} veículo(s)`}
+                    {`${element.numberOfOS} OS · ${element.vehicles.length} veículo(s)`}
                   </div>
                 </div>
               </div>
@@ -146,8 +151,8 @@ const Customers = () => {
               )}
               <div className="client-footer">
                 <div className="client-vehicle-tags">
-                  {element.vehicle.length > 0
-                    ? element.vehicle.map((car, index) => (
+                  {element.vehicles.length > 0
+                    ? element.vehicles.map((car, index) => (
                         <span className="car-tag-group" key={index}>
                           <span className="svc-tag car-tag-placa">
                             {car.license_plate}
