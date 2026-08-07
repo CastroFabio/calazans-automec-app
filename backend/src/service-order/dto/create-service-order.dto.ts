@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Decimal } from '@prisma/client/runtime/index-browser';
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsEmpty,
@@ -52,7 +53,8 @@ export class CreateServiceOrderDto {
   })
   @IsDate()
   @IsOptional()
-  arrived_at: Date;
+  @Type(() => Date)
+  arrived_at?: Date;
 
   @ApiProperty({
     description: 'Kilometragem que o carro chegou',

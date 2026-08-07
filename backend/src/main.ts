@@ -40,7 +40,22 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('customers', 'Gerenciamento de clientes')
     .addTag('vehicles', 'Gerenciamento de veículos')
-    .addTag('service-orders', 'Gerenciamento de ordens de serviço')
+    .addTag('service-order', 'Gerenciamento de ordens de serviço')
+    .addTag('material', 'Gerenciamento de itens de material')
+    .addTag('maintenance', 'Gerenciamento de serviços de manutenção')
+    .addTag(
+      'maintenance-group',
+      'Gerenciamento de grupos de serviços de manutenção',
+    )
+    .addTag('material-group', 'Gerenciamento de grupos de itens de material')
+    .addTag(
+      'maintenance-item',
+      'Gerenciamento de grupos de serviços de manutenção dentro da ordem de serviço',
+    )
+    .addTag(
+      'material-item',
+      'Gerenciamento de grupos de itens de material dentro da ordem de serviço',
+    )
     .addBearerAuth() // Se usar autenticação JWT
     .build();
 

@@ -8,29 +8,44 @@ import { orderApi } from "../api/orders";
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [serviceOrderData, setServiceOrderData] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(0);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const tabsData = [
     {
-      id: "tab1",
+      id: 0,
       title: "Todas",
       status: "all",
     },
     {
-      id: "tab2",
+      id: 1,
       title: "Pendentes",
       status: "pending",
     },
     {
-      id: "tab3",
+      id: 2,
       title: "Em andamento",
       status: "progress",
     },
     {
-      id: "tab4",
+      id: 3,
       title: "Concluídas",
+      status: "done",
+    },
+    {
+      id: 4,
+      title: "Aberta",
+      status: "done",
+    },
+    {
+      id: 5,
+      title: "Aguardando Peças",
+      status: "done",
+    },
+    {
+      id: 6,
+      title: "Cancelada",
       status: "done",
     },
   ];
@@ -39,13 +54,11 @@ const ServiceOrderList = () => {
 
   const handleFilteredCustomers = useMemo(() => {
     return serviceOrderData.filter((element) => {
-      console.log(element);
-
-      const matchesTab = activeTab === "all" || element.status === activeTab;
+      const matchesTab = activeTab === 0 || element.status === activeTab;
 
       const matchesSearch =
         searchTerm === "" ||
-        element.vehicle[0].license_plate
+        element.vehicle.license_plate
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
 
@@ -58,7 +71,6 @@ const ServiceOrderList = () => {
       setLoading(true);
       setError(null);
       const { data } = await orderApi.getAll();
-      console.log(data);
 
       setServiceOrderData(data);
     } catch (err) {
@@ -66,6 +78,52 @@ const ServiceOrderList = () => {
       console.error("Erro ao buscar ordens:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const convertPriotity = (priority) => {
+    switch (priority) {
+      case 1:
+        return "Pendente";
+        break;
+      case 2:
+        return "Em andamento";
+        break;
+      case 3:
+        return "Concluída";
+        break;
+      case 4:
+        return "Aberta";
+        break;
+      case 5:
+        return "Aguardando Peças";
+        break;
+      case 6:
+        return "Cancelada";
+        break;
+      default:
+        return "N/A";
+        break;
+    }
+  };
+
+  const convertStatus = (status) => {
+    switch (status) {
+      case 1:
+        return "Normal";
+        break;
+      case 2:
+        return "Baixa";
+        break;
+      case 3:
+        return "Alta";
+        break;
+      case 4:
+        return "Urgente";
+        break;
+      default:
+        return "N/A";
+        break;
     }
   };
 
@@ -110,8 +168,8 @@ const ServiceOrderList = () => {
           {tabsData.map((tab, index) => (
             <div
               key={index}
-              className={`chip ${activeTab === tab.status ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.status)}
+              className={`chip ${activeTab === tab.id ? "active" : ""}`}
+              onClick={() => setActiveTab(tab.id)}
             >
               {tab.title}
             </div>
@@ -158,7 +216,7 @@ const ServiceOrderList = () => {
                     </div>
                   </td>
                   <td>
-                    {element.item_maintenance.map((item) => (
+                    {element.itemMaintenances.map((item) => (
                       <span key={item.id} className="svc-tag">
                         {item.maintenancejob.name}
                       </span>
@@ -169,15 +227,17 @@ const ServiceOrderList = () => {
                   </td>
                   <td>
                     <span className={`badge ${priClass[element.priority]}`}>
-                      {element.priority}
+                      {convertPriotity(element.priority)}
                     </span>
                   </td>
                   <td>
                     <span className={`badge ${statusClass[element.status]}`}>
-                      {element.status}
+                      {convertStatus(element.status)}
                     </span>
                   </td>
-                  <td className="td-value">{formattedPrice(element.value)}</td>
+                  <td className="td-value">
+                    {formattedPrice(element.subtotal)}
+                  </td>
                   <td className="td-date">
                     {formatLocalDateTimeStringISO(element.arrived_at)}
                   </td>
