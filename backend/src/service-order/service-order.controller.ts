@@ -59,6 +59,15 @@ export class ServiceOrderController {
     return this.serviceOrderService.create(createServiceOrderDto);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: 'Contar quantidade total de ordens de serviço',
+    description: 'Retorna a quantidade total de ordens de serviço cadastrados',
+  })
+  count() {
+    return this.serviceOrderService.countAll();
+  }
+
   @Get()
   @ApiOperation({
     summary: 'Listar todas as ordens de serviço',

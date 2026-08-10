@@ -12,6 +12,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ServiceOrderService {
   constructor(private prisma: PrismaService) {}
 
+  async countAll() {
+    return await this.prisma.serviceOrder.count();
+  }
+
   // CREATE - Criar uma ordem de serviço
   async create(createServiceOrderDto: CreateServiceOrderDto) {
     try {

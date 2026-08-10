@@ -12,6 +12,10 @@ import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
 export class MaterialGroupService {
   constructor(private prisma: PrismaService) {}
 
+  async countAll() {
+    return await this.prisma.materialGroup.count();
+  }
+
   // CREATE - criar um novo grupo de materiais
   async create(createMaterialGroupDto: CreateMaterialGroupDto) {
     try {

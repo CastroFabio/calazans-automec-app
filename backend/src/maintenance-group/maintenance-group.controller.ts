@@ -64,6 +64,16 @@ export class MaintenanceGroupController {
     return this.maintenanceGroupService.create(createMaintenanceGroupDto);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: 'Contar quantidade total de grupos de manutenção',
+    description:
+      'Retorna a quantidade total de grupos de manutenção cadastrados',
+  })
+  count() {
+    return this.maintenanceGroupService.countAll();
+  }
+
   @Get()
   @ApiOperation({
     summary: 'Listar todos os grupos de manutenção',

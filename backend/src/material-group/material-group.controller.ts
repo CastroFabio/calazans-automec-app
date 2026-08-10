@@ -62,6 +62,15 @@ export class MaterialGroupController {
     return this.materialGroupService.create(createMaterialGroupDto);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: 'Contar quantidade total de grupos de material',
+    description: 'Retorna a quantidade total de grupos de material cadastrados',
+  })
+  count() {
+    return this.materialGroupService.countAll();
+  }
+
   @Get()
   @ApiOperation({
     summary: 'Listar todos os grupos de material',

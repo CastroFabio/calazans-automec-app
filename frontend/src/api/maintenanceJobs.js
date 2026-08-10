@@ -15,7 +15,7 @@ export const maintenanceJobApi = {
   create: (data) => api.post(ENDPOINTS.maintenanceJobs.base, data),
 
   // Atualizar serviço
-  update: (id, data) => api.put(ENDPOINTS.maintenanceJobs.byId(id), data),
+  update: (id, data) => api.patch(ENDPOINTS.maintenanceJobs.byId(id), data),
 
   // Remover serviço
   delete: (id) => api.delete(ENDPOINTS.maintenanceJobs.byId(id)),

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { materialGroupApi } from "../api/materialGroups";
+import { materialApi } from "../api/materials";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -15,6 +16,7 @@ const Materials = () => {
   const [newItemName, setNewItemName] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   const activeGroup = activeTab
     ? materialsGroupData.find(
@@ -22,7 +24,7 @@ const Materials = () => {
       )
     : null;
 
-  const fetchCustomers = async () => {
+  const fetchMaterials = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -38,7 +40,7 @@ const Materials = () => {
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchMaterials();
   }, []);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
@@ -50,8 +52,39 @@ const Materials = () => {
   };
 
   const handleEditSave = async () => {
-    handleEditSaveUpdate(editingItem, "material");
-    setEditingItem({ group: null, index: null, value: "" });
+    if (!editingItem.group || !editingItem.index) return;
+
+    try {
+      const { index: id, value: newName, group: groupName } = editingItem;
+
+      // Atualizar no backend
+      await materialApi.update(id, { name: newName });
+
+      // Atualizar localmente
+      setMaterialsGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.group === groupName) {
+            return {
+              ...group,
+              materials: group.materials.map((material) => {
+                if (material.id === id) {
+                  return { ...material, name: newName };
+                }
+                return material;
+              }),
+            };
+          }
+          return group;
+        });
+      });
+
+      setEditingItem({ group: null, index: null, value: "" });
+    } catch (error) {
+      console.error("Erro ao editar:", error);
+      const message =
+        error.response?.data?.message || "Erro ao adicionar serviço";
+      setError(message);
+    }
   };
 
   const handleEditCancel = () => {
@@ -67,15 +100,62 @@ const Materials = () => {
   };
 
   const handleRemoveItem = async (materialID) => {
-    handleRemoveJobMaterial("material", materialID);
+    try {
+      await materialApi.delete(materialID);
+
+      // Remover localmente
+      setMaterialsGroupData((prevData) => {
+        return prevData.map((group) => {
+          return {
+            ...group,
+            materials: group.materials.filter((job) => job.id !== materialID),
+          };
+        });
+      });
+    } catch (error) {
+      console.error("Erro ao remover:", error);
+      const message = error.response?.data?.message || "Erro ao remover";
+      setError(message);
+    }
   };
 
   const handleAddItem = async (groupIndex, newItemName) => {
-    const newItem = {
-      name: newItemName,
-      group_id: groupIndex,
-    };
-    handleAddJobMaterial(newItem, "material");
+    if (!newItemName.trim()) return;
+
+    setIsAdding(true);
+    setError(null);
+
+    try {
+      const newItem = {
+        name: newItemName.trim(),
+        group_id: groupIndex,
+      };
+
+      const response = await materialApi.create(newItem);
+
+      // Atualizar o estado localmente
+      setMaterialsGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.id === groupIndex) {
+            return {
+              ...group,
+              materials: [...group.materials, response.data],
+            };
+          }
+          return group;
+        });
+      });
+
+      // Limpar o campo
+      setNewItemName("");
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
+      const message =
+        error.response?.data?.message || "Erro ao adicionar serviço";
+      setError(message);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (

@@ -12,6 +12,10 @@ import { UpdateMaintenanceGroupDto } from './dto/update-maintenance-group.dto';
 export class MaintenanceGroupService {
   constructor(private prisma: PrismaService) {}
 
+  async countAll() {
+    return await this.prisma.maintenanceJobGroup.count();
+  }
+
   // CREATE - criar um novo grupo de manutenção
   async create(createMaintenanceGroupDto: CreateMaintenanceGroupDto) {
     try {

@@ -14,6 +14,10 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
 
+  async countAll() {
+    return await this.prisma.customer.count();
+  }
+
   // CREATE - Criar um novo cliente
   async create(createCustomerDto: CreateCustomerDto) {
     try {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
+import { maintenanceJobApi } from "../api/maintenanceJobs";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState({
@@ -15,6 +16,7 @@ const MaintenanceJobs = () => {
   const [newItemName, setNewItemName] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   const activeGroup = activeTab
     ? maintenanceJobsGroupData.find(
@@ -22,7 +24,7 @@ const MaintenanceJobs = () => {
       )
     : null;
 
-  const fetchCustomers = async () => {
+  const fetchMaintenance = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -38,7 +40,7 @@ const MaintenanceJobs = () => {
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchMaintenance();
   }, []);
 
   const handleEditClick = (groupName, itemIndex, currentValue) => {
@@ -50,8 +52,39 @@ const MaintenanceJobs = () => {
   };
 
   const handleEditSave = async () => {
-    handleEditSaveUpdate(editingItem, "maintenancejob");
-    setEditingItem({ group: null, index: null, value: "" });
+    if (!editingItem.group || !editingItem.index) return;
+
+    try {
+      const { index: id, value: newName, group: groupName } = editingItem;
+
+      // Atualizar no backend
+      await maintenanceJobApi.update(id, { name: newName });
+
+      // Atualizar localmente
+      setMaintenanceJobsGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.group === groupName) {
+            return {
+              ...group,
+              maintenanceJobs: group.maintenanceJobs.map((job) => {
+                if (job.id === id) {
+                  return { ...job, name: newName };
+                }
+                return job;
+              }),
+            };
+          }
+          return group;
+        });
+      });
+
+      setEditingItem({ group: null, index: null, value: "" });
+    } catch (error) {
+      console.error("Erro ao editar:", error);
+      const message =
+        error.response?.data?.message || "Erro ao adicionar serviço";
+      setError(message);
+    }
   };
 
   const handleEditCancel = () => {
@@ -67,15 +100,64 @@ const MaintenanceJobs = () => {
   };
 
   const handleRemoveItem = async (maintenanceID) => {
-    handleRemoveJobMaterial("maintenancejob", maintenanceID);
+    try {
+      await maintenanceJobApi.delete(maintenanceID);
+
+      // Remover localmente
+      setMaintenanceJobsGroupData((prevData) => {
+        return prevData.map((group) => {
+          return {
+            ...group,
+            maintenanceJobs: group.maintenanceJobs.filter(
+              (job) => job.id !== maintenanceID,
+            ),
+          };
+        });
+      });
+    } catch (error) {
+      console.error("Erro ao remover:", error);
+      const message = error.response?.data?.message || "Erro ao remover";
+      setError(message);
+    }
   };
 
   const handleAddItem = async (groupIndex, newItemName) => {
-    const newItem = {
-      name: newItemName,
-      group_id: groupIndex,
-    };
-    handleAddJobMaterial(newItem, "maintenancejob");
+    if (!newItemName.trim()) return;
+
+    setIsAdding(true);
+    setError(null);
+
+    try {
+      const newItem = {
+        name: newItemName.trim(),
+        group_id: groupIndex,
+      };
+
+      const response = await maintenanceJobApi.create(newItem);
+
+      // Atualizar o estado localmente
+      setMaintenanceJobsGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.id === groupIndex) {
+            return {
+              ...group,
+              maintenanceJobs: [...group.maintenanceJobs, response.data],
+            };
+          }
+          return group;
+        });
+      });
+
+      // Limpar o campo
+      setNewItemName("");
+    } catch (error) {
+      console.error("Erro ao adicionar serviço:", error);
+      const message =
+        error.response?.data?.message || "Erro ao adicionar serviço";
+      setError(message);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (

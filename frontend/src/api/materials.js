@@ -15,7 +15,7 @@ export const materialApi = {
   create: (data) => api.post(ENDPOINTS.materials.base, data),
 
   // Atualizar material
-  update: (id, data) => api.put(ENDPOINTS.materials.byId(id), data),
+  update: (id, data) => api.patch(ENDPOINTS.materials.byId(id), data),
 
   // Remover material
   delete: (id) => api.delete(ENDPOINTS.materials.byId(id)),

@@ -6,6 +6,8 @@ import {
   serviceOrderListDTO,
 } from "../data/mockDataDTO";
 import SideBarList from "../components/sideBarList";
+import { customerApi } from "../api/customers";
+import { orderApi } from "../api/orders";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { materialGroupApi } from "../api/materialGroups";
 import { useLocation } from "react-router-dom";
@@ -13,6 +15,8 @@ import { useLocation } from "react-router-dom";
 const SideBar = () => {
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [materialGroupData, setMaterialGroupData] = useState([]);
+  const [customerData, setCustomerData] = useState([]);
+  const [serviceOrderData, setServiceOrderData] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +29,10 @@ const SideBar = () => {
     try {
       setLoading(true);
       setError(null);
+      const responseServiceOrder = await orderApi.getAll();
+      setServiceOrderData(responseServiceOrder.data);
+      const responseCustomer = await customerApi.getAll();
+      setCustomerData(responseCustomer.data);
       const responseMaterial = await materialGroupApi.getAll();
       setMaterialGroupData(responseMaterial.data);
       const responseMaintenance = await maintenanceGroupApi.getAll();
@@ -49,7 +57,7 @@ const SideBar = () => {
         id: "serviceOrdersTab",
         title: "Ordens de Serviço",
         navigateURL: "/",
-        numberOf: serviceOrderListDTO.length,
+        numberOf: serviceOrderData.length,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -65,7 +73,7 @@ const SideBar = () => {
         id: "customersTab",
         title: "Clientes",
         navigateURL: "/customers",
-        numberOf: customerListDTO.length,
+        numberOf: customerData.length,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

@@ -5,6 +5,7 @@ import {
   IsPositive,
   IsNumber,
   Min,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -23,6 +24,7 @@ export class CreateMaintenanceDto {
     example: '30.25',
   })
   @IsNumber()
+  @IsOptional()
   @Min(0, { message: 'Valor unitário não pode ser negativo' })
   @Type(() => Number)
   value_unit: number;

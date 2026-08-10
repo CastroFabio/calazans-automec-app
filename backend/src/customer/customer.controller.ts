@@ -81,6 +81,15 @@ export class CustomersController {
     return this.customersService.create(createCustomerDto);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: 'Contar clientes',
+    description: 'Retorna a quantidade total de clientes cadastrados',
+  })
+  count() {
+    return this.customersService.countAll();
+  }
+
   @Get()
   @ApiOperation({
     summary: 'Listar todos os clientes',

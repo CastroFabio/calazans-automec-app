@@ -26,9 +26,9 @@ export const ENDPOINTS = {
 
   // Maintenance Jobs
   maintenanceJobs: {
-    base: "/maintenance-jobs",
-    byId: (id) => `/maintenance-jobs/${id}`,
-    byGroup: (groupId) => `/maintenance-jobs/group/${groupId}`,
+    base: "/maintenance",
+    byId: (id) => `/maintenance/${id}`,
+    byGroup: (groupId) => `/maintenance/group/${groupId}`,
   },
 
   // Maintenance Groups
@@ -40,9 +40,9 @@ export const ENDPOINTS = {
 
   // Materials
   materials: {
-    base: "/materials",
-    byId: (id) => `/materials/${id}`,
-    byGroup: (groupId) => `/materials/group/${groupId}`,
+    base: "/material",
+    byId: (id) => `/material/${id}`,
+    byGroup: (groupId) => `/material/group/${groupId}`,
   },
 
   // Material Groups
