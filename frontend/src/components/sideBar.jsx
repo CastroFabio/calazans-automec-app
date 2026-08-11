@@ -172,7 +172,7 @@ const SideBar = () => {
         <div className="user-row">
           <div className="avatar">JC</div>
           <div>
-            <div className="user-name">João Carlos</div>
+            <div className="user-name">João Calazans</div>
             <div className="user-role">Administrador</div>
           </div>
         </div>

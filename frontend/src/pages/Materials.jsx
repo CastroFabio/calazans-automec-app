@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { materialGroupApi } from "../api/materialGroups";
 import { materialApi } from "../api/materials";
+import MaterialGroupList from "../components/MaterialGroupList.component";
+import MaterialActiveGroupItemList from "../components/MaterialActiveGroupItemList.component";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -64,13 +66,14 @@ const Materials = () => {
         group: creatingGroupName.trim(),
       });
 
-      console.log("✅ Grupo criado:", response.data);
+      const updatedGroupList = (prevData) => {
+        return [...prevData, { ...response.data, materials: [] }];
+      };
 
-      // ✅ Atualizar a lista de grupos
-      setMaterialsGroupData((prevData) => [
-        ...prevData,
-        { ...response.data, materials: [] },
-      ]);
+      const sortedGroupList = updatedGroupList(materialsGroupData).sort(
+        (a, b) => a.group.localeCompare(b.group),
+      );
+      setMaterialsGroupData(sortedGroupList);
 
       // ✅ Limpar o campo
       setCreatingGroupName("");
@@ -295,7 +298,35 @@ const Materials = () => {
         </div>
       </div>
       <div className="cad-layout">
-        <div>
+        <MaterialGroupList
+          setIsCreatingGroup={setIsCreatingGroup}
+          isCreatingGroup={isCreatingGroup}
+          handleClickCreatingGroup={handleClickCreatingGroup}
+          creatingGroupName={creatingGroupName}
+          handleChangeCreatingGroup={handleChangeCreatingGroup}
+          handleCancelCreatingGroup={handleCancelCreatingGroup}
+          materialsGroupData={materialsGroupData}
+          setActiveTab={setActiveTab}
+          activeTab={activeTab}
+        />
+
+        <MaterialActiveGroupItemList
+          editingItem={editingItem}
+          setEditingItem={setEditingItem}
+          activeTab={activeTab}
+          activeGroup={activeGroup}
+          newItemName={newItemName}
+          setNewItemName={setNewItemName}
+          handleEditSaveGroup={handleEditSaveGroup}
+          handleEditSave={handleEditSave}
+          handleEditKeyPress={handleEditKeyPress}
+          handleEditKeyPressGroup={handleEditKeyPressGroup}
+          handleEditClick={handleEditClick}
+          handleRemoveItemGroup={handleRemoveItemGroup}
+          handleRemoveItem={handleRemoveItem}
+          handleAddItem={handleAddItem}
+        />
+        {/* <div>
           <div className=" flex">
             <div className="cad-subtitle-group ">Grupos</div>
             <button
@@ -385,13 +416,14 @@ const Materials = () => {
                 ))
               : ""}
           </div>
-        </div>
-        <div className="cad-items-outer">
+        </div> */}
+        {/* <div className="cad-items-outer">
           <div className="cad-items-wrap">
             {activeTab.groupName ? (
               <div className="cad-items-header ">
                 <span className="cad-items-title " id="svcGroupTitle">
-                  {editingItem.group === activeTab.groupName ? (
+                  {editingItem.group === activeTab.groupName &&
+                  editingItem.index === activeTab.groupIndex ? (
                     <input
                       type="text"
                       className="input cad-input cad-edit-input"
@@ -519,7 +551,7 @@ const Materials = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

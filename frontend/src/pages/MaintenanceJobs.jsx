@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
+import MaintenanceGroupList from "../components/MaintenanceGroupList.component";
+import MaintenanceActiveGroupItemList from "../components/MaintenanceActiveGroupItemList.component";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState({
@@ -50,13 +52,12 @@ const MaintenanceJobs = () => {
   const handleClickCreatingGroup = async (e) => {
     e.preventDefault();
 
-    // ✅ Usar creatingGroupName em vez de groupName
     if (!creatingGroupName.trim()) {
       setError("O nome do grupo é obrigatório");
       return;
     }
 
-    setIsCreatingGroup(true); // ✅ Usar o estado correto
+    setIsCreatingGroup(true);
     setError(null);
 
     try {
@@ -64,21 +65,19 @@ const MaintenanceJobs = () => {
         group: creatingGroupName.trim(),
       });
 
-      console.log("✅ Grupo criado:", response.data);
+      const updatedGroupList = (prevData) => {
+        return [...prevData, { ...response.data, maintenanceJobs: [] }];
+      };
 
-      // ✅ Atualizar a lista de grupos
-      setMaintenanceGroupData((prevData) => [
-        ...prevData,
-        { ...response.data, maintenanceJobs: [] },
-      ]);
+      const sortedGroupList = updatedGroupList(maintenanceGroupData).sort(
+        (a, b) => a.group.localeCompare(b.group),
+      );
+      setMaintenanceGroupData(sortedGroupList);
 
-      // ✅ Limpar o campo
       setCreatingGroupName("");
 
-      // ✅ Fechar o input
       setIsCreatingGroup(false);
 
-      // ✅ Opcional: Selecionar o novo grupo automaticamente
       setActiveTab({
         groupIndex: response.data.id,
         groupName: response.data.group,
@@ -202,7 +201,6 @@ const MaintenanceJobs = () => {
     try {
       await maintenanceJobApi.delete(maintenanceID);
 
-      // Remover localmente
       setMaintenanceGroupData((prevData) => {
         return prevData.map((group) => {
           return {
@@ -237,7 +235,6 @@ const MaintenanceJobs = () => {
 
       const response = await maintenanceJobApi.create(newItem);
 
-      // Atualizar o estado localmente
       setMaintenanceGroupData((prevData) => {
         return prevData.map((group) => {
           if (group.id === groupIndex) {
@@ -250,7 +247,6 @@ const MaintenanceJobs = () => {
         });
       });
 
-      // Limpar o campo
       setNewItemName("");
     } catch (error) {
       console.error("Erro ao adicionar serviço de manutenção:", error);
@@ -266,15 +262,12 @@ const MaintenanceJobs = () => {
   // ========== REMOVER GRUPO ==========
   const handleRemoveItemGroup = async (groupID) => {
     try {
-      // 1. Remover no backend
       await maintenanceGroupApi.delete(groupID);
 
-      // 2. Remover localmente
       setMaintenanceGroupData((prevData) => {
         return prevData.filter((group) => group.id !== groupID);
       });
 
-      // 3. Se o grupo removido era o grupo ativo, limpar a tab ativa
       if (activeTab.groupIndex === groupID) {
         setActiveTab({
           groupName: "",
@@ -299,231 +292,34 @@ const MaintenanceJobs = () => {
         </div>
       </div>
       <div className="cad-layout">
-        <div>
-          <div className=" flex">
-            <div className="cad-subtitle-group ">Grupos</div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsCreatingGroup(true)}
-              disabled={isCreatingGroup}
-            >
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
-          </div>
-          {isCreatingGroup && (
-            <div
-              className="cad-create-group-container"
-              style={{ marginBottom: "8px" }}
-            >
-              <form onSubmit={handleClickCreatingGroup}>
-                <input
-                  type="text"
-                  className="input cad-input cad-input-group-create"
-                  value={creatingGroupName}
-                  onChange={handleChangeCreatingGroup}
-                  placeholder="Ex: Suspensão, Motor, Freios..."
-                  autoFocus
-                />
-                <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
-                  <button
-                    type="submit"
-                    className="btn btn-primary btn-sm"
-                    disabled={!creatingGroupName.trim()}
-                  >
-                    Criar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={handleCancelCreatingGroup}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-          <div className="cad-groups" id="svcGroupList">
-            {maintenanceGroupData.length > 0
-              ? maintenanceGroupData.map((element, index) => (
-                  <div key={index} className="cad-group-wrap">
-                    <button
-                      onClick={() =>
-                        setActiveTab({
-                          groupIndex: element.id,
-                          groupName: element.group,
-                        })
-                      }
-                      className={`cad-group-btn ${activeTab.groupName === element.group ? "active" : ""}`}
-                    >
-                      <span>{element.group}</span>
-                      <div className="cad-group-container">
-                        <span className="cad-group-count">
-                          {element.maintenanceJobs.length}
-                        </span>
-                        <span className="cad-chevron">
-                          <svg
-                            className={`cad-chevron-symbol ${activeTab.groupName ? "transform:rotate(180deg)" : ""}`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
-                        </span>
-                      </div>
-                    </button>
-                  </div>
-                ))
-              : ""}
-          </div>
-        </div>
-        <div className="cad-items-outer">
-          <div className="cad-items-wrap">
-            {activeTab.groupName ? (
-              <div className="cad-items-header ">
-                <span className="cad-items-title " id="svcGroupTitle">
-                  {editingItem.group === activeTab.groupName ? (
-                    <input
-                      type="text"
-                      className="input cad-input cad-edit-input"
-                      value={editingItem.value}
-                      onChange={(e) => {
-                        setEditingItem({
-                          ...editingItem,
-                          value: e.target.value,
-                        });
-                      }}
-                      onBlur={handleEditSaveGroup}
-                      onKeyDown={handleEditKeyPressGroup}
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="cad-item-name">{activeTab.groupName}</div>
-                  )}
-                </span>
-                <button
-                  className="btn btn-sm btn-ghost cad-btn-editar"
-                  onClick={() =>
-                    handleEditClick(
-                      activeTab.groupName,
-                      activeTab.groupIndex,
-                      "",
-                    )
-                  }
-                >
-                  Editar
-                </button>
-                <button
-                  className="btn btn-sm btn-danger cad-btn-remover"
-                  onClick={() => handleRemoveItemGroup(activeTab.groupIndex)}
-                >
-                  Remover
-                </button>
-              </div>
-            ) : (
-              <div className="cad-items-header ">
-                <span className="cad-items-title " id="svcGroupTitle">
-                  Selecione um grupo
-                </span>
-              </div>
-            )}
-            {activeGroup && activeGroup.maintenanceJobs.length > 0 ? (
-              activeGroup.maintenanceJobs.map((element) => (
-                <div key={element.id} className="cad-item-row">
-                  {editingItem.group === activeTab.groupName &&
-                  editingItem.index === element.id ? (
-                    <input
-                      type="text"
-                      className="input cad-input cad-edit-input"
-                      value={editingItem.value}
-                      onChange={(e) =>
-                        setEditingItem({
-                          ...editingItem,
-                          value: e.target.value,
-                        })
-                      }
-                      onBlur={handleEditSave}
-                      onKeyDown={handleEditKeyPress}
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="cad-item-name">{element.name}</div>
-                  )}
-                  <div className="cad-item-actions">
-                    <button
-                      onClick={() =>
-                        handleEditClick(
-                          activeTab.groupName,
-                          element.id,
-                          element.name,
-                        )
-                      }
-                      className="btn btn-sm btn-ghost cad-btn-editar"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleRemoveItem(element.id)}
-                      className="btn btn-sm btn-danger cad-btn-remover"
-                    >
-                      Remover
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div id="svcItemList">
-                <div className="cad-empty">
-                  {activeTab.groupName
-                    ? "Nenhum serviço encontrado neste grupo"
-                    : "Selecione um grupo à esquerda"}
-                </div>
-              </div>
-            )}
-            <div className="cad-add-form">
-              <input
-                type="text"
-                className="input cad-input"
-                id="svcNewItem"
-                placeholder="Nome do novo serviço..."
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  if (activeTab.groupName && newItemName.trim()) {
-                    handleAddItem(activeTab.groupIndex, newItemName);
-                    setNewItemName("");
-                  }
-                }}
-              >
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Adicionar
-              </button>
-            </div>
-          </div>
-        </div>
+        <MaintenanceGroupList
+          setIsCreatingGroup={setIsCreatingGroup}
+          isCreatingGroup={isCreatingGroup}
+          handleClickCreatingGroup={handleClickCreatingGroup}
+          creatingGroupName={creatingGroupName}
+          handleChangeCreatingGroup={handleChangeCreatingGroup}
+          handleCancelCreatingGroup={handleCancelCreatingGroup}
+          maintenanceGroupData={maintenanceGroupData}
+          setActiveTab={setActiveTab}
+          activeTab={activeTab}
+        />
+
+        <MaintenanceActiveGroupItemList
+          editingItem={editingItem}
+          setEditingItem={setEditingItem}
+          activeTab={activeTab}
+          activeGroup={activeGroup}
+          newItemName={newItemName}
+          setNewItemName={setNewItemName}
+          handleEditSaveGroup={handleEditSaveGroup}
+          handleEditSave={handleEditSave}
+          handleEditKeyPress={handleEditKeyPress}
+          handleEditKeyPressGroup={handleEditKeyPressGroup}
+          handleEditClick={handleEditClick}
+          handleRemoveItemGroup={handleRemoveItemGroup}
+          handleRemoveItem={handleRemoveItem}
+          handleAddItem={handleAddItem}
+        />
       </div>
     </div>
   );

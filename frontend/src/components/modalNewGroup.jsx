@@ -32,7 +32,6 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
       // Extrair mensagem de erro
       const message = err.response.data.message || "Erro ao criar grupo";
       setError(message);
-      console.log(error);
     } finally {
       setLoading(false);
     }
