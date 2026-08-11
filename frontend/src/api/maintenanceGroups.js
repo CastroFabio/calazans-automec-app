@@ -19,4 +19,6 @@ export const maintenanceGroupApi = {
 
   // Remover grupo
   delete: (id) => api.delete(ENDPOINTS.maintenanceGroups.byId(id)),
+
+  getTotal: () => api.get(ENDPOINTS.maintenanceGroups.count),
 };

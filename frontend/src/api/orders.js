@@ -31,6 +31,9 @@ export const orderApi = {
   // Buscar ordens por status
   getByStatus: (status) => api.get(`/service-order/status/${status}`),
 
+  // Buscar quantidade total
+  getTotal: () => api.get(ENDPOINTS.orders.count),
+
   // Recalcular total da ordem
   recalculateTotal: (id) => api.patch(`/service-order/${id}/recalculate`),
 };

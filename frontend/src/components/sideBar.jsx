@@ -1,22 +1,19 @@
 import { useEffect, useState } from "react";
-import {
-  customerListDTO,
-  maintenanceJobsListDTO,
-  materialsListDTO,
-  serviceOrderListDTO,
-} from "../data/mockDataDTO";
+
 import SideBarList from "../components/sideBarList";
+
 import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { materialGroupApi } from "../api/materialGroups";
+
 import { useLocation } from "react-router-dom";
 
 const SideBar = () => {
-  const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
-  const [materialGroupData, setMaterialGroupData] = useState([]);
-  const [customerData, setCustomerData] = useState([]);
-  const [serviceOrderData, setServiceOrderData] = useState([]);
+  const [maintenanceJobsGroupCount, setMaintenanceJobsGroupCount] = useState(0);
+  const [materialGroupCount, setMaterialGroupCount] = useState(0);
+  const [customerCount, setCustomerCount] = useState(0);
+  const [serviceOrderCount, setServiceOrderCount] = useState(0);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -29,14 +26,18 @@ const SideBar = () => {
     try {
       setLoading(true);
       setError(null);
-      const responseServiceOrder = await orderApi.getAll();
-      setServiceOrderData(responseServiceOrder.data);
-      const responseCustomer = await customerApi.getAll();
-      setCustomerData(responseCustomer.data);
-      const responseMaterial = await materialGroupApi.getAll();
-      setMaterialGroupData(responseMaterial.data);
-      const responseMaintenance = await maintenanceGroupApi.getAll();
-      setMaintenanceJobsGroupData(responseMaintenance.data);
+
+      const responseServiceOrder = await orderApi.getTotal();
+      setServiceOrderCount(responseServiceOrder.data);
+
+      const responseCustomer = await customerApi.getTotal();
+      setCustomerCount(responseCustomer.data);
+
+      const responseMaterial = await materialGroupApi.getTotal();
+      setMaterialGroupCount(responseMaterial.data);
+
+      const responseMaintenance = await maintenanceGroupApi.getTotal();
+      setMaintenanceJobsGroupCount(responseMaintenance.data);
     } catch (err) {
       setError(err.message || "Erro ao carregar grupos de material");
       console.error("Erro:", err);
@@ -52,12 +53,14 @@ const SideBar = () => {
   const tabsData = {
     listagemCategory: "Listagem",
     cadastroCategory: "Cadastro",
+    inventoryCategory: "Inventário",
+
     listagemData: [
       {
         id: "serviceOrdersTab",
         title: "Ordens de Serviço",
         navigateURL: "/",
-        numberOf: serviceOrderData.length,
+        numberOf: serviceOrderCount,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -73,7 +76,7 @@ const SideBar = () => {
         id: "customersTab",
         title: "Clientes",
         navigateURL: "/customers",
-        numberOf: customerData.length,
+        numberOf: customerCount,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -88,10 +91,66 @@ const SideBar = () => {
     ],
     casdastroData: [
       {
+        id: "newCustomerTab",
+        title: "Novo Cliente",
+        navigateURL: "/new-customer",
+        numberOf: null,
+        svgIcon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+        ),
+      },
+      {
+        id: "newServiceOrderTab",
+        title: "Nova Ordem de Serviço",
+        navigateURL: "/new-service-order",
+        numberOf: null,
+        svgIcon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+        ),
+      },
+      {
+        id: "newVehicleTab",
+        title: "Novo Veículo",
+        navigateURL: "/new-vehicle",
+        numberOf: null,
+        svgIcon: (
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+        ),
+      },
+    ],
+    inventoryData: [
+      {
         id: "maintanenceJobsTab",
         title: "Serviços",
         navigateURL: "/services",
-        numberOf: maintenanceJobsGroupData.length,
+        numberOf: maintenanceJobsGroupCount,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -113,7 +172,7 @@ const SideBar = () => {
         id: "materialsTab",
         title: "Materiais & Peças",
         navigateURL: "/materials",
-        numberOf: materialGroupData.length,
+        numberOf: materialGroupCount,
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -164,6 +223,12 @@ const SideBar = () => {
         <SideBarList
           categoryName={tabsData.cadastroCategory}
           tabsDataCategory={tabsData.casdastroData}
+          isActive={isActive}
+        />
+
+        <SideBarList
+          categoryName={tabsData.inventoryCategory}
+          tabsDataCategory={tabsData.inventoryData}
           isActive={isActive}
         />
       </nav>

@@ -19,4 +19,6 @@ export const materialGroupApi = {
 
   // Remover grupo
   delete: (id) => api.delete(ENDPOINTS.materialGroups.byId(id)),
+
+  getTotal: () => api.get(ENDPOINTS.materialGroups.count),
 };

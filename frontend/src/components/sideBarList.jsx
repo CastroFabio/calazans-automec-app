@@ -16,7 +16,10 @@ const SideBarList = ({ categoryName, tabsDataCategory, isActive }) => {
         >
           {tab.svgIcon}
           {tab.title}
-          <span className="nav-count" id="osCount">
+          <span
+            className={` ${tab.numberOf != null ? "nav-count" : ""}`}
+            id="osCount"
+          >
             {tab.numberOf}
           </span>
         </div>

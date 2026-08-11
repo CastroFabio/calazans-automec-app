@@ -54,16 +54,26 @@ const NavBar = () => {
     {
       pathURL: "/services",
       title: "Serviços",
-      btn: "",
+      btn: null,
     },
     {
       pathURL: "/materials",
       title: "Materiais e Peças",
-      btn: "",
+      btn: null,
     },
     {
-      pathURL: "/neworder",
+      pathURL: "/new-customer",
+      title: "Novo Cliente",
+      btn: null,
+    },
+    {
+      pathURL: "/new-service-order",
       title: "Nova Ordem de Serviço",
+      btn: null,
+    },
+    {
+      pathURL: "/new-vehicle",
+      title: "Novo Veículo",
       btn: null,
     },
   ];

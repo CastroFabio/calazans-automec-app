@@ -60,7 +60,6 @@ const NewServiceOrder = () => {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="ph-title">Nova Ordem de Serviço</div>
           <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
         <div className="os-num-badge">#OS-2025-0143</div>

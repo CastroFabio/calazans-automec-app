@@ -8,6 +8,8 @@ import Materials from "./pages/Materials";
 import ServiceOrderList from "./pages/serviceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
 import NestedListForm from "./pages/Teste";
+import NewCustomer from "./pages/NewCustomer";
+import NewVehicle from "./pages/NewVehicle";
 
 const App = () => {
   return (
@@ -22,8 +24,10 @@ const App = () => {
               <Route path="/customers" element={<Customers />} />
               <Route path="/services" element={<MaintenanceJobs />} />
               <Route path="/materials" element={<Materials />} />
-              {/*<Route path="/neworder" element={<NewServiceOrder />} />
-              <Route path="/teste" element={<NestedListForm />} />
+              <Route path="/new-service-order" element={<NewServiceOrder />} />
+              <Route path="/new-customer" element={<NewCustomer />} />
+              <Route path="/new-vehicle" element={<NewVehicle />} />
+              {/*<Route path="/teste" element={<NestedListForm />} />
               <Route path="*" element={<NotFound />} /> */}
             </Routes>
           </div>

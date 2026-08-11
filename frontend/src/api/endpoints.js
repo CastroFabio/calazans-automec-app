@@ -4,6 +4,7 @@ export const ENDPOINTS = {
     base: "/customers",
     byId: (id) => `/customers/${id}`,
     orders: (id) => `/customers/${id}/orders`,
+    count: `/customers/count`,
   },
 
   // Cars
@@ -22,6 +23,7 @@ export const ENDPOINTS = {
     byVehicle: (vehicleId) => `/service-order/vehicle/${vehicleId}`,
     byStatus: (status) => `/service-order/status/${status}`,
     recalculate: (id) => `/service-order/${id}/recalculate`,
+    count: `/service-order/count`,
   },
 
   // Maintenance Jobs
@@ -34,6 +36,7 @@ export const ENDPOINTS = {
   // Maintenance Groups
   maintenanceGroups: {
     base: "/maintenance-group",
+    count: `/maintenance-group/count`,
     byId: (id) => `/maintenance-group/${id}`,
     jobs: (id) => `/maintenance-group/${id}/jobs`,
   },
@@ -48,6 +51,7 @@ export const ENDPOINTS = {
   // Material Groups
   materialGroups: {
     base: "/material-group",
+    count: `/material-group/count`,
     byId: (id) => `/material-group/${id}`,
     materials: (id) => `/material-group/${id}/materials`,
   },
