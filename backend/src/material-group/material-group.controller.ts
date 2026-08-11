@@ -58,7 +58,7 @@ export class MaterialGroupController {
     type: MaterialGroupResponseDto,
   })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createMaterialGroupDto: MaterialGroupResponseDto) {
+  create(@Body() createMaterialGroupDto: CreateMaterialGroupDto) {
     return this.materialGroupService.create(createMaterialGroupDto);
   }
 

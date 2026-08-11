@@ -12,11 +12,13 @@ const Materials = () => {
     index: null,
     value: "",
   });
+  const [creatingGroupName, setCreatingGroupName] = useState("");
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
   const [newItemName, setNewItemName] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
 
   const activeGroup = activeTab
     ? materialsGroupData.find(
@@ -24,6 +26,7 @@ const Materials = () => {
       )
     : null;
 
+  // ========== BUSCAR DADOS ==========
   const fetchMaterials = async () => {
     try {
       setLoading(true);
@@ -32,8 +35,8 @@ const Materials = () => {
 
       setMaterialsGroupData(data);
     } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço");
-      console.error("Erro ao buscar ordens:", err);
+      setError(err.message || "Erro ao carregar materiais");
+      console.error("Erro ao buscar materiais:", err);
     } finally {
       setLoading(false);
     }
@@ -43,6 +46,64 @@ const Materials = () => {
     fetchMaterials();
   }, []);
 
+  // ========== CRIAR GRUPO ==========
+  const handleClickCreatingGroup = async (e) => {
+    e.preventDefault();
+
+    // ✅ Usar creatingGroupName em vez de groupName
+    if (!creatingGroupName.trim()) {
+      setError("O nome do grupo é obrigatório");
+      return;
+    }
+
+    setIsCreatingGroup(true); // ✅ Usar o estado correto
+    setError(null);
+
+    try {
+      const response = await materialGroupApi.create({
+        group: creatingGroupName.trim(),
+      });
+
+      console.log("✅ Grupo criado:", response.data);
+
+      // ✅ Atualizar a lista de grupos
+      setMaterialsGroupData((prevData) => [
+        ...prevData,
+        { ...response.data, materials: [] },
+      ]);
+
+      // ✅ Limpar o campo
+      setCreatingGroupName("");
+
+      // ✅ Fechar o input
+      setIsCreatingGroup(false);
+
+      // ✅ Opcional: Selecionar o novo grupo automaticamente
+      setActiveTab({
+        groupIndex: response.data.id,
+        groupName: response.data.group,
+      });
+    } catch (error) {
+      console.error("❌ Erro ao criar grupo:", error);
+      const message = error.response?.data?.message || "Erro ao criar grupo";
+      setError(message);
+    } finally {
+      setIsCreatingGroup(false);
+    }
+  };
+
+  const handleCancelCreatingGroup = () => {
+    setCreatingGroupName("");
+    setIsCreatingGroup(false);
+    setError(null);
+  };
+
+  const handleChangeCreatingGroup = (e) => {
+    setCreatingGroupName(e.target.value);
+    if (error) setError(null);
+  };
+
+  // ========== EDITAR ITEM ==========
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
       group: groupName,
@@ -51,26 +112,24 @@ const Materials = () => {
     });
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = async (type) => {
     if (!editingItem.group || !editingItem.index) return;
 
     try {
       const { index: id, value: newName, group: groupName } = editingItem;
 
-      // Atualizar no backend
       await materialApi.update(id, { name: newName });
 
-      // Atualizar localmente
       setMaterialsGroupData((prevData) => {
         return prevData.map((group) => {
           if (group.group === groupName) {
             return {
               ...group,
-              materials: group.materials.map((material) => {
-                if (material.id === id) {
-                  return { ...material, name: newName };
+              materials: group.materials.map((element) => {
+                if (element.id === id) {
+                  return { ...element, name: newName };
                 }
-                return material;
+                return element;
               }),
             };
           }
@@ -82,7 +141,37 @@ const Materials = () => {
     } catch (error) {
       console.error("Erro ao editar:", error);
       const message =
-        error.response?.data?.message || "Erro ao adicionar serviço";
+        error.response?.data?.message || "Erro ao adicionar materiais";
+      setError(message);
+    }
+  };
+
+  const handleEditSaveGroup = async () => {
+    if (!editingItem.group || !editingItem.index) return;
+
+    try {
+      const { index: id, value: newName, group: groupName } = editingItem;
+
+      await materialGroupApi.update(id, { group: newName });
+
+      setMaterialsGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.id === id) {
+            return {
+              ...group,
+              group: newName,
+            };
+          }
+          return group;
+        });
+      });
+
+      setActiveTab({ ...activeTab, groupName: newName });
+      setEditingItem({ group: null, index: null, value: "" });
+    } catch (error) {
+      console.error("Erro ao editar:", error);
+      const message =
+        error.response?.data?.message || "Erro ao adicionar material";
       setError(message);
     }
   };
@@ -99,6 +188,15 @@ const Materials = () => {
     }
   };
 
+  const handleEditKeyPressGroup = (e) => {
+    if (e.key === "Enter") {
+      handleEditSaveGroup();
+    } else if (e.key === "Escape") {
+      handleEditCancel();
+    }
+  };
+
+  // ========== REMOVER ITEM ==========
   const handleRemoveItem = async (materialID) => {
     try {
       await materialApi.delete(materialID);
@@ -108,7 +206,9 @@ const Materials = () => {
         return prevData.map((group) => {
           return {
             ...group,
-            materials: group.materials.filter((job) => job.id !== materialID),
+            materials: group.materials.filter(
+              (element) => element.id !== materialID,
+            ),
           };
         });
       });
@@ -119,6 +219,7 @@ const Materials = () => {
     }
   };
 
+  // ========== ADICIONAR ITEM ==========
   const handleAddItem = async (groupIndex, newItemName) => {
     if (!newItemName.trim()) return;
 
@@ -149,12 +250,38 @@ const Materials = () => {
       // Limpar o campo
       setNewItemName("");
     } catch (error) {
-      console.error("Erro ao adicionar serviço:", error);
+      console.error("Erro ao adicionar material:", error);
       const message =
-        error.response?.data?.message || "Erro ao adicionar serviço";
+        error.response?.data?.message || "Erro ao adicionar material";
       setError(message);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  // ========== REMOVER GRUPO ==========
+  const handleRemoveItemGroup = async (groupID) => {
+    try {
+      // 1. Remover no backend
+      await materialGroupApi.delete(groupID);
+
+      // 2. Remover localmente
+      setMaterialsGroupData((prevData) => {
+        return prevData.filter((group) => group.id !== groupID);
+      });
+
+      // 3. Se o grupo removido era o grupo ativo, limpar a tab ativa
+      if (activeTab.groupIndex === groupID) {
+        setActiveTab({
+          groupName: "",
+          groupIndex: null,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao remover grupo:", error);
+      const message = error.response?.data?.message || "Erro ao remover grupo";
+      setError(message);
+      alert(`Erro: ${message}`);
     }
   };
 
@@ -169,7 +296,56 @@ const Materials = () => {
       </div>
       <div className="cad-layout">
         <div>
-          <div className="cad-subtitle-group">Grupos</div>
+          <div className=" flex">
+            <div className="cad-subtitle-group ">Grupos</div>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsCreatingGroup(true)}
+              disabled={isCreatingGroup}
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          </div>
+          {isCreatingGroup && (
+            <div
+              className="cad-create-group-container"
+              style={{ marginBottom: "8px" }}
+            >
+              <form onSubmit={handleClickCreatingGroup}>
+                <input
+                  type="text"
+                  className="input cad-input cad-input-group-create"
+                  value={creatingGroupName}
+                  onChange={handleChangeCreatingGroup}
+                  placeholder="Ex: Suspensão, Motor, Freios..."
+                  autoFocus
+                />
+                <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={!creatingGroupName.trim()}
+                  >
+                    Criar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleCancelCreatingGroup}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           <div className="cad-groups" id="svcGroupList">
             {materialsGroupData.length > 0
               ? materialsGroupData.map((element, index) => (
@@ -212,13 +388,54 @@ const Materials = () => {
         </div>
         <div className="cad-items-outer">
           <div className="cad-items-wrap">
-            <div className="cad-items-header">
-              <span className="cad-items-title" id="svcGroupTitle">
-                {activeTab.groupName
-                  ? activeTab.groupName
-                  : "Selecione um grupo"}
-              </span>
-            </div>
+            {activeTab.groupName ? (
+              <div className="cad-items-header ">
+                <span className="cad-items-title " id="svcGroupTitle">
+                  {editingItem.group === activeTab.groupName ? (
+                    <input
+                      type="text"
+                      className="input cad-input cad-edit-input"
+                      value={editingItem.value}
+                      onChange={(e) => {
+                        setEditingItem({
+                          ...editingItem,
+                          value: e.target.value,
+                        });
+                      }}
+                      onBlur={handleEditSaveGroup}
+                      onKeyDown={handleEditKeyPressGroup}
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="cad-item-name">{activeTab.groupName}</div>
+                  )}
+                </span>
+                <button
+                  className="btn btn-sm btn-ghost cad-btn-editar"
+                  onClick={() =>
+                    handleEditClick(
+                      activeTab.groupName,
+                      activeTab.groupIndex,
+                      "",
+                    )
+                  }
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn btn-sm btn-danger cad-btn-remover"
+                  onClick={() => handleRemoveItemGroup(activeTab.groupIndex)}
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
+              <div className="cad-items-header ">
+                <span className="cad-items-title " id="svcGroupTitle">
+                  Selecione um grupo
+                </span>
+              </div>
+            )}
             {activeGroup && activeGroup.materials.length > 0 ? (
               activeGroup.materials.map((element) => (
                 <div key={element.id} className="cad-item-row">
@@ -267,7 +484,7 @@ const Materials = () => {
               <div id="svcItemList">
                 <div className="cad-empty">
                   {activeTab.groupName
-                    ? "Nenhum serviço encontrado neste grupo"
+                    ? "Nenhum material encontrado neste grupo"
                     : "Selecione um grupo à esquerda"}
                 </div>
               </div>
@@ -277,7 +494,7 @@ const Materials = () => {
                 type="text"
                 className="input cad-input"
                 id="svcNewItem"
-                placeholder="Nome do novo serviço..."
+                placeholder="Nome do novo material..."
                 value={newItemName}
                 onChange={(e) => setNewItemName(e.target.value)}
               />

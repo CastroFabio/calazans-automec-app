@@ -34,8 +34,8 @@ export const ENDPOINTS = {
   // Maintenance Groups
   maintenanceGroups: {
     base: "/maintenance-group",
-    byId: (id) => `/maintenance-groups/${id}`,
-    jobs: (id) => `/maintenance-groups/${id}/jobs`,
+    byId: (id) => `/maintenance-group/${id}`,
+    jobs: (id) => `/maintenance-group/${id}/jobs`,
   },
 
   // Materials

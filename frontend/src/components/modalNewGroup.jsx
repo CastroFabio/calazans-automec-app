@@ -1,27 +1,46 @@
 import { useState } from "react";
+import { materialGroupApi } from "../api/materialGroups";
 
 const ModalNewGroup = ({ isOpen, onClose }) => {
-  const [newMaterialGroup, setNewMaterialGroup] = useState({});
+  const [groupName, setGroupName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { error } = await supabase
-      .from("material_group")
-      .insert(newMaterialGroup)
-      .single();
-    if (error) {
-      console.error("Error adding material group:", error.message);
+    if (!groupName.trim()) {
+      setError("O nome do grupo é obrigatório");
       return;
     }
 
-    onClose();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await materialGroupApi.create({
+        group: groupName.trim(),
+      });
+
+      setGroupName("");
+      onClose();
+    } catch (err) {
+      console.error("Erro ao criar grupo:", err);
+
+      // Extrair mensagem de erro
+      const message = err.response.data.message || "Erro ao criar grupo";
+      setError(message);
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
-    setNewMaterialGroup((prev) => ({ ...prev, group: e.target.value }));
+    setGroupName(e.target.value);
+    if (error) setError(null);
   };
 
   const handleContentClick = (e) => {
@@ -48,9 +67,22 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
                 type="text"
                 className="input"
                 id="novoGrupoNome"
+                value={groupName}
                 onChange={handleChange}
                 placeholder="Ex: Suspensão, Motor, Freios..."
+                disabled={loading}
+                autoFocus
               />
+              {error &&
+                error.map((element, index) => (
+                  <div
+                    key={index}
+                    className="error-message"
+                    style={{ color: "red", marginTop: "8px" }}
+                  >
+                    ❌ {element}
+                  </div>
+                ))}
               <div className="modal-new-group-context-undertext">
                 O grupo ficará disponível para organizar itens no catálogo.
               </div>
@@ -60,7 +92,11 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
             <button className="btn btn-ghost" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || !groupName.trim()}
+            >
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -69,7 +105,7 @@ const ModalNewGroup = ({ isOpen, onClose }) => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              Criar Grupo
+              {loading ? "Criando..." : "Criar Grupo"}
             </button>
           </div>
         </form>

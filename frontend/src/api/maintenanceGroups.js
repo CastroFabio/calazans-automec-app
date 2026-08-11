@@ -15,7 +15,7 @@ export const maintenanceGroupApi = {
   create: (data) => api.post(ENDPOINTS.maintenanceGroups.base, data),
 
   // Atualizar grupo
-  update: (id, data) => api.put(ENDPOINTS.maintenanceGroups.byId(id), data),
+  update: (id, data) => api.patch(ENDPOINTS.maintenanceGroups.byId(id), data),
 
   // Remover grupo
   delete: (id) => api.delete(ENDPOINTS.maintenanceGroups.byId(id)),

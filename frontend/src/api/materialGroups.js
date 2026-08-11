@@ -15,7 +15,7 @@ export const materialGroupApi = {
   create: (data) => api.post(ENDPOINTS.materialGroups.base, data),
 
   // Atualizar grupo
-  update: (id, data) => api.put(ENDPOINTS.materialGroups.byId(id), data),
+  update: (id, data) => api.patch(ENDPOINTS.materialGroups.byId(id), data),
 
   // Remover grupo
   delete: (id) => api.delete(ENDPOINTS.materialGroups.byId(id)),

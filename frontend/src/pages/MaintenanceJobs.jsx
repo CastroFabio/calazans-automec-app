@@ -12,28 +12,31 @@ const MaintenanceJobs = () => {
     index: null,
     value: "",
   });
-  const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
+  const [creatingGroupName, setCreatingGroupName] = useState("");
+  const [maintenanceGroupData, setMaintenanceGroupData] = useState([]);
   const [newItemName, setNewItemName] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
 
   const activeGroup = activeTab
-    ? maintenanceJobsGroupData.find(
+    ? maintenanceGroupData.find(
         (element) => element.group === activeTab.groupName,
       )
     : null;
 
+  // ========== BUSCAR DADOS ==========
   const fetchMaintenance = async () => {
     try {
       setLoading(true);
       setError(null);
       const { data } = await maintenanceGroupApi.getAll();
 
-      setMaintenanceJobsGroupData(data);
+      setMaintenanceGroupData(data);
     } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço");
-      console.error("Erro ao buscar ordens:", err);
+      setError(err.message || "Erro ao carregar materiais");
+      console.error("Erro ao buscar materiais:", err);
     } finally {
       setLoading(false);
     }
@@ -43,6 +46,64 @@ const MaintenanceJobs = () => {
     fetchMaintenance();
   }, []);
 
+  // ========== CRIAR GRUPO ==========
+  const handleClickCreatingGroup = async (e) => {
+    e.preventDefault();
+
+    // ✅ Usar creatingGroupName em vez de groupName
+    if (!creatingGroupName.trim()) {
+      setError("O nome do grupo é obrigatório");
+      return;
+    }
+
+    setIsCreatingGroup(true); // ✅ Usar o estado correto
+    setError(null);
+
+    try {
+      const response = await maintenanceGroupApi.create({
+        group: creatingGroupName.trim(),
+      });
+
+      console.log("✅ Grupo criado:", response.data);
+
+      // ✅ Atualizar a lista de grupos
+      setMaintenanceGroupData((prevData) => [
+        ...prevData,
+        { ...response.data, maintenanceJobs: [] },
+      ]);
+
+      // ✅ Limpar o campo
+      setCreatingGroupName("");
+
+      // ✅ Fechar o input
+      setIsCreatingGroup(false);
+
+      // ✅ Opcional: Selecionar o novo grupo automaticamente
+      setActiveTab({
+        groupIndex: response.data.id,
+        groupName: response.data.group,
+      });
+    } catch (error) {
+      console.error("Erro ao criar grupo:", error);
+      const message = error.response?.data?.message || "Erro ao criar grupo";
+      setError(message);
+    } finally {
+      setIsCreatingGroup(false);
+    }
+  };
+
+  const handleCancelCreatingGroup = () => {
+    setCreatingGroupName("");
+    setIsCreatingGroup(false);
+    setError(null);
+  };
+
+  const handleChangeCreatingGroup = (e) => {
+    setCreatingGroupName(e.target.value);
+    if (error) setError(null);
+  };
+
+  // ========== EDITAR ITEM ==========
   const handleEditClick = (groupName, itemIndex, currentValue) => {
     setEditingItem({
       group: groupName,
@@ -51,26 +112,24 @@ const MaintenanceJobs = () => {
     });
   };
 
-  const handleEditSave = async () => {
+  const handleEditSave = async (type) => {
     if (!editingItem.group || !editingItem.index) return;
 
     try {
       const { index: id, value: newName, group: groupName } = editingItem;
 
-      // Atualizar no backend
       await maintenanceJobApi.update(id, { name: newName });
 
-      // Atualizar localmente
-      setMaintenanceJobsGroupData((prevData) => {
+      setMaintenanceGroupData((prevData) => {
         return prevData.map((group) => {
           if (group.group === groupName) {
             return {
               ...group,
-              maintenanceJobs: group.maintenanceJobs.map((job) => {
-                if (job.id === id) {
-                  return { ...job, name: newName };
+              maintenanceJobs: group.maintenanceJobs.map((element) => {
+                if (element.id === id) {
+                  return { ...element, name: newName };
                 }
-                return job;
+                return element;
               }),
             };
           }
@@ -82,7 +141,38 @@ const MaintenanceJobs = () => {
     } catch (error) {
       console.error("Erro ao editar:", error);
       const message =
-        error.response?.data?.message || "Erro ao adicionar serviço";
+        error.response?.data?.message || "Erro ao adicionar materiais";
+      setError(message);
+    }
+  };
+
+  const handleEditSaveGroup = async () => {
+    if (!editingItem.group || !editingItem.index) return;
+
+    try {
+      const { index: id, value: newName, group: groupName } = editingItem;
+
+      await maintenanceGroupApi.update(id, { group: newName });
+
+      setMaintenanceGroupData((prevData) => {
+        return prevData.map((group) => {
+          if (group.id === id) {
+            return {
+              ...group,
+              group: newName,
+            };
+          }
+          return group;
+        });
+      });
+
+      setActiveTab({ ...activeTab, groupName: newName });
+      setEditingItem({ group: null, index: null, value: "" });
+    } catch (error) {
+      console.error("Erro ao editar:", error);
+      const message =
+        error.response?.data?.message ||
+        "Erro ao adicionar serviço de manutenção";
       setError(message);
     }
   };
@@ -99,28 +189,40 @@ const MaintenanceJobs = () => {
     }
   };
 
+  const handleEditKeyPressGroup = (e) => {
+    if (e.key === "Enter") {
+      handleEditSaveGroup();
+    } else if (e.key === "Escape") {
+      handleEditCancel();
+    }
+  };
+
+  // ========== REMOVER ITEM ==========
   const handleRemoveItem = async (maintenanceID) => {
     try {
       await maintenanceJobApi.delete(maintenanceID);
 
       // Remover localmente
-      setMaintenanceJobsGroupData((prevData) => {
+      setMaintenanceGroupData((prevData) => {
         return prevData.map((group) => {
           return {
             ...group,
             maintenanceJobs: group.maintenanceJobs.filter(
-              (job) => job.id !== maintenanceID,
+              (element) => element.id !== maintenanceID,
             ),
           };
         });
       });
     } catch (error) {
       console.error("Erro ao remover:", error);
-      const message = error.response?.data?.message || "Erro ao remover";
+      const message =
+        error.response?.data?.message ||
+        "Erro ao remover serviço de manutenção";
       setError(message);
     }
   };
 
+  // ========== ADICIONAR ITEM ==========
   const handleAddItem = async (groupIndex, newItemName) => {
     if (!newItemName.trim()) return;
 
@@ -136,7 +238,7 @@ const MaintenanceJobs = () => {
       const response = await maintenanceJobApi.create(newItem);
 
       // Atualizar o estado localmente
-      setMaintenanceJobsGroupData((prevData) => {
+      setMaintenanceGroupData((prevData) => {
         return prevData.map((group) => {
           if (group.id === groupIndex) {
             return {
@@ -151,12 +253,39 @@ const MaintenanceJobs = () => {
       // Limpar o campo
       setNewItemName("");
     } catch (error) {
-      console.error("Erro ao adicionar serviço:", error);
+      console.error("Erro ao adicionar serviço de manutenção:", error);
       const message =
-        error.response?.data?.message || "Erro ao adicionar serviço";
+        error.response?.data?.message ||
+        "Erro ao adicionar serviço de manutenção";
       setError(message);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  // ========== REMOVER GRUPO ==========
+  const handleRemoveItemGroup = async (groupID) => {
+    try {
+      // 1. Remover no backend
+      await maintenanceGroupApi.delete(groupID);
+
+      // 2. Remover localmente
+      setMaintenanceGroupData((prevData) => {
+        return prevData.filter((group) => group.id !== groupID);
+      });
+
+      // 3. Se o grupo removido era o grupo ativo, limpar a tab ativa
+      if (activeTab.groupIndex === groupID) {
+        setActiveTab({
+          groupName: "",
+          groupIndex: null,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao remover grupo:", error);
+      const message = error.response?.data?.message || "Erro ao remover grupo";
+      setError(message);
+      alert(`Erro: ${message}`);
     }
   };
 
@@ -165,16 +294,65 @@ const MaintenanceJobs = () => {
       <div className="page-header">
         <div>
           <div className="ph-sub">
-            Catálogo de serviços disponíveis na oficina
+            Catálogo de serviços de manutenação disponíveis na oficina
           </div>
         </div>
       </div>
       <div className="cad-layout">
         <div>
-          <div className="cad-subtitle-group">Grupos</div>
+          <div className=" flex">
+            <div className="cad-subtitle-group ">Grupos</div>
+            <button
+              className="btn btn-primary"
+              onClick={() => setIsCreatingGroup(true)}
+              disabled={isCreatingGroup}
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </button>
+          </div>
+          {isCreatingGroup && (
+            <div
+              className="cad-create-group-container"
+              style={{ marginBottom: "8px" }}
+            >
+              <form onSubmit={handleClickCreatingGroup}>
+                <input
+                  type="text"
+                  className="input cad-input cad-input-group-create"
+                  value={creatingGroupName}
+                  onChange={handleChangeCreatingGroup}
+                  placeholder="Ex: Suspensão, Motor, Freios..."
+                  autoFocus
+                />
+                <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary btn-sm"
+                    disabled={!creatingGroupName.trim()}
+                  >
+                    Criar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={handleCancelCreatingGroup}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           <div className="cad-groups" id="svcGroupList">
-            {maintenanceJobsGroupData.length > 0
-              ? maintenanceJobsGroupData.map((element, index) => (
+            {maintenanceGroupData.length > 0
+              ? maintenanceGroupData.map((element, index) => (
                   <div key={index} className="cad-group-wrap">
                     <button
                       onClick={() =>
@@ -214,13 +392,54 @@ const MaintenanceJobs = () => {
         </div>
         <div className="cad-items-outer">
           <div className="cad-items-wrap">
-            <div className="cad-items-header">
-              <span className="cad-items-title" id="svcGroupTitle">
-                {activeTab.groupName
-                  ? activeTab.groupName
-                  : "Selecione um grupo"}
-              </span>
-            </div>
+            {activeTab.groupName ? (
+              <div className="cad-items-header ">
+                <span className="cad-items-title " id="svcGroupTitle">
+                  {editingItem.group === activeTab.groupName ? (
+                    <input
+                      type="text"
+                      className="input cad-input cad-edit-input"
+                      value={editingItem.value}
+                      onChange={(e) => {
+                        setEditingItem({
+                          ...editingItem,
+                          value: e.target.value,
+                        });
+                      }}
+                      onBlur={handleEditSaveGroup}
+                      onKeyDown={handleEditKeyPressGroup}
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="cad-item-name">{activeTab.groupName}</div>
+                  )}
+                </span>
+                <button
+                  className="btn btn-sm btn-ghost cad-btn-editar"
+                  onClick={() =>
+                    handleEditClick(
+                      activeTab.groupName,
+                      activeTab.groupIndex,
+                      "",
+                    )
+                  }
+                >
+                  Editar
+                </button>
+                <button
+                  className="btn btn-sm btn-danger cad-btn-remover"
+                  onClick={() => handleRemoveItemGroup(activeTab.groupIndex)}
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
+              <div className="cad-items-header ">
+                <span className="cad-items-title " id="svcGroupTitle">
+                  Selecione um grupo
+                </span>
+              </div>
+            )}
             {activeGroup && activeGroup.maintenanceJobs.length > 0 ? (
               activeGroup.maintenanceJobs.map((element) => (
                 <div key={element.id} className="cad-item-row">

@@ -147,6 +147,7 @@ export class MaintenanceGroupService {
 
       if (!maintenanceJobGroup)
         throw new NotFoundException('Grupo de material não encontrado');
+
       await this.prisma.maintenanceJobGroup.delete({
         where: { id },
       });

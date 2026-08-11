@@ -957,9 +957,6 @@
 
 /* ── SERVICE ROWS ── */
 
-.cad-subtitle-group {
-}
-
 .services-list {
   display: flex;
   flex-direction: column;
@@ -1659,17 +1656,27 @@
   gap: 6px;
 }
 
+.flex {
+  display: flex;
+  justify-content: space-between;
+}
+
 .cad-subtitle-group {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--ink3);
-  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
 }
 
 .cad-input {
   flex: 1;
+}
+
+.cad-input-group-create {
+  margin-top: 8px;
 }
 
 .cad-search-box {
@@ -1736,6 +1743,10 @@
 .cad-group-btn.active .cad-group-count {
   background: var(--accent-mid);
   color: var(--accent);
+}
+
+.border {
+  border: #1a1a17 1px solid;
 }
 
 .cad-items-wrap {

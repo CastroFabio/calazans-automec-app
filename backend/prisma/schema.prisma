@@ -33,7 +33,7 @@ model Vehicle {
   customer_id   Int?
 
   // Relacionamentos
-  customer      Customer?      @relation(fields: [customer_id], references: [id])
+  customer      Customer?      @relation(fields: [customer_id], references: [id], onDelete: SetNull)
   serviceOrders ServiceOrder[]
 
   @@map("vehicle")
@@ -56,7 +56,7 @@ model Material {
   group_id   Int
 
   // Relacionamentos
-  group         MaterialGroup  @relation(fields: [group_id], references: [id])
+  group         MaterialGroup  @relation(fields: [group_id], references: [id], onDelete: Cascade)
   itemMaterials ItemMaterial[] // Relacionamento inverso
 
   @@map("material")
@@ -80,7 +80,7 @@ model MaintenanceJob {
   value_unit Float    @default(0) @db.DoublePrecision
 
   // Relacionamentos
-  group            MaintenanceJobGroup @relation(fields: [group_id], references: [id])
+  group            MaintenanceJobGroup @relation(fields: [group_id], references: [id], onDelete: Cascade)
   itemMaintenances ItemMaintenance[] // Relacionamento inverso
 
   @@map("maintenancejob")
@@ -101,8 +101,8 @@ model ServiceOrder {
   subtotal     Float     @default(0)
 
   // Relacionamentos
-  customer         Customer          @relation(fields: [customer_id], references: [id])
-  vehicle          Vehicle           @relation(fields: [vehicle_id], references: [id])
+  customer         Customer          @relation(fields: [customer_id], references: [id], onDelete: Restrict)
+  vehicle          Vehicle           @relation(fields: [vehicle_id], references: [id], onDelete: Restrict)
   itemMaterials    ItemMaterial[] // Relacionamento inverso com ItemMaterial
   itemMaintenances ItemMaintenance[]
 
@@ -119,8 +119,8 @@ model ItemMaterial {
   reference       String?  @db.Text
 
   // Relacionamentos
-  serviceorder ServiceOrder @relation(fields: [serviceorder_id], references: [id])
-  material     Material     @relation(fields: [material_id], references: [id])
+  serviceorder ServiceOrder @relation(fields: [serviceorder_id], references: [id], onDelete: Cascade)
+  material     Material     @relation(fields: [material_id], references: [id], onDelete: Restrict)
 
   @@map("item_material")
 }
@@ -134,8 +134,8 @@ model ItemMaintenance {
   description     String?  @db.Text
 
   // Relacionamentos
-  serviceorder   ServiceOrder    @relation(fields: [serviceorder_id], references: [id])
-  maintenancejob MaintenanceJob? @relation(fields: [maintenance_id], references: [id])
+  serviceorder   ServiceOrder    @relation(fields: [serviceorder_id], references: [id], onDelete: Cascade)
+  maintenancejob MaintenanceJob? @relation(fields: [maintenance_id], references: [id], onDelete: Restrict)
 
   @@map("item_maintenance")
 }
