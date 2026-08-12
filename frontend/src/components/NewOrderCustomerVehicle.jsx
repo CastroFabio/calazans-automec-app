@@ -7,7 +7,7 @@ const NewOrderCustomerVehicle = ({
   formData,
   customerData,
 }) => {
-  const [selectedCustomerInfo, setSelectedCustomerInfo] = useState({});
+  const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
     formatLocalDateTime(new Date()),
@@ -57,10 +57,10 @@ const NewOrderCustomerVehicle = ({
           <div className="field">
             <label>Veículo *</label>
             <div className="car-badge-row">
-              {selectedCustomerInfo &&
-              Object.keys(selectedCustomerInfo).length > 0 ? (
-                selectedCustomerInfo.vehicle.length > 0 ? (
-                  selectedCustomerInfo.vehicle.map((element, index) => (
+              {}
+              {selectedCustomerInfo ? (
+                selectedCustomerInfo.vehicles.length > 0 ? (
+                  selectedCustomerInfo.vehicles.map((element, index) => (
                     <div
                       className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
                       key={index}

@@ -103,7 +103,7 @@ const AutoCompleteCustomer = ({
             >
               <div className="ac-option-name">{element.name}</div>
               <div className="ac-option-sub">
-                {`${element.cell} · ${element.vehicle.length}  veículo(s) `}
+                {`${element.cell} · ${element.vehicles.length}  veículo(s) `}
               </div>
             </div>
           ))
