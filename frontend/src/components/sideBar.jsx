@@ -6,19 +6,21 @@ import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { materialGroupApi } from "../api/materialGroups";
+import { useCustomers } from "../context/Customer.context";
 
 import { useLocation } from "react-router-dom";
 
 const SideBar = () => {
   const [maintenanceJobsGroupCount, setMaintenanceJobsGroupCount] = useState(0);
   const [materialGroupCount, setMaterialGroupCount] = useState(0);
-  const [customerCount, setCustomerCount] = useState(0);
   const [serviceOrderCount, setServiceOrderCount] = useState(0);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const { countAllCustomers } = useCustomers();
 
   const isActive = (path) => (currentPath === path ? "active" : "");
 
@@ -29,9 +31,6 @@ const SideBar = () => {
 
       const responseServiceOrder = await orderApi.getTotal();
       setServiceOrderCount(responseServiceOrder.data);
-
-      const responseCustomer = await customerApi.getTotal();
-      setCustomerCount(responseCustomer.data);
 
       const responseMaterial = await materialGroupApi.getTotal();
       setMaterialGroupCount(responseMaterial.data);
@@ -76,7 +75,7 @@ const SideBar = () => {
         id: "customersTab",
         title: "Clientes",
         navigateURL: "/customers",
-        numberOf: customerCount,
+        numberOf: countAllCustomers(),
         svgIcon: (
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

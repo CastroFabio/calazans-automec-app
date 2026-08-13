@@ -1293,9 +1293,9 @@
   flex-shrink: 0;
   transition: all 0.14s;
 }
+
 .sp-close:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
 }
 .sp-body {
   flex: 1;

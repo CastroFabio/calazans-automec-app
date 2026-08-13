@@ -7,6 +7,7 @@ const CustomerContext = createContext();
 // Provider do Contexto
 export const CustomerProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
+  const [customerCount, setCustomerCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -24,15 +25,33 @@ export const CustomerProvider = ({ children }) => {
     }
   };
 
+  // Carregar clientes ao iniciar
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const countAllCustomers = () => {
+    return customers.length;
+  };
+
   // Função para adicionar cliente (atualiza a lista)
   const addCustomer = (newCustomer) => {
     setCustomers((prev) => [newCustomer, ...prev]);
   };
 
-  // Carregar clientes ao iniciar
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+  const removeCustomer = (customerId) => {
+    setCustomers((prev) =>
+      prev.filter((customer) => customer.id !== customerId),
+    );
+  };
+
+  const updateCustomer = (updatedCustomer) => {
+    setCustomers((prev) =>
+      prev.map((customer) =>
+        customer.id === updatedCustomer.id ? updatedCustomer : customer,
+      ),
+    );
+  };
 
   return (
     <CustomerContext.Provider
@@ -43,6 +62,9 @@ export const CustomerProvider = ({ children }) => {
         error,
         fetchCustomers,
         addCustomer,
+        removeCustomer,
+        updateCustomer,
+        countAllCustomers,
       }}
     >
       {children}

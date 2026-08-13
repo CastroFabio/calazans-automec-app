@@ -12,23 +12,7 @@ const Customers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
-  const { customers, fetchCustomers } = useCustomers();
-
-  if (loading) return <div>Carregando clientes...</div>;
-  if (error) return <div>Erro: {error}</div>;
-
-  const getCustomerNameInitials = (customerName) => {
-    return customerName
-      .split(" ")
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  const { customers, fetchCustomers, removeCustomer } = useCustomers();
 
   const filteredData = useMemo(() => {
     if (!searchTerm) {
@@ -50,6 +34,19 @@ const Customers = () => {
     });
   }, [customers, searchTerm]);
 
+  const getCustomerNameInitials = (customerName) => {
+    return customerName
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   const handleCardClick = () => {
     setSidebarOpen(true);
   };
@@ -63,6 +60,42 @@ const Customers = () => {
 
     setSelectedCustomer(data);
   };
+
+  const handleRemoveCustomer = async (customerID, event) => {
+    event.stopPropagation(); // Impede abrir o sidebar
+
+    if (!window.confirm("Tem certeza que deseja remover este cliente?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // 1. Remover no backend
+      await customerApi.delete(customerID);
+
+      // 2. Remover da lista local (usando o contexto)
+      removeCustomer(customerID);
+
+      // 3. Se o cliente removido estava selecionado, fechar sidebar
+      if (selectedCustomer?.id === customerID) {
+        setSidebarOpen(false);
+        setSelectedCustomer(null);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao remover cliente:", error);
+      const message =
+        error.response?.data?.message || "Erro ao remover cliente";
+      setError(message);
+      alert(`Erro: ${message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div>Carregando clientes...</div>;
+  if (error) return <div>Erro: {error}</div>;
 
   return (
     <div className="page" id="page-clientes">
@@ -101,6 +134,12 @@ const Customers = () => {
                 handleFetchSelectedCustomer(element.id);
               }}
             >
+              <button
+                className="sp-close "
+                onClick={(e) => handleRemoveCustomer(element.id, e)}
+              >
+                ×
+              </button>
               <div className="client-card-header">
                 <div className="client-avatar-lg bg-orange-50">
                   {getCustomerNameInitials(element.name)}

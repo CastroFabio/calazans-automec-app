@@ -20,7 +20,7 @@ const NavBar = () => {
       title: "Ordens de Serviço",
       btn: (
         <button
-          onClick={() => navigate("/neworder")}
+          onClick={() => navigate("/new-service-order")}
           className="btn btn-primary"
         >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
