@@ -1423,6 +1423,26 @@
 
 /* ── MODALS ── */
 
+.modal-container-vehicle-textarea {
+  min-height: 60px;
+}
+
+.modal-container-vehicle-input {
+  text-transform: uppercase;
+}
+
+.modal-container-vehicle-select {
+  gap: 13px;
+}
+
+.modal-container-vehicle {
+  width: 560px;
+}
+
+.modal-vehicle-field-customer {
+  margin-bottom: 14px;
+}
+
 .modal-customer-form-grid {
   gap: 13px;
 }

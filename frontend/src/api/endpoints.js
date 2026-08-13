@@ -8,10 +8,10 @@ export const ENDPOINTS = {
   },
 
   // Cars
-  cars: {
-    base: "/cars",
-    byId: (id) => `/cars/${id}`,
-    maintenance: (id) => `/cars/${id}/maintenance`,
+  vehicles: {
+    base: "/vehicles",
+    byId: (id) => `/vehicles/${id}`,
+    maintenance: (id) => `/vehicles/${id}/maintenance`,
   },
 
   // Orders (Service Orders)

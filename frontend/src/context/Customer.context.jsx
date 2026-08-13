@@ -25,11 +25,6 @@ export const CustomerProvider = ({ children }) => {
     }
   };
 
-  // Carregar clientes ao iniciar
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
   const countAllCustomers = () => {
     return customers.length;
   };
@@ -53,6 +48,69 @@ export const CustomerProvider = ({ children }) => {
     );
   };
 
+  const addVehicleToCustomer = (customerId, newVehicle) => {
+    setCustomers((prev) =>
+      prev.map((customer) => {
+        if (customer.id !== customerId) return customer;
+
+        // Atualizar o cliente com o novo veículo
+        const updatedCustomer = {
+          ...customer,
+          vehicles: [...(customer.vehicles || []), newVehicle],
+          _count: {
+            ...customer._count,
+            vehicles: (customer._count?.vehicles || 0) + 1,
+          },
+        };
+
+        return updatedCustomer;
+      }),
+    );
+  };
+
+  const removeVehicleFromCustomer = (customerId, vehicleId) => {
+    setCustomers((prev) =>
+      prev.map((customer) => {
+        if (customer.id !== customerId) return customer;
+
+        const updatedVehicles = (customer.vehicles || []).filter(
+          (vehicle) => vehicle.id !== vehicleId,
+        );
+
+        return {
+          ...customer,
+          vehicles: updatedVehicles,
+          _count: {
+            ...customer._count,
+            vehicles: updatedVehicles.length,
+          },
+        };
+      }),
+    );
+  };
+
+  const updateVehicleFromCustomer = (customerId, updatedVehicle) => {
+    setCustomers((prev) =>
+      prev.map((customer) => {
+        if (customer.id !== customerId) return customer;
+
+        const updatedVehicles = (customer.vehicles || []).map((vehicle) =>
+          vehicle.id === updatedVehicle.id ? updatedVehicle : vehicle,
+        );
+
+        return {
+          ...customer,
+          vehicles: updatedVehicles,
+        };
+      }),
+    );
+  };
+
+  // Carregar clientes ao iniciar
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
   return (
     <CustomerContext.Provider
       value={{
@@ -65,6 +123,9 @@ export const CustomerProvider = ({ children }) => {
         removeCustomer,
         updateCustomer,
         countAllCustomers,
+        addVehicleToCustomer,
+        removeVehicleFromCustomer,
+        updateVehicleFromCustomer,
       }}
     >
       {children}

@@ -3,6 +3,7 @@ import { customerListDTO } from "../data/mockDataDTO";
 import { customerApi } from "../api/customers";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { useCustomers } from "../context/Customer.context";
+import NewVehicleModal from "../components/NewVehicleModal.component";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -10,6 +11,7 @@ const Customers = () => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const { customers, fetchCustomers, removeCustomer } = useCustomers();
@@ -48,17 +50,35 @@ const Customers = () => {
   };
 
   const handleCardClick = () => {
-    setSidebarOpen(true);
+    setSidebarOpen(false);
   };
 
   const closeSidebar = () => {
     setSidebarOpen(false);
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const handleFetchSelectedCustomer = async (customerID) => {
     const { data } = await customerApi.getById(customerID);
 
     setSelectedCustomer(data);
+  };
+
+  const handleOpenModal = (event, customer) => {
+    if (event) event.stopPropagation();
+
+    // ✅ Verificar se o cliente existe
+    if (!customer) {
+      alert("Selecione um cliente primeiro");
+      return;
+    }
+
+    // ✅ Definir o cliente selecionado e abrir o modal
+    setSelectedCustomer(customer);
+    setIsModalOpen(true);
   };
 
   const handleRemoveCustomer = async (customerID, event) => {
@@ -213,7 +233,10 @@ const Customers = () => {
                       ))
                     : ""}
                 </div>
-                <button className="btn btn-sm btn-secondary client-btn-add-vehicle">
+                <button
+                  className="btn btn-sm btn-secondary client-btn-add-vehicle"
+                  onClick={(e) => handleOpenModal(e, element)}
+                >
                   + Veículo
                 </button>
               </div>
@@ -230,6 +253,14 @@ const Customers = () => {
         <CustomerDetailPanel
           onClose={closeSidebar}
           sidebarOpen={sidebarOpen}
+          selectedCustomer={selectedCustomer}
+        />
+      )}
+
+      {isModalOpen && selectedCustomer && (
+        <NewVehicleModal
+          onClose={closeModal}
+          isModalOpen={isModalOpen}
           selectedCustomer={selectedCustomer}
         />
       )}
