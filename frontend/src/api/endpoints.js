@@ -58,8 +58,15 @@ export const ENDPOINTS = {
 
   // Item Materials (materiais dentro da OS)
   itemMaterials: {
-    base: "/item-material",
-    byId: (id) => `/item-material/${id}`,
-    byOrder: (orderId) => `/item-material/order/${orderId}`,
+    base: "/material-item",
+    byId: (id) => `/material-item/${id}`,
+    byOrder: (orderId) => `/material-item/order/${orderId}`,
+  },
+
+  // Item Maintenance (manutenações dentro da OS)
+  itemMaintenances: {
+    base: "/maintenance-item",
+    byId: (id) => `/maintenance-item/${id}`,
+    byOrder: (orderId) => `/maintenance-item/order/${orderId}`,
   },
 };

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -8,6 +9,7 @@ import { CreateMaintenanceItemDto } from './dto/create-maintenance-item.dto';
 import { UpdateMaintenanceDto } from 'src/maintenance/dto/update-maintenance.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateMaintenanceItemDto } from './dto/update-maintenance-item.dto';
+import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';
 
 @Injectable()
 export class MaintenanceItemService {
@@ -74,6 +76,113 @@ export class MaintenanceItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao criar serviço de manutenção',
+      );
+    }
+  }
+
+  // CREATE BATCH - Criar múltiplos itens de uma vez
+  async createBatch(createBatchDto: CreateItemMaintenanceBatchDto) {
+    try {
+      const { items } = createBatchDto;
+
+      if (!items || items.length === 0) {
+        throw new BadRequestException('Nenhum item para criar');
+      }
+
+      // Validar: cada item deve ter maintenance_id OU description
+      for (const item of items) {
+        if (!item.maintenance_id && !item.description) {
+          throw new BadRequestException(
+            'Cada item deve ter maintenance_id ou description',
+          );
+        }
+      }
+
+      // Validar se as manutenções existem (apenas as que têm ID)
+      const maintenanceIds = items
+        .filter((item) => item.maintenance_id)
+        .map((item) => item.maintenance_id as number);
+
+      if (maintenanceIds.length > 0) {
+        const existingMaintenances = await this.prisma.maintenanceJob.findMany({
+          where: { id: { in: maintenanceIds } },
+          select: { id: true },
+        });
+
+        const existingIds = new Set(existingMaintenances.map((m) => m.id));
+        const missingIds = maintenanceIds.filter((id) => !existingIds.has(id));
+
+        if (missingIds.length > 0) {
+          throw new NotFoundException(
+            `Manutenções não encontradas: ${missingIds.join(', ')}`,
+          );
+        }
+      }
+
+      // Validar se a OS existe
+      const orderIds = [...new Set(items.map((item) => item.serviceorder_id))];
+      const existingOrders = await this.prisma.serviceOrder.findMany({
+        where: { id: { in: orderIds } },
+        select: { id: true },
+      });
+
+      const existingOrderIds = new Set(existingOrders.map((o) => o.id));
+      const missingOrderIds = orderIds.filter(
+        (id) => !existingOrderIds.has(id),
+      );
+
+      if (missingOrderIds.length > 0) {
+        throw new NotFoundException(
+          `Ordens de serviço não encontradas: ${missingOrderIds.join(', ')}`,
+        );
+      }
+
+      // Preparar dados para createMany
+      const data = items.map((item) => ({
+        maintenance_id: item.maintenance_id || null,
+        description: item.description || null,
+        value_unity: item.value_unity,
+        serviceorder_id: item.serviceorder_id,
+      }));
+
+      // Criar todos de uma vez com createMany
+      const result = await this.prisma.itemMaintenance.createMany({
+        data,
+        skipDuplicates: false,
+      });
+
+      // Buscar os itens criados para retornar
+      const createdItems = await this.prisma.itemMaintenance.findMany({
+        where: {
+          serviceorder_id: { in: orderIds },
+        },
+        include: {
+          maintenancejob: {
+            include: {
+              group: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+        take: items.length,
+      });
+
+      return {
+        count: result.count,
+        items: createdItems,
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao criar itens de manutenção: ',
       );
     }
   }

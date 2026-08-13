@@ -28,6 +28,10 @@ import {
 } from '@nestjs/swagger';
 import { MaterialResponseDto } from 'src/material/dto/response-material.dto';
 import { MaterialItemResponseDto } from './dto/response-material-item.dto';
+import {
+  CreateItemMaterialBatchDto,
+  CreateItemMaterialBatchItemDto,
+} from './dto/create-item-material-batch.dto';
 
 @ApiTags('material-item')
 @Controller('material-item')
@@ -58,6 +62,26 @@ export class MaterialItemController {
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaterialItemDto: CreateMaterialItemDto) {
     return this.materialItemService.create(createMaterialItemDto);
+  }
+
+  @Post('batch')
+  @ApiOperation({
+    summary: 'Criar múltiplos itens de material de uma vez',
+    description: 'Cria vários itens de material em uma única requisição',
+  })
+  @ApiCreatedResponse({
+    description: 'Itens criados com sucesso',
+    type: [MaterialItemResponseDto],
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados inválidos',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno do servidor',
+  })
+  @HttpCode(HttpStatus.CREATED)
+  async createBatch(@Body() createBatchDto: CreateItemMaterialBatchDto) {
+    return this.materialItemService.createBatch(createBatchDto);
   }
 
   @Get()

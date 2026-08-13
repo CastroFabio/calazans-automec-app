@@ -72,6 +72,7 @@ const ServiceOrderList = () => {
       setLoading(true);
       setError(null);
       const { data } = await orderApi.getAll();
+      data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
       setServiceOrderData(data);
     } catch (err) {

@@ -28,6 +28,7 @@ import {
 } from '@nestjs/swagger';
 import { MaintenanceResponseDto } from 'src/maintenance/dto/response-maintenance.dto';
 import { MaintenanceItemResponseDto } from './dto/response-maintenance-item.dto';
+import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';
 
 @ApiTags('maintenance-item')
 @Controller('maintenance-item')
@@ -60,6 +61,26 @@ export class MaintenanceItemController {
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaintenanceItemDto: CreateMaintenanceItemDto) {
     return this.maintenanceItemService.create(createMaintenanceItemDto);
+  }
+
+  @Post('batch')
+  @ApiOperation({
+    summary: 'Criar múltiplos itens de manutenção de uma vez',
+    description: 'Cria vários itens de manutenção em uma única requisição',
+  })
+  @ApiCreatedResponse({
+    description: 'Itens criados com sucesso',
+    type: [MaintenanceItemResponseDto],
+  })
+  @ApiBadRequestResponse({
+    description: 'Dados inválidos',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Erro interno do servidor',
+  })
+  @HttpCode(HttpStatus.CREATED)
+  async createBatch(@Body() createBatchDto: CreateItemMaintenanceBatchDto) {
+    return this.maintenanceItemService.createBatch(createBatchDto);
   }
 
   @Get()

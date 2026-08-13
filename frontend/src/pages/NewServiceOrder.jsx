@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 import AutoCompleteCustomer from "../components/AutoCompleteCustomer";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
@@ -11,14 +12,20 @@ import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { formattedPrice } from "../utils/convertPrice";
 import { materialApi } from "../api/materials";
 import { materialGroupApi } from "../api/materialGroups";
+import { priorityMap, priorityReverseMap } from "../utils/priorityMap";
+import { statusMap, statusReverseMap } from "../utils/statusMap";
+import { orderApi } from "../api/orders";
+import { itemMaterialApi } from "../api/itemMaterial";
+import { itemMaintenanceApi } from "../api/itemMaintenance";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
-  const [listMaterials, setListMaterials] = useState([]);
   const [materialsData, setMaterialsData] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
@@ -38,19 +45,32 @@ const NewServiceOrder = () => {
   // State for form fields
   const [formData, setFormData] = useState({
     professional: "",
-    priority: "Normal",
-    status: "Pendente",
+    priority: 1,
+    status: 1,
     arrived_at: new Date().toISOString(),
-    customer_id: "",
-    vehicle_id: "",
     entry_km: "",
     diagnosis: "",
     observation: "",
-    value: "",
-    item_material: [],
-    item_maintenancejob: [],
+    subtotal: null,
+    customer_id: "",
+    vehicle_id: "",
   });
 
+  const [formDataItemMaintenance, setFormDataItemMaintenance] = useState({
+    value_unity: null,
+    serviceorder_id: null,
+    maintenance_id: null,
+    description: "",
+  });
+
+  const [formDataItemMaterial, setFormDataItemMaterial] = useState({
+    value_unity: null,
+    serviceorder_id: null,
+    material_id: null,
+    reference: "",
+  });
+
+  // FETCH
   const handleFetchCustomers = async () => {
     const { data } = await customerApi.getAll();
 
@@ -81,8 +101,151 @@ const NewServiceOrder = () => {
     handleFetchGroupMaintenanceJobData();
   }, []);
 
+  // Função específica para prioridade
+  const handlePriorityChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      priority: priorityMap[value] || 1, // ← Converte texto para ID
+    }));
+  };
+
+  // Função específica para status
+  const handleStatusChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      status: statusMap[value] || 1, // ← Converte texto para ID
+    }));
+  };
+
+  //
+  const handleAddItem = () => {
+    const newItem = {
+      ...formDataItemMaintenance,
+      id: Date.now(), // ID temporário
+      maintenance_id: formDataItemMaintenance.maintenance_id,
+      serviceorder_id: null,
+      value_unity: Number(formDataItemMaintenance.value_unity) || 0,
+      description: formDataItemMaintenance.description,
+    };
+
+    setListMaintenanceJobs((prev) => [...prev, newItem]);
+
+    setFormDataItemMaintenance({
+      value_unity: null,
+      serviceorder_id: null,
+      maintenance_id: null,
+      description: "",
+    });
+  };
+
+  // No componente
+  const navigate = useNavigate();
+
+  // Função para salvar a OS
+  const handleSaveOS = async () => {
+    // ========== VALIDAÇÕES ==========
+    if (!formData.customer_id) {
+      setError("Selecione um cliente");
+      return;
+    }
+
+    if (!formData.vehicle_id) {
+      setError("Selecione um veículo");
+      return;
+    }
+
+    if (!formData.diagnosis.trim()) {
+      setError("Preencha o diagnóstico");
+      return;
+    }
+
+    if (listMaintenanceJobs.length === 0 && materialsList.length === 0) {
+      setError("Adicione pelo menos um serviço ou material");
+      return;
+    }
+
+    // ========== PREPARAR DADOS DA OS ==========
+    const serviceOrderData = {
+      customer_id: formData.customer_id,
+      vehicle_id: formData.vehicle_id,
+      professional: formData.professional || null,
+      priority: formData.priority,
+      status: formData.status,
+      arrived_at: formData.arrived_at,
+      entry_km: parseFloat(formData.entry_km) || 0,
+      diagnosis: formData.diagnosis.trim(),
+      observation: formData.observation?.trim() || null,
+      subtotal: calculateGrandTotal(),
+    };
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // ========== 1. CRIAR SERVICE ORDER ==========
+
+      const { data: serviceOrder } = await orderApi.create(serviceOrderData);
+
+      const serviceOrderId = serviceOrder.id; // ← ID para usar nos itens
+
+      // ========== 2. CRIAR ITEM MAINTENANCE ==========
+      if (listMaintenanceJobs.length > 0) {
+        const itemMaintenanceData = listMaintenanceJobs.map((job) => ({
+          serviceorder_id: serviceOrderId, // ← ID da OS
+          maintenance_id: job.maintenance_id,
+          value_unity: parseFloat(job.value_unit) || 0,
+          description: job.description?.trim() || "",
+        }));
+
+        // Criar todos os ItemMaintenance de uma vez
+        await itemMaintenanceApi.createBatch(itemMaintenanceData);
+      }
+
+      // ========== 3. CRIAR ITEM MATERIAL ==========
+      if (materialsList.length > 0) {
+        const itemMaterialData = materialsList.map((item) => ({
+          serviceorder_id: serviceOrderId, // ← ID da OS
+          material_id: item.material_id,
+          quantity: parseFloat(item.quantity) || 1,
+          value_unity: parseFloat(item.value_unity) || 0,
+          reference: item.reference?.trim() || "",
+        }));
+
+        // Criar todos os ItemMaterial de uma vez
+        await itemMaterialApi.createBatch(itemMaterialData);
+      }
+
+      // ========== SUCESSO ==========
+      navigate("/");
+    } catch (error) {
+      console.error("❌ Erro ao salvar OS:", error);
+
+      let errorMessage = "Erro ao salvar OS";
+      if (error.response) {
+        console.error("Status:", error.response.status);
+        console.error("Dados:", error.response.data);
+        errorMessage = error.response.data?.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = "Servidor não respondeu";
+      }
+
+      setError(errorMessage);
+      alert(`❌ ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // HANDLES
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleFormFieldChangeMaintenance = (field, value) => {
+    setFormDataItemMaintenance((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -118,6 +281,7 @@ const NewServiceOrder = () => {
     setSelectedCustomerInfo(suggestion);
     setShowSuggestions(false);
     handleFormFieldChange("customer_id", suggestion.id);
+
     setFilteredSuggestions([]);
   };
 
@@ -169,30 +333,32 @@ const NewServiceOrder = () => {
       prev.map((job) => {
         if (job.id !== id) return job;
 
+        // Se for o campo "name" (que na verdade é o select)
         if (field === "name") {
-          let foundValue = ""; // ← default to empty string, NOT undefined
+          let foundJob = null;
+          let foundValue = "";
 
+          // Procurar o serviço selecionado
           for (const group of maintenanceJobsGroupData) {
             const found = group.maintenanceJobs.find(
               (item) => item.name === value,
             );
 
-            if (found && found.value_unit !== undefined) {
-              foundValue = found.value_unit;
+            if (found) {
+              foundJob = found;
+              foundValue = formattedPrice(found.value_unit);
               break;
             }
           }
 
           return {
             ...job,
-            name: value,
-            value_unit: foundValue, // ← always a string
+            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
+            value_unit: foundValue,
           };
         }
 
-        // Ensure we never set undefined for any field
-        const newValue = value === undefined || value === null ? "" : value;
-        return { ...job, [field]: newValue };
+        return { ...job, [field]: value };
       }),
     );
   };
@@ -201,12 +367,12 @@ const NewServiceOrder = () => {
   const handleAddMaterial = () => {
     const newMaterial = {
       id: Date.now(),
+      material_id: null,
       name: "",
-      quantity: "",
-      value_unity: "",
+      quantity: 1,
+      value_unity: 0,
       reference: "",
-      serviceorder_id: "",
-      material_id: "",
+      serviceorder_id: null,
     };
     setMaterialsList([...materialsList, newMaterial]);
   };
@@ -217,10 +383,37 @@ const NewServiceOrder = () => {
 
   const handleMaterialInputChange = (id, field, value) => {
     setMaterialsList((prev) =>
-      prev.map((element) =>
-        element.id === id ? { ...element, [field]: value } : element,
-      ),
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        // Se for value_unity, converter para número
+        if (field === "value_unity") {
+          return {
+            ...element,
+            [field]: value === "" ? "" : parseFloat(value) || 0,
+          };
+        }
+
+        // Se for quantity, converter para número
+        if (field === "quantity") {
+          return {
+            ...element,
+            [field]: value === "" ? "" : parseFloat(value) || 1,
+          };
+        }
+
+        return { ...element, [field]: value };
+      }),
     );
+  };
+
+  const findMaterialById = (id) => {
+    if (!id) return null;
+    for (const group of materialsGroupData) {
+      const found = group.materials.find((item) => item.id === id);
+      if (found) return found;
+    }
+    return null;
   };
 
   const calculateTotalMaintenanceJob = () => {
@@ -242,17 +435,43 @@ const NewServiceOrder = () => {
     }, 0);
   };
 
-  //
+  // SELECT MAINTENANCE
+  // Função para encontrar serviço por ID
+  const findMaintenanceJobById = (id) => {
+    if (!id) return null;
+    for (const group of maintenanceJobsGroupData) {
+      const found = group.maintenanceJobs.find((item) => item.id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  // Função para encontrar serviço por Nome
+  const findMaintenanceJobByName = (name) => {
+    if (!name) return null;
+    for (const group of maintenanceJobsGroupData) {
+      const found = group.maintenanceJobs.find((item) => item.name === name);
+      if (found) return found;
+    }
+    return null;
+  };
 
   return (
     <div className="page">
+      {/* ============== */}
+      {/* === HEADER === */}
+      {/* ============== */}
       <div className="page-header">
         <div>
           <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
-        <div className="os-num-badge">#OS-2025-0143</div>
+        {/* <div className="os-num-badge">#OS-2025-0143</div> */}
       </div>
+
       <div className="form-wrap">
+        {/* ========================= */}
+        {/* === CLIENTE E VEÍCULO === */}
+        {/* ========================= */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -290,8 +509,7 @@ const NewServiceOrder = () => {
                         />
                       </svg>
                     </span>
-                    {selectedCustomerInfo &&
-                    Object.keys(selectedCustomerInfo).length > 0 ? (
+                    {selectedCustomerInfo ? (
                       <div className="ac-selected-pill">
                         {selectedCustomerInfo.name}
                         <button onClick={handleClearCustomer}>×</button>
@@ -366,7 +584,9 @@ const NewServiceOrder = () => {
                         <div
                           className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
                           key={index}
-                          onClick={() => handleSelectedVehicle(element)}
+                          onClick={() => {
+                            handleSelectedVehicle(element);
+                          }}
                         >
                           <svg
                             className="car-badge-svg"
@@ -408,9 +628,9 @@ const NewServiceOrder = () => {
                   className="input"
                   placeholder="Ex: 52.300 km"
                   value={formData.entry_km}
-                  onChange={(e) =>
-                    handleFormFieldChange("entry_km", e.target.value)
-                  }
+                  onChange={(e) => {
+                    handleFormFieldChange("entry_km", e.target.value);
+                  }}
                 />
               </div>
               <div className="field">
@@ -439,6 +659,10 @@ const NewServiceOrder = () => {
           setListMaintenanceJobs={setListMaintenanceJobs}
           maintenanceJobsGroupData={maintenanceJobsGroupData}
         />*/}
+
+        {/* =============== */}
+        {/* === SERVIÇO === */}
+        {/* =============== */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -484,25 +708,52 @@ const NewServiceOrder = () => {
                           <label>Tipo de Serviço *</label>
                           <select
                             className="select"
-                            value={element.name}
+                            value={element.maintenance_id || ""}
                             onChange={(e) => {
-                              handleMaintenanceJobChange(
-                                element.id,
-                                "name",
-                                e.target.value,
+                              const selectedId = e.target.value;
+
+                              if (!selectedId) {
+                                // Limpar
+                                handleMaintenanceJobChange(
+                                  element.id,
+                                  "maintenance_id",
+                                  null,
+                                );
+                                handleMaintenanceJobChange(
+                                  element.id,
+                                  "value_unit",
+                                  "",
+                                );
+                                return;
+                              }
+
+                              const foundJob = findMaintenanceJobById(
+                                Number(selectedId),
                               );
+
+                              if (foundJob) {
+                                setListMaintenanceJobs((prev) =>
+                                  prev.map((job) => {
+                                    if (job.id !== element.id) return job;
+                                    return {
+                                      ...job,
+                                      maintenance_id: foundJob.id,
+                                      value_unit: formattedPrice(
+                                        foundJob.value_unit,
+                                      ),
+                                    };
+                                  }),
+                                );
+                              }
                             }}
                           >
                             <option value="">Selecione o serviço...</option>
                             {maintenanceJobsGroupData.map(
-                              (element, groupIndex) => (
-                                <optgroup
-                                  key={groupIndex}
-                                  label={element.group}
-                                >
-                                  {element.maintenanceJobs.map(
+                              (group, groupIndex) => (
+                                <optgroup key={groupIndex} label={group.group}>
+                                  {group.maintenanceJobs.map(
                                     (item, itemIndex) => (
-                                      <option key={itemIndex} value={item.name}>
+                                      <option key={itemIndex} value={item.id}>
                                         {item.name}
                                       </option>
                                     ),
@@ -520,28 +771,29 @@ const NewServiceOrder = () => {
                               type="text"
                               className="svc-mo-input"
                               placeholder="0,00"
-                              value={element.value_unit}
+                              value={element.value_unit || ""}
                               onChange={(e) =>
                                 handleMaintenanceJobChange(
-                                  element.id,
-                                  "value_unit",
-                                  e.target.value,
+                                  element.id, // ID do item na lista
+                                  "value_unit", // Campo a ser atualizado
+                                  e.target.value, // Novo valor
                                 )
                               }
                             />
                           </div>
                         </div>
+
                         <div className="field col-full">
                           <label>Observações</label>
                           <textarea
                             className="textarea service-row-textarea"
                             placeholder="Detalhes adicionais do serviço..."
-                            value={element.description}
+                            value={element.description || ""}
                             onChange={(e) =>
                               handleMaintenanceJobChange(
-                                element.id,
-                                "description",
-                                e.target.value,
+                                element.id, // ID do item na lista
+                                "description", // Campo a ser atualizado
+                                e.target.value, // Novo valor
                               )
                             }
                           />
@@ -570,6 +822,10 @@ const NewServiceOrder = () => {
           listMaintenanceJobs={listMaintenanceJobs}
           materialsData={materialsData}
         /> */}
+
+        {/* ================ */}
+        {/* === MATERIAL === */}
+        {/* ================ */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -607,28 +863,58 @@ const NewServiceOrder = () => {
                           <td>
                             <select
                               className="select select-new-order-material"
-                              value={element.name}
+                              value={element.material_id || ""} // ← USA O ID, não o nome
                               onChange={(e) => {
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "name",
-                                  e.target.value,
+                                const selectedId = e.target.value;
+
+                                if (!selectedId) {
+                                  // Limpar
+                                  handleMaterialInputChange(
+                                    element.id,
+                                    "material_id",
+                                    null,
+                                  );
+                                  handleMaterialInputChange(
+                                    element.id,
+                                    "name",
+                                    "",
+                                  );
+                                  return;
+                                }
+
+                                // Buscar o material pelo ID
+                                const foundMaterial = findMaterialById(
+                                  Number(selectedId),
                                 );
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "material_id",
-                                  element.id,
-                                );
+
+                                if (foundMaterial) {
+                                  // Atualizar material_id e name
+                                  handleMaterialInputChange(
+                                    element.id,
+                                    "material_id",
+                                    foundMaterial.id,
+                                  );
+                                  handleMaterialInputChange(
+                                    element.id,
+                                    "name",
+                                    foundMaterial.name,
+                                  );
+                                }
                               }}
                             >
                               <option value="">Selecione...</option>
-                              {materialsGroupData.map((element, index) => (
-                                <optgroup key={index} label={element.group}>
-                                  {element.materials.map((element, index) => (
-                                    <option key={index} value={element.name}>
-                                      {element.name}
-                                    </option>
-                                  ))}
+                              {materialsGroupData.map((group, groupIndex) => (
+                                <optgroup key={groupIndex} label={group.group}>
+                                  {group.materials.map(
+                                    (material, materialIndex) => (
+                                      <option
+                                        key={materialIndex}
+                                        value={material.id}
+                                      >
+                                        {material.name}
+                                      </option>
+                                    ),
+                                  )}
                                 </optgroup>
                               ))}
                             </select>
@@ -747,6 +1033,10 @@ const NewServiceOrder = () => {
           handleFormFieldChange={handleFormFieldChange}
           formData={formData}
         />*/}
+
+        {/* =================== */}
+        {/* === DETALHES OS === */}
+        {/* =================== */}
         <div className="form-section">
           <div className="fs-header">
             <svg
@@ -786,10 +1076,8 @@ const NewServiceOrder = () => {
                 <label>Prioridade</label>
                 <select
                   className="select"
-                  value={formData.priority}
-                  onChange={(e) =>
-                    handleFormFieldChange("priority", e.target.value)
-                  }
+                  value={priorityReverseMap[formData.priority] || "Normal"} // ← Mostra texto
+                  onChange={(e) => handlePriorityChange(e.target.value)} // ← Salva ID
                 >
                   <option value="Normal">Normal</option>
                   <option value="Baixa">Baixa</option>
@@ -797,17 +1085,20 @@ const NewServiceOrder = () => {
                   <option value="Urgente">Urgente</option>
                 </select>
               </div>
+
               <div className="field">
                 <label>Status Inicial</label>
                 <select
                   className="select"
-                  value={formData.status}
-                  onChange={(e) =>
-                    handleFormFieldChange("status", e.target.value)
-                  }
+                  value={statusReverseMap[formData.status] || "Pendente"} // ← Mostra texto
+                  onChange={(e) => handleStatusChange(e.target.value)} // ← Salva ID
                 >
                   <option value="Pendente">Pendente</option>
                   <option value="Em andamento">Em andamento</option>
+                  <option value="Concluído">Concluído</option>
+                  <option value="Aberta">Aberta</option>
+                  <option value="Aguardando peças">Aguardando peças</option>
+                  <option value="Cancelada">Cancelada</option>
                 </select>
               </div>
               <div className="field col-full">
@@ -835,9 +1126,13 @@ const NewServiceOrder = () => {
             </div>
           </div>
         </div>
+
+        {/* =================== */}
+        {/* === FINALIZAÇÃO === */}
+        {/* =================== */}
         <div className="form-actions">
-          <button className="btn btn-ghost">Cancelar</button>
-          <button className="btn btn-secondary">
+          {/* <button className="btn btn-ghost">Cancelar</button> */}
+          {/* <button className="btn btn-secondary">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -847,8 +1142,12 @@ const NewServiceOrder = () => {
               />
             </svg>
             Imprimir
-          </button>
-          <button className="btn btn-primary">
+          </button> */}
+          <button
+            className="btn btn-primary"
+            onClick={handleSaveOS}
+            disabled={loading}
+          >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -857,7 +1156,7 @@ const NewServiceOrder = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            Salvar OS
+            {loading ? "Salvando..." : "Salvar OS"}
           </button>
         </div>
       </div>

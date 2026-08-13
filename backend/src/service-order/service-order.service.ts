@@ -99,6 +99,9 @@ export class ServiceOrderService {
         itemMaintenances: {
           include: { maintenancejob: { select: { id: true, name: true } } },
         },
+        /* itemMaterials: {
+          include: { material: { select: { id: true, name: true } } },
+        }, */
       },
     });
   }
