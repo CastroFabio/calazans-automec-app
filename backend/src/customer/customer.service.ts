@@ -53,6 +53,7 @@ export class CustomersService {
   async findAll() {
     return this.prisma.customer.findMany({
       include: {
+        _count: { select: { serviceOrders: true, vehicles: true } },
         vehicles: true, // Inclui os veículos do cliente
       },
       orderBy: {

@@ -1180,6 +1180,7 @@
   display: none;
   backdrop-filter: blur(3px);
 }
+
 .overlay.open {
   display: block;
 }
@@ -1421,6 +1422,15 @@
 }
 
 /* ── MODALS ── */
+
+.modal-customer-form-grid {
+  gap: 13px;
+}
+
+.modal-customer-textarea {
+  min-height: 72px;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

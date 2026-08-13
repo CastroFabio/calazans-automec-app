@@ -2,16 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
 import { customerApi } from "../api/customers";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
+import { useCustomers } from "../context/Customer.context";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [customersData, setCustomersData] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  const { customers, fetchCustomers } = useCustomers();
+
+  if (loading) return <div>Carregando clientes...</div>;
+  if (error) return <div>Erro: {error}</div>;
 
   const getCustomerNameInitials = (customerName) => {
     return customerName
@@ -28,12 +32,12 @@ const Customers = () => {
 
   const filteredData = useMemo(() => {
     if (!searchTerm) {
-      return customersData;
+      return customers;
     }
 
     const lowerCaseSearch = searchTerm.toLowerCase();
 
-    return customersData.filter((element) => {
+    return customers.filter((element) => {
       if (element.name.toLowerCase().includes(lowerCaseSearch)) {
         return true;
       }
@@ -44,26 +48,7 @@ const Customers = () => {
 
       return vehicleMatch;
     });
-  }, [customersData, searchTerm]);
-
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data } = await customerApi.getAll();
-
-      setCustomersData(data);
-    } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço");
-      console.error("Erro ao buscar ordens:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+  }, [customers, searchTerm]);
 
   const handleCardClick = () => {
     setSidebarOpen(true);
@@ -106,7 +91,7 @@ const Customers = () => {
         </div>
       </div>
       <div className="clients-grid" id="clientsGrid">
-        {filteredData.length > 0 ? (
+        {filteredData && filteredData.length > 0 ? (
           filteredData.map((element) => (
             <div
               className="client-card"
@@ -123,7 +108,7 @@ const Customers = () => {
                 <div>
                   <div className="client-name">{element.name}</div>
                   <div className="client-sub">
-                    {`${element.numberOfOS} OS · ${element.vehicles.length} veículo(s)`}
+                    {`${element._count.serviceOrders} OS · ${element._count.vehicles} veículo(s)`}
                   </div>
                 </div>
               </div>
@@ -176,7 +161,7 @@ const Customers = () => {
               )}
               <div className="client-footer">
                 <div className="client-vehicle-tags">
-                  {element.vehicles.length > 0
+                  {element._count.vehicles > 0
                     ? element.vehicles.map((car, index) => (
                         <span className="car-tag-group" key={index}>
                           <span className="svc-tag car-tag-placa">

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ModalNewGroup from "./modalNewGroup";
+import NewCustomerModal from "./NewCustomerModal.component";
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -38,7 +39,12 @@ const NavBar = () => {
       pathURL: "/customers",
       title: "Clientes",
       btn: (
-        <button className="btn btn-primary">
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            openModal();
+          }}
+        >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -100,7 +106,9 @@ const NavBar = () => {
         </button>
         <span className="page-title">{activeItem.title}</span>
         <div className="topbar-right">{activeItem.btn}</div>
-        <ModalNewGroup isOpen={isModalOpen} onClose={closeModal} />
+        {isModalOpen && (
+          <NewCustomerModal isOpen={isModalOpen} onClose={closeModal} />
+        )}
       </header>
     </>
   );
