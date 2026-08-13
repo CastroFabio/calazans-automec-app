@@ -11,6 +11,7 @@ import NestedListForm from "./pages/Teste";
 import NewCustomer from "./pages/NewCustomer";
 import NewVehicle from "./pages/NewVehicle";
 import { CustomerProvider } from "./context/Customer.context";
+import UpdateCustomer from "./pages/UpdateCustomer";
 
 const App = () => {
   return (
@@ -32,8 +33,9 @@ const App = () => {
                 />
                 <Route path="/new-customer" element={<NewCustomer />} />
                 <Route path="/new-vehicle" element={<NewVehicle />} />
-                {/*<Route path="/teste" element={<NestedListForm />} />
-              <Route path="*" element={<NotFound />} /> */}
+                <Route path="/update-customer" element={<UpdateCustomer />} />
+                {/*<Route path="/teste" element={<NestedListForm />} />*/}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
           </div>

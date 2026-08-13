@@ -79,6 +79,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
     <div
       className={`modal-overlay ${isModalOpen ? "open" : ""}`}
       id="modalCarro"
+      onClick={closeWindow}
     >
       <div className="modal modal-container-vehicle">
         <div className="modal-header">

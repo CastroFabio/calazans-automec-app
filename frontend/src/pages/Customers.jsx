@@ -50,7 +50,7 @@ const Customers = () => {
   };
 
   const handleCardClick = () => {
-    setSidebarOpen(false);
+    setSidebarOpen(true);
   };
 
   const closeSidebar = () => {
