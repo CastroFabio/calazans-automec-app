@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { customerListDTO } from "../data/mockDataDTO";
 import { customerApi } from "../api/customers";
+import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -8,6 +9,9 @@ const Customers = () => {
   const [customersData, setCustomersData] = useState([]);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const getCustomerNameInitials = (customerName) => {
     return customerName
@@ -61,6 +65,20 @@ const Customers = () => {
     fetchCustomers();
   }, []);
 
+  const handleCardClick = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleFetchSelectedCustomer = async (customerID) => {
+    const { data } = await customerApi.getById(customerID);
+
+    setSelectedCustomer(data);
+  };
+
   return (
     <div className="page" id="page-clientes">
       <div className="page-header">
@@ -90,7 +108,14 @@ const Customers = () => {
       <div className="clients-grid" id="clientsGrid">
         {filteredData.length > 0 ? (
           filteredData.map((element) => (
-            <div className="client-card" key={element.id}>
+            <div
+              className="client-card"
+              key={element.id}
+              onClick={() => {
+                handleCardClick();
+                handleFetchSelectedCustomer(element.id);
+              }}
+            >
               <div className="client-card-header">
                 <div className="client-avatar-lg bg-orange-50">
                   {getCustomerNameInitials(element.name)}
@@ -176,6 +201,14 @@ const Customers = () => {
           </div>
         )}
       </div>
+
+      {sidebarOpen && selectedCustomer && (
+        <CustomerDetailPanel
+          onClose={closeSidebar}
+          sidebarOpen={sidebarOpen}
+          selectedCustomer={selectedCustomer}
+        />
+      )}
     </div>
   );
 };

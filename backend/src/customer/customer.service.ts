@@ -66,7 +66,13 @@ export class CustomersService {
     return this.prisma.customer.findUnique({
       where: { id },
       include: {
-        vehicles: true, // Inclui os veículos do cliente
+        vehicles: true,
+        serviceOrders: {
+          include: {
+            vehicle: true,
+            itemMaintenances: { include: { maintenancejob: true } },
+          },
+        },
       },
     });
   }

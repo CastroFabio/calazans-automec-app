@@ -1198,6 +1198,11 @@
   transition: transform 0.27s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -8px 0 40px rgba(0, 0, 0, 0.1);
 }
+
+.side-panel-customer {
+  width: 500px;
+}
+
 .side-panel.open {
   transform: translateX(0);
 }
@@ -1546,6 +1551,12 @@
 
 /* ── CAR BADGE ── */
 
+.car-detail-no-car {
+  font-size: 13px;
+  color: var(--ink3);
+  padding: 8px 0;
+}
+
 .car-badge-svg {
   width: 10px;
   height: 10px;
@@ -1609,6 +1620,45 @@
 
 /* ── CLIENT DETAIL PANEL ── */
 
+.btn-new-os-customer {
+  flex: 1;
+  justify-content: center;
+}
+
+.client-panel-cards-container {
+  display: flex;
+  gap: 8px;
+}
+
+.client-panel-observation {
+  font-style: italic;
+  color: var(--ink3);
+}
+
+.client-panel-avatar-sub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 3px;
+}
+
+.client-panel-avatar-name {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.client-panel-avatar-name-sub {
+  flex: 1;
+  min-width: 0;
+}
+
+.client-panel-header-content {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 14px;
+}
+
 .client-panel-header {
   padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);
@@ -1665,6 +1715,70 @@
   padding-bottom: 5px;
   border-bottom: 1px solid var(--bg);
 }
+
+.car-panel-service-order-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.car-panel-service-order-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.car-panel-service-order-status-badge {
+  font-size: 9px;
+}
+
+.car-panel-service-order-priority-badge {
+  font-size: 9px;
+}
+
+.car-entry-km-title {
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.car-entry-km-info {
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.car-entry-km {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.car-tag-badge {
+  font-size: 9px;
+}
+
+.car-tag-color {
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.car-detail-card-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.car-detail-card-container-flex {
+  flex: 1;
+}
+
+.car-detail-card-margin-bottom {
+  margin-bottom: 5px;
+}
+
 .car-detail-card {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -1719,6 +1833,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.os-mini-svc-car {
+  font-size: 10px;
+  color: var(--ink3);
+}
+
 .os-mini-val {
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
