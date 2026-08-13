@@ -774,9 +774,9 @@ const NewServiceOrder = () => {
                               value={element.value_unit || ""}
                               onChange={(e) =>
                                 handleMaintenanceJobChange(
-                                  element.id, // ID do item na lista
-                                  "value_unit", // Campo a ser atualizado
-                                  e.target.value, // Novo valor
+                                  element.id,
+                                  "value_unit",
+                                  e.target.value,
                                 )
                               }
                             />

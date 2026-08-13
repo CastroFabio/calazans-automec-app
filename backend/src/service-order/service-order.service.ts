@@ -110,6 +110,18 @@ export class ServiceOrderService {
   async findOne(id: number) {
     const serviceOrder = await this.prisma.serviceOrder.findUnique({
       where: { id },
+      include: {
+        customer: { select: { id: true, name: true } },
+        vehicle: {
+          select: { id: true, license_plate: true, model: true, brand: true },
+        },
+        itemMaintenances: {
+          include: { maintenancejob: { select: { id: true, name: true } } },
+        },
+        itemMaterials: {
+          include: { material: { select: { id: true, name: true } } },
+        },
+      },
     });
 
     if (!serviceOrder)

@@ -1201,6 +1201,68 @@
 .side-panel.open {
   transform: translateX(0);
 }
+
+.sp-client-vehicle-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.sp-close-div-button {
+  display: none;
+  margin-bottom: 8px;
+}
+
+.sp-close-button {
+  padding: 3px 8px;
+  font-size: 11px;
+  gap: 4px;
+}
+
+.sp-close-button-svg {
+  width: 11px;
+  height: 11px;
+}
+
+.sp-header-id {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sp-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.sp-header-badges {
+  margin-top: 6px;
+}
+
+.sp-header-badges-status {
+  margin-right: 5px;
+}
+
+.sp-body-grid {
+  margin-bottom: 16px;
+}
+
+.sp-value-diagnostic {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink2);
+}
+
+.sp-label-acompanhamento {
+  margin-bottom: 12px;
+}
+
+.btn-editar-atualizar-os {
+  flex: 1;
+  justify-content: center;
+}
+
 .sp-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
@@ -1242,6 +1304,42 @@
   color: var(--ink3);
   margin-bottom: 5px;
 }
+.sp-subtotal {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sp-services-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.sp-services-item-number {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.sp-services-item {
+  font-size: 13px;
+}
+
+.sp-material-item {
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--bg);
+  color: var(--ink2);
+}
+
 .sp-value {
   font-size: 13px;
 }
@@ -1510,6 +1608,7 @@
 }
 
 /* ── CLIENT DETAIL PANEL ── */
+
 .client-panel-header {
   padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border);

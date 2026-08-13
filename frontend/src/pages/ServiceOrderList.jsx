@@ -5,13 +5,18 @@ import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
 import { convertPriotity, convertStatus } from "../utils/convertPriorityStatus";
+import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [serviceOrderData, setServiceOrderData] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
+  const [selectedServiceOrder, setSelectedServiceOrder] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // SIDEBAR DETAIL PANEL
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const tabsData = [
     {
@@ -95,6 +100,19 @@ const ServiceOrderList = () => {
     return <div className="error">Erro: {error}</div>;
   }
 
+  const handleCardClick = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
+  const handleFetchSelectedServiceOrder = async (serviceOrderID) => {
+    const { data } = await orderApi.getById(serviceOrderID);
+    setSelectedServiceOrder(data);
+  };
+
   return (
     <div className="page active" id="page-os">
       <div className="page-header">
@@ -150,7 +168,12 @@ const ServiceOrderList = () => {
           {handleFilteredCustomers.length > 0 ? (
             handleFilteredCustomers.map((element) => (
               <tbody key={element.id}>
-                <tr>
+                <tr
+                  onClick={() => {
+                    handleCardClick();
+                    handleFetchSelectedServiceOrder(element.id);
+                  }}
+                >
                   <td>
                     <span className="td-id">{`#${element.id}`}</span>
                   </td>
@@ -209,6 +232,13 @@ const ServiceOrderList = () => {
           )}
         </table>
       </div>
+      {sidebarOpen && selectedServiceOrder && (
+        <ServiceOrderDetailPanel
+          onClose={closeSidebar}
+          sidebarOpen={sidebarOpen}
+          selectedServiceOrder={selectedServiceOrder}
+        />
+      )}
     </div>
   );
 };
