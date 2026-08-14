@@ -154,7 +154,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
             </div>
             {selectedCustomer.vehicles.length > 0 ? (
               selectedCustomer.vehicles.map((element) => (
-                <div className="car-detail-card">
+                <div key={element.id} className="car-detail-card">
                   <div className="car-detail-card-container">
                     <div className="car-detail-card-container-flex">
                       <div className="car-detail-card-margin-bottom">

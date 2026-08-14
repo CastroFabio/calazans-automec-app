@@ -14,6 +14,7 @@ const Customers = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomerModal, setSelectedCustomerModal] = useState(null);
 
   const { customers, fetchCustomers, removeCustomer } = useCustomers();
 
@@ -80,7 +81,7 @@ const Customers = () => {
     }
 
     // ✅ Definir o cliente selecionado e abrir o modal
-    setSelectedCustomer(customer);
+    setSelectedCustomerModal(customer);
     setIsModalOpen(true);
   };
 
@@ -270,11 +271,11 @@ const Customers = () => {
         />
       )}
 
-      {isModalOpen && selectedCustomer && (
+      {isModalOpen && selectedCustomerModal && (
         <NewVehicleModal
           onClose={closeModal}
           isModalOpen={isModalOpen}
-          selectedCustomer={selectedCustomer}
+          selectedCustomer={selectedCustomerModal}
         />
       )}
     </div>

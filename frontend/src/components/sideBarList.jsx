@@ -8,20 +8,19 @@ const SideBarList = ({ categoryName, tabsDataCategory, isActive }) => {
       <div className="nav-label">{categoryName}</div>
       {tabsDataCategory.map((tab, index) => (
         <div
-          className={`nav-item ${isActive(tab.navigateURL)}`}
+          className={`nav-item ${isActive(tab.path) ? "active" : ""}`}
           onClick={() => {
-            navigate(tab.navigateURL);
+            navigate(tab.path);
           }}
           key={index}
         >
-          {tab.svgIcon}
+          {tab.icon}
           {tab.title}
-          <span
-            className={` ${tab.numberOf != null ? "nav-count" : ""}`}
-            id="osCount"
-          >
-            {tab.numberOf}
-          </span>
+          {tab.count !== null && tab.count !== undefined && (
+            <span className={`nav-count`} id="osCount">
+              {tab.count}
+            </span>
+          )}
         </div>
       ))}
     </>
