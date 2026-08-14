@@ -4,6 +4,7 @@ import { customerApi } from "../api/customers";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { useCustomers } from "../context/Customer.context";
 import NewVehicleModal from "../components/NewVehicleModal.component";
+import { useNavigate } from "react-router-dom";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -44,6 +45,8 @@ const Customers = () => {
       .join("")
       .toUpperCase();
   };
+
+  const navigate = useNavigate();
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -104,7 +107,7 @@ const Customers = () => {
         setSelectedCustomer(null);
       }
     } catch (error) {
-      console.error("❌ Erro ao remover cliente:", error);
+      console.error("Erro ao remover cliente:", error);
       const message =
         error.response?.data?.message || "Erro ao remover cliente";
       setError(message);
@@ -112,6 +115,10 @@ const Customers = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditCustomerClick = async (customerID) => {
+    navigate(`/customers/edit/${customerID}`);
   };
 
   if (loading) return <div>Carregando clientes...</div>;
@@ -238,6 +245,12 @@ const Customers = () => {
                   onClick={(e) => handleOpenModal(e, element)}
                 >
                   + Veículo
+                </button>
+                <button
+                  className="btn btn-sm btn-secondary client-btn-add-edit-customer"
+                  onClick={() => handleEditCustomerClick(element.id)}
+                >
+                  Editar
                 </button>
               </div>
             </div>

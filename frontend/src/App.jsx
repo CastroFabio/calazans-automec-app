@@ -12,6 +12,7 @@ import NewCustomer from "./pages/NewCustomer";
 import NewVehicle from "./pages/NewVehicle";
 import { CustomerProvider } from "./context/Customer.context";
 import UpdateCustomer from "./pages/UpdateCustomer";
+import EditCustomer from "./pages/EditCustomer";
 
 const App = () => {
   return (
@@ -33,7 +34,7 @@ const App = () => {
                 />
                 <Route path="/new-customer" element={<NewCustomer />} />
                 <Route path="/new-vehicle" element={<NewVehicle />} />
-                <Route path="/update-customer" element={<UpdateCustomer />} />
+                <Route path="/customers/edit/:id" element={<EditCustomer />} />
                 {/*<Route path="/teste" element={<NestedListForm />} />*/}
                 <Route path="*" element={<NotFound />} />
               </Routes>

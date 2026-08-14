@@ -7,6 +7,7 @@ const CustomerContext = createContext();
 // Provider do Contexto
 export const CustomerProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
+  const [customerID, setCustomerID] = useState(null);
   const [customerCount, setCustomerCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,6 +28,84 @@ export const CustomerProvider = ({ children }) => {
 
   const countAllCustomers = () => {
     return customers.length;
+  };
+
+  // ========== ✅ BUSCAR CLIENTE POR ID NO BACKEND ==========
+  const fetchCustomerById = async (id) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Primeiro tenta encontrar na lista local
+      const localCustomer = customers.find((c) => c.id === id);
+      if (localCustomer) return localCustomer;
+
+      // Se não encontrar, busca no backend
+      const { data } = await customerApi.getById(id);
+
+      // Atualiza a lista local com o cliente encontrado (opcional)
+      setCustomers((prev) => {
+        // Verifica se já existe na lista
+        const exists = prev.some((c) => c.id === data.id);
+        if (!exists) {
+          return [...prev, data];
+        }
+        return prev.map((c) => (c.id === data.id ? data : c));
+      });
+
+      return data;
+    } catch (err) {
+      console.error(`Erro ao buscar cliente ${id}:`, err);
+
+      let errorMessage = "Erro ao buscar cliente";
+      if (err.response?.status === 404) {
+        errorMessage = "Cliente não encontrado";
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.request) {
+        errorMessage = "Servidor não respondeu";
+      }
+
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ========== ✅ BUSCAR CLIENTE POR ID ==========
+  const getCustomerById = (id) => {
+    // Buscar na lista de clientes
+    const customer = customers.find((c) => c.id === id);
+
+    if (!customer) {
+      console.warn(`Cliente com ID ${id} não encontrado na lista local`);
+      return null;
+    }
+
+    return customer;
+  };
+
+  // ========== ✅ BUSCAR CLIENTE POR ID COM DETALHES ==========
+  const getCustomerByIdWithDetails = (id) => {
+    const customer = customers.find((c) => c.id === id);
+
+    if (!customer) {
+      console.warn(`Cliente com ID ${id} não encontrado na lista local`);
+      return null;
+    }
+
+    // Retorna o cliente com estatísticas
+    return {
+      ...customer,
+      totalVehicles: customer.vehicles?.length || 0,
+      totalServiceOrders: customer.serviceOrders?.length || 0,
+      totalValue:
+        customer.serviceOrders?.reduce(
+          (sum, order) => sum + (order.subtotal || 0),
+          0,
+        ) || 0,
+    };
   };
 
   // Função para adicionar cliente (atualiza a lista)
@@ -126,6 +205,11 @@ export const CustomerProvider = ({ children }) => {
         addVehicleToCustomer,
         removeVehicleFromCustomer,
         updateVehicleFromCustomer,
+        fetchCustomerById,
+        getCustomerByIdWithDetails,
+        getCustomerById,
+        customerID,
+        setCustomerID,
       }}
     >
       {children}

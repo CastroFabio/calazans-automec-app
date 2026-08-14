@@ -82,6 +82,11 @@ const NavBar = () => {
       title: "Novo Veículo",
       btn: null,
     },
+    {
+      pathURL: "/customers/edit/",
+      title: "Editar Cliente",
+      btn: null,
+    },
   ];
 
   const isActive = (path) => {
