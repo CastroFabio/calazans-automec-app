@@ -2897,6 +2897,24 @@
   border-top: 1px dashed var(--accent-mid);
 }
 
+/* Adicionar no CSS */
+.ec-car-card {
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+
+.ec-car-card.editing {
+  border: 2px solid var(--accent);
+  background: #f8faff;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.ec-car-card.editing .ec-car-card-header {
+  margin-bottom: 12px;
+}
+
 /* ── NOT FOUND ── */
 #page-not-found {
   background: var(--bg);

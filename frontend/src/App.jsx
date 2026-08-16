@@ -7,11 +7,7 @@ import MaintenanceJobs from "./pages/MaintenanceJobs";
 import Materials from "./pages/Materials";
 import ServiceOrderList from "./pages/serviceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
-import NestedListForm from "./pages/Teste";
-import NewCustomer from "./pages/NewCustomer";
-import NewVehicle from "./pages/NewVehicle";
 import { CustomerProvider } from "./context/Customer.context";
-import UpdateCustomer from "./pages/UpdateCustomer";
 import EditCustomer from "./pages/EditCustomer";
 
 const App = () => {
@@ -32,10 +28,7 @@ const App = () => {
                   path="/new-service-order"
                   element={<NewServiceOrder />}
                 />
-                <Route path="/new-customer" element={<NewCustomer />} />
-                <Route path="/new-vehicle" element={<NewVehicle />} />
                 <Route path="/customers/edit/:id" element={<EditCustomer />} />
-                {/*<Route path="/teste" element={<NestedListForm />} />*/}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

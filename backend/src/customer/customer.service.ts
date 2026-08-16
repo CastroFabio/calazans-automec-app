@@ -54,7 +54,13 @@ export class CustomersService {
     return this.prisma.customer.findMany({
       include: {
         _count: { select: { serviceOrders: true, vehicles: true } },
-        vehicles: true, // Inclui os veículos do cliente
+        vehicles: true,
+        serviceOrders: {
+          include: {
+            vehicle: true,
+            itemMaintenances: { include: { maintenancejob: true } },
+          },
+        },
       },
       orderBy: {
         created_at: 'desc',
@@ -131,7 +137,6 @@ export class CustomersService {
 
   // DELETE - Remover um cliente
   async remove(id: number): Promise<void> {
-    // ← Mude para Promise<void>
     try {
       const customer = await this.prisma.customer.findUnique({
         where: { id },

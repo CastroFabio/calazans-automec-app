@@ -79,9 +79,12 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
     <div
       className={`modal-overlay ${isModalOpen ? "open" : ""}`}
       id="modalCarro"
-      onClick={closeWindow}
+      onClick={onClose}
     >
-      <div className="modal modal-container-vehicle">
+      <div
+        className="modal modal-container-vehicle"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <span className="modal-title">Cadastrar Veículo</span>
           <button className="sp-close" onClick={closeWindow}>
@@ -136,14 +139,13 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
                 }
               />
             </div>
-
             <div className="field">
               <label>Marca</label>
               <input
                 type="text"
                 className="input"
                 placeholder="Ex: Honda"
-                value={formData.brand}
+                value={formData.brand || ""}
                 onChange={(e) => handleFormFieldChange("brand", e.target.value)}
               />
             </div>
@@ -153,10 +155,11 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
                 type="text"
                 className="input"
                 placeholder="Ex: Civic EXL"
-                value={formData.model}
+                value={formData.model || ""}
                 onChange={(e) => handleFormFieldChange("model", e.target.value)}
               />
             </div>
+
             {/* <div className="field">
               <label>Cor</label>
               <input type="text" className="input" placeholder="Prata" />
@@ -187,6 +190,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
             Salvar Veículo
           </button>
         </div>
+        {error && <p>{error}</p>}
       </div>
     </div>
   );

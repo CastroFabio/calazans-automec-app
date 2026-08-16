@@ -2,29 +2,39 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
 import { customerApi } from "../api/customers";
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import { vehicleApi } from "../api/vehicle";
+import { statusReverseMap } from "../utils/statusMap";
+import { formattedPrice } from "../utils/convertPrice";
 
 const EditCustomer = () => {
   const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    cell: null,
-    telephone: null,
-    observation: "",
+  const [originalCustomer, setOriginalCustomer] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingVehicleId, setEditingVehicleId] = useState(null);
+  const [editingVehicleData, setEditingVehicleData] = useState({
+    license_plate: "",
+    brand: "",
+    model: "",
   });
-  const [formDataVehicle, setFormDataVehicle] = useState([
-    {
-      license_plate: "",
-      brand: "",
-      model: "",
-    },
-  ]);
+  const [vehicleSaving, setVehicleSaving] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { getCustomerById, updateCustomer } = useCustomers();
+  const {
+    getCustomerById,
+    updateCustomer,
+    updateVehicleFromCustomer,
+    removeVehicleFromCustomer,
+  } = useCustomers();
 
   useEffect(() => {
     const loadCustomer = async () => {
@@ -35,16 +45,14 @@ const EditCustomer = () => {
         let found = getCustomerById(Number(id));
 
         if (found) {
+          console.log(found);
+
           setCustomer(found);
-          setFormData(found);
-          setFormDataVehicle(found.vehicles);
         } else {
           // Se não encontrar, busca no backend
           const { data } = await customerApi.getById(Number(id));
 
           setCustomer(data);
-          setFormData(data);
-          setFormDataVehicle(data.vehicles);
         }
       } catch (err) {
         console.error("Erro ao buscar cliente:", err);
@@ -59,12 +67,213 @@ const EditCustomer = () => {
     }
   }, [id, getCustomerById]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!customer) return;
+
+    // Validação básica
+    if (!customer.name?.trim()) {
+      setError("O nome é obrigatório");
+      return;
+    }
+
+    if (!customer.cell?.trim()) {
+      setError("O celular é obrigatório");
+      return;
+    }
+
+    // ✅ Verificar se há veículo em edição
+    if (editingVehicleId !== null) {
+      setError("Salve ou cancele a edição do veículo primeiro");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      // 1. Dados para enviar
+      const updateData = {
+        name: customer.name.trim(),
+        cell: customer.cell.trim(),
+        telephone: customer.telephone?.trim() || null,
+        observation: customer.observation?.trim() || null,
+      };
+
+      // 2. Chamar API para atualizar
+      const { data } = await customerApi.update(customer.id, updateData);
+
+      // ✅ FAZER MERGE - manter veículos
+      const mergedCustomer = {
+        ...customer,
+        ...data,
+        vehicles: customer.vehicles || [],
+        serviceOrders: customer.serviceOrders || [],
+      };
+
+      updateCustomer(mergedCustomer);
+      setOriginalCustomer(JSON.parse(JSON.stringify(mergedCustomer)));
+      setSuccess(true);
+
+      // 5. Redirecionar após 1.5 segundos
+      setTimeout(() => {
+        navigate("/customers");
+      }, 1500);
+    } catch (err) {
+      console.error("❌ Erro ao atualizar:", err);
+
+      let errorMessage = "Erro ao atualizar cliente";
+      if (err.response) {
+        if (err.response.status === 404) {
+          errorMessage = "Cliente não encontrado";
+        } else if (err.response.status === 409) {
+          errorMessage = "Este celular já está em uso";
+        } else {
+          errorMessage = err.response.data?.message || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = "Servidor não respondeu";
+      }
+
+      setError(errorMessage);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ========== INICIAR EDIÇÃO DE VEÍCULO ==========
+  const startEditingVehicle = (vehicle) => {
+    setIsEditing(true);
+    setEditingVehicleId(vehicle.id);
+    setEditingVehicleData({
+      license_plate: vehicle.license_plate || "",
+      brand: vehicle.brand || "",
+      model: vehicle.model || "",
+    });
+  };
+
+  // ========== CANCELAR EDIÇÃO DE VEÍCULO ==========
+  const cancelEditingVehicle = () => {
+    setIsEditing(false);
+    setEditingVehicleId(null);
+    setEditingVehicleData({
+      license_plate: "",
+      brand: "",
+      model: "",
+    });
+    setVehicleSaving(false);
+  };
+
+  // ========== SALVAR EDIÇÃO DE VEÍCULO ==========
+  const handleSaveVehicle = async (vehicleId) => {
+    // Validação
+    if (!editingVehicleData.license_plate.trim()) {
+      setError("A placa é obrigatória");
+      return;
+    }
+
+    setVehicleSaving(true);
+    setError(null);
+
+    try {
+      const updateData = {
+        license_plate: editingVehicleData.license_plate.trim().toUpperCase(),
+        brand: editingVehicleData.brand.trim() || null,
+        model: editingVehicleData.model.trim() || null,
+        customer_id: customer.id,
+      };
+
+      // 1. Chamar API
+      const { data } = await vehicleApi.update(vehicleId, updateData);
+
+      // 2. Atualizar contexto
+      updateVehicleFromCustomer(customer.id, data);
+
+      // 3. Atualizar cliente local
+      setCustomer((prev) => ({
+        ...prev,
+        vehicles: prev.vehicles.map((v) => (v.id === vehicleId ? data : v)),
+      }));
+
+      // 4. Sair do modo de edição
+      cancelEditingVehicle();
+    } catch (err) {
+      console.error("❌ Erro ao atualizar veículo:", err);
+
+      let errorMessage = "Erro ao atualizar veículo";
+      if (err.response) {
+        if (err.response.status === 404) {
+          errorMessage = "Veículo não encontrado";
+        } else if (err.response.status === 409) {
+          errorMessage = "Esta placa já está em uso";
+        } else {
+          errorMessage = err.response.data?.message || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = "Servidor não respondeu";
+      }
+
+      setError(errorMessage);
+    } finally {
+      setVehicleSaving(false);
+    }
+  };
+
+  // ========== REMOVER VEÍCULO ==========
+  const handleRemoveVehicle = async (vehicleId) => {
+    if (!window.confirm("Tem certeza que deseja remover este veículo?")) {
+      return;
+    }
+
+    try {
+      await vehicleApi.delete(vehicleId);
+      removeVehicleFromCustomer(customer.id, vehicleId);
+
+      setCustomer((prev) => ({
+        ...prev,
+        vehicles: prev.vehicles.filter((v) => v.id !== vehicleId),
+      }));
+    } catch (err) {
+      console.error("❌ Erro ao remover veículo:", err);
+      setError("Erro ao remover veículo");
+    }
+  };
+
+  // ========== HANDLE CHANGE DO VEÍCULO EM EDIÇÃO ==========
+  const handleVehicleChange = (field, value) => {
+    setEditingVehicleData((prev) => ({ ...prev, [field]: value }));
+    if (error) setError(null);
+  };
+
   // HANDLES
   const handleFormFieldChange = (field, value) => {
-    setFormData((prev) => ({
+    setCustomer((prev) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const formattedServiceOrderTitle = (selectedServiceOrder) => {
+    const maintenanceJobCount = selectedServiceOrder.itemMaintenances.length;
+    if (maintenanceJobCount > 1)
+      return (
+        selectedServiceOrder.itemMaintenances[0].maintenancejob.name +
+        " +" +
+        (maintenanceJobCount - 1)
+      );
+    else if (maintenanceJobCount === 0)
+      return "Ordem de Serviço #" + selectedServiceOrder.id;
+    return selectedServiceOrder.itemMaintenances[0].maintenancejob.name;
   };
 
   if (loading) return <div>Carregando cliente...</div>;
@@ -85,8 +294,12 @@ const EditCustomer = () => {
           </div>
         </div>
         <div className="topbar-right ec-client-topbar-right">
-          <button className="btn btn-ghost">Cancelar</button>
-          <button className="btn btn-primary">
+          <button
+            type="button" // type="submit" se estiver dentro do form
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={saving || editingVehicleId !== null}
+          >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -95,9 +308,9 @@ const EditCustomer = () => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            Salvar alterações
+            {saving ? "Salvando..." : "Salvar alterações"}
           </button>
-        </div>
+        </div>{" "}
       </div>
 
       <div className="edit-layout ec-client-container">
@@ -113,7 +326,7 @@ const EditCustomer = () => {
                     className="input"
                     id="ecNome"
                     placeholder="Nome do cliente"
-                    value={formData.name}
+                    value={customer.name}
                     onChange={(e) =>
                       handleFormFieldChange("name", e.target.value)
                     }
@@ -126,7 +339,7 @@ const EditCustomer = () => {
                     className="input"
                     id="ecPhone"
                     placeholder="(11) 0000-0000"
-                    value={formData.telephone}
+                    value={customer.telephone}
                     onChange={(e) =>
                       handleFormFieldChange("telephone", e.target.value)
                     }
@@ -139,7 +352,7 @@ const EditCustomer = () => {
                     className="input"
                     id="ecCel"
                     placeholder="(11) 00000-0000"
-                    value={formData.cell}
+                    value={customer.cell}
                     onChange={(e) =>
                       handleFormFieldChange("cell", e.target.value)
                     }
@@ -151,7 +364,7 @@ const EditCustomer = () => {
                     className="textarea"
                     id="ecObs"
                     placeholder="Notas sobre o cliente..."
-                    value={formData.observation}
+                    value={customer.observation}
                     onChange={(e) =>
                       handleFormFieldChange("observation", e.target.value)
                     }
@@ -163,8 +376,11 @@ const EditCustomer = () => {
 
           <div className="form-section">
             <div className="fs-header ec-client-fs-header">
-              <span>Veículos</span>
-              <button className="btn btn-sm btn-secondary">
+              <span>Veículos ({customer.vehicles?.length || 0})</span>
+              <button
+                className="btn btn-sm btn-secondary"
+                onClick={handleOpenModal}
+              >
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
@@ -176,10 +392,14 @@ const EditCustomer = () => {
                 Adicionar veículo
               </button>
             </div>
-            {customer.vehicles.map((element, index) => (
-              <div key={element.id} className="fs-body ec-client-fs-body">
-                <div id="ecCarsList">
-                  <div className="ec-car-card" id="ecCar-${car.id}">
+            {customer.vehicles?.map((element, index) => {
+              const isEditingThis = editingVehicleId === element.id;
+
+              return (
+                <div key={element.id} className="fs-body ec-client-fs-body">
+                  <div
+                    className={`ec-car-card ${isEditingThis ? "editing" : ""}`}
+                  >
                     <div className="ec-car-card-header">
                       <div className="ec-car-num">{index + 1}</div>
                       <div className="ec-car-label">
@@ -188,105 +408,143 @@ const EditCustomer = () => {
                             {element.license_plate}
                           </span>
                           <span className="svc-tag car-tag-model">
-                            {`${element.brand} ${element.model}`}
+                            {element.brand} {element.model}
                           </span>
                         </span>
                       </div>
-                      <button className="btn btn-sm btn-ghost ec-car-btn">
+                      <button
+                        className="btn btn-sm btn-danger ec-car-btn"
+                        onClick={() => handleRemoveVehicle(element.id)}
+                      >
                         Remover
                       </button>
                     </div>
+
                     <div className="form-grid g3 ec-car-form-grid">
                       <div className="field">
                         <label>Placa *</label>
                         <input
                           type="text"
                           className="input ec-car-input"
-                          value="${car.placa}"
-                          id="ecPlaca-${car.id}"
                           placeholder="ABC-1234"
-                          value={formDataVehicle[index].license_plate}
+                          disabled={!isEditingThis || vehicleSaving}
+                          value={
+                            isEditingThis
+                              ? editingVehicleData.license_plate
+                              : element.license_plate
+                          }
                           onChange={(e) =>
-                            handleFormFieldChange(
-                              "license_plate",
-                              e.target.value,
-                            )
+                            handleVehicleChange("license_plate", e.target.value)
                           }
                         />
                       </div>
                       <div className="field">
-                        <label>Marca *</label>
+                        <label>Marca</label>
                         <input
                           type="text"
                           className="input"
-                          value="${car.marca}"
-                          id="ecMarca-${car.id}"
                           placeholder="Honda, Toyota..."
-                          value={formDataVehicle[index].brand}
+                          disabled={!isEditingThis || vehicleSaving}
+                          value={
+                            isEditingThis
+                              ? editingVehicleData.brand
+                              : element.brand || ""
+                          }
                           onChange={(e) =>
-                            handleFormFieldChange("brand", e.target.value)
+                            handleVehicleChange("brand", e.target.value)
                           }
                         />
                       </div>
                       <div className="field">
-                        <label>Modelo *</label>
+                        <label>Modelo</label>
                         <input
                           type="text"
                           className="input"
-                          value="${car.modelo}"
-                          id="ecModelo-${car.id}"
                           placeholder="Civic, Corolla..."
-                          value={formDataVehicle[index].model}
+                          disabled={!isEditingThis || vehicleSaving}
+                          value={
+                            isEditingThis
+                              ? editingVehicleData.model
+                              : element.model || ""
+                          }
                           onChange={(e) =>
-                            handleFormFieldChange("model", e.target.value)
+                            handleVehicleChange("model", e.target.value)
                           }
                         />
                       </div>
-                      {/* <div className="field">
-                        <label>Ano</label>
-                        <input
-                          type="text"
-                          className="input"
-                          value="${car.ano}"
-                          id="ecAno-${car.id}"
-                          placeholder="2024"
-                        />
-                      </div>
-                      <div className="field">
-                        <label>Cor</label>
-                        <input
-                          type="text"
-                          className="input"
-                          value="${car.cor}"
-                          id="ecCor-${car.id}"
-                          placeholder="Prata, Preto..."
-                        />
-                      </div>
-                      <div className="field">
-                        <label>Km atual</label>
-                        <input
-                          type="text"
-                          className="input"
-                          value="${car.km}"
-                          id="ecKm-${car.id}"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="field col-full">
-                        <label>Observações do veículo</label>
-                        <textarea
-                          className="textarea"
-                          id="ecCarObs-${car.id}"
-                          placeholder="GNV, blindado, etc..."
+                    </div>
+
+                    {/* Botões de ação do veículo */}
+                    <div className="topbar-right ec-client-topbar-right">
+                      {isEditingThis ? (
+                        <>
+                          <button
+                            className="btn btn-ghost"
+                            onClick={cancelEditingVehicle}
+                            disabled={vehicleSaving}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleSaveVehicle(element.id)}
+                            disabled={
+                              vehicleSaving ||
+                              !editingVehicleData.license_plate.trim()
+                            }
+                          >
+                            {vehicleSaving ? (
+                              "Salvando..."
+                            ) : (
+                              <>
+                                <svg
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                Salvar
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => startEditingVehicle(element)}
                         >
-                          Observation
-                        </textarea>
-                      </div> */}
+                          <svg
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                          Editar
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
+              );
+            })}
+
+            {(!customer.vehicles || customer.vehicles.length === 0) && (
+              <div className="fs-body">
+                <div className="empty-state">Nenhum veículo cadastrado</div>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -297,23 +555,48 @@ const EditCustomer = () => {
               className="fs-body ec-client-fs-body-os-summary"
               id="ecOSSummary"
             >
-              <div className="os-mini-row ec-client-os-mini-row">
-                <div className="ec-client-os-mini-row-container">
-                  <div className="ec-client-os-mini-row-info">
-                    <span className="os-mini-id">#$serviceOrderID</span>
-                    <span className="badge ec-client-os-badge">status</span>
+              {customer.serviceOrders?.map((element) => (
+                <div
+                  key={element.id}
+                  className="os-mini-row ec-client-os-mini-row"
+                >
+                  <div className="ec-client-os-mini-row-container">
+                    <div className="ec-client-os-mini-row-info">
+                      <span className="os-mini-id">#{element.id}</span>
+                      <span className="badge ec-client-os-badge">
+                        {statusReverseMap[element.status]}
+                      </span>
+                    </div>
+                    <div className="os-mini-svc">
+                      {formattedServiceOrderTitle(element)}
+                    </div>
+                    <div className="ec-car-label">
+                      <span className="car-tag-group">
+                        <span className="svc-tag car-tag-placa">
+                          {element.vehicle.license_plate}
+                        </span>
+                        <span className="svc-tag car-tag-model">
+                          {element.vehicle.brand} {element.vehicle.model}
+                        </span>
+                      </span>
+                    </div>
                   </div>
-                  <div className="os-mini-svc">Manutenção + 1</div>
-                  {/* {car
-                    ? `<div style="margin-top:3px;"><span className="car-tag-group"><span className="svc-tag car-tag-placa">${car.placa}</span><span className="svc-tag car-tag-model">${car.marca} ${car.modelo}</span></span></div>`
-                    : ""} */}
+                  <div className="os-mini-val">
+                    {formattedPrice(element.subtotal)}
+                  </div>
                 </div>
-                <div className="os-mini-val">Valor service order</div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
+      {isModalOpen && customer && (
+        <NewVehicleModal
+          onClose={closeModal}
+          isModalOpen={isModalOpen}
+          selectedCustomer={customer}
+        />
+      )}
     </div>
   );
 };

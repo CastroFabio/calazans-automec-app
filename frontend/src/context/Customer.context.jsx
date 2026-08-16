@@ -121,9 +121,31 @@ export const CustomerProvider = ({ children }) => {
 
   const updateCustomer = (updatedCustomer) => {
     setCustomers((prev) =>
-      prev.map((customer) =>
-        customer.id === updatedCustomer.id ? updatedCustomer : customer,
-      ),
+      prev.map((customer) => {
+        if (customer.id !== updatedCustomer.id) return customer;
+
+        // Se o backend não enviou veículos, mantém os que já existem
+        const vehicles =
+          updatedCustomer.vehicles?.length > 0
+            ? updatedCustomer.vehicles
+            : customer.vehicles || [];
+
+        const serviceOrders =
+          updatedCustomer.serviceOrders?.length > 0
+            ? updatedCustomer.serviceOrders
+            : customer.serviceOrders || [];
+
+        return {
+          ...customer, // Mantém tudo que já existia
+          ...updatedCustomer, // Sobrescreve com os novos dados
+          vehicles, // ✅ Mantém veículos
+          serviceOrders, // ✅ Mantém ordens de serviço
+          _count: {
+            vehicles: vehicles.length,
+            serviceOrders: serviceOrders.length,
+          },
+        };
+      }),
     );
   };
 
@@ -180,6 +202,10 @@ export const CustomerProvider = ({ children }) => {
         return {
           ...customer,
           vehicles: updatedVehicles,
+          _count: {
+            ...customer._count,
+            vehicles: updatedVehicles.length,
+          },
         };
       }),
     );
