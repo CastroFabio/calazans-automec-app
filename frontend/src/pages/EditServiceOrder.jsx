@@ -121,7 +121,7 @@ const EditServiceOrder = () => {
     );
   };
 
-  // ========== FUNÇÕES PARA MATERIAIS (itemMaterials) ==========
+  // ========== FUNÇÕES PARA MATERIAIS (itemMaterials) - CORRIGIDO ==========
 
   const findMaterialById = (id) => {
     for (const group of materialsGroupData) {
@@ -201,8 +201,8 @@ const EditServiceOrder = () => {
 
   const calculateTotalMaterials = () => {
     return itemMaterials.reduce((total, item) => {
-      const quantity = parseValue(item.quantity);
-      const value = parseValue(item.value_unity);
+      const quantity = parseFloat(item.quantity) || 0;
+      const value = parseFloat(item.value_unity) || 0;
       return total + quantity * value;
     }, 0);
   };
@@ -231,6 +231,7 @@ const EditServiceOrder = () => {
         observation: serviceOrder.observation,
         subtotal: calculateGrandTotal(),
       };
+      console.log(updateData);
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
 
@@ -356,12 +357,6 @@ const EditServiceOrder = () => {
           </div>
         </div>
       </div>
-
-      {success && (
-        <div className="success-message">
-          ✅ Ordem de serviço atualizada com sucesso! Redirecionando...
-        </div>
-      )}
 
       {error && <div className="error-message">❌ {error}</div>}
 

@@ -1,45 +1,38 @@
-export const convertPriotity = (priority) => {
-  switch (priority) {
-    case 1:
-      return "Pendente";
-      break;
-    case 2:
-      return "Em andamento";
-      break;
-    case 3:
-      return "Concluída";
-      break;
-    case 4:
-      return "Aberta";
-      break;
-    case 5:
-      return "Aguardando Peças";
-      break;
-    case 6:
-      return "Cancelada";
-      break;
-    default:
-      return "N/A";
-      break;
-  }
+import { priorityReverseMap } from "./priorityMap";
+import { statusReverseMap } from "./statusMap";
+
+export const convertPriority = (priority) => {
+  return priorityReverseMap[priority] || "Desconhecido";
 };
 
 export const convertStatus = (status) => {
-  switch (status) {
-    case 1:
-      return "Normal";
-      break;
-    case 2:
-      return "Baixa";
-      break;
-    case 3:
-      return "Alta";
-      break;
-    case 4:
-      return "Urgente";
-      break;
-    default:
-      return "N/A";
-      break;
-  }
+  return statusReverseMap[status] || "Desconhecido";
+};
+
+export const getPriorityInfo = (priority) => {
+  return {
+    id: priority,
+    label: priorityReverseMap[priority] || "Desconhecido",
+  };
+};
+
+export const getStatusInfo = (status) => {
+  return {
+    id: status,
+    label: statusReverseMap[status] || "Desconhecido",
+  };
+};
+
+export const getStatusOptions = () => {
+  return Object.entries(statusReverseMap).map(([id, label]) => ({
+    id: Number(id),
+    label,
+  }));
+};
+
+export const getPriorityOptions = () => {
+  return Object.entries(priorityReverseMap).map(([id, label]) => ({
+    id: Number(id),
+    label,
+  }));
 };

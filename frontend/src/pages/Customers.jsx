@@ -16,7 +16,7 @@ const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedCustomerModal, setSelectedCustomerModal] = useState(null);
 
-  const { customers, fetchCustomers, removeCustomer } = useCustomers();
+  const { customers, removeCustomer } = useCustomers();
 
   const filteredData = useMemo(() => {
     if (!searchTerm) {
