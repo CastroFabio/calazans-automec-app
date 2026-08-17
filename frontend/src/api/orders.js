@@ -12,7 +12,7 @@ export const orderApi = {
   create: (data) => api.post(ENDPOINTS.orders.base, data),
 
   // Atualizar ordem
-  update: (id, data) => api.put(ENDPOINTS.orders.byId(id), data),
+  update: (id, data) => api.patch(ENDPOINTS.orders.byId(id), data),
 
   // Atualizar status da ordem
   updateStatus: (id, status) =>

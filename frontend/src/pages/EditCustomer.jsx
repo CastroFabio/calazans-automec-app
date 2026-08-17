@@ -45,8 +45,6 @@ const EditCustomer = () => {
         let found = getCustomerById(Number(id));
 
         if (found) {
-          console.log(found);
-
           setCustomer(found);
         } else {
           // Se não encontrar, busca no backend
@@ -310,7 +308,7 @@ const EditCustomer = () => {
             </svg>
             {saving ? "Salvando..." : "Salvar alterações"}
           </button>
-        </div>{" "}
+        </div>
       </div>
 
       <div className="edit-layout ec-client-container">

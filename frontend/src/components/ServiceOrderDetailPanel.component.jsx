@@ -2,12 +2,15 @@ import React from "react";
 import { statusReverseMap } from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formattedPrice } from "../utils/convertPrice";
+import { useNavigate } from "react-router-dom";
 
 const ServiceOrderDetailPanel = ({
   onClose,
   sidebarOpen,
   selectedServiceOrder,
 }) => {
+  const navigate = useNavigate();
+
   const formattedServiceOrderTitle = () => {
     const maintenanceJobCount = selectedServiceOrder.itemMaintenances.length;
     if (maintenanceJobCount > 1)
@@ -139,7 +142,12 @@ const ServiceOrderDetailPanel = ({
           </div> */}
         </div>
         <div className="sp-footer">
-          <button className="btn btn-primary btn-editar-atualizar-os">
+          <button
+            className="btn btn-primary btn-editar-atualizar-os"
+            onClick={() =>
+              navigate(`/service-order/edit/${selectedServiceOrder.id}`)
+            }
+          >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"

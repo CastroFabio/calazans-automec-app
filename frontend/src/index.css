@@ -2915,6 +2915,171 @@
   margin-bottom: 12px;
 }
 
+.edit-order-container {
+  padding: 18px 24px 0;
+}
+
+.edit-order-page-header {
+  padding-top: 10px;
+}
+
+.edit-order-status-prio-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-order-id-header {
+  color: var(--accent);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.edit-order-icon-customer-vehicle {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+
+.edit-order-icon-customer-vehicle-text {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.edit-order-form-grid {
+  gap: 12px;
+}
+
+.edit-order-input {
+  background: var(--surface2);
+  color: var(--ink2);
+  cursor: default;
+}
+
+.edit-order-input-car-info {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.edit-order-input-km {
+  background: var(--surface2);
+  color: var(--ink2);
+  cursor: default;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.edit-order-fs-header-svg-services {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+
+.edit-order-fs-header-svg-materials {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+
+.edit-order-header-desc {
+  width: 38%;
+}
+
+.edit-order-header-qtd {
+  width: 9%;
+}
+
+.edit-order-header-value {
+  width: 17%;
+}
+
+.edit-order-header-total {
+  width: 17%;
+}
+
+.edit-order-header-ref {
+  width: 15%;
+}
+
+.edit-order-divider-horizontal {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+}
+
+.edit-order-diagnosis-svg-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+
+.edit-order-form-grid-container {
+  gap: 12px;
+}
+
+.edit-order-textarea {
+  min-height: 56px;
+}
+
+.edit-order-form-actions {
+  padding: 0;
+}
+
+.edit-order-update-status-svg {
+  width: 12px;
+  height: 12px;
+}
+
+.edit-order-status-opt-dot-pending {
+  background: #f59e0b;
+}
+
+.edit-order-status-opt-dot-on-going {
+  background: #3b82f6;
+}
+
+.edit-order-status-opt-dot-done {
+  background: #22c55e;
+}
+
+.edit-order-status-opt-dot-cancelled {
+  background: #ef4444;
+}
+
+.edit-order-note-input-wrap {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 5px;
+}
+
+.edit-order-btn-apply-status {
+  width: 100%;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.edit-order-status-card-svg {
+  width: 12px;
+  height: 12px;
+}
+
+.edit-order-status-card-body {
+  padding: 12px 16px;
+}
+
+.edit-order-status-card-body {
+  padding: 8px 16px;
+}
+
+.edit-order-activity-log {
+  font-size: 12px;
+  color: var(--ink3);
+  padding: 8px 0;
+}
+
 /* ── NOT FOUND ── */
 #page-not-found {
   background: var(--bg);

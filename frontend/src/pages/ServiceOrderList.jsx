@@ -6,10 +6,10 @@ import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
 import { convertPriotity, convertStatus } from "../utils/convertPriorityStatus";
 import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const ServiceOrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [serviceOrderData, setServiceOrderData] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedServiceOrder, setSelectedServiceOrder] = useState(null);
   const [error, setError] = useState(false);
@@ -17,6 +17,8 @@ const ServiceOrderList = () => {
 
   // SIDEBAR DETAIL PANEL
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { serviceOrders } = useServiceOrders();
 
   const tabsData = [
     {
@@ -59,7 +61,7 @@ const ServiceOrderList = () => {
   const statusList = ["all", ...new Set(tabsData.map((p) => p.status))];
 
   const handleFilteredCustomers = useMemo(() => {
-    return serviceOrderData.filter((element) => {
+    return serviceOrders.filter((element) => {
       const matchesTab = activeTab === 0 || element.status === activeTab;
 
       const matchesSearch =
@@ -70,27 +72,7 @@ const ServiceOrderList = () => {
 
       return matchesSearch && matchesTab;
     });
-  }, [serviceOrderData, activeTab, searchTerm]);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data } = await orderApi.getAll();
-      data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-      setServiceOrderData(data);
-    } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço");
-      console.error("Erro ao buscar ordens:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  }, [serviceOrders, activeTab, searchTerm]);
 
   if (loading) {
     return <div className="loading">Carregando ordens...</div>;

@@ -11,4 +11,8 @@ export const itemMaterialApi = {
 
   // Buscar por ordem de serviço
   getByOrder: (orderId) => api.get(ENDPOINTS.itemMaterials.byOrder(orderId)),
+
+  update: (id, data) => api.patch(ENDPOINTS.itemMaterials.byId(id), data),
+
+  delete: (id) => api.delete(ENDPOINTS.itemMaterials.byId(id)),
 };

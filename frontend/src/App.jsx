@@ -1,40 +1,54 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import NavBar from "./components/navBar";
 import SideBar from "./components/sideBar";
+
 import Customers from "./pages/Customers";
 import NotFound from "./pages/NotFound";
 import MaintenanceJobs from "./pages/MaintenanceJobs";
 import Materials from "./pages/Materials";
 import ServiceOrderList from "./pages/serviceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
-import { CustomerProvider } from "./context/Customer.context";
 import EditCustomer from "./pages/EditCustomer";
+import EditServiceOrder from "./pages/EditServiceOrder";
+
+import { CustomerProvider } from "./context/Customer.context";
+import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 
 const App = () => {
   return (
     <>
-      <CustomerProvider>
-        <BrowserRouter>
-          <SideBar />
-          <div className="main">
-            <NavBar />
-            <div className="content">
-              <Routes>
-                <Route path="/" element={<ServiceOrderList />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/services" element={<MaintenanceJobs />} />
-                <Route path="/materials" element={<Materials />} />
-                <Route
-                  path="/new-service-order"
-                  element={<NewServiceOrder />}
-                />
-                <Route path="/customers/edit/:id" element={<EditCustomer />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+      <ServiceOrderProvider>
+        <CustomerProvider>
+          <BrowserRouter>
+            <SideBar />
+            <div className="main">
+              <NavBar />
+              <div className="content">
+                <Routes>
+                  <Route path="/" element={<ServiceOrderList />} />
+                  <Route path="/customers" element={<Customers />} />
+                  <Route path="/services" element={<MaintenanceJobs />} />
+                  <Route path="/materials" element={<Materials />} />
+                  <Route
+                    path="/new-service-order"
+                    element={<NewServiceOrder />}
+                  />
+                  <Route
+                    path="/customers/edit/:id"
+                    element={<EditCustomer />}
+                  />
+                  <Route
+                    path="/service-order/edit/:id"
+                    element={<EditServiceOrder />}
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
             </div>
-          </div>
-        </BrowserRouter>
-      </CustomerProvider>
+          </BrowserRouter>
+        </CustomerProvider>
+      </ServiceOrderProvider>
     </>
   );
 };
