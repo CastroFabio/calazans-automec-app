@@ -93,7 +93,6 @@ const ServiceOrderDetailPanel = ({
     ) {
       return;
     }
-    console.log("Cancelar OS #", order.id);
   };
 
   // ========== RENDER ==========

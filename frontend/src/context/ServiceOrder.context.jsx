@@ -133,6 +133,10 @@ export const ServiceOrderProvider = ({ children }) => {
     }
   };
 
+  const countAllServiceOrders = () => {
+    return serviceOrders.length;
+  };
+
   // ========== BUSCAR ORDEM POR ID (LOCAL) ==========
   const getServiceOrderById = (id) => {
     const serviceOrder = serviceOrders.find(
@@ -162,9 +166,7 @@ export const ServiceOrderProvider = ({ children }) => {
       }
 
       // 2. Busca no backend
-      console.log(`📤 Buscando ordem ${id} no backend...`);
       const { data } = await orderApi.getById(Number(id));
-      console.log(`✅ Ordem ${id} encontrada:`, data);
 
       // 3. Atualiza a lista local
       setServiceOrders((prev) => {
@@ -251,6 +253,7 @@ export const ServiceOrderProvider = ({ children }) => {
         updateServiceOrder,
         removeServiceOrder,
         clearError,
+        countAllServiceOrders,
       }}
     >
       {children}

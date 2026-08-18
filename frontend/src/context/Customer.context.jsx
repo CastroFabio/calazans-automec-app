@@ -77,7 +77,6 @@ export const CustomerProvider = ({ children }) => {
   const getCustomerById = (id) => {
     // Buscar na lista de clientes
     const customer = customers.find((c) => c.id === id);
-    console.log("Customer", customer);
 
     if (!customer) {
       console.warn(`Cliente com ID ${id} não encontrado na lista local`);

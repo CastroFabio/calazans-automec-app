@@ -9,6 +9,7 @@ import { materialGroupApi } from "../api/materialGroups";
 import { useCustomers } from "../context/Customer.context";
 
 import { useLocation } from "react-router-dom";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const ICONS = {
   orders: (
@@ -77,10 +78,10 @@ const SideBar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { countAllCustomers } = useCustomers();
+  const { countAllServiceOrders } = useServiceOrders();
 
   // Estados
   const [counts, setCounts] = useState({
-    serviceOrders: 0,
     materials: 0,
     maintenanceJobs: 0,
   });
@@ -110,7 +111,6 @@ const SideBar = () => {
       ]);
 
       setCounts({
-        serviceOrders: orders.data,
         materials: materials.data,
         maintenanceJobs: maintenance.data,
       });
@@ -136,7 +136,7 @@ const SideBar = () => {
             id: "serviceOrdersTab",
             title: "Ordens de Serviço",
             path: "/",
-            count: counts.serviceOrders,
+            count: countAllServiceOrders(),
             icon: ICONS.orders,
           },
           {
@@ -189,7 +189,7 @@ const SideBar = () => {
         ],
       },
     }),
-    [counts, countAllCustomers],
+    [counts, countAllCustomers, countAllServiceOrders],
   );
 
   // Filtrar itens ocultos (se houver)

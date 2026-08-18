@@ -412,7 +412,9 @@ const EditCustomer = () => {
                       </div>
                       <button
                         className="btn btn-sm btn-danger ec-car-btn"
-                        onClick={() => handleRemoveVehicle(element.id)}
+                        onClick={() => {
+                          handleRemoveVehicle(element.id);
+                        }}
                       >
                         Remover
                       </button>

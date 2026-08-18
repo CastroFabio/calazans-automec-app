@@ -231,7 +231,6 @@ const EditServiceOrder = () => {
         observation: serviceOrder.observation,
         subtotal: calculateGrandTotal(),
       };
-      console.log(updateData);
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
 

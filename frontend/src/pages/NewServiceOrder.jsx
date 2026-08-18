@@ -17,6 +17,7 @@ import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { orderApi } from "../api/orders";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
@@ -69,6 +70,8 @@ const NewServiceOrder = () => {
     material_id: null,
     reference: "",
   });
+
+  const { addServiceOrder } = useServiceOrders();
 
   // FETCH
   const handleFetchCustomers = async () => {
@@ -143,27 +146,120 @@ const NewServiceOrder = () => {
 
   // Função para salvar a OS
   const handleSaveOS = async () => {
-    // ========== VALIDAÇÕES ==========
+    // ========== VALIDAÇÕES BÁSICAS ==========
+
+    const errorList = [];
+
+    // 1. Cliente
     if (!formData.customer_id) {
-      setError("Selecione um cliente");
-      return;
+      errorList.push("Selecione um cliente");
     }
 
+    // 2. Veículo
     if (!formData.vehicle_id) {
-      setError("Selecione um veículo");
-      return;
+      errorList.push("Selecione um veículo");
     }
 
-    if (!formData.diagnosis.trim()) {
-      setError("Preencha o diagnóstico");
-      return;
+    // 3. Diagnóstico
+    if (!formData.diagnosis?.trim()) {
+      errorList.push("Preencha o diagnóstico");
     }
 
+    // 4. Pelo menos um serviço ou material
     if (listMaintenanceJobs.length === 0 && materialsList.length === 0) {
-      setError("Adicione pelo menos um serviço ou material");
-      return;
+      errorList.push("Adicione pelo menos um serviço ou material");
     }
 
+    // ========== VALIDAÇÃO DE SERVIÇOS ==========
+
+    const invalidServices = listMaintenanceJobs.filter((job) => {
+      if (!job.maintenance_id) return true;
+      const value = parseFloat(job.value_unit) || 0;
+      if (value <= 0) return true;
+      return false;
+    });
+
+    if (invalidServices.length > 0) {
+      const errorMessages = invalidServices.map((job, index) => {
+        const errors = [];
+        if (!job.maintenance_id) errors.push("serviço não selecionado");
+        const value = parseFloat(job.value_unit) || 0;
+        if (value <= 0) errors.push("valor inválido ou zerado");
+        return `Serviço #${index + 1}: ${errors.join(" e ")}`;
+      });
+
+      errorList.push(`Serviços incompletos:\n${errorMessages.join("\n")}`);
+    }
+
+    // ========== VALIDAÇÃO DE MATERIAIS ==========
+
+    const invalidMaterials = materialsList.filter((item) => {
+      if (!item.material_id) return true;
+      const quantity = parseFloat(item.quantity) || 0;
+      if (quantity <= 0) return true;
+      const value = parseFloat(item.value_unity) || 0;
+      if (value <= 0) return true;
+      return false;
+    });
+
+    if (invalidMaterials.length > 0) {
+      const errorMessages = invalidMaterials.map((item, index) => {
+        const errors = [];
+        if (!item.material_id) errors.push("material não selecionado");
+        const quantity = parseFloat(item.quantity) || 0;
+        if (quantity <= 0) errors.push("quantidade inválida");
+        const value = parseFloat(item.value_unity) || 0;
+        if (value <= 0) errors.push("valor inválido");
+        return `Material #${index + 1}: ${errors.join(" e ")}`;
+      });
+
+      errorList.push(`Materiais incompletos:\n${errorMessages.join("\n")}`);
+    }
+
+    // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
+
+    const hasValidService = listMaintenanceJobs.some(
+      (job) => parseFloat(job.value_unit) > 0,
+    );
+
+    const hasValidMaterial = materialsList.some((item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      const value = parseFloat(item.value_unity) || 0;
+      return quantity > 0 && value > 0;
+    });
+
+    if (!hasValidService && !hasValidMaterial) {
+      errorList.push(
+        "Adicione pelo menos um serviço ou material com valor válido",
+      );
+    }
+
+    // ========== VALIDAÇÃO DE NOMES ==========
+
+    const servicesWithoutName = listMaintenanceJobs.filter((job) => {
+      job.maintenance_id && !job.name;
+    });
+
+    if (servicesWithoutName.length > 0) {
+      errorList.push(
+        "Alguns serviços não têm nome associado. Selecione novamente.",
+      );
+    }
+
+    const materialsWithoutName = materialsList.filter(
+      (item) => item.material_id && !item.name,
+    );
+
+    if (materialsWithoutName.length > 0) {
+      errorList.push(
+        "Alguns materiais não têm nome associado. Selecione novamente.",
+      );
+    }
+
+    if (errorList.length > 0) {
+      alert(errorList.join("\n"));
+      return;
+    }
     // ========== PREPARAR DADOS DA OS ==========
     const serviceOrderData = {
       customer_id: formData.customer_id,
@@ -178,58 +274,102 @@ const NewServiceOrder = () => {
       subtotal: calculateGrandTotal(),
     };
 
+    // ========== SALVAR ==========
     try {
       setLoading(true);
       setError(null);
 
-      // ========== 1. CRIAR SERVICE ORDER ==========
-
+      // 1. Criar Service Order
       const { data: serviceOrder } = await orderApi.create(serviceOrderData);
 
-      const serviceOrderId = serviceOrder.id; // ← ID para usar nos itens
+      addServiceOrder(serviceOrder);
 
-      // ========== 2. CRIAR ITEM MAINTENANCE ==========
+      const serviceOrderId = serviceOrder.id;
+
+      // 2. Criar Item Maintenance
       if (listMaintenanceJobs.length > 0) {
         const itemMaintenanceData = listMaintenanceJobs.map((job) => ({
-          serviceorder_id: serviceOrderId, // ← ID da OS
+          serviceorder_id: serviceOrderId,
           maintenance_id: job.maintenance_id,
           value_unity: parseFloat(job.value_unit) || 0,
           description: job.description?.trim() || "",
         }));
 
-        // Criar todos os ItemMaintenance de uma vez
         await itemMaintenanceApi.createBatch(itemMaintenanceData);
       }
 
-      // ========== 3. CRIAR ITEM MATERIAL ==========
+      // 3. Criar Item Material
       if (materialsList.length > 0) {
         const itemMaterialData = materialsList.map((item) => ({
-          serviceorder_id: serviceOrderId, // ← ID da OS
+          serviceorder_id: serviceOrderId,
           material_id: item.material_id,
           quantity: parseFloat(item.quantity) || 1,
           value_unity: parseFloat(item.value_unity) || 0,
           reference: item.reference?.trim() || "",
         }));
 
-        // Criar todos os ItemMaterial de uma vez
         await itemMaterialApi.createBatch(itemMaterialData);
       }
 
       // ========== SUCESSO ==========
       navigate("/");
-    } catch (error) {
-      console.error("❌ Erro ao salvar OS:", error);
+    } catch (err) {
+      // ✅ Melhor tratamento de erro
+      console.error("❌ Erro ao salvar OS:", err);
 
-      let errorMessage = "Erro ao salvar OS";
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Dados:", error.response.data);
-        errorMessage = error.response.data?.message || errorMessage;
-      } else if (error.request) {
-        errorMessage = "Servidor não respondeu";
+      let errorMessage = "Erro ao salvar Ordem de Serviço";
+
+      if (err.response) {
+        // Erro com resposta do servidor
+        console.error("Status:", err.response.status);
+        console.error("Dados:", err.response.data);
+
+        switch (err.response.status) {
+          case 400:
+            errorMessage =
+              err.response.data?.message ||
+              "Dados inválidos. Verifique os campos preenchidos.";
+            break;
+          case 401:
+            errorMessage = "Não autorizado. Faça login novamente.";
+            break;
+          case 403:
+            errorMessage = "Sem permissão para criar ordens de serviço.";
+            break;
+          case 404:
+            errorMessage = "Recurso não encontrado. Verifique os dados.";
+            break;
+          case 409:
+            errorMessage =
+              err.response.data?.message || "Conflito com dados existentes.";
+            break;
+          case 422:
+            errorMessage =
+              err.response.data?.message ||
+              "Dados inválidos. Verifique as validações.";
+            break;
+          case 500:
+            errorMessage =
+              "Erro interno no servidor. Tente novamente mais tarde.";
+            break;
+          default:
+            errorMessage =
+              err.response.data?.message ||
+              `Erro ${err.response.status}: ${err.response.statusText}`;
+        }
+      } else if (err.request) {
+        // Requisição feita, mas sem resposta
+        errorMessage =
+          "Servidor não respondeu. Verifique sua conexão com a internet.";
+      } else if (err.message) {
+        // Erro na configuração da requisição
+        errorMessage = err.message;
       }
 
+      // ✅ Atualiza o estado de erro com a mensagem amigável
       setError(errorMessage);
+
+      // ✅ Mostra alerta com a mensagem
       alert(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
@@ -346,7 +486,7 @@ const NewServiceOrder = () => {
 
             if (found) {
               foundJob = found;
-              foundValue = formattedPrice(found.value_unit);
+              foundValue = found.value_unit;
               break;
             }
           }
@@ -738,9 +878,7 @@ const NewServiceOrder = () => {
                                     return {
                                       ...job,
                                       maintenance_id: foundJob.id,
-                                      value_unit: formattedPrice(
-                                        foundJob.value_unit,
-                                      ),
+                                      value_unit: foundJob.value_unit,
                                     };
                                   }),
                                 );
