@@ -190,7 +190,9 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
             Salvar Veículo
           </button>
         </div>
-        {error && <p>{error}</p>}
+        <div className="customer-error-message-container">
+          {error && <p>{error}</p>}
+        </div>
       </div>
     </div>
   );

@@ -138,7 +138,8 @@ const EditServiceOrder = () => {
       name: "",
       quantity: 1,
       value_unity: "",
-      reference: "",
+      receipt: "",
+      supplier: "",
     };
     setItemMaterials([...itemMaterials, newMaterial]);
   };
@@ -266,14 +267,16 @@ const EditServiceOrder = () => {
             material_id: item.material_id,
             quantity: parseValue(item.quantity),
             value_unity: parseValue(item.value_unity),
-            reference: item.reference || "",
+            receipt: item.receipt || "",
+            supplier: item.supplier || "",
           });
         } else {
           await itemMaterialApi.update(item.id, {
             material_id: item.material_id,
             quantity: parseValue(item.quantity),
             value_unity: parseValue(item.value_unity),
-            reference: item.reference || "",
+            receipt: item.receipt || "",
+            supplier: item.supplier || "",
           });
         }
       }
@@ -574,7 +577,8 @@ const EditServiceOrder = () => {
                       <th className="mat-table-content-qtd">Qtd.</th>
                       <th className="mat-table-content-value">Valor Unit.</th>
                       <th className="mat-table-content-total">Total</th>
-                      <th className="mat-table-content-ref">Referência</th>
+                      <th className="mat-table-content-ref">Loja</th>
+                      <th className="mat-table-content-ref">Recibo</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -664,11 +668,26 @@ const EditServiceOrder = () => {
                               type="text"
                               className="input input-new-order-material-ref"
                               placeholder="Ref."
-                              value={element.reference || ""}
+                              value={element.supplier || ""}
                               onChange={(e) =>
                                 handleMaterialInputChange(
                                   element.id,
-                                  "reference",
+                                  "supplier",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="input input-new-order-material-ref"
+                              placeholder="Ref."
+                              value={element.receipt || ""}
+                              onChange={(e) =>
+                                handleMaterialInputChange(
+                                  element.id,
+                                  "receipt",
                                   e.target.value,
                                 )
                               }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { newServiceOrderCustomerListDTO } from "../data/mockDataDTO";
+import NewCustomerModal from "./NewCustomerModal.component";
 
 const AutoCompleteCustomer = ({
   selectedCustomerInfo,
@@ -11,6 +12,7 @@ const AutoCompleteCustomer = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [customerName, setCustomerName] = useState("");
 
   useEffect(() => {
     if (inputValue.trim() === "") {
@@ -57,6 +59,14 @@ const AutoCompleteCustomer = ({
     setSelectedVehicleInfo({});
   };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="ac-wrap">
       <div className="ac-input-row">
@@ -99,7 +109,10 @@ const AutoCompleteCustomer = ({
             <div
               key={index}
               className="ac-option"
-              onClick={() => handleSuggestionClick(element)}
+              onClick={() => {
+                console.log("isModalOpen");
+                handleSuggestionClick(element);
+              }}
             >
               <div className="ac-option-name">{element.name}</div>
               <div className="ac-option-sub">
@@ -111,7 +124,13 @@ const AutoCompleteCustomer = ({
           <div className="ac-empty">Nenhum cliente encontrado</div>
         )}
         <div
-          className="ac-option-create" /* onmousedown="acCreateClient('${inst}','${q.replace(/'/g, "\\'")}')" */
+          className="ac-option-create"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("isModalOpen");
+            handleOpenModal();
+          }}
         >
           <svg
             width="13"

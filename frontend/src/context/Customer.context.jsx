@@ -86,6 +86,27 @@ export const CustomerProvider = ({ children }) => {
     return customer;
   };
 
+  const getCustomerByName = (name) => {
+    // Buscar na lista de clientes
+    const customer = customers.find((c) => c.name === name);
+
+    if (!customer) {
+      console.warn(`Cliente com nome ${name} não encontrado na lista local`);
+      return null;
+    }
+
+    return customer;
+  };
+
+  const getFirstCustomer = () => {
+    if (customers.length <= 0) {
+      console.warn(`Nenhum cliente registrado`);
+      return null;
+    }
+
+    return customers[0];
+  };
+
   // ========== ✅ BUSCAR CLIENTE POR ID COM DETALHES ==========
   const getCustomerByIdWithDetails = (id) => {
     const customer = customers.find((c) => c.id === id);
@@ -234,6 +255,8 @@ export const CustomerProvider = ({ children }) => {
         fetchCustomerById,
         getCustomerByIdWithDetails,
         getCustomerById,
+        getCustomerByName,
+        getFirstCustomer,
         customerID,
         setCustomerID,
       }}

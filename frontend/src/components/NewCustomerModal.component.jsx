@@ -3,9 +3,9 @@ import { customerApi } from "../api/customers";
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
 
-const NewCustomerModal = ({ isOpen, onClose }) => {
+const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    name: customerName || "",
     cell: "",
     telephone: "",
     observation: "",
@@ -44,6 +44,7 @@ const NewCustomerModal = ({ isOpen, onClose }) => {
       const { data } = await customerApi.create(customerData);
       const newCustomerData = {
         ...data,
+        vehicles: [],
         _count: {
           serviceOrders: 0,
           vehicles: 0,
@@ -158,6 +159,9 @@ const NewCustomerModal = ({ isOpen, onClose }) => {
             </svg>
             Salvar e Cadastrar Cliente
           </button>
+        </div>
+        <div className="customer-error-message-container">
+          {error && <p>{error}</p>}
         </div>
       </div>
     </div>

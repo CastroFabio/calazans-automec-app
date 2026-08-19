@@ -50,11 +50,20 @@ export class CreateMaterialItemDto {
   material_id: number;
 
   @ApiPropertyOptional({
-    description: 'Referência',
-    example: 'Descrição sobre o item material',
+    description: 'Códido do recibo da peça que foi comprada no fornecedor',
+    example: '234599',
     type: String,
   })
   @IsOptional()
-  @IsString({ message: 'Referência deve ser uma string' })
-  reference: string;
+  @IsString({ message: 'Códido do recibo deve ser uma string' })
+  receipt: string;
+
+  @ApiPropertyOptional({
+    description: 'Nome do fornecedor',
+    example: 'AP',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'Nome do fornecedor deve ser uma string' })
+  supplier: string;
 }

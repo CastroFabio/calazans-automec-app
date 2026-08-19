@@ -43,14 +43,28 @@ export class CreateItemMaterialBatchItemDto {
   value_unity: number;
 
   @ApiPropertyOptional({
-    description: 'Referência do material',
-    example: 'LOT-2024-001',
+    description: 'Código do recibo',
+    example: '42145',
     maxLength: 255,
   })
   @IsOptional()
-  @IsString({ message: 'reference deve ser uma string' })
-  @MaxLength(255, { message: 'reference deve ter no máximo 255 caracteres' })
-  reference?: string;
+  @IsString({ message: 'código do recibo deve ser uma string' })
+  @MaxLength(255, {
+    message: 'código do recibo deve ter no máximo 255 caracteres',
+  })
+  receipt?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nome do fornecedor',
+    example: 'AP',
+    maxLength: 255,
+  })
+  @IsOptional()
+  @IsString({ message: 'Nome do fornecedor deve ser uma string' })
+  @MaxLength(255, {
+    message: 'Nome do fornecedor deve ter no máximo 255 caracteres',
+  })
+  supplier?: string;
 
   @ApiProperty({
     description: 'ID da ordem de serviço',

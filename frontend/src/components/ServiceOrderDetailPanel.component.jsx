@@ -222,10 +222,16 @@ const ServiceOrderDetailPanel = ({
                       <span className="sp-material-value">
                         {formattedPrice(element.value_unity)}
                       </span>
-                    )}
-                    {element.reference && (
+                    )}{" "}
+                    {element.supplier && (
                       <span className="sp-material-ref">
-                        Ref: {element.reference}
+                        <strong>Loja:</strong> {element.supplier}
+                      </span>
+                    )}{" "}
+                    {element.receipt && (
+                      <span className="sp-material-ref">
+                        <strong>Recibo:</strong>
+                        {element.receipt}
                       </span>
                     )}
                   </div>

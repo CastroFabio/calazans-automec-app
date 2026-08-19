@@ -18,6 +18,9 @@ import { orderApi } from "../api/orders";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import NewCustomerModal from "../components/NewCustomerModal.component";
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import { useCustomers } from "../context/Customer.context";
 
 const NewServiceOrder = () => {
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
@@ -27,6 +30,8 @@ const NewServiceOrder = () => {
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
+  const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
 
   // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
@@ -68,10 +73,12 @@ const NewServiceOrder = () => {
     value_unity: null,
     serviceorder_id: null,
     material_id: null,
-    reference: "",
+    receipt: "",
+    supplier: "",
   });
 
   const { addServiceOrder } = useServiceOrders();
+  const { getFirstCustomer, getCustomerById } = useCustomers();
 
   // FETCH
   const handleFetchCustomers = async () => {
@@ -305,7 +312,8 @@ const NewServiceOrder = () => {
           material_id: item.material_id,
           quantity: parseFloat(item.quantity) || 1,
           value_unity: parseFloat(item.value_unity) || 0,
-          reference: item.reference?.trim() || "",
+          receipt: item.receipt?.trim() || "",
+          supplier: item.supplier?.trim() || "",
         }));
 
         await itemMaterialApi.createBatch(itemMaterialData);
@@ -511,7 +519,8 @@ const NewServiceOrder = () => {
       name: "",
       quantity: 1,
       value_unity: 0,
-      reference: "",
+      receipt: "",
+      supplier: "",
       serviceorder_id: null,
     };
     setMaterialsList([...materialsList, newMaterial]);
@@ -594,6 +603,22 @@ const NewServiceOrder = () => {
       if (found) return found;
     }
     return null;
+  };
+
+  const closeCustomerModal = () => {
+    setCustomerIsModalOpen(false);
+  };
+
+  const handleOpenCustomerModal = () => {
+    setCustomerIsModalOpen(true);
+  };
+
+  const closeVehicleModal = () => {
+    setVehicleIsModalOpen(false);
+  };
+
+  const handleOpenVehicleModal = () => {
+    setVehicleIsModalOpen(true);
   };
 
   return (
@@ -693,9 +718,7 @@ const NewServiceOrder = () => {
                     ) : (
                       <div className="ac-empty">Nenhum cliente encontrado</div>
                     )}
-                    <div
-                      className="ac-option-create" /* onmousedown="acCreateClient('${inst}','${q.replace(/'/g, "\\'")}')" */
-                    >
+                    <div className="ac-option-create">
                       <svg
                         width="13"
                         height="13"
@@ -749,7 +772,10 @@ const NewServiceOrder = () => {
                         <span className="car-badge-row-text-no-car">
                           Nenhum veículo cadastrado
                         </span>
-                        <button className="add-row-btn add-row-btn-car-badge">
+                        <button
+                          className="add-row-btn add-row-btn-car-badge"
+                          onClick={handleOpenVehicleModal}
+                        >
                           + Cadastrar veículo
                         </button>
                       </>
@@ -990,7 +1016,8 @@ const NewServiceOrder = () => {
                     <th className="mat-table-content-qtd">Qtd.</th>
                     <th className="mat-table-content-value">Valor Unit.</th>
                     <th className="mat-table-content-total">Total</th>
-                    <th className="mat-table-content-ref">Referência</th>
+                    <th className="mat-table-content-ref">Loja</th>
+                    <th className="mat-table-content-ref">Recibo</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1111,11 +1138,26 @@ const NewServiceOrder = () => {
                               type="text"
                               className="input input-new-order-material-ref"
                               placeholder="Ref."
-                              value={element.reference}
+                              value={element.supplier}
                               onChange={(e) =>
                                 handleMaterialInputChange(
                                   element.id,
-                                  "reference",
+                                  "supplier",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="text"
+                              className="input input-new-order-material-ref"
+                              placeholder="Ref."
+                              value={element.receipt}
+                              onChange={(e) =>
+                                handleMaterialInputChange(
+                                  element.id,
+                                  "receipt",
                                   e.target.value,
                                 )
                               }
@@ -1298,6 +1340,20 @@ const NewServiceOrder = () => {
           </button>
         </div>
       </div>
+      {isCustomerModalOpen && (
+        <NewCustomerModal
+          isOpen={isCustomerModalOpen}
+          onClose={closeCustomerModal}
+          customerName={inputValue}
+        />
+      )}
+      {isVehicleModalOpen && (
+        <NewVehicleModal
+          isModalOpen={isVehicleModalOpen}
+          onClose={closeVehicleModal}
+          selectedCustomer={getCustomerById()}
+        />
+      )}
     </div>
   );
 };

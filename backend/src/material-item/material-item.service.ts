@@ -60,7 +60,8 @@ export class MaterialItemService {
           value_unity: createMaterialItemDto.value_unity,
           serviceorder_id: createMaterialItemDto.serviceorder_id,
           material_id: createMaterialItemDto.material_id,
-          reference: createMaterialItemDto.reference,
+          supplier: createMaterialItemDto.supplier,
+          receipt: createMaterialItemDto.receipt,
         },
       });
 
@@ -124,7 +125,8 @@ export class MaterialItemService {
         material_id: item.material_id,
         quantity: item.quantity,
         value_unity: item.value_unity,
-        reference: item.reference || null,
+        supplier: item.supplier || null,
+        receipt: item.receipt || null,
         serviceorder_id: item.serviceorder_id,
       }));
 
@@ -236,7 +238,8 @@ export class MaterialItemService {
           value_unity: updateMaterialItemDto.value_unity,
           serviceorder_id: updateMaterialItemDto.serviceorder_id,
           material_id: updateMaterialItemDto.material_id,
-          reference: updateMaterialItemDto.reference,
+          receipt: updateMaterialItemDto.receipt,
+          supplier: updateMaterialItemDto.supplier,
         },
         include: {
           material: true,

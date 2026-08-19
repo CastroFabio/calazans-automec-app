@@ -14,7 +14,8 @@ const NewOrderMaterial = ({
       name: "",
       quantity: "",
       value_unity: "",
-      reference: "",
+      receipt: "",
+      supplier: "",
       serviceorder_id: "",
       material_id: "",
     };
@@ -79,7 +80,8 @@ const NewOrderMaterial = ({
                 <th className="mat-table-content-qtd">Qtd.</th>
                 <th className="mat-table-content-value">Valor Unit.</th>
                 <th className="mat-table-content-total">Total</th>
-                <th className="mat-table-content-ref">Referência</th>
+                <th className="mat-table-content-ref">Loja</th>
+                <th className="mat-table-content-ref">Recibo</th>
                 <th></th>
               </tr>
             </thead>
@@ -169,11 +171,26 @@ const NewOrderMaterial = ({
                           type="text"
                           className="input input-new-order-material-ref"
                           placeholder="Ref."
-                          value={element.reference}
+                          value={element.supplier}
                           onChange={(e) =>
                             handleMaterialInputChange(
                               element.id,
-                              "reference",
+                              "supplier",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="input input-new-order-material-ref"
+                          placeholder="Ref."
+                          value={element.receipt}
+                          onChange={(e) =>
+                            handleMaterialInputChange(
+                              element.id,
+                              "receipt",
                               e.target.value,
                             )
                           }

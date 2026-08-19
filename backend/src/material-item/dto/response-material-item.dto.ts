@@ -39,9 +39,16 @@ export class MaterialItemResponseDto {
   material_id: number;
 
   @ApiPropertyOptional({
-    description: 'Referência',
-    example: 'Descrição sobre o item material',
+    description: 'Loja que foi comprado',
+    example: 'Nome da loja que foi comprada a peça',
     type: String,
   })
-  reference: string;
+  supplier: string;
+
+  @ApiPropertyOptional({
+    description: 'Recibo da compra de peças',
+    example: 'Recibo da compra de peça referente ao fornecedor',
+    type: String,
+  })
+  receipt: string;
 }

@@ -116,7 +116,8 @@ model ItemMaterial {
   value_unity     Float    @db.DoublePrecision
   serviceorder_id Int
   material_id     Int
-  reference       String?  @db.Text
+  receipt         String?  @db.Text
+  supplier        String?  @db.Text
 
   // Relacionamentos
   serviceorder ServiceOrder @relation(fields: [serviceorder_id], references: [id], onDelete: Cascade)
