@@ -6,17 +6,19 @@ import { orderApi } from "../api/orders";
 import { convertPriority, convertStatus } from "../utils/convertPriorityStatus";
 import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import { statusReverseMap } from "../utils/statusMap";
+import Loading from "./Loading";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
   { id: 0, title: "Todas", status: null },
-  { id: 1, title: "Pendentes", status: 1 },
-  { id: 2, title: "Em andamento", status: 2 },
-  { id: 3, title: "Concluídas", status: 3 },
-  { id: 4, title: "Aberta", status: 4 },
-  { id: 5, title: "Aguardando Peças", status: 5 },
-  { id: 6, title: "Cancelada", status: 6 },
-  { id: 7, title: "Ainda a pagar", status: 7 },
+  { id: 1, title: statusReverseMap[1], status: 1 },
+  { id: 2, title: statusReverseMap[2], status: 2 },
+  { id: 3, title: statusReverseMap[3], status: 3 },
+  { id: 4, title: statusReverseMap[4], status: 4 },
+  { id: 5, title: statusReverseMap[5], status: 5 },
+  { id: 6, title: statusReverseMap[6], status: 6 },
+  { id: 7, title: statusReverseMap[7], status: 7 },
 ];
 
 const ServiceOrderList = () => {
@@ -37,9 +39,6 @@ const ServiceOrderList = () => {
   const [localLoading, setLocalLoading] = useState(false);
 
   // ========== CARREGAR DADOS AO INICIAR ==========
-  useEffect(() => {
-    fetchServiceOrders();
-  }, []);
 
   // ========== FILTRAR ORDENS ==========
   const filteredOrders = useMemo(() => {
@@ -93,9 +92,7 @@ const ServiceOrderList = () => {
   };
 
   // ========== RENDER ==========
-  if (loading) {
-    return <div className="loading">Carregando ordens...</div>;
-  }
+  if (loading) return <Loading />;
 
   if (error) {
     return <div className="error">❌ {error}</div>;

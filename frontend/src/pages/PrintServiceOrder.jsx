@@ -6,6 +6,7 @@ import { orderApi } from "../api/orders";
 import { statusReverseMap } from "../utils/statusMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { formattedPrice } from "../utils/convertPrice";
+import logo from "../../public/LogoCalazansAutomec.png";
 
 const INFO_MEC = {
   nomeOficina: "Calazans Automec",
@@ -142,7 +143,13 @@ const PrintServiceOrder = () => {
         <div className="print-doc" id="printDoc">
           <div className="print-header">
             <div>
-              <div className="print-logo">Logo da oficina</div>
+              <div className="print-logo">
+                <img
+                  src={logo}
+                  alt="Company Logo"
+                  className="print-header-logo-image"
+                />
+              </div>
               <div className="print-subtitulo">{INFO_MEC.subtitulo}</div>
             </div>
             <div className="print-shop-info">
