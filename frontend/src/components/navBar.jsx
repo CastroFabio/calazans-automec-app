@@ -65,6 +65,15 @@ const ROUTES_CONFIG = {
       return `Editar Cliente`;
     },
   },
+  "/service-order/print": {
+    title: "Imprimir Ordem de Serviço",
+    btn: null,
+    isDynamic: true,
+    getTitle: (path) => {
+      const id = path.split("/").pop();
+      return `Imprimir Ordem de Serviço`;
+    },
+  },
 };
 
 const NavBar = () => {

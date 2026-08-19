@@ -45,7 +45,7 @@ const App = () => {
                   />
                   <Route path="*" element={<NotFound />} />
                   <Route
-                    path="/service-order/:id/print"
+                    path="/service-order/print/:id"
                     element={<PrintServiceOrder />}
                   />
                 </Routes>

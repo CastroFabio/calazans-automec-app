@@ -88,7 +88,7 @@ const ServiceOrderDetailPanel = ({
   };
 
   const handlePrintOrder = () => {
-    navigate(`/service-order/${order.id}/print`);
+    navigate(`/service-order/print/${order.id}`);
     if (onClose) onClose();
   };
 
