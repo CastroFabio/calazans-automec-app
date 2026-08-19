@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "serviceorder" ADD COLUMN     "paid" DOUBLE PRECISION NOT NULL DEFAULT 0;

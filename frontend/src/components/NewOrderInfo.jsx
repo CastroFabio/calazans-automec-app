@@ -29,13 +29,11 @@ const NewOrderInfo = ({ handleFormFieldChange, formData }) => {
               }
             >
               <option value="">Selecione...</option>
-              <option value="Carlos Mendes">Carlos Mendes</option>
-              <option value="Ana Lima">Ana Lima</option>
-              <option value="Pedro Santos">Pedro Santos</option>
-              <option value="Fernanda Costa">Fernanda Costa</option>
+              <option value="João Calazans">João Calazans</option>
+              <option value="Waguinho">Waguinho</option>
             </select>
           </div>
-          <div className="field">
+          {/* <div className="field">
             <label>Prioridade</label>
             <select
               className="select"
@@ -49,7 +47,7 @@ const NewOrderInfo = ({ handleFormFieldChange, formData }) => {
               <option value="Alta">Alta</option>
               <option value="Urgente">Urgente</option>
             </select>
-          </div>
+          </div> */}
           <div className="field">
             <label>Status Inicial</label>
             <select

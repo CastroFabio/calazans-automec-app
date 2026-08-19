@@ -59,11 +59,18 @@ export class ServiceOrderResponseDto {
   diagnosis: String;
 
   @ApiProperty({
-    description: 'Observação da ordem de serviço',
-    example: 'Texto para observação',
+    description: 'Valor da ordem de serviço',
+    example: 1500,
     type: Number,
   })
   subtotal: Number;
+
+  @ApiProperty({
+    description: 'Valor pago da ordem de serviço',
+    example: 1000,
+    type: Number,
+  })
+  paid: Number;
 
   @ApiProperty({
     description: 'ID do cliente',

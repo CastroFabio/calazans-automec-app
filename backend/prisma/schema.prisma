@@ -99,6 +99,7 @@ model ServiceOrder {
   diagnosis    String?   @db.Text
   observation  String?   @db.Text
   subtotal     Float     @default(0)
+  paid         Float     @default(0)
 
   // Relacionamentos
   customer         Customer          @relation(fields: [customer_id], references: [id], onDelete: Restrict)

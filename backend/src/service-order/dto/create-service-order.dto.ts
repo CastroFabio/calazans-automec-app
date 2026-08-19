@@ -94,6 +94,16 @@ export class CreateServiceOrderDto {
   subtotal: number;
 
   @ApiProperty({
+    description: 'Quanto a ordem foi paga',
+    example: 30.4,
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0, { message: 'Valor pago não pode ser menor que zero' })
+  paid: number;
+
+  @ApiProperty({
     description: 'ID do cliente',
     example: 1,
     type: Number,

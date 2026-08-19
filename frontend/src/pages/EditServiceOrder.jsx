@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { orderApi } from "../api/orders";
-import { statusReverseMap } from "../utils/statusMap";
+import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
@@ -230,6 +230,7 @@ const EditServiceOrder = () => {
         status: serviceOrder.status,
         diagnosis: serviceOrder.diagnosis,
         observation: serviceOrder.observation,
+        paid: serviceOrder.paid,
         subtotal: calculateGrandTotal(),
       };
 
@@ -777,13 +778,11 @@ const EditServiceOrder = () => {
                     }
                   >
                     <option value="">Selecione...</option>
-                    <option value="Carlos Mendes">Carlos Mendes</option>
-                    <option value="Ana Lima">Ana Lima</option>
-                    <option value="Pedro Santos">Pedro Santos</option>
-                    <option value="Fernanda Costa">Fernanda Costa</option>
+                    <option value="João Calazans">João Calazans</option>
+                    <option value="Waguinho">Waguinho</option>
                   </select>
                 </div>
-                <div className="field">
+                {/* <div className="field">
                   <label>Prioridade</label>
                   <select
                     className="select"
@@ -798,6 +797,22 @@ const EditServiceOrder = () => {
                     <option value={3}>Alta</option>
                     <option value={4}>Urgente</option>
                   </select>
+                </div> */}
+                <div className="field">
+                  <label>Total Pago</label>
+                  <div className="input-prefix">
+                    <span>R$</span>
+                    <input
+                      type="text"
+                      placeholder="0,00"
+                      className="input-new-order-material-cost"
+                      value={serviceOrder.paid || 0}
+                      onChange={(e) => {
+                        handleFormFieldChange("paid", Number(e.target.value));
+                        console.log(serviceOrder);
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="field">
                   <label>Status</label>
@@ -809,12 +824,13 @@ const EditServiceOrder = () => {
                     }
                   >
                     <option value="">Selecione...</option>
-                    <option value={1}>Pendente</option>
-                    <option value={2}>Em andamento</option>
-                    <option value={3}>Concluído</option>
-                    <option value={4}>Aberta</option>
-                    <option value={5}>Aguardando peças</option>
-                    <option value={6}>Cancelada</option>
+                    <option value={1}>{statusReverseMap[1]}</option>
+                    <option value={2}>{statusReverseMap[2]}</option>
+                    <option value={3}>{statusReverseMap[3]}</option>
+                    <option value={4}>{statusReverseMap[4]}</option>
+                    <option value={5}>{statusReverseMap[5]}</option>
+                    <option value={6}>{statusReverseMap[6]}</option>
+                    <option value={7}>{statusReverseMap[7]}</option>
                   </select>
                 </div>
                 <div className="field col-full">
@@ -890,7 +906,7 @@ const EditServiceOrder = () => {
         {/* ========== SIDEBAR ========== */}
         <div className="edit-side">
           {/* Status Card */}
-          <div className="status-card">
+          {/* <div className="status-card">
             <div className="status-card-header">
               <svg
                 className="edit-order-update-status-svg"
@@ -945,10 +961,10 @@ const EditServiceOrder = () => {
                 Aplicar Status
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Resumo da OS */}
-          <div className="status-card">
+          {/* <div className="status-card">
             <div className="status-card-header">
               <svg
                 className="edit-order-status-card-svg"
@@ -995,10 +1011,10 @@ const EditServiceOrder = () => {
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Histórico de Atividades */}
-          <div className="status-card">
+          {/* <div className="status-card">
             <div className="status-card-header">
               <svg
                 className="edit-order-status-card-svg"
@@ -1022,7 +1038,7 @@ const EditServiceOrder = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

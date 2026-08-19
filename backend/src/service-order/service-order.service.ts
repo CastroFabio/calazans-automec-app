@@ -71,6 +71,7 @@ export class ServiceOrderService {
           diagnosis: createServiceOrderDto.diagnosis,
           observation: createServiceOrderDto.observation,
           subtotal: createServiceOrderDto.subtotal,
+          paid: createServiceOrderDto.paid,
         },
         include: { customer: true, vehicle: true },
       });
@@ -183,6 +184,7 @@ export class ServiceOrderService {
           diagnosis: updateServiceOrderDto.diagnosis,
           observation: updateServiceOrderDto.observation,
           subtotal: updateServiceOrderDto.subtotal,
+          paid: updateServiceOrderDto.paid,
         },
       });
     } catch (error) {

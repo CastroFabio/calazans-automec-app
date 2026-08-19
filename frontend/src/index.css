@@ -3454,3 +3454,8 @@
   color: var(--accent);
   font-weight: bold;
 }
+
+.texto-riscado {
+  color: var(--ink3);
+  text-decoration: line-through;
+}

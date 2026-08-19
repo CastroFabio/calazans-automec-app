@@ -219,7 +219,13 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                   </div>
                 </div>
                 <div className="os-mini-val">
-                  {formattedPrice(element.subtotal)}
+                  {element.paid >= element.subtotal ? (
+                    <div className="texto-riscado">
+                      {formattedPrice(element.subtotal)}
+                    </div>
+                  ) : (
+                    formattedPrice(element.subtotal)
+                  )}
                 </div>
               </div>
             ))}
