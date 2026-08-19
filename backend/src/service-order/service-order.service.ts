@@ -112,7 +112,7 @@ export class ServiceOrderService {
     const serviceOrder = await this.prisma.serviceOrder.findUnique({
       where: { id },
       include: {
-        customer: { select: { id: true, name: true } },
+        customer: { select: { id: true, name: true, cell: true } },
         vehicle: {
           select: {
             id: true,
