@@ -25,6 +25,8 @@ const EditServiceOrder = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isClear, setIsClear] = useState(false);
+  const [payment, setPayment] = useState(0);
 
   // Estados para serviços (itemMaintenances)
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
@@ -49,12 +51,14 @@ const EditServiceOrder = () => {
           setOriginalServiceOrder(JSON.parse(JSON.stringify(found)));
           setItemMaintenances(found.itemMaintenances || []);
           setItemMaterials(found.itemMaterials || []);
+          setPayment(found.paid);
         } else {
           const { data } = await orderApi.getById(Number(id));
           setServiceOrder(data);
           setOriginalServiceOrder(JSON.parse(JSON.stringify(data)));
           setItemMaintenances(data.itemMaintenances || []);
           setItemMaterials(data.itemMaterials || []);
+          setPayment(data.paid);
         }
 
         // 2. Buscar grupos de serviços (para o select)
@@ -287,9 +291,37 @@ const EditServiceOrder = () => {
       updateServiceOrder(updatedOrder);
 
       setSuccess(true);
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      navigate("/");
+    } catch (err) {
+      console.error("❌ Erro:", err);
+      setError(err.response?.data?.message || "Erro ao atualizar ordem");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSubmitPayment = async (e) => {
+    e.preventDefault();
+
+    if (!serviceOrder) return;
+
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      // 1. Atualizar dados básicos da OS
+      const updateData = {
+        paid: Number(payment),
+      };
+
+      const { data } = await orderApi.update(serviceOrder.id, updateData);
+
+      // 4. Atualizar contexto
+      const updatedOrder = { ...serviceOrder, ...data };
+      updateServiceOrder(updatedOrder);
+
+      setSuccess(true);
     } catch (err) {
       console.error("❌ Erro:", err);
       setError(err.response?.data?.message || "Erro ao atualizar ordem");
@@ -301,6 +333,10 @@ const EditServiceOrder = () => {
 
   const handleFormFieldChange = (field, value) => {
     setServiceOrder((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFormFieldPaidChange = (value) => {
+    setPayment(value);
   };
 
   // ========== HANDLE REMOVE ORDEM ==========
@@ -798,22 +834,7 @@ const EditServiceOrder = () => {
                     <option value={4}>Urgente</option>
                   </select>
                 </div> */}
-                <div className="field">
-                  <label>Total Pago</label>
-                  <div className="input-prefix">
-                    <span>R$</span>
-                    <input
-                      type="text"
-                      placeholder="0,00"
-                      className="input-new-order-material-cost"
-                      value={serviceOrder.paid || 0}
-                      onChange={(e) => {
-                        handleFormFieldChange("paid", Number(e.target.value));
-                        console.log(serviceOrder);
-                      }}
-                    />
-                  </div>
-                </div>
+
                 <div className="field">
                   <label>Status</label>
                   <select
@@ -905,6 +926,80 @@ const EditServiceOrder = () => {
 
         {/* ========== SIDEBAR ========== */}
         <div className="edit-side">
+          <div className="status-card">
+            <div className="status-card-header">
+              <svg
+                className="status-card-header-svg"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                />
+              </svg>
+              Pagamento
+            </div>
+            <div className="status-card-body status-card-body-container">
+              <div id="editPaymentRows">
+                <div className="payment-row">
+                  <span className="payment-row-total-os">Total da OS</span>
+                  <span className="payment-total payment-total-value">
+                    {formattedPrice(serviceOrder.subtotal)}
+                  </span>
+                </div>
+                <div className="payment-row">
+                  <span className="payment-row-total-pago">Total pago</span>
+                  <span className="payment-row-total-pago-value">
+                    {formattedPrice(serviceOrder.paid)}
+                  </span>
+                </div>
+                <div className="payment-row payment-row-container">
+                  <span className="payment-row-saldo-restante">
+                    Saldo restante
+                  </span>
+                  <span
+                    className={`payment-row-saldo-restante-value  ${Number(serviceOrder.paid) >= Number(serviceOrder.subtotal) ? "payment-saldo-ok" : "payment-saldo-due"} `}
+                  >
+                    {Number(serviceOrder.paid) >= Number(serviceOrder.subtotal)
+                      ? "Quitado"
+                      : formattedPrice(
+                          serviceOrder.subtotal - serviceOrder.paid,
+                        )}
+                  </span>
+                </div>
+              </div>
+              <div className="status-card-body status-card-body-container-registrar-pagamento">
+                <div className="status-card-body-container-registrar-pagamento-text">
+                  Registrar pagamento
+                </div>
+                <div className="status-card-body-container-registrar-pagamento-input-container">
+                  <div className="status-card-body-registrar-pagamento-input-container input-prefix">
+                    <span>R$</span>
+                    <input
+                      type="text"
+                      className="input status-card-body-registrar-pagamento-input"
+                      id="editPaymentInput"
+                      placeholder="0,00"
+                      value={0 || payment}
+                      onChange={(e) => {
+                        handleFormFieldPaidChange(Number(e.target.value));
+                      }}
+                    />
+                  </div>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={handleSubmitPayment}
+                  >
+                    Registrar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Status Card */}
           {/* <div className="status-card">
             <div className="status-card-header">

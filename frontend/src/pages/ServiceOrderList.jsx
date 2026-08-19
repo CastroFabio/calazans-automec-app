@@ -16,6 +16,7 @@ const TABS = [
   { id: 4, title: "Aberta", status: 4 },
   { id: 5, title: "Aguardando Peças", status: 5 },
   { id: 6, title: "Cancelada", status: 6 },
+  { id: 7, title: "Ainda a pagar", status: 7 },
 ];
 
 const ServiceOrderList = () => {
