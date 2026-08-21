@@ -1,0 +1,344 @@
+/* printServiceOrder.css */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 15mm;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Container estrutural - Remove decorações de tela */
+  .print-doc {
+    width: 100%;
+    background: #ffffff;
+  }
+
+  /* Cabeçalho Profissional de Duas Colunas */
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #111111;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+  }
+
+  .print-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .print-header-logo-image {
+    max-height: 50px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .print-subtitulo {
+    font-size: 11px;
+    font-weight: 600;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .print-shop-info {
+    text-align: right;
+    font-size: 11px;
+    color: #333333;
+    line-height: 1.5;
+  }
+
+  /* Bloco de Resumo da OS */
+  .print-os-summary-block {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f5f5f0 !important;
+    border: 1px solid #dddddd;
+    padding: 10px 14px;
+    margin-bottom: 15px;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-os-id-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .print-os-id {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    background-color: #111111 !important;
+    color: #ffffff !important;
+    padding: 3px 8px;
+    border-radius: 3px;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-os-info-serviço {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .print-os-info-status-entry {
+    text-align: right;
+  }
+
+  .print-os-info-status {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid #111111;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .print-os-info-entry {
+    font-size: 10px;
+    color: #555555;
+    margin-top: 4px;
+  }
+
+  /* Seções unificadas do corpo */
+  .print-section-body {
+    border: 1px solid #dddddd;
+  }
+
+  .print-section {
+    padding: 12px 16px;
+    border-bottom: 1px solid #dddddd;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-section:last-child {
+    border-bottom: none;
+  }
+
+  .print-section-title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #555555;
+    margin-bottom: 6px;
+    border-left: 3px solid #111111;
+    padding-left: 6px;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Grid Compacto de Informações */
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  /* Caso precise de 2 colunas apenas para o cliente */
+  .print-grid.client-grid {
+    grid-template-columns: 2fr 2fr;
+  }
+
+  .print-field-box {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .print-field-label {
+    font-size: 9px;
+    color: #666666;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+  }
+
+  .print-field-val {
+    font-size: 11px;
+    font-weight: 600;
+    color: #111111;
+  }
+
+  .print-field-val-placa {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .print-section-title-text {
+    font-size: 11px;
+    color: #222222;
+    background-color: #fafafa;
+    padding: 8px;
+    border-left: 2px solid #cccccc;
+  }
+
+  /* Tabelas de Itens Formatadas para Papel */
+  .print-mat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .print-mat-table th {
+    text-align: left;
+    padding: 6px 8px;
+    background-color: #f5f5f0 !important;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #333333;
+    border-bottom: 1px solid #cccccc;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .print-mat-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eeeeee;
+    color: #111111;
+  }
+
+  .print-mat-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Alinhamentos específicos da tabela de Peças */
+  .print-mat-table th.print-mat-table-header-qty {
+    text-align: center;
+    width: 6%;
+  }
+  .print-mat-table th.print-mat-table-header-unt {
+    text-align: right;
+    width: 12%;
+  }
+  .print-mat-table th.print-mat-table-header-total {
+    text-align: right;
+    width: 14%;
+  }
+  .print-mat-table th.print-mat-table-mao-de-obra {
+    text-align: right;
+    width: 20%;
+  }
+
+  .print-material-table-quantidade {
+    text-align: center;
+  }
+  .print-mat-table-value-price,
+  .print-material-table-unit-value,
+  .print-material-table-total {
+    text-align: right;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 600;
+  }
+
+  .print-mat-table-nenhum-valor,
+  .print-mat-table-nenhum {
+    color: #777777;
+    font-style: italic;
+    padding: 6px 0;
+  }
+
+  /* Linhas de Subtotal das Tabelas */
+  .print-mat-table-value-mao-de-obra-total-container,
+  .print-material-table-value-total-container {
+    background-color: #f9f9f9 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .print-mat-table-value-mao-de-obra-total-title,
+  .print-material-table-value-total-title {
+    font-weight: 700;
+    text-align: right;
+    padding-right: 15px;
+  }
+
+  .print-mat-table-value-mao-de-obra-total,
+  .print-material-table-value-total-value {
+    text-align: right;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
+    border-top: 1px solid #cccccc;
+  }
+
+  /* Bloco unificado de Totais Gerais */
+  .print-totals {
+    background-color: #fafaf8 !important;
+    padding: 12px 20px;
+    border-top: 1px solid #dddddd;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-total-container-box {
+    width: 250px;
+  }
+
+  .print-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 11px;
+  }
+
+  .print-total-row-value {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 600;
+  }
+
+  .print-total-row.grand {
+    font-size: 13px;
+    font-weight: 700;
+    border-top: 1px solid #111111;
+    margin-top: 4px;
+    padding-top: 6px;
+  }
+
+  .print-total-row.paid {
+    color: #1b4332 !important;
+  }
+
+  .print-total-row.due {
+    color: #7209b7 !important;
+    font-weight: 700;
+  }
+
+  /* Rodapé Final */
+  .print-footer {
+    text-align: center;
+    padding: 15px 0;
+    font-size: 10px;
+    color: #666666;
+    border-top: 1px solid #dddddd;
+    margin-top: 20px;
+  }
+}

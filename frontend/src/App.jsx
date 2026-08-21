@@ -15,6 +15,7 @@ import EditServiceOrder from "./pages/EditServiceOrder";
 import { CustomerProvider } from "./context/Customer.context";
 import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 import PrintServiceOrder from "./pages/PrintServiceOrder";
+import Teste from "./pages/Teste";
 
 const App = () => {
   return (
@@ -44,6 +45,7 @@ const App = () => {
                     element={<EditServiceOrder />}
                   />
                   <Route path="*" element={<NotFound />} />
+                  <Route path="/teste" element={<Teste />} />
                   <Route
                     path="/service-order/print/:id"
                     element={<PrintServiceOrder />}
