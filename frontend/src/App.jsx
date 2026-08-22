@@ -7,7 +7,7 @@ import Customers from "./pages/Customers";
 import NotFound from "./pages/NotFound";
 import MaintenanceJobs from "./pages/MaintenanceJobs";
 import Materials from "./pages/Materials";
-import ServiceOrderList from "./pages/serviceOrderList";
+import ServiceOrderList from "./pages/ServiceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
 import EditCustomer from "./pages/EditCustomer";
 import EditServiceOrder from "./pages/EditServiceOrder";
