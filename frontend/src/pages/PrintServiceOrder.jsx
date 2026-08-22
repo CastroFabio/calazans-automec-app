@@ -27,13 +27,6 @@ const PrintServiceOrder = () => {
 
   const componentRef = useRef(null);
 
-  const handlePrint = useReactToPrint({
-    documentTitle: "Ordem_Servico",
-    contentRef: componentRef,
-    ignoreGlobalStyles: true, // Turns off the application's broken global styles
-    pageStyle: printStyles, // Inject your completely fresh, untainted stylesheet
-  });
-
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -52,6 +45,19 @@ const PrintServiceOrder = () => {
 
     if (id) loadData();
   }, [id]);
+
+  const formatFilename = (text) => {
+    if (!text) return "";
+    // Uses a regular expression (g flag) to replace all spaces globally
+    return text.trim().replace(/\s+/g, "_");
+  };
+
+  const handlePrint = useReactToPrint({
+    documentTitle: `Ordem_de_Servico_${formatFilename(serviceOrder.customer.name) || "Cliente"}_#${id || "Oficina"}`,
+    contentRef: componentRef,
+    ignoreGlobalStyles: true, // Turns off the application's broken global styles
+    pageStyle: printStyles, // Inject your completely fresh, untainted stylesheet
+  });
 
   if (loading) return <Loading />;
   if (error) return <div>Erro: {error}</div>;
