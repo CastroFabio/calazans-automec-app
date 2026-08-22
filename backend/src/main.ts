@@ -14,6 +14,7 @@ async function bootstrap() {
       'http://localhost:5174', // Outras portas do Vite
       'http://localhost:3001', // Outras portas
       /\.vercel\.app$/, // Para deploy na Vercel
+      'https://calazans-automec-frontend.onrender.com',
     ],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
