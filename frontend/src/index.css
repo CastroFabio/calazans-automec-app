@@ -1093,7 +1093,11 @@
   width: 17%;
 }
 
-.mat-table-content-ref {
+.mat-table-content-supplier {
+  width: 7%;
+}
+
+.mat-table-content-receipt {
   width: 15%;
 }
 

@@ -26,7 +26,7 @@ const EditServiceOrder = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [isClear, setIsClear] = useState(false);
-  const [payment, setPayment] = useState(0);
+  const [payment, setPayment] = useState("");
 
   // Estados para serviços (itemMaintenances)
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
@@ -154,29 +154,33 @@ const EditServiceOrder = () => {
 
   const handleMaterialInputChange = (id, field, value) => {
     setItemMaterials((prev) =>
-      prev.map((item) => {
-        if (item.id !== id) return item;
+      prev.map((element) => {
+        if (element.id !== id) return element;
 
-        if (field === "material_id") {
-          const foundMaterial = findMaterialById(Number(value));
-          if (foundMaterial) {
-            return {
-              ...item,
-              material_id: foundMaterial.id,
-              name: foundMaterial.name,
-            };
+        // Se for value_unity, converter para número
+        if (field === "name") {
+          let foundJob = null;
+          let foundValue = "";
+
+          // Procurar o serviço selecionado
+          for (const group of materialsGroupData) {
+            const found = group.materials.find((item) => item.name === value);
+
+            if (found) {
+              foundJob = found;
+              foundValue = found.value_unity;
+              break;
+            }
           }
-          return { ...item, material_id: null, name: "" };
-        }
 
-        if (field === "quantity" || field === "value_unity") {
           return {
-            ...item,
-            [field]: value === "" ? "" : parseFloat(value) || 0,
+            ...element,
+            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
+            value_unity: foundValue,
           };
         }
 
-        return { ...item, [field]: value };
+        return { ...element, [field]: value };
       }),
     );
   };
@@ -984,9 +988,9 @@ const EditServiceOrder = () => {
                       className="input status-card-body-registrar-pagamento-input"
                       id="editPaymentInput"
                       placeholder="0,00"
-                      value={0 || payment}
+                      value={"" || payment}
                       onChange={(e) => {
-                        handleFormFieldPaidChange(Number(e.target.value));
+                        handleFormFieldPaidChange(e.target.value);
                       }}
                     />
                   </div>
