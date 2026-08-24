@@ -1078,27 +1078,27 @@
 }
 
 .mat-table-content-desc {
-  width: 38%;
+  width: 28%;
 }
 
 .mat-table-content-qtd {
-  width: 9%;
-}
-
-.mat-table-content-value {
-  width: 17%;
-}
-
-.mat-table-content-total {
-  width: 17%;
-}
-
-.mat-table-content-supplier {
   width: 7%;
 }
 
+.mat-table-content-value {
+  width: 14%;
+}
+
+.mat-table-content-total {
+  width: 14%;
+}
+
+.mat-table-content-supplier {
+  width: 20%;
+}
+
 .mat-table-content-receipt {
-  width: 15%;
+  width: 13%;
 }
 
 .mat-table-wrap {

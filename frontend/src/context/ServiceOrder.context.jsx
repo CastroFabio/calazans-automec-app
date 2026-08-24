@@ -1,114 +1,4 @@
-/* import React, { createContext, useContext, useEffect, useState } from "react";
-import { orderApi } from "../api/orders";
-
-const ServiceOrderContext = createContext();
-
-export const ServiceOrderProvider = ({ children }) => {
-  const [serviceOrders, setServiceOrders] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // BUSCAR ORDENS
-  const fetchServiceOrders = async () => {
-    try {
-      const { data } = await orderApi.getAll();
-      setServiceOrders(data);
-    } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço.");
-    }
-  };
-
-  // ========== BUSCAR ORDEM POR ID (LOCAL) ==========
-
-  // ========== BUSCAR ORDEM POR ID (LOCAL) ==========
-  const getServiceOrderById = (id) => {
-    const serviceOrder = serviceOrders.find(
-      (element) => Number(element.id) === Number(id),
-    );
-
-    if (!serviceOrder) {
-      console.warn(
-        `Ordem de serviço com ID ${id} não encontrada na lista local`,
-      );
-      return null;
-    }
-
-    return serviceOrder;
-  };
-  const fetchServiceOrderById = async (id) => {
-    try {
-      setError(null);
-
-      // Primeiro tenta encontrar na lista local
-      const localServiceOrder = serviceOrders.find(
-        (element) => element.id === id,
-      );
-      if (localServiceOrder) return localServiceOrder;
-
-      const { data } = await orderApi.getById(id);
-
-      setServiceOrders((prev) => {
-        // Verifica se já existe na lista
-        const exists = prev.some((element) => element.id === data.id);
-        if (!exists) {
-          return [...prev, data];
-        }
-        return prev.map((element) => (element.id === data.id ? data : element));
-      });
-
-      return data;
-    } catch (err) {
-      console.error(`Erro ao buscar Ordens de Serviço ${id}:`, err);
-
-      let errorMessage = "Erro ao buscar Ordens de Serviço";
-      if (err.response?.status === 404) {
-        errorMessage = "Ordens de Serviço não encontrado";
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.request) {
-        errorMessage = "Servidor não respondeu";
-      }
-
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Carregar clientes ao iniciar
-  useEffect(() => {
-    fetchServiceOrders();
-  }, []);
-  return (
-    <ServiceOrderContext.Provider
-      value={{
-        serviceOrders,
-        setServiceOrders,
-        error,
-        fetchServiceOrders,
-        fetchServiceOrderById,
-        getServiceOrderById,
-      }}
-    >
-      {children}
-    </ServiceOrderContext.Provider>
-  );
-};
-
-// Hook para usar o contexto
-export const useServiceOrders = () => {
-  const context = useContext(ServiceOrderContext);
-  if (!context) {
-    throw new Error(
-      "useServiceOrders must be used within a ServiceOrerProvider",
-    );
-  }
-  return context;
-};
- */
-
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { orderApi } from "../api/orders";
 
 const ServiceOrderContext = createContext();
@@ -117,6 +7,8 @@ export const ServiceOrderProvider = ({ children }) => {
   const [serviceOrders, setServiceOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
+  const [materialsList, setMaterialsList] = useState([]);
 
   // ========== BUSCAR TODAS AS ORDENS ==========
   const fetchServiceOrders = async () => {
@@ -226,6 +118,97 @@ export const ServiceOrderProvider = ({ children }) => {
     );
   };
 
+  // ========== HANDLE INPUT ==========
+  const handleMaintenanceJobChange = (
+    id,
+    field,
+    value,
+    maintenanceJobsGroupData,
+  ) => {
+    setListMaintenanceJobs((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        // Se for o campo "name" (que na verdade é o select)
+        if (field === "name") {
+          let foundJob = null;
+          let foundValue = "";
+
+          // Procurar o serviço selecionado
+          for (const group of maintenanceJobsGroupData) {
+            const found = group.maintenanceJobs.find(
+              (item) => item.name === value,
+            );
+
+            if (found) {
+              foundJob = found;
+              foundValue =
+                typeof found.value_unity === "string"
+                  ? found.value_unity.replace(",", ".")
+                  : found.value_unity;
+              break;
+            }
+          }
+
+          return {
+            ...element,
+            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
+            value_unity: foundValue,
+          };
+        }
+
+        // Se a alteração direta for no próprio campo value_unity
+        if (field === "value_unity" && typeof value === "string") {
+          return { ...element, [field]: value.replace(",", ".") };
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
+  const handleMaterialInputChange = (id, field, value, materialsGroupData) => {
+    setMaterialsList((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        if (field === "name") {
+          let foundJob = null;
+          let foundValue = "";
+
+          // Procurar o serviço selecionado
+          for (const group of materialsGroupData) {
+            const found = group.materials.find((item) => item.name === value);
+
+            if (found) {
+              foundJob = found;
+              // Troca vírgula por ponto se o valor for string
+              foundValue =
+                typeof found.value_unity === "string"
+                  ? found.value_unity.replace(",", ".")
+                  : found.value_unity;
+              break;
+            }
+          }
+
+          return {
+            ...element,
+            name: value, // Atualiza o nome selecionado
+            maintenance_id: foundJob ? foundJob.id : null,
+            value_unity: foundValue,
+          };
+        }
+
+        // Se a alteração direta for no próprio campo value_unity
+        if (field === "value_unity" && typeof value === "string") {
+          return { ...element, [field]: value.replace(",", ".") };
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
   // ========== REMOVER ORDEM ==========
   const removeServiceOrder = (orderId) => {
     setServiceOrders((prev) => prev.filter((order) => order.id !== orderId));
@@ -254,6 +237,12 @@ export const ServiceOrderProvider = ({ children }) => {
         removeServiceOrder,
         clearError,
         countAllServiceOrders,
+        handleMaintenanceJobChange,
+        setListMaintenanceJobs,
+        listMaintenanceJobs,
+        handleMaterialInputChange,
+        setMaterialsList,
+        materialsList,
       }}
     >
       {children}

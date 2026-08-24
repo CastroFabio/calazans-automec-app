@@ -23,7 +23,6 @@ import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useCustomers } from "../context/Customer.context";
 
 const NewServiceOrder = () => {
-  const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
   const [materialsData, setMaterialsData] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
@@ -44,9 +43,6 @@ const NewServiceOrder = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-
-  // NewOrderMaterial
-  const [materialsList, setMaterialsList] = useState([]);
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -77,7 +73,15 @@ const NewServiceOrder = () => {
     supplier: "",
   });
 
-  const { addServiceOrder } = useServiceOrders();
+  const {
+    addServiceOrder,
+    handleMaintenanceJobChange,
+    setListMaintenanceJobs,
+    listMaintenanceJobs,
+    handleMaterialInputChange,
+    setMaterialsList,
+    materialsList,
+  } = useServiceOrders();
   const { getFirstCustomer, getCustomerById } = useCustomers();
 
   // FETCH
@@ -476,41 +480,6 @@ const NewServiceOrder = () => {
     );
   };
 
-  const handleMaintenanceJobChange = (id, field, value) => {
-    setListMaintenanceJobs((prev) =>
-      prev.map((job) => {
-        if (job.id !== id) return job;
-
-        // Se for o campo "name" (que na verdade é o select)
-        if (field === "name") {
-          let foundJob = null;
-          let foundValue = "";
-
-          // Procurar o serviço selecionado
-          for (const group of maintenanceJobsGroupData) {
-            const found = group.maintenanceJobs.find(
-              (item) => item.name === value,
-            );
-
-            if (found) {
-              foundJob = found;
-              foundValue = found.value_unity;
-              break;
-            }
-          }
-
-          return {
-            ...job,
-            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
-            value_unity: foundValue,
-          };
-        }
-
-        return { ...job, [field]: value };
-      }),
-    );
-  };
-
   // NewOrderMaterial
   const handleAddMaterial = () => {
     const newMaterial = {
@@ -518,7 +487,7 @@ const NewServiceOrder = () => {
       material_id: null,
       name: "",
       quantity: 1,
-      value_unity: 0,
+      value_unity: "",
       receipt: "",
       supplier: "",
       serviceorder_id: null,
@@ -528,39 +497,6 @@ const NewServiceOrder = () => {
 
   const handleRemoveMaterial = (id) => {
     setMaterialsList(materialsList.filter((material) => material.id !== id));
-  };
-
-  const handleMaterialInputChange = (id, field, value) => {
-    setMaterialsList((prev) =>
-      prev.map((element) => {
-        if (element.id !== id) return element;
-
-        // Se for value_unity, converter para número
-        if (field === "name") {
-          let foundJob = null;
-          let foundValue = "";
-
-          // Procurar o serviço selecionado
-          for (const group of materialsGroupData) {
-            const found = group.materials.find((item) => item.name === value);
-
-            if (found) {
-              foundJob = found;
-              foundValue = found.value_unity;
-              break;
-            }
-          }
-
-          return {
-            ...element,
-            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
-            value_unity: foundValue,
-          };
-        }
-
-        return { ...element, [field]: value };
-      }),
-    );
   };
 
   const findMaterialById = (id) => {
@@ -891,11 +827,13 @@ const NewServiceOrder = () => {
                                   element.id,
                                   "maintenance_id",
                                   null,
+                                  maintenanceJobsGroupData,
                                 );
                                 handleMaintenanceJobChange(
                                   element.id,
                                   "value_unity",
                                   "",
+                                  maintenanceJobsGroupData,
                                 );
                                 return;
                               }
@@ -941,13 +879,14 @@ const NewServiceOrder = () => {
                             <input
                               type="text"
                               className="svc-mo-input"
-                              placeholder="0,00"
-                              value={element.value_unity || ""}
+                              placeholder="0.00"
+                              value={element.value_unity ?? ""}
                               onChange={(e) =>
                                 handleMaintenanceJobChange(
                                   element.id,
                                   "value_unity",
                                   e.target.value,
+                                  maintenanceJobsGroupData,
                                 )
                               }
                             />
@@ -965,6 +904,7 @@ const NewServiceOrder = () => {
                                 element.id, // ID do item na lista
                                 "description", // Campo a ser atualizado
                                 e.target.value, // Novo valor
+                                maintenanceJobsGroupData,
                               )
                             }
                           />
@@ -1023,7 +963,7 @@ const NewServiceOrder = () => {
                     <th className="mat-table-content-qtd">Qtd.</th>
                     <th className="mat-table-content-value">Valor Unit.</th>
                     <th className="mat-table-content-total">Total</th>
-                    <th className="mat-table-content-supplier">Loja</th>
+                    <th className="mat-table-content-supplier">Fornecedor</th>
                     <th className="mat-table-content-receipt">Recibo</th>
                     <th></th>
                   </tr>
@@ -1045,11 +985,13 @@ const NewServiceOrder = () => {
                                     element.id,
                                     "material_id",
                                     null,
+                                    materialsGroupData,
                                   );
                                   handleMaterialInputChange(
                                     element.id,
                                     "name",
                                     "",
+                                    materialsGroupData,
                                   );
                                   return;
                                 }
@@ -1065,11 +1007,13 @@ const NewServiceOrder = () => {
                                     element.id,
                                     "material_id",
                                     foundMaterial.id,
+                                    materialsGroupData,
                                   );
                                   handleMaterialInputChange(
                                     element.id,
                                     "name",
                                     foundMaterial.name,
+                                    materialsGroupData,
                                   );
                                 }
                               }}
@@ -1102,6 +1046,7 @@ const NewServiceOrder = () => {
                                   element.id,
                                   "quantity",
                                   e.target.value,
+                                  materialsGroupData,
                                 )
                               }
                             />
@@ -1111,7 +1056,7 @@ const NewServiceOrder = () => {
                               <span>R$</span>
                               <input
                                 type="text"
-                                placeholder="0,00"
+                                placeholder="0.00"
                                 className="input-new-order-material-cost"
                                 value={element.value_unity ?? ""}
                                 onChange={(e) =>
@@ -1119,6 +1064,7 @@ const NewServiceOrder = () => {
                                     element.id,
                                     "value_unity",
                                     e.target.value,
+                                    materialsGroupData,
                                   )
                                 }
                               />
@@ -1151,6 +1097,7 @@ const NewServiceOrder = () => {
                                   element.id,
                                   "supplier",
                                   e.target.value,
+                                  materialsGroupData,
                                 )
                               }
                             />
@@ -1166,6 +1113,7 @@ const NewServiceOrder = () => {
                                   element.id,
                                   "receipt",
                                   e.target.value,
+                                  materialsGroupData,
                                 )
                               }
                             />
