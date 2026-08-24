@@ -9,6 +9,8 @@ export const ServiceOrderProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
   const [materialsList, setMaterialsList] = useState([]);
+  const [itemMaterials, setItemMaterials] = useState([]);
+  const [itemMaintenances, setItemMaintenances] = useState([]);
 
   // ========== BUSCAR TODAS AS ORDENS ==========
   const fetchServiceOrders = async () => {
@@ -119,45 +121,51 @@ export const ServiceOrderProvider = ({ children }) => {
   };
 
   // ========== HANDLE INPUT ==========
+
   const handleMaintenanceJobChange = (
     id,
     field,
     value,
-    maintenanceJobsGroupData,
+    maintenanceJobsGroupData = [],
   ) => {
     setListMaintenanceJobs((prev) =>
       prev.map((element) => {
         if (element.id !== id) return element;
 
-        // Se for o campo "name" (que na verdade é o select)
-        if (field === "name") {
+        // Trata a troca do serviço no select
+        if (field === "maintenance_id" || field === "name") {
+          // Converte o valor do select para número se não for vazio
+          const selectedId =
+            value !== "" && value !== null ? Number(value) : null;
+
           let foundJob = null;
           let foundValue = "";
 
-          // Procurar o serviço selecionado
-          for (const group of maintenanceJobsGroupData) {
-            const found = group.maintenanceJobs.find(
-              (item) => item.name === value,
-            );
+          if (selectedId !== null) {
+            for (const group of maintenanceJobsGroupData) {
+              const found = group.maintenanceJobs?.find(
+                (item) => Number(item.id) === selectedId || item.name === value,
+              );
 
-            if (found) {
-              foundJob = found;
-              foundValue =
-                typeof found.value_unity === "string"
-                  ? found.value_unity.replace(",", ".")
-                  : found.value_unity;
-              break;
+              if (found) {
+                foundJob = found;
+                foundValue =
+                  typeof found.value_unity === "string"
+                    ? found.value_unity.replace(",", ".")
+                    : String(found.value_unity ?? "");
+                break;
+              }
             }
           }
 
           return {
             ...element,
-            maintenance_id: foundJob ? foundJob.id : null, // ✅ CAPTURA O ID
-            value_unity: foundValue,
+            maintenance_id: foundJob ? foundJob.id : selectedId,
+            value_unity: foundJob ? foundValue : element.value_unity,
           };
         }
 
-        // Se a alteração direta for no próprio campo value_unity
+        // Se a alteração direta for no campo de valor da mão de obra
         if (field === "value_unity" && typeof value === "string") {
           return { ...element, [field]: value.replace(",", ".") };
         }
@@ -167,41 +175,99 @@ export const ServiceOrderProvider = ({ children }) => {
     );
   };
 
-  const handleMaterialInputChange = (id, field, value, materialsGroupData) => {
+  const handleMaterialInputChange = (
+    id,
+    field,
+    value,
+    materialsGroupData = [],
+  ) => {
     setMaterialsList((prev) =>
       prev.map((element) => {
         if (element.id !== id) return element;
 
-        if (field === "name") {
-          let foundJob = null;
+        // Trata seleção pelo dropdown (espera id do material ou name)
+        if (field === "material_id" || field === "name") {
+          let foundMaterial = null;
           let foundValue = "";
+          const numericId = Number(value);
 
-          // Procurar o serviço selecionado
           for (const group of materialsGroupData) {
-            const found = group.materials.find((item) => item.name === value);
+            const found = group.materials?.find(
+              (item) => item.id === numericId || item.name === value,
+            );
 
             if (found) {
-              foundJob = found;
-              // Troca vírgula por ponto se o valor for string
+              foundMaterial = found;
               foundValue =
                 typeof found.value_unity === "string"
                   ? found.value_unity.replace(",", ".")
-                  : found.value_unity;
+                  : String(found.value_unity ?? "");
               break;
             }
           }
 
           return {
             ...element,
-            name: value, // Atualiza o nome selecionado
-            maintenance_id: foundJob ? foundJob.id : null,
-            value_unity: foundValue,
+            material_id: foundMaterial ? foundMaterial.id : numericId || null,
+            name: foundMaterial ? foundMaterial.name : value,
+            value_unity: foundValue !== "" ? foundValue : element.value_unity,
           };
         }
 
-        // Se a alteração direta for no próprio campo value_unity
+        // Trata digitação direta do preço do material
         if (field === "value_unity" && typeof value === "string") {
           return { ...element, [field]: value.replace(",", ".") };
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
+  const handleEditMaintenanceJobChange = (id, field, value) => {
+    setItemMaintenances((prev) =>
+      prev.map((job) => {
+        if (job.id !== id) return job;
+
+        if (field === "maintenance_id") {
+          if (!value) {
+            return { ...job, maintenance_id: null, value_unity: "" };
+          }
+          const foundJob = findMaintenanceJobById(value);
+          if (foundJob) {
+            const rawValue = foundJob.value_unity ?? foundJob.value_unit ?? "";
+            return {
+              ...job,
+              maintenance_id: foundJob.id,
+              value_unity:
+                typeof rawValue === "string" ? rawValue : String(rawValue),
+            };
+          }
+        }
+
+        return { ...job, [field]: value };
+      }),
+    );
+  };
+
+  const handleEditMaterialInputChange = (id, field, value) => {
+    setItemMaterials((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        if (field === "material_id") {
+          if (!value) {
+            return { ...element, material_id: null, value_unity: "" };
+          }
+          const foundMat = findMaterialById(value);
+          if (foundMat) {
+            return {
+              ...element,
+              material_id: foundMat.id,
+              name: foundMat.name,
+              value_unity: foundMat.value_unity ?? foundMat.value_unit ?? "",
+            };
+          }
         }
 
         return { ...element, [field]: value };
@@ -243,6 +309,8 @@ export const ServiceOrderProvider = ({ children }) => {
         handleMaterialInputChange,
         setMaterialsList,
         materialsList,
+        handleEditMaterialInputChange,
+        handleEditMaintenanceJobChange,
       }}
     >
       {children}

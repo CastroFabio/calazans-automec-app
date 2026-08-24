@@ -53,7 +53,7 @@ const PrintServiceOrder = () => {
   };
 
   const handlePrint = useReactToPrint({
-    documentTitle: `Ordem_de_Servico_${formatFilename(serviceOrder.customer.name) || "Cliente"}_#${id || "Oficina"}`,
+    documentTitle: `Ordem_de_Servico_${formatFilename(serviceOrder?.customer?.name) || "Cliente"}_#${id || "Oficina"}`,
     contentRef: componentRef,
     ignoreGlobalStyles: true, // Turns off the application's broken global styles
     pageStyle: printStyles, // Inject your completely fresh, untainted stylesheet

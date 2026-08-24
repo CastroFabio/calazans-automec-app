@@ -323,6 +323,9 @@ const NewServiceOrder = () => {
         await itemMaterialApi.createBatch(itemMaterialData);
       }
 
+      setListMaintenanceJobs([]);
+      setMaterialsList([]);
+
       // ========== SUCESSO ==========
       navigate("/");
     } catch (err) {
