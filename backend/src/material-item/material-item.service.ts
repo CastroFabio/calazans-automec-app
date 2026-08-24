@@ -57,7 +57,7 @@ export class MaterialItemService {
       const materialItem = await this.prisma.itemMaterial.create({
         data: {
           quantity: createMaterialItemDto.quantity,
-          value_unity: createMaterialItemDto.value_unity,
+          value_unit: createMaterialItemDto.value_unit,
           serviceorder_id: createMaterialItemDto.serviceorder_id,
           material_id: createMaterialItemDto.material_id,
           supplier: createMaterialItemDto.supplier,
@@ -124,7 +124,7 @@ export class MaterialItemService {
       const data = items.map((item) => ({
         material_id: item.material_id,
         quantity: item.quantity,
-        value_unity: item.value_unity,
+        value_unit: item.value_unit,
         supplier: item.supplier || null,
         receipt: item.receipt || null,
         serviceorder_id: item.serviceorder_id,
@@ -235,7 +235,7 @@ export class MaterialItemService {
         where: { id },
         data: {
           quantity: updateMaterialItemDto.quantity,
-          value_unity: updateMaterialItemDto.value_unity,
+          value_unit: updateMaterialItemDto.value_unit,
           serviceorder_id: updateMaterialItemDto.serviceorder_id,
           material_id: updateMaterialItemDto.material_id,
           receipt: updateMaterialItemDto.receipt,

@@ -16,12 +16,6 @@ export class MaintenanceItemResponseDto {
   created_at: Date;
 
   @ApiProperty({
-    description: 'Valor unitário do serviço de manutenção',
-    example: 2.5,
-  })
-  value_unity: number;
-
-  @ApiProperty({
     description: 'ID da ordem de serviço',
     example: 1,
     type: Number,

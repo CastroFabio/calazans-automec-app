@@ -21,6 +21,8 @@ import { useServiceOrders } from "../context/ServiceOrder.context";
 import NewCustomerModal from "../components/NewCustomerModal.component";
 import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useCustomers } from "../context/Customer.context";
+import InputPriceValue from "../components/InputPriceValue";
+import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -52,6 +54,7 @@ const NewServiceOrder = () => {
     arrived_at: new Date().toISOString(),
     entry_km: "",
     diagnosis: "",
+    labor_job: "",
     observation: "",
     subtotal: null,
     customer_id: "",
@@ -59,14 +62,13 @@ const NewServiceOrder = () => {
   });
 
   const [formDataItemMaintenance, setFormDataItemMaintenance] = useState({
-    value_unity: null,
     serviceorder_id: null,
     maintenance_id: null,
     description: "",
   });
 
   const [formDataItemMaterial, setFormDataItemMaterial] = useState({
-    value_unity: null,
+    value_unit: null,
     serviceorder_id: null,
     material_id: null,
     receipt: "",
@@ -82,7 +84,7 @@ const NewServiceOrder = () => {
     setMaterialsList,
     materialsList,
   } = useServiceOrders();
-  const { getFirstCustomer, getCustomerById } = useCustomers();
+  const { getCustomerById } = useCustomers();
 
   // FETCH
   const handleFetchCustomers = async () => {
@@ -138,14 +140,13 @@ const NewServiceOrder = () => {
       id: Date.now(), // ID temporário
       maintenance_id: formDataItemMaintenance.maintenance_id,
       serviceorder_id: null,
-      value_unity: Number(formDataItemMaintenance.value_unity) || 0,
+      value_unit: Number(formDataItemMaintenance.value_unit) || 0,
       description: formDataItemMaintenance.description,
     };
 
     setListMaintenanceJobs((prev) => [...prev, newItem]);
 
     setFormDataItemMaintenance({
-      value_unity: null,
       serviceorder_id: null,
       maintenance_id: null,
       description: "",
@@ -181,12 +182,15 @@ const NewServiceOrder = () => {
       errorList.push("Adicione pelo menos um serviço ou material");
     }
 
+    if (!formData.labor_job) {
+      errorList.push("Adicione um valor de mão de obra");
+    }
+
     // ========== VALIDAÇÃO DE SERVIÇOS ==========
 
     const invalidServices = listMaintenanceJobs.filter((job) => {
       if (!job.maintenance_id) return true;
-      const value = parseFloat(job.value_unity) || 0;
-      if (value <= 0) return true;
+
       return false;
     });
 
@@ -194,8 +198,6 @@ const NewServiceOrder = () => {
       const errorMessages = invalidServices.map((job, index) => {
         const errors = [];
         if (!job.maintenance_id) errors.push("serviço não selecionado");
-        const value = parseFloat(job.value_unity) || 0;
-        if (value <= 0) errors.push("valor inválido ou zerado");
         return `Serviço #${index + 1}: ${errors.join(" e ")}`;
       });
 
@@ -208,7 +210,7 @@ const NewServiceOrder = () => {
       if (!item.material_id) return true;
       const quantity = parseFloat(item.quantity) || 0;
       if (quantity <= 0) return true;
-      const value = parseFloat(item.value_unity) || 0;
+      const value = parseFloat(item.value_unit) || 0;
       if (value <= 0) return true;
       return false;
     });
@@ -219,7 +221,7 @@ const NewServiceOrder = () => {
         if (!item.material_id) errors.push("material não selecionado");
         const quantity = parseFloat(item.quantity) || 0;
         if (quantity <= 0) errors.push("quantidade inválida");
-        const value = parseFloat(item.value_unity) || 0;
+        const value = parseFloat(item.value_unit) || 0;
         if (value <= 0) errors.push("valor inválido");
         return `Material #${index + 1}: ${errors.join(" e ")}`;
       });
@@ -229,13 +231,9 @@ const NewServiceOrder = () => {
 
     // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
 
-    const hasValidService = listMaintenanceJobs.some(
-      (job) => parseFloat(job.value_unity) > 0,
-    );
-
     const hasValidMaterial = materialsList.some((item) => {
       const quantity = parseFloat(item.quantity) || 0;
-      const value = parseFloat(item.value_unity) || 0;
+      const value = parseFloat(item.value_unit) || 0;
       return quantity > 0 && value > 0;
     });
 
@@ -280,6 +278,7 @@ const NewServiceOrder = () => {
       status: formData.status,
       arrived_at: formData.arrived_at,
       entry_km: parseFloat(formData.entry_km) || 0,
+      labor_job: parseFloat(formData.labor_job) || 0,
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
       subtotal: calculateGrandTotal(),
@@ -302,7 +301,6 @@ const NewServiceOrder = () => {
         const itemMaintenanceData = listMaintenanceJobs.map((job) => ({
           serviceorder_id: serviceOrderId,
           maintenance_id: job.maintenance_id,
-          value_unity: parseFloat(job.value_unity) || 0,
           description: job.description?.trim() || "",
         }));
 
@@ -315,7 +313,7 @@ const NewServiceOrder = () => {
           serviceorder_id: serviceOrderId,
           material_id: item.material_id,
           quantity: parseFloat(item.quantity) || 1,
-          value_unity: parseFloat(item.value_unity) || 0,
+          value_unit: parseFloat(item.value_unit) || 0,
           receipt: item.receipt?.trim() || "",
           supplier: item.supplier?.trim() || "",
         }));
@@ -469,7 +467,6 @@ const NewServiceOrder = () => {
     const newMaintenanceJob = {
       id: Date.now(),
       maintenance_id: "",
-      value_unity: "",
       description: "",
       name: "",
     };
@@ -490,7 +487,7 @@ const NewServiceOrder = () => {
       material_id: null,
       name: "",
       quantity: 1,
-      value_unity: "",
+      value_unit: "",
       receipt: "",
       supplier: "",
       serviceorder_id: null,
@@ -511,23 +508,20 @@ const NewServiceOrder = () => {
     return null;
   };
 
-  const calculateTotalMaintenanceJob = () => {
-    return listMaintenanceJobs.reduce((total, job) => {
-      return total + (parseFloat(job.value_unity) || 0);
+  const calculateTotalMaintenanceJob = () =>
+    parseFloat(formData.labor_job || 0);
+
+  const calculateTotalMaterials = () => {
+    return materialsList.reduce((total, material) => {
+      const materialTotal =
+        (parseFloat(material.value_unit) || 0) *
+        (parseFloat(material.quantity) || 0);
+      return total + materialTotal;
     }, 0);
   };
 
   const calculateGrandTotal = () => {
     return calculateTotalMaintenanceJob() + calculateTotalMaterials();
-  };
-
-  const calculateTotalMaterials = () => {
-    return materialsList.reduce((total, material) => {
-      const materialTotal =
-        (parseFloat(material.value_unity) || 0) *
-        (parseFloat(material.quantity) || 0);
-      return total + materialTotal;
-    }, 0);
   };
 
   // SELECT MAINTENANCE
@@ -800,6 +794,10 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="services-list">
+              <InputPriceValue
+                labor_job={formData.labor_job}
+                handleFormFieldChange={handleFormFieldChange}
+              />
               {listMaintenanceJobs.length > 0
                 ? listMaintenanceJobs.map((element, index) => (
                     <div key={element.id} className="service-row">
@@ -832,12 +830,7 @@ const NewServiceOrder = () => {
                                   null,
                                   maintenanceJobsGroupData,
                                 );
-                                handleMaintenanceJobChange(
-                                  element.id,
-                                  "value_unity",
-                                  "",
-                                  maintenanceJobsGroupData,
-                                );
+
                                 return;
                               }
 
@@ -852,7 +845,6 @@ const NewServiceOrder = () => {
                                     return {
                                       ...job,
                                       maintenance_id: foundJob.id,
-                                      value_unity: foundJob.value_unity,
                                     };
                                   }),
                                 );
@@ -875,26 +867,6 @@ const NewServiceOrder = () => {
                             )}
                           </select>
                         </div>
-                        <div className="field">
-                          <label>Mão de Obra</label>
-                          <div className="input-prefix">
-                            <span>R$</span>
-                            <input
-                              type="text"
-                              className="svc-mo-input"
-                              placeholder="0.00"
-                              value={element.value_unity ?? ""}
-                              onChange={(e) =>
-                                handleMaintenanceJobChange(
-                                  element.id,
-                                  "value_unity",
-                                  e.target.value,
-                                  maintenanceJobsGroupData,
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
 
                         <div className="field col-full">
                           <label>Observações</label>
@@ -913,6 +885,14 @@ const NewServiceOrder = () => {
                           />
                         </div>
                       </div>
+                      <AddMaterialInMaintenace
+                        handleAddMaterial={handleAddMaterial}
+                        materialsList={materialsList}
+                        handleMaterialInputChange={handleMaterialInputChange}
+                        materialsGroupData={materialsGroupData}
+                        handleRemoveMaterial={handleRemoveMaterial}
+                        findMaterialById={findMaterialById}
+                      />
                     </div>
                   ))
                 : ""}
@@ -928,6 +908,24 @@ const NewServiceOrder = () => {
               </svg>
               Adicionar serviço
             </button>
+            <div className="total-row">
+              <div className="total-item">
+                Mão de obra:
+                <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+              </div>
+              <div className="total-row-divider"></div>
+              <div className="total-item">
+                Peças:
+                <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+              </div>
+              <div className="total-row-divider"></div>
+              <div className="total-item">
+                Total:
+                <span className="grand-total">
+                  R$ {calculateGrandTotal().toFixed(2)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -940,7 +938,7 @@ const NewServiceOrder = () => {
         {/* ================ */}
         {/* === MATERIAL === */}
         {/* ================ */}
-        <div className="form-section">
+        {/* <div className="form-section">
           <div className="fs-header">
             <svg
               className="fs-header-svg"
@@ -1061,11 +1059,11 @@ const NewServiceOrder = () => {
                                 type="text"
                                 placeholder="0.00"
                                 className="input-new-order-material-cost"
-                                value={element.value_unity ?? ""}
+                                value={element.value_unit ?? ""}
                                 onChange={(e) =>
                                   handleMaterialInputChange(
                                     element.id,
-                                    "value_unity",
+                                    "value_unit",
                                     e.target.value,
                                     materialsGroupData,
                                   )
@@ -1080,9 +1078,9 @@ const NewServiceOrder = () => {
                               readOnly
                               disabled
                               value={
-                                element.value_unity && element.quantity
+                                element.value_unit && element.quantity
                                   ? (
-                                      parseFloat(element.value_unity) *
+                                      parseFloat(element.value_unit) *
                                       parseFloat(element.quantity)
                                     ).toFixed(2)
                                   : "—"
@@ -1146,26 +1144,9 @@ const NewServiceOrder = () => {
               </svg>
               Adicionar peça / material
             </button>
-            <div className="total-row">
-              <div className="total-item">
-                Mão de obra:
-                <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
-              </div>
-              <div className="total-row-divider"></div>
-              <div className="total-item">
-                Peças:
-                <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
-              </div>
-              <div className="total-row-divider"></div>
-              <div className="total-item">
-                Total:
-                <span className="grand-total">
-                  R$ {calculateGrandTotal().toFixed(2)}
-                </span>
-              </div>
-            </div>
+           
           </div>
-        </div>
+        </div> */}
         {/* <!-- Info OS --> 
         <NewOrderInfo
           handleFormFieldChange={handleFormFieldChange}

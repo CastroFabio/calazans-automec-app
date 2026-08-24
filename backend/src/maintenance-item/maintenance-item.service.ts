@@ -59,7 +59,6 @@ export class MaintenanceItemService {
 
       const maintenanceItem = await this.prisma.itemMaintenance.create({
         data: {
-          value_unity: createMaintenanceItemDto.value_unity,
           serviceorder_id: createMaintenanceItemDto.serviceorder_id,
           maintenance_id: createMaintenanceItemDto.maintenance_id,
           description: createMaintenanceItemDto.description,
@@ -137,12 +136,13 @@ export class MaintenanceItemService {
         );
       }
 
-      // Preparar dados para createMany
+      // 🟢 PREPARAR DADOS TRATANDO NULL -> UNDEFINED
       const data = items.map((item) => ({
-        maintenance_id: item.maintenance_id || null,
-        description: item.description || null,
-        value_unity: item.value_unity,
         serviceorder_id: item.serviceorder_id,
+        maintenance_id: item.maintenance_id
+          ? Number(item.maintenance_id)
+          : undefined,
+        description: item.description ?? undefined,
       }));
 
       // Criar todos de uma vez com createMany
@@ -182,7 +182,7 @@ export class MaintenanceItemService {
         throw error;
       }
       throw new InternalServerErrorException(
-        'Erro ao criar itens de manutenção: ',
+        'Erro ao criar itens de manutenção: ' + error.message,
       );
     }
   }
@@ -251,7 +251,6 @@ export class MaintenanceItemService {
       return this.prisma.itemMaintenance.update({
         where: { id },
         data: {
-          value_unity: updateMaintenanceItemDto.value_unity,
           serviceorder_id: updateMaintenanceItemDto.serviceorder_id,
           maintenance_id: updateMaintenanceItemDto.maintenance_id,
           description: updateMaintenanceItemDto.description,

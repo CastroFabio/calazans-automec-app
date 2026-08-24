@@ -34,16 +34,6 @@ export class CreateItemMaintenanceBatchItemDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Valor unitário do serviço',
-    example: 89.9,
-    type: Number,
-    minimum: 0,
-  })
-  @IsNumber({}, { message: 'value_unity deve ser um número' })
-  @Min(0, { message: 'value_unity deve ser maior ou igual a zero' })
-  value_unity: number;
-
-  @ApiProperty({
     description: 'ID da ordem de serviço',
     example: 1,
     type: Number,

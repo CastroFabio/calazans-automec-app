@@ -10,12 +10,6 @@ import {
 } from 'class-validator';
 
 export class CreateMaintenanceItemDto {
-  @ApiProperty({ description: 'Valor unitário de manutenção', example: 2.5 })
-  @IsNumber()
-  @Min(0, { message: 'Valor unitário de manutenção não pode ser negativo' })
-  @IsNotEmpty({ message: 'Valor unitário de manutenção é obrigatório' })
-  value_unity: number;
-
   @ApiProperty({
     description: 'ID da ordem de serviço',
     example: 1,

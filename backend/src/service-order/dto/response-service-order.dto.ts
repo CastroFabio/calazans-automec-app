@@ -73,6 +73,13 @@ export class ServiceOrderResponseDto {
   paid: Number;
 
   @ApiProperty({
+    description: 'Valor da mão-de-obra da ordem de serviço',
+    example: 1000,
+    type: Number,
+  })
+  labor_cost: Number;
+
+  @ApiProperty({
     description: 'ID do cliente',
     example: 1,
     type: Number,

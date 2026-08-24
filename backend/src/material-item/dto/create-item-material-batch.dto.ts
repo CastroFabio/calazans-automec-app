@@ -38,9 +38,9 @@ export class CreateItemMaterialBatchItemDto {
     type: Number,
     minimum: 0,
   })
-  @IsNumber({}, { message: 'value_unity deve ser um número' })
-  @Min(0, { message: 'value_unity deve ser maior ou igual a zero' })
-  value_unity: number;
+  @IsNumber({}, { message: 'value_unit deve ser um número' })
+  @Min(0, { message: 'value_unit deve ser maior ou igual a zero' })
+  value_unit: number;
 
   @ApiPropertyOptional({
     description: 'Código do recibo',
