@@ -1,114 +1,4 @@
-/* import React, { createContext, useContext, useEffect, useState } from "react";
-import { orderApi } from "../api/orders";
-
-const ServiceOrderContext = createContext();
-
-export const ServiceOrderProvider = ({ children }) => {
-  const [serviceOrders, setServiceOrders] = useState([]);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // BUSCAR ORDENS
-  const fetchServiceOrders = async () => {
-    try {
-      const { data } = await orderApi.getAll();
-      setServiceOrders(data);
-    } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço.");
-    }
-  };
-
-  // ========== BUSCAR ORDEM POR ID (LOCAL) ==========
-
-  // ========== BUSCAR ORDEM POR ID (LOCAL) ==========
-  const getServiceOrderById = (id) => {
-    const serviceOrder = serviceOrders.find(
-      (element) => Number(element.id) === Number(id),
-    );
-
-    if (!serviceOrder) {
-      console.warn(
-        `Ordem de serviço com ID ${id} não encontrada na lista local`,
-      );
-      return null;
-    }
-
-    return serviceOrder;
-  };
-  const fetchServiceOrderById = async (id) => {
-    try {
-      setError(null);
-
-      // Primeiro tenta encontrar na lista local
-      const localServiceOrder = serviceOrders.find(
-        (element) => element.id === id,
-      );
-      if (localServiceOrder) return localServiceOrder;
-
-      const { data } = await orderApi.getById(id);
-
-      setServiceOrders((prev) => {
-        // Verifica se já existe na lista
-        const exists = prev.some((element) => element.id === data.id);
-        if (!exists) {
-          return [...prev, data];
-        }
-        return prev.map((element) => (element.id === data.id ? data : element));
-      });
-
-      return data;
-    } catch (err) {
-      console.error(`Erro ao buscar Ordens de Serviço ${id}:`, err);
-
-      let errorMessage = "Erro ao buscar Ordens de Serviço";
-      if (err.response?.status === 404) {
-        errorMessage = "Ordens de Serviço não encontrado";
-      } else if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.request) {
-        errorMessage = "Servidor não respondeu";
-      }
-
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Carregar clientes ao iniciar
-  useEffect(() => {
-    fetchServiceOrders();
-  }, []);
-  return (
-    <ServiceOrderContext.Provider
-      value={{
-        serviceOrders,
-        setServiceOrders,
-        error,
-        fetchServiceOrders,
-        fetchServiceOrderById,
-        getServiceOrderById,
-      }}
-    >
-      {children}
-    </ServiceOrderContext.Provider>
-  );
-};
-
-// Hook para usar o contexto
-export const useServiceOrders = () => {
-  const context = useContext(ServiceOrderContext);
-  if (!context) {
-    throw new Error(
-      "useServiceOrders must be used within a ServiceOrerProvider",
-    );
-  }
-  return context;
-};
- */
-
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { orderApi } from "../api/orders";
 
 const ServiceOrderContext = createContext();
@@ -117,6 +7,10 @@ export const ServiceOrderProvider = ({ children }) => {
   const [serviceOrders, setServiceOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [listMaintenanceJobs, setListMaintenanceJobs] = useState([]);
+  const [materialsList, setMaterialsList] = useState([]);
+  const [itemMaterials, setItemMaterials] = useState([]);
+  const [itemMaintenances, setItemMaintenances] = useState([]);
 
   // ========== BUSCAR TODAS AS ORDENS ==========
   const fetchServiceOrders = async () => {
@@ -226,6 +120,161 @@ export const ServiceOrderProvider = ({ children }) => {
     );
   };
 
+  // ========== HANDLE INPUT ==========
+
+  const handleMaintenanceJobChange = (
+    id,
+    field,
+    value,
+    maintenanceJobsGroupData = [],
+  ) => {
+    setListMaintenanceJobs((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        // Trata a troca do serviço no select
+        if (field === "maintenance_id" || field === "name") {
+          // Converte o valor do select para número se não for vazio
+          const selectedId =
+            value !== "" && value !== null ? Number(value) : null;
+
+          let foundJob = null;
+          let foundValue = "";
+
+          if (selectedId !== null) {
+            for (const group of maintenanceJobsGroupData) {
+              const found = group.maintenanceJobs?.find(
+                (item) => Number(item.id) === selectedId || item.name === value,
+              );
+
+              if (found) {
+                foundJob = found;
+                foundValue =
+                  typeof found.value_unity === "string"
+                    ? found.value_unity.replace(",", ".")
+                    : String(found.value_unity ?? "");
+                break;
+              }
+            }
+          }
+
+          return {
+            ...element,
+            maintenance_id: foundJob ? foundJob.id : selectedId,
+            value_unity: foundJob ? foundValue : element.value_unity,
+          };
+        }
+
+        // Se a alteração direta for no campo de valor da mão de obra
+        if (field === "value_unity" && typeof value === "string") {
+          return { ...element, [field]: value.replace(",", ".") };
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
+  const handleMaterialInputChange = (
+    id,
+    field,
+    value,
+    materialsGroupData = [],
+  ) => {
+    setMaterialsList((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        // Trata seleção pelo dropdown (espera id do material ou name)
+        if (field === "material_id" || field === "name") {
+          let foundMaterial = null;
+          let foundValue = "";
+          const numericId = Number(value);
+
+          for (const group of materialsGroupData) {
+            const found = group.materials?.find(
+              (item) => item.id === numericId || item.name === value,
+            );
+
+            if (found) {
+              foundMaterial = found;
+              foundValue =
+                typeof found.value_unity === "string"
+                  ? found.value_unity.replace(",", ".")
+                  : String(found.value_unity ?? "");
+              break;
+            }
+          }
+
+          return {
+            ...element,
+            material_id: foundMaterial ? foundMaterial.id : numericId || null,
+            name: foundMaterial ? foundMaterial.name : value,
+            value_unity: foundValue !== "" ? foundValue : element.value_unity,
+          };
+        }
+
+        // Trata digitação direta do preço do material
+        if (field === "value_unity" && typeof value === "string") {
+          return { ...element, [field]: value.replace(",", ".") };
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
+  const handleEditMaintenanceJobChange = (id, field, value) => {
+    setItemMaintenances((prev) =>
+      prev.map((job) => {
+        if (job.id !== id) return job;
+
+        if (field === "maintenance_id") {
+          if (!value) {
+            return { ...job, maintenance_id: null, value_unity: "" };
+          }
+          const foundJob = findMaintenanceJobById(value);
+          if (foundJob) {
+            const rawValue = foundJob.value_unity ?? foundJob.value_unit ?? "";
+            return {
+              ...job,
+              maintenance_id: foundJob.id,
+              value_unity:
+                typeof rawValue === "string" ? rawValue : String(rawValue),
+            };
+          }
+        }
+
+        return { ...job, [field]: value };
+      }),
+    );
+  };
+
+  const handleEditMaterialInputChange = (id, field, value) => {
+    setItemMaterials((prev) =>
+      prev.map((element) => {
+        if (element.id !== id) return element;
+
+        if (field === "material_id") {
+          if (!value) {
+            return { ...element, material_id: null, value_unity: "" };
+          }
+          const foundMat = findMaterialById(value);
+          if (foundMat) {
+            return {
+              ...element,
+              material_id: foundMat.id,
+              name: foundMat.name,
+              value_unity: foundMat.value_unity ?? foundMat.value_unit ?? "",
+            };
+          }
+        }
+
+        return { ...element, [field]: value };
+      }),
+    );
+  };
+
   // ========== REMOVER ORDEM ==========
   const removeServiceOrder = (orderId) => {
     setServiceOrders((prev) => prev.filter((order) => order.id !== orderId));
@@ -254,6 +303,14 @@ export const ServiceOrderProvider = ({ children }) => {
         removeServiceOrder,
         clearError,
         countAllServiceOrders,
+        handleMaintenanceJobChange,
+        setListMaintenanceJobs,
+        listMaintenanceJobs,
+        handleMaterialInputChange,
+        setMaterialsList,
+        materialsList,
+        handleEditMaterialInputChange,
+        handleEditMaintenanceJobChange,
       }}
     >
       {children}
