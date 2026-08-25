@@ -63,6 +63,7 @@ export class MaintenanceItemService {
           maintenance_id: createMaintenanceItemDto.maintenance_id,
           description: createMaintenanceItemDto.description,
         },
+        include: { maintenancejob: true },
       });
 
       return maintenanceItem;

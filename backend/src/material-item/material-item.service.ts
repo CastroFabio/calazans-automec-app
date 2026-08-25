@@ -64,6 +64,7 @@ export class MaterialItemService {
           receipt: createMaterialItemDto.receipt,
           itemMaintenance_id: createMaterialItemDto.itemMaintenance_id,
         },
+        include: { material: true },
       });
 
       return materialItem;

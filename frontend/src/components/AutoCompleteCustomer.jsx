@@ -110,7 +110,6 @@ const AutoCompleteCustomer = ({
               key={index}
               className="ac-option"
               onClick={() => {
-                console.log("isModalOpen");
                 handleSuggestionClick(element);
               }}
             >
@@ -128,7 +127,6 @@ const AutoCompleteCustomer = ({
           onMouseDown={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log("isModalOpen");
             handleOpenModal();
           }}
         >

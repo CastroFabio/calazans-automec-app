@@ -108,11 +108,26 @@ const NewOrderMaintenanceJob = ({
                         <option value="">Selecione o serviço...</option>
                         {maintenanceJobsGroupData.map((group, groupIndex) => (
                           <optgroup key={groupIndex} label={group.group}>
-                            {group.maintenanceJobs.map((item, itemIndex) => (
-                              <option key={itemIndex} value={item.id}>
-                                {item.name}
-                              </option>
-                            ))}
+                            {group.maintenanceJobs.map((item, itemIndex) => {
+                              const isSelected = listMaintenanceJobs.some(
+                                (job) =>
+                                  Number(job.maintenance_id) ===
+                                  Number(item.id),
+                              );
+                              const isCurrentSelection =
+                                Number(element.maintenance_id) ===
+                                Number(item.id);
+
+                              return (
+                                <option
+                                  key={itemIndex}
+                                  value={item.id}
+                                  disabled={isSelected && !isCurrentSelection}
+                                >
+                                  {item.name}
+                                </option>
+                              );
+                            })}
                           </optgroup>
                         ))}
                       </select>

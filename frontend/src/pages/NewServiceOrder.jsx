@@ -303,18 +303,11 @@ const NewServiceOrder = () => {
         if (Array.isArray(createdMaintenances.items)) {
           listMaintenanceJobs.forEach((job, index) => {
             if (createdMaintenances.items[index]) {
-              console.log(
-                "createdMaintenances.items",
-                createdMaintenances.items,
-              );
-              console.log("listMaintenanceJobs", listMaintenanceJobs);
               maintenanceIdMap[job.id] = createdMaintenances.items[index].id;
             }
           });
         }
       }
-
-      console.log("maintenanceIdMap", maintenanceIdMap);
 
       // 3. Criar Item Material
       if ((materialsList || []).length > 0) {

@@ -8,7 +8,6 @@ const AddMaterialInMaintenace = ({
   itemMaintenance_id,
 }) => {
   // Filtra apenas os materiais deste serviço específico
-  // console.log("materialsList", materialsList);
 
   const serviceMaterials = materialsList.filter(
     (item) => item.itemMaintenance_id === itemMaintenance_id,
@@ -82,11 +81,29 @@ const AddMaterialInMaintenace = ({
                         <option value="">Selecione...</option>
                         {materialsGroupData.map((group, groupIndex) => (
                           <optgroup key={groupIndex} label={group.group}>
-                            {group.materials.map((material, materialIndex) => (
-                              <option key={materialIndex} value={material.id}>
-                                {material.name}
-                              </option>
-                            ))}
+                            {group.materials.map((material, materialIndex) => {
+                              // Verifica se esta peça já foi selecionada em algum item do 'materialsList'
+                              const isSelected = materialsList.some(
+                                (item) =>
+                                  Number(item.material_id) ===
+                                  Number(material.id),
+                              );
+
+                              // Se for a peça selecionada na LINHA ATUAL, permite (não desabilita)
+                              const isCurrentSelection =
+                                Number(element.material_id) ===
+                                Number(material.id);
+
+                              return (
+                                <option
+                                  key={materialIndex}
+                                  value={material.id}
+                                  disabled={isSelected && !isCurrentSelection}
+                                >
+                                  {material.name}
+                                </option>
+                              );
+                            })}
                           </optgroup>
                         ))}
                       </select>
