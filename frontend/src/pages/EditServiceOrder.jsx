@@ -43,20 +43,26 @@ const EditServiceOrder = () => {
         setError(null);
 
         // 1. Buscar ordem de serviço
-        let found = getServiceOrderById(Number(id));
+        /* let found = getServiceOrderById(Number(id));
 
         if (found) {
           setServiceOrder(found);
           setItemMaintenances(found.itemMaintenances || []);
           setItemMaterials(found.itemMaterials || []);
           setPayment(found.paid);
-        } else {
+        } else { 
           const { data } = await orderApi.getById(Number(id));
           setServiceOrder(data);
           setItemMaintenances(data.itemMaintenances || []);
           setItemMaterials(data.itemMaterials || []);
           setPayment(data.paid);
-        }
+         } */
+
+        const { data } = await orderApi.getById(Number(id));
+        setServiceOrder(data);
+        setItemMaintenances(data.itemMaintenances || []);
+        setItemMaterials(data.itemMaterials || []);
+        setPayment(data.paid);
 
         // 2. Buscar grupos de serviços (para o select)
         const { data: maintenanceData } = await maintenanceGroupApi.getAll();
@@ -93,7 +99,7 @@ const EditServiceOrder = () => {
     const newJob = {
       id: Date.now(),
       maintenance_id: null,
-      value_unity: "",
+      value_unit: "",
       description: "",
     };
     setItemMaintenances([...itemMaintenances, newJob]);
@@ -103,22 +109,27 @@ const EditServiceOrder = () => {
     setItemMaintenances(itemMaintenances.filter((item) => item.id !== id));
   };
 
-  const handleMaintenanceJobChange = (id, field, value) => {
+  const handleMaintenanceJobChange = (
+    id,
+    field,
+    value,
+    maintenanceJobsGroupData,
+  ) => {
     setItemMaintenances((prev) =>
       prev.map((job) => {
         if (job.id !== id) return job;
 
         if (field === "maintenance_id") {
           if (!value) {
-            return { ...job, maintenance_id: null, value_unity: "" };
+            return { ...job, maintenance_id: null, value_unit: "" };
           }
           const foundJob = findMaintenanceJobById(value);
           if (foundJob) {
-            const rawValue = foundJob.value_unity ?? foundJob.value_unit ?? "";
+            const rawValue = foundJob.value_unit ?? foundJob.value_unit ?? "";
             return {
               ...job,
               maintenance_id: foundJob.id,
-              value_unity:
+              value_unit:
                 typeof rawValue === "string" ? rawValue : String(rawValue),
             };
           }
@@ -142,13 +153,14 @@ const EditServiceOrder = () => {
     return null;
   };
 
-  const handleAddMaterial = () => {
+  const handleAddMaterial = (itemMaintenanceID) => {
     const newMaterial = {
       id: Date.now(),
       material_id: null,
+      itemMaintenance_id: itemMaintenanceID,
       name: "",
       quantity: 1,
-      value_unity: "",
+      value_unit: "",
       receipt: "",
       supplier: "",
     };
@@ -159,14 +171,14 @@ const EditServiceOrder = () => {
     setItemMaterials(itemMaterials.filter((item) => item.id !== id));
   };
 
-  const handleMaterialInputChange = (id, field, value) => {
+  const handleMaterialInputChange = (id, field, value, materialGroupData) => {
     setItemMaterials((prev) =>
       prev.map((element) => {
         if (element.id !== id) return element;
 
         if (field === "material_id") {
           if (!value) {
-            return { ...element, material_id: null, value_unity: "" };
+            return { ...element, material_id: null, value_unit: "" };
           }
           const foundMat = findMaterialById(value);
           if (foundMat) {
@@ -174,7 +186,7 @@ const EditServiceOrder = () => {
               ...element,
               material_id: foundMat.id,
               name: foundMat.name,
-              value_unity: foundMat.value_unity ?? foundMat.value_unit ?? "",
+              value_unit: foundMat.value_unit ?? foundMat.value_unit ?? "",
             };
           }
         }
@@ -196,16 +208,13 @@ const EditServiceOrder = () => {
     return 0;
   };
 
-  const calculateTotalMaintenanceJob = () => {
-    return itemMaintenances.reduce((total, job) => {
-      return total + parseValue(job.value_unity);
-    }, 0);
-  };
+  const calculateTotalMaintenanceJob = () =>
+    parseValue(serviceOrder.labor_cost || 0);
 
   const calculateTotalMaterials = () => {
     return itemMaterials.reduce((total, item) => {
       const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unity);
+      const value = parseValue(item.value_unit);
       return total + quantity * value;
     }, 0);
   };
@@ -230,7 +239,8 @@ const EditServiceOrder = () => {
         diagnosis: serviceOrder.diagnosis,
         observation: serviceOrder.observation,
         paid: serviceOrder.paid,
-        subtotal: calculateGrandTotal(),
+        subtotal: parseFloat(calculateGrandTotal().toFixed(2)),
+        labor_cost: parseValue(serviceOrder.labor_cost) || 0,
       };
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
@@ -241,13 +251,11 @@ const EditServiceOrder = () => {
           await itemMaintenanceApi.create({
             serviceorder_id: serviceOrder.id,
             maintenance_id: item.maintenance_id,
-            value_unity: parseValue(item.value_unity),
             description: item.description || "",
           });
         } else {
           await itemMaintenanceApi.update(item.id, {
             maintenance_id: item.maintenance_id,
-            value_unity: parseValue(item.value_unity),
             description: item.description || "",
           });
         }
@@ -259,16 +267,18 @@ const EditServiceOrder = () => {
           await itemMaterialApi.create({
             serviceorder_id: serviceOrder.id,
             material_id: item.material_id,
+            itemMaintenance_id: item.itemMaintenance_id,
             quantity: parseValue(item.quantity),
-            value_unity: parseValue(item.value_unity),
+            value_unit: parseValue(item.value_unit),
             receipt: item.receipt || "",
             supplier: item.supplier || "",
           });
         } else {
           await itemMaterialApi.update(item.id, {
+            itemMaintenance_id: item.itemMaintenance_id,
             material_id: item.material_id,
             quantity: parseValue(item.quantity),
-            value_unity: parseValue(item.value_unity),
+            value_unit: parseValue(item.value_unit),
             receipt: item.receipt || "",
             supplier: item.supplier || "",
           });
@@ -410,7 +420,7 @@ const EditServiceOrder = () => {
           </div>
 
           {/* ========== SERVIÇOS ========== */}
-          <div className="form-section">
+          {/*<div className="form-section">
             <div className="fs-header">
               <svg
                 className="fs-header-svg"
@@ -433,7 +443,7 @@ const EditServiceOrder = () => {
               </svg>
               <span className="fs-title">Serviços</span>
             </div>
-            <div className="fs-body">
+             <div className="fs-body">
               <div className="services-list">
                 {itemMaintenances.length > 0 ? (
                   itemMaintenances.map((element, index) => (
@@ -493,11 +503,11 @@ const EditServiceOrder = () => {
                               type="text"
                               className="svc-mo-input"
                               placeholder="0,00"
-                              value={element.value_unity || ""}
+                              value={element.value_unit || ""}
                               onChange={(e) =>
                                 handleMaintenanceJobChange(
                                   element.id,
-                                  "value_unity",
+                                  "value_unit",
                                   e.target.value,
                                 )
                               }
@@ -530,18 +540,18 @@ const EditServiceOrder = () => {
                 + Adicionar serviço
               </button>
             </div>
-          </div>
+          </div> */}
           <NewOrderMaintenanceJob
-            formData={formData}
+            formData={serviceOrder}
             handleFormFieldChange={handleFormFieldChange}
-            listMaintenanceJobs={listMaintenanceJobs}
+            listMaintenanceJobs={itemMaintenances}
             handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
             handleMaintenanceJobChange={handleMaintenanceJobChange}
             findMaintenanceJobById={findMaintenanceJobById}
-            setListMaintenanceJobs={setListMaintenanceJobs}
+            setListMaintenanceJobs={setItemMaintenances}
             maintenanceJobsGroupData={maintenanceJobsGroupData}
             handleAddMaterial={handleAddMaterial}
-            materialsList={materialsList}
+            materialsList={itemMaterials}
             handleMaterialInputChange={handleMaterialInputChange}
             materialsGroupData={materialsGroupData}
             handleRemoveMaterial={handleRemoveMaterial}
@@ -628,11 +638,11 @@ const EditServiceOrder = () => {
                                 type="text"
                                 placeholder="0,00"
                                 className="input-new-order-material-cost"
-                                value={element.value_unity || ""}
+                                value={element.value_unit || ""}
                                 onChange={(e) =>
                                   handleMaterialInputChange(
                                     element.id,
-                                    "value_unity",
+                                    "value_unit",
                                     e.target.value,
                                   )
                                 }
@@ -646,7 +656,7 @@ const EditServiceOrder = () => {
                               readOnly
                               value={(
                                 (parseFloat(element.quantity) || 0) *
-                                parseValue(element.value_unity)
+                                parseValue(element.value_unit)
                               ).toFixed(2)}
                             />
                           </td>

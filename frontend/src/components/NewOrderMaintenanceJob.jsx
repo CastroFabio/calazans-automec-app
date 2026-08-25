@@ -78,7 +78,6 @@ const NewOrderMaintenanceJob = ({
                           const selectedId = e.target.value;
 
                           if (!selectedId) {
-                            // Limpar
                             handleMaintenanceJobChange(
                               element.id,
                               "maintenance_id",

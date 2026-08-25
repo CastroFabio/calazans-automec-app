@@ -62,6 +62,7 @@ export class MaterialItemService {
           material_id: createMaterialItemDto.material_id,
           supplier: createMaterialItemDto.supplier,
           receipt: createMaterialItemDto.receipt,
+          itemMaintenance_id: createMaterialItemDto.itemMaintenance_id,
         },
       });
 
@@ -128,6 +129,7 @@ export class MaterialItemService {
         supplier: item.supplier || null,
         receipt: item.receipt || null,
         serviceorder_id: item.serviceorder_id,
+        itemMaintenance_id: item.itemMaintenance_id,
       }));
 
       // Criar todos de uma vez com createMany

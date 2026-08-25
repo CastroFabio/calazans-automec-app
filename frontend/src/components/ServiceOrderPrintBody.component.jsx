@@ -14,7 +14,7 @@ const INFO_MEC = {
   subtitulo: "Oficina & Automecânica",
 };
 
-const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
+const ServiceOrderPrintBody = ({ serviceOrder }) => {
   const calculateTotalMaintenanceJob = () => {
     return serviceOrder.itemMaintenances.reduce((total, job) => {
       return total + (parseFloat(job.value_unity) || 0);
@@ -39,7 +39,7 @@ const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
   };
 
   return (
-    <div className="print-doc" id="printDoc" ref={componentRef}>
+    <div className="print-doc" id="printDoc">
       <div className="print-header">
         <div>
           <div className="print-logo">

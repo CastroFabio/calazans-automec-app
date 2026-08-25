@@ -8,6 +8,8 @@ const AddMaterialInMaintenace = ({
   itemMaintenance_id,
 }) => {
   // Filtra apenas os materiais deste serviço específico
+  // console.log("materialsList", materialsList);
+
   const serviceMaterials = materialsList.filter(
     (item) => item.itemMaintenance_id === itemMaintenance_id,
   );

@@ -107,11 +107,13 @@ const PrintServiceOrder = () => {
           </button>
         </div>
         <div className="print-doc" id="printDoc">
-          <ServiceOrderPrintBody
-            componentRef={componentRef}
-            serviceOrder={serviceOrder}
-          />
-          {/* <PrintableServiceOrder /> */}
+          <ServiceOrderPrintBody serviceOrder={serviceOrder} />
+          <div style={{ display: "none" }}>
+            <PrintableServiceOrder
+              componentRef={componentRef}
+              data={serviceOrder}
+            />
+          </div>
         </div>
       </div>
     </div>
