@@ -1,61 +1,28 @@
 import React, { useState } from "react";
+import InputPriceValue from "./InputPriceValue";
+import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
 
 const NewOrderMaintenanceJob = ({
+  formData,
+  handleFormFieldChange,
   listMaintenanceJobs,
+  handleRemoveMaintenanceJob,
+  handleMaintenanceJobChange,
+  findMaintenanceJobById,
   setListMaintenanceJobs,
   maintenanceJobsGroupData,
+  handleAddMaterial,
+  materialsList,
+  handleMaterialInputChange,
+  materialsGroupData,
+  handleRemoveMaterial,
+  findMaterialById,
+  itemMaintenance_id,
+  handleAddMaintenanceJob,
+  calculateTotalMaintenanceJob,
+  calculateTotalMaterials,
+  calculateGrandTotal,
 }) => {
-  const handleAddMaintenanceJob = () => {
-    const newMaintenanceJob = {
-      id: Date.now(),
-      maintenance_id: "",
-      value_unit: "",
-      description: "",
-      name: "",
-    };
-
-    setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
-  };
-
-  const handleRemoveMaintenanceJob = (id) => {
-    setListMaintenanceJobs(
-      listMaintenanceJobs.filter((element) => element.id !== id),
-    );
-  };
-
-  const handleMaintenanceJobChange = (id, field, value) => {
-    setListMaintenanceJobs((prev) =>
-      prev.map((job) => {
-        if (job.id !== id) return job;
-
-        if (field === "name") {
-          let foundValue = ""; // ← default to empty string, NOT undefined
-
-          for (const group of maintenanceJobsGroupData) {
-            const found = group.maintenancejob.find(
-              (item) => item.name === value,
-            );
-
-            if (found && found.value_unit !== undefined) {
-              foundValue = formattedPrice(found.value_unit);
-              break;
-            }
-          }
-
-          return {
-            ...job,
-            name: value,
-            value_unit: foundValue, // ← always a string
-          };
-        }
-
-        // Ensure we never set undefined for any field
-        const newValue = value === undefined || value === null ? "" : value;
-        return { ...job, [field]: newValue };
-      }),
-    );
-  };
-
   return (
     <div className="form-section">
       <div className="fs-header">
@@ -82,6 +49,10 @@ const NewOrderMaintenanceJob = ({
       </div>
       <div className="fs-body">
         <div className="services-list">
+          <InputPriceValue
+            labor_cost={formData.labor_cost}
+            handleFormFieldChange={handleFormFieldChange}
+          />
           {listMaintenanceJobs.length > 0
             ? listMaintenanceJobs.map((element, index) => (
                 <div key={element.id} className="service-row">
@@ -102,20 +73,44 @@ const NewOrderMaintenanceJob = ({
                       <label>Tipo de Serviço *</label>
                       <select
                         className="select"
-                        value={element.name}
+                        value={element.maintenance_id || ""}
                         onChange={(e) => {
-                          handleMaintenanceJobChange(
-                            element.id,
-                            "name",
-                            e.target.value,
+                          const selectedId = e.target.value;
+
+                          if (!selectedId) {
+                            // Limpar
+                            handleMaintenanceJobChange(
+                              element.id,
+                              "maintenance_id",
+                              null,
+                              maintenanceJobsGroupData,
+                            );
+
+                            return;
+                          }
+
+                          const foundJob = findMaintenanceJobById(
+                            Number(selectedId),
                           );
+
+                          if (foundJob) {
+                            setListMaintenanceJobs((prev) =>
+                              prev.map((job) => {
+                                if (job.id !== element.id) return job;
+                                return {
+                                  ...job,
+                                  maintenance_id: foundJob.id,
+                                };
+                              }),
+                            );
+                          }
                         }}
                       >
                         <option value="">Selecione o serviço...</option>
-                        {maintenanceJobsGroupData.map((element, groupIndex) => (
-                          <optgroup key={groupIndex} label={element.group}>
-                            {element.maintenancejob.map((item, itemIndex) => (
-                              <option key={itemIndex} value={item.name}>
+                        {maintenanceJobsGroupData.map((group, groupIndex) => (
+                          <optgroup key={groupIndex} label={group.group}>
+                            {group.maintenanceJobs.map((item, itemIndex) => (
+                              <option key={itemIndex} value={item.id}>
                                 {item.name}
                               </option>
                             ))}
@@ -123,41 +118,33 @@ const NewOrderMaintenanceJob = ({
                         ))}
                       </select>
                     </div>
-                    <div className="field">
-                      <label>Mão de Obra</label>
-                      <div className="input-prefix">
-                        <span>R$</span>
-                        <input
-                          type="text"
-                          className="svc-mo-input"
-                          placeholder="0,00"
-                          value={element.value_unit}
-                          onChange={(e) =>
-                            handleMaintenanceJobChange(
-                              element.id,
-                              "value_unit",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
+
                     <div className="field col-full">
                       <label>Observações</label>
                       <textarea
                         className="textarea service-row-textarea"
                         placeholder="Detalhes adicionais do serviço..."
-                        value={element.description}
+                        value={element.description || ""}
                         onChange={(e) =>
                           handleMaintenanceJobChange(
-                            element.id,
-                            "description",
-                            e.target.value,
+                            element.id, // ID do item na lista
+                            "description", // Campo a ser atualizado
+                            e.target.value, // Novo valor
+                            maintenanceJobsGroupData,
                           )
                         }
                       />
                     </div>
                   </div>
+                  <AddMaterialInMaintenace
+                    handleAddMaterial={() => handleAddMaterial(element.id)}
+                    materialsList={materialsList}
+                    handleMaterialInputChange={handleMaterialInputChange}
+                    materialsGroupData={materialsGroupData}
+                    handleRemoveMaterial={handleRemoveMaterial}
+                    findMaterialById={findMaterialById}
+                    itemMaintenance_id={element.id}
+                  />
                 </div>
               ))
             : ""}
@@ -173,6 +160,24 @@ const NewOrderMaintenanceJob = ({
           </svg>
           Adicionar serviço
         </button>
+        <div className="total-row">
+          <div className="total-item">
+            Mão de obra:
+            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+          </div>
+          <div className="total-row-divider"></div>
+          <div className="total-item">
+            Peças:
+            <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+          </div>
+          <div className="total-row-divider"></div>
+          <div className="total-item">
+            Total:
+            <span className="grand-total">
+              R$ {calculateGrandTotal().toFixed(2)}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

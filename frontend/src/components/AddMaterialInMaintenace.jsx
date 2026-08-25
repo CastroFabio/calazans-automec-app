@@ -5,7 +5,13 @@ const AddMaterialInMaintenace = ({
   materialsGroupData,
   handleRemoveMaterial,
   findMaterialById,
+  itemMaintenance_id,
 }) => {
+  // Filtra apenas os materiais deste serviço específico
+  const serviceMaterials = materialsList.filter(
+    (item) => item.itemMaintenance_id === itemMaintenance_id,
+  );
+
   return (
     <div className="add-material-by-maintenance-container">
       <div className="add-material-by-maintenance-label">
@@ -25,18 +31,17 @@ const AddMaterialInMaintenace = ({
             </tr>
           </thead>
           <tbody className="svc-mat-body">
-            {materialsList.length > 0
-              ? materialsList.map((element, index) => (
-                  <tr className="add-material-row" key={index}>
+            {serviceMaterials.length > 0
+              ? serviceMaterials.map((element, index) => (
+                  <tr className="add-material-row" key={element.id || index}>
                     <td>
                       <select
                         className="select select-new-order-material"
-                        value={element.material_id || ""} // ← USA O ID, não o nome
+                        value={element.material_id || ""}
                         onChange={(e) => {
                           const selectedId = e.target.value;
 
                           if (!selectedId) {
-                            // Limpar
                             handleMaterialInputChange(
                               element.id,
                               "material_id",
@@ -52,13 +57,11 @@ const AddMaterialInMaintenace = ({
                             return;
                           }
 
-                          // Buscar o material pelo ID
                           const foundMaterial = findMaterialById(
                             Number(selectedId),
                           );
 
                           if (foundMaterial) {
-                            // Atualizar material_id e name
                             handleMaterialInputChange(
                               element.id,
                               "material_id",
@@ -109,11 +112,11 @@ const AddMaterialInMaintenace = ({
                           type="text"
                           placeholder="0.00"
                           className="input-new-order-material-cost"
-                          value={element.value_unity ?? ""}
+                          value={element.value_unit ?? ""}
                           onChange={(e) =>
                             handleMaterialInputChange(
                               element.id,
-                              "value_unity",
+                              "value_unit",
                               e.target.value,
                               materialsGroupData,
                             )
@@ -128,9 +131,9 @@ const AddMaterialInMaintenace = ({
                         readOnly
                         disabled
                         value={
-                          element.value_unity && element.quantity
+                          element.value_unit && element.quantity
                             ? (
-                                parseFloat(element.value_unity) *
+                                parseFloat(element.value_unit) *
                                 parseFloat(element.quantity)
                               ).toFixed(2)
                             : "—"
@@ -142,7 +145,7 @@ const AddMaterialInMaintenace = ({
                         type="text"
                         className="input input-new-order-material-ref"
                         placeholder="Ref."
-                        value={element.supplier}
+                        value={element.supplier || ""}
                         onChange={(e) =>
                           handleMaterialInputChange(
                             element.id,
@@ -158,7 +161,7 @@ const AddMaterialInMaintenace = ({
                         type="text"
                         className="input input-new-order-material-ref"
                         placeholder="Ref."
-                        value={element.receipt}
+                        value={element.receipt || ""}
                         onChange={(e) =>
                           handleMaterialInputChange(
                             element.id,

@@ -1,4 +1,4 @@
-const InputPriceValue = ({ labor_job, handleFormFieldChange }) => {
+const InputPriceValue = ({ labor_cost, handleFormFieldChange }) => {
   return (
     <div className="form-grid g3 form-grid-input-price">
       <div className="field col-full">
@@ -10,8 +10,10 @@ const InputPriceValue = ({ labor_job, handleFormFieldChange }) => {
             id="moInput"
             className="input"
             placeholder="0,00"
-            value={labor_job || ""}
-            onChange={(e) => handleFormFieldChange("labor_job", e.target.value)}
+            value={labor_cost || ""}
+            onChange={(e) =>
+              handleFormFieldChange("labor_cost", e.target.value)
+            }
           />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { formatServiceOrderTitle } from "../utils/formatServiceOrderTitle";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { formattedPrice } from "../utils/convertPrice";
 import { statusReverseMap } from "../utils/statusMap";
-import logo from "../../public/LogoCalazansAutomec.png";
+import logo from "../assets/LogoCalazansAutomec.png";
 
 const INFO_MEC = {
   nomeOficina: "Calazans Automec",

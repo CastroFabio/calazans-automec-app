@@ -74,6 +74,19 @@ export class CreateItemMaterialBatchItemDto {
   @IsInt({ message: 'serviceorder_id deve ser um número inteiro' })
   @IsPositive({ message: 'serviceorder_id deve ser um número positivo' })
   serviceorder_id: number;
+
+  @ApiPropertyOptional({
+    description: 'ID do item de manutenção vinculado (opcional)',
+    example: 1,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'ID do serviço de manutenção deve ser um número inteiro' })
+  @IsPositive({
+    message: 'ID do serviço de manutenção deve ser um número positivo',
+  })
+  itemMaintenance_id?: number;
 }
 
 export class CreateItemMaterialBatchDto {
