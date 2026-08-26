@@ -10,6 +10,7 @@ import { materialGroupApi } from "../api/materialGroups";
 import { formattedPrice } from "../utils/convertPrice";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
+import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import Loading from "./Loading";
 
 const EditServiceOrder = () => {
@@ -42,20 +43,26 @@ const EditServiceOrder = () => {
         setError(null);
 
         // 1. Buscar ordem de serviço
-        let found = getServiceOrderById(Number(id));
+        /* let found = getServiceOrderById(Number(id));
 
         if (found) {
           setServiceOrder(found);
           setItemMaintenances(found.itemMaintenances || []);
           setItemMaterials(found.itemMaterials || []);
           setPayment(found.paid);
-        } else {
+        } else { 
           const { data } = await orderApi.getById(Number(id));
           setServiceOrder(data);
           setItemMaintenances(data.itemMaintenances || []);
           setItemMaterials(data.itemMaterials || []);
           setPayment(data.paid);
-        }
+         } */
+
+        const { data } = await orderApi.getById(Number(id));
+        setServiceOrder(data);
+        setItemMaintenances(data.itemMaintenances || []);
+        setItemMaterials(data.itemMaterials || []);
+        setPayment(data.paid);
 
         // 2. Buscar grupos de serviços (para o select)
         const { data: maintenanceData } = await maintenanceGroupApi.getAll();
@@ -92,7 +99,7 @@ const EditServiceOrder = () => {
     const newJob = {
       id: Date.now(),
       maintenance_id: null,
-      value_unity: "",
+      value_unit: "",
       description: "",
     };
     setItemMaintenances([...itemMaintenances, newJob]);
@@ -102,22 +109,27 @@ const EditServiceOrder = () => {
     setItemMaintenances(itemMaintenances.filter((item) => item.id !== id));
   };
 
-  const handleMaintenanceJobChange = (id, field, value) => {
+  const handleMaintenanceJobChange = (
+    id,
+    field,
+    value,
+    maintenanceJobsGroupData,
+  ) => {
     setItemMaintenances((prev) =>
       prev.map((job) => {
         if (job.id !== id) return job;
 
         if (field === "maintenance_id") {
           if (!value) {
-            return { ...job, maintenance_id: null, value_unity: "" };
+            return { ...job, maintenance_id: null, value_unit: "" };
           }
           const foundJob = findMaintenanceJobById(value);
           if (foundJob) {
-            const rawValue = foundJob.value_unity ?? foundJob.value_unit ?? "";
+            const rawValue = foundJob.value_unit ?? foundJob.value_unit ?? "";
             return {
               ...job,
               maintenance_id: foundJob.id,
-              value_unity:
+              value_unit:
                 typeof rawValue === "string" ? rawValue : String(rawValue),
             };
           }
@@ -141,13 +153,14 @@ const EditServiceOrder = () => {
     return null;
   };
 
-  const handleAddMaterial = () => {
+  const handleAddMaterial = (itemMaintenanceID) => {
     const newMaterial = {
       id: Date.now(),
       material_id: null,
+      itemMaintenance_id: itemMaintenanceID,
       name: "",
       quantity: 1,
-      value_unity: "",
+      value_unit: "",
       receipt: "",
       supplier: "",
     };
@@ -158,14 +171,14 @@ const EditServiceOrder = () => {
     setItemMaterials(itemMaterials.filter((item) => item.id !== id));
   };
 
-  const handleMaterialInputChange = (id, field, value) => {
+  const handleMaterialInputChange = (id, field, value, materialGroupData) => {
     setItemMaterials((prev) =>
       prev.map((element) => {
         if (element.id !== id) return element;
 
         if (field === "material_id") {
           if (!value) {
-            return { ...element, material_id: null, value_unity: "" };
+            return { ...element, material_id: null, value_unit: "" };
           }
           const foundMat = findMaterialById(value);
           if (foundMat) {
@@ -173,7 +186,7 @@ const EditServiceOrder = () => {
               ...element,
               material_id: foundMat.id,
               name: foundMat.name,
-              value_unity: foundMat.value_unity ?? foundMat.value_unit ?? "",
+              value_unit: foundMat.value_unit ?? foundMat.value_unit ?? "",
             };
           }
         }
@@ -195,16 +208,13 @@ const EditServiceOrder = () => {
     return 0;
   };
 
-  const calculateTotalMaintenanceJob = () => {
-    return itemMaintenances.reduce((total, job) => {
-      return total + parseValue(job.value_unity);
-    }, 0);
-  };
+  const calculateTotalMaintenanceJob = () =>
+    parseValue(serviceOrder.labor_cost || 0);
 
   const calculateTotalMaterials = () => {
     return itemMaterials.reduce((total, item) => {
       const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unity);
+      const value = parseValue(item.value_unit);
       return total + quantity * value;
     }, 0);
   };
@@ -229,52 +239,68 @@ const EditServiceOrder = () => {
         diagnosis: serviceOrder.diagnosis,
         observation: serviceOrder.observation,
         paid: serviceOrder.paid,
-        subtotal: calculateGrandTotal(),
+        subtotal: parseFloat(calculateGrandTotal().toFixed(2)),
+        labor_cost: parseValue(serviceOrder.labor_cost) || 0,
       };
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
 
-      for (const item of itemMaintenances) {
-        const isNew = item.id > 1000000;
-        if (isNew) {
-          await itemMaintenanceApi.create({
+      // 1. Processa e atualiza a lista de Manutenções/Serviços
+      const updatedItemMaintenances = await Promise.all(
+        itemMaintenances.map(async (item) => {
+          const isNew = item.id > 1000000;
+          const payload = {
             serviceorder_id: serviceOrder.id,
             maintenance_id: item.maintenance_id,
-            value_unity: parseValue(item.value_unity),
             description: item.description || "",
-          });
-        } else {
-          await itemMaintenanceApi.update(item.id, {
-            maintenance_id: item.maintenance_id,
-            value_unity: parseValue(item.value_unity),
-            description: item.description || "",
-          });
-        }
-      }
+          };
 
-      for (const item of itemMaterials) {
-        const isNew = item.id > 1000000;
-        if (isNew) {
-          await itemMaterialApi.create({
+          if (isNew) {
+            // Recebe o item criado pelo Backend (com o ID definitivo gerado)
+            const { data: createdItem } =
+              await itemMaintenanceApi.create(payload);
+            return createdItem;
+          } else {
+            await itemMaintenanceApi.update(item.id, payload);
+            return item;
+          }
+        }),
+      );
+
+      // 2. Processa e atualiza a lista de Peças/Materiais
+      const updatedItemMaterials = await Promise.all(
+        itemMaterials.map(async (item) => {
+          const isNew = item.id > 1000000;
+          const payload = {
             serviceorder_id: serviceOrder.id,
             material_id: item.material_id,
+            itemMaintenance_id: item.itemMaintenance_id,
             quantity: parseValue(item.quantity),
-            value_unity: parseValue(item.value_unity),
+            value_unit: parseValue(item.value_unit),
             receipt: item.receipt || "",
             supplier: item.supplier || "",
-          });
-        } else {
-          await itemMaterialApi.update(item.id, {
-            material_id: item.material_id,
-            quantity: parseValue(item.quantity),
-            value_unity: parseValue(item.value_unity),
-            receipt: item.receipt || "",
-            supplier: item.supplier || "",
-          });
-        }
-      }
+          };
 
-      const updatedOrder = { ...serviceOrder, ...data };
+          if (isNew) {
+            // Recebe o material criado pelo Backend (com o ID definitivo gerado)
+            const { data: createdMaterial } =
+              await itemMaterialApi.create(payload);
+            return createdMaterial;
+          } else {
+            await itemMaterialApi.update(item.id, payload);
+            return item;
+          }
+        }),
+      );
+
+      // 3. Monta o objeto atualizado com os dados vindos das APIs
+      const updatedOrder = {
+        ...serviceOrder,
+        ...data,
+        itemMaintenances: updatedItemMaintenances,
+        itemMaterials: updatedItemMaterials,
+      };
+
       updateServiceOrder(updatedOrder);
       navigate("/");
     } catch (err) {
@@ -409,283 +435,26 @@ const EditServiceOrder = () => {
           </div>
 
           {/* ========== SERVIÇOS ========== */}
-          <div className="form-section">
-            <div className="fs-header">
-              <span className="fs-title">Serviços</span>
-            </div>
-            <div className="fs-body">
-              <div className="services-list">
-                {itemMaintenances.length > 0 ? (
-                  itemMaintenances.map((element, index) => (
-                    <div key={element.id} className="service-row">
-                      <div className="service-row-header">
-                        <div className="service-num">{index + 1}</div>
-                        <span className="service-row-label">
-                          Serviço #{index + 1}
-                        </span>
-                        <button
-                          className="remove-btn"
-                          onClick={() => handleRemoveMaintenanceJob(element.id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <div className="form-grid g3 form-grid-servico">
-                        <div className="field col-2">
-                          <label>Tipo de Serviço *</label>
-                          <select
-                            className="select"
-                            value={
-                              element.maintenance_id
-                                ? String(element.maintenance_id)
-                                : ""
-                            }
-                            onChange={(e) =>
-                              handleMaintenanceJobChange(
-                                element.id,
-                                "maintenance_id",
-                                e.target.value,
-                              )
-                            }
-                          >
-                            <option value="">Selecione o serviço...</option>
-                            {maintenanceJobsGroupData.map(
-                              (group, groupIndex) => (
-                                <optgroup key={groupIndex} label={group.group}>
-                                  {group.maintenanceJobs?.map((item) => (
-                                    <option
-                                      key={item.id}
-                                      value={String(item.id)}
-                                    >
-                                      {item.name}
-                                    </option>
-                                  ))}
-                                </optgroup>
-                              ),
-                            )}
-                          </select>
-                        </div>
-                        <div className="field">
-                          <label>Mão de Obra</label>
-                          <div className="input-prefix">
-                            <span>R$</span>
-                            <input
-                              type="text"
-                              className="svc-mo-input"
-                              placeholder="0,00"
-                              value={element.value_unity || ""}
-                              onChange={(e) =>
-                                handleMaintenanceJobChange(
-                                  element.id,
-                                  "value_unity",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                        <div className="field col-full">
-                          <label>Observações</label>
-                          <textarea
-                            className="textarea service-row-textarea"
-                            placeholder="Detalhes adicionais do serviço..."
-                            value={element.description || ""}
-                            onChange={(e) =>
-                              handleMaintenanceJobChange(
-                                element.id,
-                                "description",
-                                e.target.value,
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="empty-state">Nenhum serviço adicionado</div>
-                )}
-              </div>
-              <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
-                + Adicionar serviço
-              </button>
-            </div>
-          </div>
-
-          {/* ========== PEÇAS & MATERIAIS ========== */}
-          <div className="form-section">
-            <div className="fs-header">
-              <span className="fs-title">Peças & Materiais</span>
-            </div>
-            <div className="fs-body">
-              <div className="mat-table-wrap">
-                <table className="mat-table">
-                  <thead>
-                    <tr>
-                      <th>Descrição</th>
-                      <th>Qtd.</th>
-                      <th>Valor Unit.</th>
-                      <th>Total</th>
-                      <th>Loja</th>
-                      <th>Recibo</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {itemMaterials.length > 0 ? (
-                      itemMaterials.map((element) => (
-                        <tr className="add-material-row" key={element.id}>
-                          <td>
-                            <select
-                              className="select select-new-order-material"
-                              value={
-                                element.material_id
-                                  ? String(element.material_id)
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "material_id",
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Selecione...</option>
-                              {materialsGroupData.map((group, groupIndex) => (
-                                <optgroup key={groupIndex} label={group.group}>
-                                  {group.materials?.map((material) => (
-                                    <option
-                                      key={material.id}
-                                      value={String(material.id)}
-                                    >
-                                      {material.name}
-                                    </option>
-                                  ))}
-                                </optgroup>
-                              ))}
-                            </select>
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              className="input input-new-order-material-qtd"
-                              value={element.quantity}
-                              min="1"
-                              onChange={(e) =>
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "quantity",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-                          <td>
-                            <div className="input-prefix">
-                              <span>R$</span>
-                              <input
-                                type="text"
-                                placeholder="0,00"
-                                className="input-new-order-material-cost"
-                                value={element.value_unity || ""}
-                                onChange={(e) =>
-                                  handleMaterialInputChange(
-                                    element.id,
-                                    "value_unity",
-                                    e.target.value,
-                                  )
-                                }
-                              />
-                            </div>
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="input input-new-order-material-total"
-                              readOnly
-                              value={(
-                                (parseFloat(element.quantity) || 0) *
-                                parseValue(element.value_unity)
-                              ).toFixed(2)}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="input input-new-order-material-ref"
-                              placeholder="Ref."
-                              value={element.supplier || ""}
-                              onChange={(e) =>
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "supplier",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="input input-new-order-material-ref"
-                              placeholder="Ref."
-                              value={element.receipt || ""}
-                              onChange={(e) =>
-                                handleMaterialInputChange(
-                                  element.id,
-                                  "receipt",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-                          <td>
-                            <button
-                              className="remove-btn"
-                              onClick={() => handleRemoveMaterial(element.id)}
-                            >
-                              ×
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="empty-state">
-                          Nenhum material adicionado
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <button className="add-row-btn" onClick={handleAddMaterial}>
-                + Adicionar peça / material
-              </button>
-              <div className="total-row">
-                <div className="total-item">
-                  Mão de obra:{" "}
-                  <strong>
-                    R$ {calculateTotalMaintenanceJob().toFixed(2)}
-                  </strong>
-                </div>
-                <div className="total-row-divider"></div>
-                <div className="total-item">
-                  Peças:{" "}
-                  <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
-                </div>
-                <div className="total-row-divider"></div>
-                <div className="total-item">
-                  Total:{" "}
-                  <span className="grand-total">
-                    R$ {calculateGrandTotal().toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <NewOrderMaintenanceJob
+            formData={serviceOrder}
+            handleFormFieldChange={handleFormFieldChange}
+            listMaintenanceJobs={itemMaintenances}
+            handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
+            handleMaintenanceJobChange={handleMaintenanceJobChange}
+            findMaintenanceJobById={findMaintenanceJobById}
+            setListMaintenanceJobs={setItemMaintenances}
+            maintenanceJobsGroupData={maintenanceJobsGroupData}
+            handleAddMaterial={handleAddMaterial}
+            materialsList={itemMaterials}
+            handleMaterialInputChange={handleMaterialInputChange}
+            materialsGroupData={materialsGroupData}
+            handleRemoveMaterial={handleRemoveMaterial}
+            findMaterialById={findMaterialById}
+            handleAddMaintenanceJob={handleAddMaintenanceJob}
+            calculateTotalMaintenanceJob={calculateTotalMaintenanceJob}
+            calculateTotalMaterials={calculateTotalMaterials}
+            calculateGrandTotal={calculateGrandTotal}
+          />
           {/* ========== DIAGNÓSTICO & INFORMAÇÕES ========== */}
           <div className="form-section">
             <div className="fs-header">

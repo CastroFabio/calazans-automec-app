@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
@@ -14,22 +15,28 @@ export class CreateMaterialItemDto {
     description: 'Quantidade de itens de material',
     example: 1,
   })
+  @Type(() => Number)
   @IsInt({ message: 'Quantidade de material deve ser inteiro' })
   @Min(0, { message: 'Quantidade de material não pode ser negativo' })
   @IsNotEmpty({ message: 'Quantidade de material é obrigatório' })
   quantity: number;
 
   @ApiProperty({ description: 'Valor unitário de material', example: 2.5 })
-  @IsNumber()
+  @Type(() => Number)
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'Valor unitário deve ser um número com até 2 casas decimais' },
+  )
   @Min(0, { message: 'Valor unitário de material não pode ser negativo' })
   @IsNotEmpty({ message: 'Valor unitário de material é obrigatório' })
-  value_unity: number;
+  value_unit: number;
 
   @ApiProperty({
     description: 'ID da ordem de serviço',
     example: 1,
     type: Number,
   })
+  @Type(() => Number)
   @IsInt({ message: 'ID da ordem de serviço deve ser um número inteiro' })
   @IsNotEmpty({ message: 'ID da ordem de serviço é obrigatório' })
   @IsPositive({
@@ -42,6 +49,7 @@ export class CreateMaterialItemDto {
     example: 1,
     type: Number,
   })
+  @Type(() => Number)
   @IsInt({ message: 'ID do material deve ser um número inteiro' })
   @IsNotEmpty({ message: 'ID do material é obrigatório' })
   @IsPositive({
@@ -50,13 +58,26 @@ export class CreateMaterialItemDto {
   material_id: number;
 
   @ApiPropertyOptional({
-    description: 'Códido do recibo da peça que foi comprada no fornecedor',
+    description: 'ID do item de manutenção vinculado (opcional)',
+    example: 1,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'ID do serviço de manutenção deve ser um número inteiro' })
+  @IsPositive({
+    message: 'ID do serviço de manutenção deve ser um número positivo',
+  })
+  itemMaintenance_id?: number;
+
+  @ApiPropertyOptional({
+    description: 'Código do recibo da peça que foi comprada no fornecedor',
     example: '234599',
     type: String,
   })
   @IsOptional()
-  @IsString({ message: 'Códido do recibo deve ser uma string' })
-  receipt: string;
+  @IsString({ message: 'Código do recibo deve ser uma string' })
+  receipt?: string;
 
   @ApiPropertyOptional({
     description: 'Nome do fornecedor',
@@ -65,5 +86,5 @@ export class CreateMaterialItemDto {
   })
   @IsOptional()
   @IsString({ message: 'Nome do fornecedor deve ser uma string' })
-  supplier: string;
+  supplier?: string;
 }

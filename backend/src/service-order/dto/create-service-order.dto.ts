@@ -85,23 +85,46 @@ export class CreateServiceOrderDto {
   observation: string;
 
   @ApiProperty({
-    description: 'Valor da ordem de ',
-    example: 30.4,
-    type: Number,
-  })
-  @IsNumber()
-  @Min(0, { message: 'Valor subtotal não pode ser menor que zero' })
-  subtotal: number;
-
-  @ApiProperty({
     description: 'Quanto a ordem foi paga',
     example: 30.4,
     type: Number,
   })
   @IsOptional()
-  @IsNumber()
-  @Min(0, { message: 'Valor pago não pode ser menor que zero' })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'O valor deve ser um número com até 2 casas decimais' },
+  )
+  @Min(0, { message: 'O preço não pode ser negativo' })
+  @Type(() => Number)
   paid: number;
+
+  @ApiProperty({
+    description: 'Quanto custou o serviço de manutenção',
+    example: 1,
+    type: Number,
+  })
+  @IsNotEmpty({ message: 'O valor da mão de obra é obrigatório' })
+  @Type(() => Number) // Converte "150.50" para 150.50
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'O valor deve ser um número com até 2 casas decimais' },
+  )
+  @Min(0, { message: 'O preço não pode ser negativo' })
+  labor_cost: number;
+
+  @ApiProperty({
+    description: 'O valor da ordem de serviço',
+    example: 2400.44,
+    type: Number,
+  })
+  @IsNotEmpty({ message: 'O valor da mão de obra é obrigatório' })
+  @Type(() => Number) // Converte "150.50" para 150.50
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'O valor deve ser um número com até 2 casas decimais' },
+  )
+  @Min(0, { message: 'O preço não pode ser negativo' })
+  subtotal: number;
 
   @ApiProperty({
     description: 'ID do cliente',

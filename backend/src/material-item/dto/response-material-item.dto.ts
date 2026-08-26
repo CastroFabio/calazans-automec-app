@@ -22,7 +22,7 @@ export class MaterialItemResponseDto {
   quantity: number;
 
   @ApiProperty({ description: 'Valor unitário de material', example: 2.5 })
-  value_unity: number;
+  value_unit: number;
 
   @ApiProperty({
     description: 'ID da ordem de serviço',

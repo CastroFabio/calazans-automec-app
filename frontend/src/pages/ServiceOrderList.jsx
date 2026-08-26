@@ -6,7 +6,7 @@ import { orderApi } from "../api/orders";
 import { convertPriority, convertStatus } from "../utils/convertPriorityStatus";
 import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
-import { statusReverseMap } from "../utils/statusMap";
+import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
 import Loading from "./Loading";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
@@ -161,7 +161,6 @@ const ServiceOrderList = () => {
               <th>Cliente / Veículo</th>
               <th>Serviços</th>
               <th>Técnico</th>
-              <th>Prioridade</th>
               <th>Status</th>
               <th>Valor</th>
               <th>Entrada</th>
@@ -223,18 +222,12 @@ const ServiceOrderList = () => {
                   <td className="os-table-professional-name">
                     {order.professional || "—"}
                   </td>
+
                   <td>
                     <span
-                      className={`badge ${priClass[order.priority] || "badge-default"}`}
+                      className={`badge badge-${statusReverseMapBadge[order.status] || "default"}`}
                     >
-                      {convertPriority(order.priority)}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${statusClass[order.status] || "badge-default"}`}
-                    >
-                      {convertStatus(order.status)}
+                      {statusReverseMap[order.status]}
                     </span>
                   </td>
                   <td className="td-value">{formattedPrice(order.subtotal)}</td>
@@ -245,7 +238,7 @@ const ServiceOrderList = () => {
               ))
             ) : (
               <tr className="empty-row">
-                <td colSpan="8">
+                <td colSpan="7">
                   <div className="empty-state">
                     {searchTerm ? (
                       <>Nenhuma ordem encontrada para "{searchTerm}"</>

@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { statusReverseMap } from "../utils/statusMap";
+import {
+  statusMap,
+  statusReverseMap,
+  statusReverseMapBadge,
+} from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
+import { orderApi } from "../api/orders";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -49,6 +55,43 @@ const ServiceOrderDetailPanel = ({
 }) => {
   const navigate = useNavigate();
 
+  // ========== DESTRUTURAÇÃO COM FALLBACKS (Definidos antes de Hooks) ==========
+
+  const [order, setOrder] = useState(selectedServiceOrder || {});
+  const customer = order.customer || {};
+  const vehicle = order.vehicle || {};
+
+  const { updateServiceOrder } = useServiceOrders();
+
+  // Garantir que os arrays existem
+  const itemMaintenances = safeArray(order.itemMaintenances);
+  const itemMaterials = safeArray(order.itemMaterials);
+
+  // ========== AGRUPAMENTO COM USEMEMO ==========
+  const groupedMaterials = useMemo(() => {
+    if (!itemMaterials || itemMaterials.length === 0) return [];
+
+    const groups = itemMaterials.reduce((acc, item) => {
+      // Normalização de chaves para evitar duplicações por espaços ou maiúsculas/minúsculas
+      const supplierStr = (item.supplier || "Sem Fornecedor").trim();
+      const receiptStr = (item.receipt || "Sem Recibo").trim();
+      const groupKey = `${supplierStr.toLowerCase()}_${receiptStr.toLowerCase()}`;
+
+      if (!acc[groupKey]) {
+        acc[groupKey] = {
+          supplier: supplierStr,
+          receipt: receiptStr,
+          items: [],
+        };
+      }
+
+      acc[groupKey].items.push(item);
+      return acc;
+    }, {});
+
+    return Object.values(groups);
+  }, [itemMaterials]);
+
   // ========== VALIDAÇÃO INICIAL ==========
   if (!sidebarOpen) return null;
 
@@ -72,15 +115,6 @@ const ServiceOrderDetailPanel = ({
     );
   }
 
-  // ========== DESTRUTURAÇÃO COM FALLBACKS ==========
-  const order = selectedServiceOrder;
-  const customer = order.customer || {};
-  const vehicle = order.vehicle || {};
-
-  // Garantir que os arrays existem
-  const itemMaintenances = safeArray(order.itemMaintenances);
-  const itemMaterials = safeArray(order.itemMaterials);
-
   // ========== HANDLERS ==========
   const handleEditOrder = () => {
     navigate(`/service-order/edit/${order.id}`);
@@ -92,12 +126,27 @@ const ServiceOrderDetailPanel = ({
     if (onClose) onClose();
   };
 
-  const handleCancelOrder = () => {
+  const handleCancelOrder = async () => {
     if (
       !window.confirm("Tem certeza que deseja cancelar esta ordem de serviço?")
     ) {
       return;
     }
+
+    if (!selectedServiceOrder) return;
+    await orderApi.update(selectedServiceOrder.id, {
+      status: statusMap.Cancelada,
+    });
+
+    setOrder({
+      ...selectedServiceOrder,
+      status: statusMap.Cancelada,
+    });
+
+    updateServiceOrder({
+      ...selectedServiceOrder,
+      status: statusMap.Cancelada,
+    });
   };
 
   // ========== RENDER ==========
@@ -122,11 +171,10 @@ const ServiceOrderDetailPanel = ({
               {formatServiceOrderTitle(order)}
             </div>
             <div className="sp-header-badges" id="spBadges">
-              <span className={`badge status-${order.status || 0}`}>
+              <span
+                className={`badge badge-${statusReverseMapBadge[order.status] || "pending "}`}
+              >
                 {statusReverseMap[order.status] || "Desconhecido"}
-              </span>
-              <span className={`badge priority-${order.priority || 0}`}>
-                {priorityReverseMap[order.priority] || "Desconhecido"}
               </span>
             </div>
           </div>
@@ -206,45 +254,55 @@ const ServiceOrderDetailPanel = ({
             </div>
           </div>
 
-          {/* ===== PEÇAS & MATERIAIS - CORRIGIDO ===== */}
+          {/* ===== PEÇAS & MATERIAIS - AGRUPADO POR RECIBO E FORNECEDOR ===== */}
           <div className="sp-section">
             <div className="sp-label">
               Peças & Materiais ({itemMaterials.length})
             </div>
-            <div id="spMaterials">
-              {itemMaterials.length > 0 ? (
-                itemMaterials.map((element, index) => (
-                  <div key={element.id || index} className="sp-material-item">
-                    <span className="sp-material-name">
-                      · <strong>{element.material?.name || "Material"}</strong>
-                    </span>{" "}
-                    {element.quantity && (
-                      <span className="sp-material-qty">
-                        {element.quantity}x
+
+            {groupedMaterials.length > 0 ? (
+              groupedMaterials.map((group) => {
+                const groupKey = `${group.supplier}-${group.receipt}`;
+
+                return (
+                  <fieldset
+                    key={groupKey}
+                    className="detail-panel-service-order-material-fieldset"
+                  >
+                    <legend className="detail-panel-service-order-material-legend">
+                      <span className="detail-panel-service-order-supplier">
+                        {group.supplier}
+                      </span>{" "}
+                      ·{" "}
+                      <span className="detail-panel-service-order-receipt">
+                        Recibo {group.receipt}
                       </span>
-                    )}{" "}
-                    {element.value_unity && (
-                      <span className="sp-material-value">
-                        {formattedPrice(element.value_unity)}
-                      </span>
-                    )}{" "}
-                    {element.supplier && (
-                      <span className="sp-material-ref">
-                        <strong>Loja:</strong> {element.supplier}
-                      </span>
-                    )}{" "}
-                    {element.receipt && (
-                      <span className="sp-material-ref">
-                        <strong>Recibo:</strong>
-                        {element.receipt}
-                      </span>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="empty-text">Nenhum material registrado</div>
-              )}
-            </div>
+                    </legend>
+
+                    {group.items.map((element, itemIdx) => (
+                      <div
+                        key={element.id || itemIdx}
+                        className="detail-panel-service-order-material-container"
+                      >
+                        <span className="detail-panel-service-order-material-name">
+                          · {element.material?.name || "Material sem nome"}
+                        </span>
+                        <span className="detail-panel-service-order-material-price">
+                          {`${Number(element.quantity || 1)}x ${parseFloat(
+                            element.value_unit || 0,
+                          ).toFixed(2)} (${formattedPrice(
+                            parseFloat(element.value_unit || 0) *
+                              Number(element.quantity || 1),
+                          )})`}
+                        </span>
+                      </div>
+                    ))}
+                  </fieldset>
+                );
+              })
+            ) : (
+              <div className="empty-text">Nenhum material registrado</div>
+            )}
           </div>
 
           {/* ===== DIAGNÓSTICO ===== */}

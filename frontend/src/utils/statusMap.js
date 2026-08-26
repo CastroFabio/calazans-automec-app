@@ -17,3 +17,13 @@ export const statusReverseMap = {
   6: "Cancelada",
   7: "Ainda a pagar",
 };
+
+export const statusReverseMapBadge = {
+  1: "pending",
+  2: "progress",
+  3: "done",
+  4: "open",
+  5: "awaiting-material",
+  6: "cancelled",
+  7: "awaiting-payment",
+};

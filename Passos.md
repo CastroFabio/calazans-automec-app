@@ -1,7 +1,7 @@
 - [x] Criar tag/release no github
 
 - [ ] Updates necessários.
-  - [ ] **Consertar input:** deve aceitar float. Atualmente só aceita int.
+  - [x] **Consertar input:** deve aceitar float. Atualmente só aceita int.
   - [ ] **Mão de obra:** deve ter um valor único. Atualmente todos os serviços tem que ter valor.
   - [ ] **Espaço morto impressão:** deve perder tanto espaço vazio, tentar fazer caber numa página. Atualmente a impressão tem muito espaço em branco.
 

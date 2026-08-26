@@ -4659,109 +4659,457 @@
           id: "OS-2025-0142",
           clientId: 5,
           carId: 6,
-          services: ["Revisão geral", "Troca de correia dentada"],
-          materials: ["Correia Gates K030", "Tensor de correia"],
           tecnico: "Carlos Mendes",
           prioridade: "alta",
           status: "progress",
           entrada: "20/02/2025 09:00",
           valor: "R$ 680,00",
           desc: "Veículo com barulho ao acelerar. Correia dentada com desgaste identificado.",
+          services: [
+            "Revisão geral preventiva",
+            "Substituição da correia dentada",
+          ],
+          materials: [
+            "Correia dentada",
+            "Tensor de correia",
+            "Kit juntas motor",
+          ],
+          servicosDetalhados: [
+            { nome: "Revisão geral preventiva", mo: "0", mats: [] },
+            {
+              nome: "Substituição da correia dentada",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Correia dentada",
+                  qty: "1",
+                  val: "180,00",
+                  fornecedor: "Distribuidora AutoPeças SP",
+                  recibo: "REC-4421",
+                },
+                {
+                  nome: "Tensor de correia",
+                  qty: "1",
+                  val: "95,00",
+                  fornecedor: "Distribuidora AutoPeças SP",
+                  recibo: "REC-4421",
+                },
+                {
+                  nome: "Kit juntas motor",
+                  qty: "1",
+                  val: "65,00",
+                  fornecedor: "Distribuidora AutoPeças SP",
+                  recibo: "REC-4421",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Correia dentada",
+              qty: "1",
+              val: "180,00",
+              fornecedor: "Distribuidora AutoPeças SP",
+              recibo: "REC-4421",
+            },
+            {
+              nome: "Tensor de correia",
+              qty: "1",
+              val: "95,00",
+              fornecedor: "Distribuidora AutoPeças SP",
+              recibo: "REC-4421",
+            },
+            {
+              nome: "Kit juntas motor",
+              qty: "1",
+              val: "65,00",
+              fornecedor: "Distribuidora AutoPeças SP",
+              recibo: "REC-4421",
+            },
+          ],
+          valorPago: 0,
+          _snapMO: 340,
         },
         {
           id: "OS-2025-0141",
           clientId: 1,
           carId: 1,
-          services: ["Alinhamento e balanceamento"],
-          materials: [],
           tecnico: "Fernanda Costa",
           prioridade: "normal",
           status: "pending",
           entrada: "19/02/2025 14:00",
           valor: "R$ 120,00",
           desc: "Vibração no volante acima de 80 km/h.",
+          services: ["Alinhamento e balanceamento"],
+          materials: [],
+          servicosDetalhados: [
+            { nome: "Alinhamento e balanceamento", mo: "0", mats: [] },
+          ],
+          materiaisDetalhados: [],
+          valorPago: 0,
+          _snapMO: 120,
         },
         {
           id: "OS-2025-0140",
           clientId: 3,
           carId: 4,
-          services: ["Troca de óleo e filtros"],
-          materials: ["Óleo Mobil 5W30 5L", "Filtro de óleo"],
           tecnico: "Pedro Santos",
           prioridade: "normal",
           status: "done",
           entrada: "17/02/2025 08:00",
           valor: "R$ 280,00",
           desc: "Manutenção preventiva de 15.000 km.",
+          services: [
+            "Troca de óleo do motor",
+            "Troca do filtro de óleo",
+            "Troca do filtro de ar",
+          ],
+          materials: [
+            "Óleo de motor 5W30 sintético",
+            "Filtro de óleo",
+            "Filtro de ar do motor",
+          ],
+          servicosDetalhados: [
+            {
+              nome: "Troca de óleo do motor",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Óleo de motor 5W30 sintético",
+                  qty: "4",
+                  val: "42,00",
+                  fornecedor: "Auto Center Norte",
+                  recibo: "NF-0089",
+                },
+                {
+                  nome: "Filtro de óleo",
+                  qty: "1",
+                  val: "28,00",
+                  fornecedor: "Auto Center Norte",
+                  recibo: "NF-0089",
+                },
+              ],
+            },
+            {
+              nome: "Troca do filtro de ar",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Filtro de ar do motor",
+                  qty: "1",
+                  val: "38,00",
+                  fornecedor: "Auto Center Norte",
+                  recibo: "NF-0089",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Óleo de motor 5W30 sintético",
+              qty: "4",
+              val: "42,00",
+              fornecedor: "Auto Center Norte",
+              recibo: "NF-0089",
+            },
+            {
+              nome: "Filtro de óleo",
+              qty: "1",
+              val: "28,00",
+              fornecedor: "Auto Center Norte",
+              recibo: "NF-0089",
+            },
+            {
+              nome: "Filtro de ar do motor",
+              qty: "1",
+              val: "38,00",
+              fornecedor: "Auto Center Norte",
+              recibo: "NF-0089",
+            },
+          ],
+          valorPago: 280,
+          _snapMO: 106,
         },
         {
           id: "OS-2025-0139",
           clientId: 2,
           carId: 2,
-          services: ["Diagnóstico eletrônico", "Sensor MAP"],
-          materials: ["Sensor MAP", "Fluido limpa-injetor"],
           tecnico: "Ana Lima",
           prioridade: "alta",
-          status: "progress",
+          status: "awaiting-payment",
           entrada: "16/02/2025 14:30",
           valor: "R$ 420,00",
           desc: "Luz de injeção acesa. Falha no sensor MAP confirmada.",
+          services: [
+            "Diagnóstico eletrônico (scanner)",
+            "Limpeza de bicos injetores",
+          ],
+          materials: ["Sensor MAP", "Fluido limpa-injetor"],
+          servicosDetalhados: [
+            {
+              nome: "Diagnóstico eletrônico (scanner)",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Sensor MAP",
+                  qty: "1",
+                  val: "210,00",
+                  fornecedor: "Peças & Cia Ltda",
+                  recibo: "REC-7731",
+                },
+              ],
+            },
+            {
+              nome: "Limpeza de bicos injetores",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Fluido limpa-injetor",
+                  qty: "2",
+                  val: "25,00",
+                  fornecedor: "Peças & Cia Ltda",
+                  recibo: "REC-7731",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Sensor MAP",
+              qty: "1",
+              val: "210,00",
+              fornecedor: "Peças & Cia Ltda",
+              recibo: "REC-7731",
+            },
+            {
+              nome: "Fluido limpa-injetor",
+              qty: "2",
+              val: "25,00",
+              fornecedor: "Peças & Cia Ltda",
+              recibo: "REC-7731",
+            },
+          ],
+          valorPago: 200,
+          _snapMO: 160,
         },
         {
           id: "OS-2025-0138",
           clientId: 4,
           carId: 5,
-          services: ["Pastilhas e discos de freio"],
-          materials: [
-            "Pastilhas Brembo diant.",
-            "Discos diant.",
-            "Fluido DOT4",
-          ],
           tecnico: "Carlos Mendes",
           prioridade: "urgente",
-          status: "progress",
+          status: "awaiting-payment",
           entrada: "15/02/2025 10:00",
           valor: "R$ 860,00",
-          desc: "Freios com chiado e pedal mole. Desgaste crítico.",
+          desc: "Freios com chiado e pedal mole. Desgaste crítico nas pastilhas e discos.",
+          services: [
+            "Substituição de pastilhas dianteiras",
+            "Substituição de disco de freio dianteiro",
+            "Sangria do sistema de freio",
+          ],
+          materials: [
+            "Pastilha de freio dianteira",
+            "Disco de freio dianteiro",
+            "Fluido de freio DOT4",
+          ],
+          servicosDetalhados: [
+            {
+              nome: "Substituição de pastilhas dianteiras",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Pastilha de freio dianteira",
+                  qty: "1",
+                  val: "185,00",
+                  fornecedor: "Brembo Oficial SP",
+                  recibo: "BRE-2024",
+                },
+              ],
+            },
+            {
+              nome: "Substituição de disco de freio dianteiro",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Disco de freio dianteiro",
+                  qty: "2",
+                  val: "220,00",
+                  fornecedor: "Brembo Oficial SP",
+                  recibo: "BRE-2024",
+                },
+              ],
+            },
+            {
+              nome: "Sangria do sistema de freio",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Fluido de freio DOT4",
+                  qty: "1",
+                  val: "35,00",
+                  fornecedor: "Auto Express",
+                  recibo: "AE-0551",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Pastilha de freio dianteira",
+              qty: "1",
+              val: "185,00",
+              fornecedor: "Brembo Oficial SP",
+              recibo: "BRE-2024",
+            },
+            {
+              nome: "Disco de freio dianteiro",
+              qty: "2",
+              val: "220,00",
+              fornecedor: "Brembo Oficial SP",
+              recibo: "BRE-2024",
+            },
+            {
+              nome: "Fluido de freio DOT4",
+              qty: "1",
+              val: "35,00",
+              fornecedor: "Auto Express",
+              recibo: "AE-0551",
+            },
+          ],
+          valorPago: 500,
+          _snapMO: 220,
         },
         {
           id: "OS-2025-0137",
           clientId: 5,
           carId: 7,
-          services: ["Ar-condicionado — carga de gás"],
-          materials: ["Gás R134a", "Óleo de compressor"],
           tecnico: "Pedro Santos",
           prioridade: "normal",
           status: "pending",
           entrada: "14/02/2025 09:30",
           valor: "R$ 220,00",
           desc: "Resfriamento insuficiente. Possível falta de gás.",
+          services: ["Carga de gás R134a"],
+          materials: ["Gás R134a (kg)", "Óleo de compressor A/C"],
+          servicosDetalhados: [
+            {
+              nome: "Carga de gás R134a",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Gás R134a (kg)",
+                  qty: "1",
+                  val: "140,00",
+                  fornecedor: "Clima Total Refrigeração",
+                  recibo: "CT-0088",
+                },
+                {
+                  nome: "Óleo de compressor A/C",
+                  qty: "1",
+                  val: "40,00",
+                  fornecedor: "Clima Total Refrigeração",
+                  recibo: "CT-0088",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Gás R134a (kg)",
+              qty: "1",
+              val: "140,00",
+              fornecedor: "Clima Total Refrigeração",
+              recibo: "CT-0088",
+            },
+            {
+              nome: "Óleo de compressor A/C",
+              qty: "1",
+              val: "40,00",
+              fornecedor: "Clima Total Refrigeração",
+              recibo: "CT-0088",
+            },
+          ],
+          valorPago: 0,
+          _snapMO: 40,
         },
         {
           id: "OS-2025-0136",
           clientId: 2,
           carId: 3,
-          services: ["Suspensão — amortecedores"],
-          materials: ["Amortecedor diant. D", "Amortecedor diant. E"],
           tecnico: "Fernanda Costa",
           prioridade: "normal",
           status: "done",
           entrada: "13/02/2025 11:00",
           valor: "R$ 1.240,00",
-          desc: "Barulho em lombadas. Amortecedores com vazamento.",
+          desc: "Barulho em lombadas. Amortecedores com vazamento confirmado.",
+          services: ["Substituição de amortecedor dianteiro"],
+          materials: ["Amortecedor dianteiro", "Amortecedor dianteiro"],
+          servicosDetalhados: [
+            {
+              nome: "Substituição de amortecedor dianteiro",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Amortecedor dianteiro",
+                  qty: "2",
+                  val: "480,00",
+                  fornecedor: "Monroe Distribuidora",
+                  recibo: "MNR-3390",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Amortecedor dianteiro",
+              qty: "2",
+              val: "480,00",
+              fornecedor: "Monroe Distribuidora",
+              recibo: "MNR-3390",
+            },
+          ],
+          valorPago: 1240,
+          _snapMO: 280,
         },
         {
           id: "OS-2025-0135",
           clientId: 1,
           carId: 1,
-          services: ["Elétrica — revisão", "Troca de bateria"],
-          materials: ["Bateria Moura 60Ah"],
           tecnico: "Ana Lima",
           prioridade: "baixa",
           status: "done",
           entrada: "10/02/2025 09:00",
           valor: "R$ 480,00",
-          desc: "Veículo sem partida. Bateria descarregada.",
+          desc: "Veículo sem partida. Bateria descarregada, sem tensão suficiente.",
+          services: ["Revisão do sistema de carga", "Troca de bateria"],
+          materials: ["Bateria 60Ah"],
+          servicosDetalhados: [
+            { nome: "Revisão do sistema de carga", mo: "0", mats: [] },
+            {
+              nome: "Troca de bateria",
+              mo: "0",
+              mats: [
+                {
+                  nome: "Bateria 60Ah",
+                  qty: "1",
+                  val: "380,00",
+                  fornecedor: "Moura Baterias Centro",
+                  recibo: "MB-6641",
+                },
+              ],
+            },
+          ],
+          materiaisDetalhados: [
+            {
+              nome: "Bateria 60Ah",
+              qty: "1",
+              val: "380,00",
+              fornecedor: "Moura Baterias Centro",
+              recibo: "MB-6641",
+            },
+          ],
+          valorPago: 480,
+          _snapMO: 100,
         },
       ];
 
@@ -5982,14 +6330,75 @@
             .join("") ||
           '<span style="color:var(--ink3);font-size:13px;">—</span>';
 
-        document.getElementById("spMaterials").innerHTML = os.materials.length
-          ? os.materials
-              .map(
-                (m) =>
-                  `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--bg);color:var(--ink2);">· ${m}</div>`,
-              )
-              .join("")
-          : '<span style="color:var(--ink3);font-size:12px;">Nenhum material registrado</span>';
+        const mats =
+          os.materiaisDetalhados ||
+          os.materials.map((m) => ({
+            nome: m,
+            qty: "1",
+            val: "0",
+            fornecedor: "",
+            recibo: "",
+          }));
+        if (!mats.length) {
+          document.getElementById("spMaterials").innerHTML =
+            '<span style="color:var(--ink3);font-size:12px;">Nenhum material registrado</span>';
+        } else {
+          // Group by fornecedor+recibo key
+          const groups = [];
+          const keyOf = (m) => (m.fornecedor || "") + "|||" + (m.recibo || "");
+          mats.forEach((m) => {
+            const k = keyOf(m);
+            let g = groups.find((x) => x.key === k);
+            if (!g) {
+              g = {
+                key: k,
+                fornecedor: m.fornecedor || "",
+                recibo: m.recibo || "",
+                items: [],
+              };
+              groups.push(g);
+            }
+            g.items.push(m);
+          });
+
+          document.getElementById("spMaterials").innerHTML = groups
+            .map((g) => {
+              const hasLabel = g.fornecedor || g.recibo;
+              const legend = [
+                g.fornecedor
+                  ? `<span style="font-weight:700;">${g.fornecedor}</span>`
+                  : "",
+                g.recibo
+                  ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--surface2);padding:1px 6px;border-radius:3px;border:1px solid var(--border);">Recibo ${g.recibo}</span>`
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" &nbsp;·&nbsp; ");
+
+              const rows = g.items
+                .map((m) => {
+                  const qty = parseFloat(m.qty) || 1;
+                  const unit = parseBRL ? parseBRL(m.val) : 0;
+                  const tot = unit * qty;
+                  return `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--bg);">
+          <span style="font-size:12px;color:var(--ink2);">· ${m.nome}</span>
+          <span style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink3);white-space:nowrap;flex-shrink:0;">${qty > 1 ? qty + "×" : ""}${tot > 0 ? " " + fmtBRL(tot) : ""}</span>
+        </div>`;
+                })
+                .join("");
+
+              if (!hasLabel) {
+                // No group header — just render items directly
+                return `<div style="margin-bottom:8px;">${rows}</div>`;
+              }
+
+              return `<fieldset style="border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px 4px;margin-bottom:8px;">
+        <legend style="font-size:10px;padding:0 5px;line-height:1.8;display:flex;align-items:center;gap:6px;">${legend}</legend>
+        ${rows}
+      </fieldset>`;
+            })
+            .join("");
+        }
 
         document.getElementById("spDesc").textContent = os.desc;
 

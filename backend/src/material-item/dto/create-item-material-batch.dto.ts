@@ -38,9 +38,9 @@ export class CreateItemMaterialBatchItemDto {
     type: Number,
     minimum: 0,
   })
-  @IsNumber({}, { message: 'value_unity deve ser um número' })
-  @Min(0, { message: 'value_unity deve ser maior ou igual a zero' })
-  value_unity: number;
+  @IsNumber({}, { message: 'value_unit deve ser um número' })
+  @Min(0, { message: 'value_unit deve ser maior ou igual a zero' })
+  value_unit: number;
 
   @ApiPropertyOptional({
     description: 'Código do recibo',
@@ -74,6 +74,19 @@ export class CreateItemMaterialBatchItemDto {
   @IsInt({ message: 'serviceorder_id deve ser um número inteiro' })
   @IsPositive({ message: 'serviceorder_id deve ser um número positivo' })
   serviceorder_id: number;
+
+  @ApiPropertyOptional({
+    description: 'ID do item de manutenção vinculado (opcional)',
+    example: 1,
+    type: Number,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'ID do serviço de manutenção deve ser um número inteiro' })
+  @IsPositive({
+    message: 'ID do serviço de manutenção deve ser um número positivo',
+  })
+  itemMaintenance_id?: number;
 }
 
 export class CreateItemMaterialBatchDto {

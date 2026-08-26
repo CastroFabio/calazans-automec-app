@@ -3,7 +3,7 @@ import { formatServiceOrderTitle } from "../utils/formatServiceOrderTitle";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { formattedPrice } from "../utils/convertPrice";
 import { statusReverseMap } from "../utils/statusMap";
-import logo from "../../public/LogoCalazansAutomec.png";
+import logo from "../assets/LogoCalazansAutomec.png";
 
 const INFO_MEC = {
   nomeOficina: "Calazans Automec",
@@ -14,24 +14,18 @@ const INFO_MEC = {
   subtitulo: "Oficina & Automecânica",
 };
 
-const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
-  const calculateTotalMaintenanceJob = () => {
-    return serviceOrder.itemMaintenances.reduce((total, job) => {
-      return total + (parseFloat(job.value_unity) || 0);
-    }, 0);
-  };
-
+const ServiceOrderPrintBody = ({ serviceOrder }) => {
   const calculateTotalMaterials = () => {
     return serviceOrder.itemMaterials.reduce((total, material) => {
       const materialTotal =
-        (parseFloat(material.value_unity) || 0) *
+        (parseFloat(material.value_unit) || 0) *
         (parseFloat(material.quantity) || 0);
       return total + materialTotal;
     }, 0);
   };
 
   const calculateGrandTotal = () => {
-    return calculateTotalMaintenanceJob() + calculateTotalMaterials();
+    return parseFloat(serviceOrder.labor_cost) + calculateTotalMaterials();
   };
 
   const totalIsPaid = () => {
@@ -39,7 +33,7 @@ const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
   };
 
   return (
-    <div className="print-doc" id="printDoc" ref={componentRef}>
+    <div className="print-doc" id="printDoc">
       <div className="print-header">
         <div>
           <div className="print-logo">
@@ -140,26 +134,22 @@ const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
               <thead>
                 <tr>
                   <th className="print-mat-table-servico">Serviço</th>
-                  <th className="print-mat-table-mao-de-obra">Mão de obra</th>
                 </tr>
               </thead>
               <tbody>
                 {serviceOrder.itemMaintenances.map((element) => (
                   <tr key={element.id}>
                     <td>{element.maintenancejob.name || "—"}</td>
-                    <td className="print-mat-table-value-price">
-                      {formattedPrice(element.value_unity)}
-                    </td>
                   </tr>
                 ))}
 
-                {calculateTotalMaintenanceJob() > 0 ? (
+                {parseFloat(serviceOrder?.labor_cost) > 0 ? (
                   <tr className="print-mat-table-value-mao-de-obra-total-container">
                     <td className="print-mat-table-value-mao-de-obra-total-title">
                       Total mão de obra
                     </td>
                     <td className="print-mat-table-value-mao-de-obra-total">
-                      {formattedPrice(calculateTotalMaintenanceJob())}
+                      {formattedPrice(serviceOrder.labor_cost)}
                     </td>
                   </tr>
                 ) : (
@@ -199,13 +189,13 @@ const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
                       {element.quantity}
                     </td>
                     <td className="print-material-table-unit-value">
-                      {element.value_unity > 0
-                        ? formattedPrice(Number(element.value_unity))
+                      {element.value_unit > 0
+                        ? formattedPrice(Number(element.value_unit))
                         : "—"}
                     </td>
                     <td className="print-material-table-total">
                       {formattedPrice(
-                        Number(element.value_unity) * Number(element.quantity),
+                        Number(element.value_unit) * Number(element.quantity),
                       ) || 0}
                     </td>
                     <td className="print-material-table-supplier">
@@ -240,9 +230,7 @@ const ServiceOrderPrintBody = ({ componentRef, serviceOrder }) => {
           <div className="print-total-row">
             <span>Mão de obra</span>
             <span className="print-total-row-value">
-              {calculateTotalMaintenanceJob() > 0
-                ? formattedPrice(calculateTotalMaintenanceJob())
-                : formattedPrice(0)}
+              {formattedPrice(serviceOrder.labor_cost) ?? formattedPrice(0)}
             </span>
           </div>
           <div className="print-total-row">

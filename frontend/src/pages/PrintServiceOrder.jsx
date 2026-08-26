@@ -78,7 +78,7 @@ const PrintServiceOrder = () => {
             </svg>
             Voltar
           </button>
-          <button className="btn btn-secondary">
+          {/* <button className="btn btn-secondary">
             <svg
               fill="none"
               stroke="currentColor"
@@ -93,7 +93,7 @@ const PrintServiceOrder = () => {
               />
             </svg>
             Enviar WhatsApp
-          </button>
+          </button> */}
           <button className="btn btn-primary" onClick={handlePrint}>
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -107,11 +107,13 @@ const PrintServiceOrder = () => {
           </button>
         </div>
         <div className="print-doc" id="printDoc">
-          <ServiceOrderPrintBody
-            componentRef={componentRef}
-            serviceOrder={serviceOrder}
-          />
-          {/* <PrintableServiceOrder /> */}
+          <ServiceOrderPrintBody serviceOrder={serviceOrder} />
+          <div style={{ display: "none" }}>
+            <PrintableServiceOrder
+              componentRef={componentRef}
+              data={serviceOrder}
+            />
+          </div>
         </div>
       </div>
     </div>

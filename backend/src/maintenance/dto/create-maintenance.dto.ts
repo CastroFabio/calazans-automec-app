@@ -20,16 +20,6 @@ export class CreateMaintenanceDto {
   name: string;
 
   @ApiProperty({
-    description: 'Valor da manutenção',
-    example: '30.25',
-  })
-  @IsNumber()
-  @IsOptional()
-  @Min(0, { message: 'Valor unitário não pode ser negativo' })
-  @Type(() => Number)
-  value_unit: number;
-
-  @ApiProperty({
     description: 'ID do grupo de manutenção proprietário',
     example: 1,
     type: Number,
