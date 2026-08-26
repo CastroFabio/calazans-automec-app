@@ -152,8 +152,11 @@ const AddMaterialInMaintenace = ({
                         value={
                           element.value_unit && element.quantity
                             ? (
-                                parseFloat(element.value_unit) *
-                                parseFloat(element.quantity)
+                                parseFloat(
+                                  String(element.value_unit)
+                                    .replace(",", ".")
+                                    .replace(/[^0-9.]/g, ""),
+                                ) * parseFloat(element.quantity)
                               ).toFixed(2)
                             : "—"
                         }

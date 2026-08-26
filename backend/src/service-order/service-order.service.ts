@@ -74,7 +74,12 @@ export class ServiceOrderService {
           labor_cost: createServiceOrderDto.labor_cost,
           paid: createServiceOrderDto.paid,
         },
-        include: { customer: true, vehicle: true },
+        include: {
+          customer: true,
+          vehicle: true,
+          itemMaintenances: { include: { maintenancejob: true } },
+          itemMaterials: { include: { material: true } },
+        },
       });
 
       return serviceOrder;

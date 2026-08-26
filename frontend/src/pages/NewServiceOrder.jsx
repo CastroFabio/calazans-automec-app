@@ -281,13 +281,14 @@ const NewServiceOrder = () => {
       setLoading(true);
       setError(null);
 
-      // 1. Criar Service Order
-      const { data: serviceOrder } = await orderApi.create(serviceOrderData);
+      // 1. Criar Service Order principal
+      const { data: createdServiceOrder } =
+        await orderApi.create(serviceOrderData);
+      const serviceOrderId = createdServiceOrder.id;
 
-      addServiceOrder(serviceOrder);
-
-      const serviceOrderId = serviceOrder.id;
       const maintenanceIdMap = {};
+      let savedMaintenances = [];
+      let savedMaterials = [];
 
       // 2. Criar Item Maintenance
       if (listMaintenanceJobs.length > 0) {
@@ -300,10 +301,15 @@ const NewServiceOrder = () => {
         const { data: createdMaintenances } =
           await itemMaintenanceApi.createBatch(itemMaintenanceData);
 
-        if (Array.isArray(createdMaintenances.items)) {
+        // Armazena os itens criados retornados do backend
+        savedMaintenances =
+          createdMaintenances.items || createdMaintenances || [];
+
+        // Mapeia o ID temporário local para o ID gerado pelo backend
+        if (Array.isArray(savedMaintenances)) {
           listMaintenanceJobs.forEach((job, index) => {
-            if (createdMaintenances.items[index]) {
-              maintenanceIdMap[job.id] = createdMaintenances.items[index].id;
+            if (savedMaintenances[index]) {
+              maintenanceIdMap[job.id] = savedMaintenances[index].id;
             }
           });
         }
@@ -321,11 +327,22 @@ const NewServiceOrder = () => {
           supplier: item.supplier?.trim() || "",
         }));
 
-        console.log("itemMaterialData", itemMaterialData);
-
-        await itemMaterialApi.createBatch(itemMaterialData);
+        const { data: createdMaterials } =
+          await itemMaterialApi.createBatch(itemMaterialData);
+        savedMaterials = createdMaterials.items || createdMaterials || [];
       }
 
+      // 4. Montar a Service Order completa com as listas inseridas/geradas
+      const fullServiceOrder = {
+        ...createdServiceOrder,
+        itemMaintenances: savedMaintenances,
+        itemMaterials: savedMaterials,
+      };
+
+      // 5. Salvar localmente via Contexto
+      addServiceOrder(fullServiceOrder);
+
+      // Limpar formulários/listas locais
       setListMaintenanceJobs([]);
       setMaterialsList([]);
 
@@ -531,9 +548,9 @@ const NewServiceOrder = () => {
 
   const calculateTotalMaterials = () => {
     return materialsList.reduce((total, material) => {
-      const materialTotal =
-        (parseFloat(material.value_unit) || 0) * (material.quantity || 0);
-      return total + materialTotal;
+      const unitValue = parseValue(material.value_unit);
+      const quantity = parseFloat(material.quantity) || 0;
+      return total + unitValue * quantity;
     }, 0);
   };
 

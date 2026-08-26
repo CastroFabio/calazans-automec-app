@@ -293,12 +293,6 @@ const EditServiceOrder = () => {
         }),
       );
 
-      console.log("data", {
-        ...data,
-        itemMaintenances: updatedItemMaintenances,
-        itemMaterials: updatedItemMaterials,
-      });
-
       // 3. Monta o objeto atualizado com os dados vindos das APIs
       const updatedOrder = {
         ...serviceOrder,
