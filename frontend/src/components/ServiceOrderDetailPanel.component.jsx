@@ -55,8 +55,6 @@ const ServiceOrderDetailPanel = ({
 
   // ========== DESTRUTURAÇÃO COM FALLBACKS (Definidos antes de Hooks) ==========
 
-  console.log(selectedServiceOrder);
-
   const [order, setOrder] = useState(selectedServiceOrder || {});
   const customer = order.customer || {};
   const vehicle = order.vehicle || {};

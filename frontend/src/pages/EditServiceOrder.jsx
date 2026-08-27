@@ -229,7 +229,116 @@ const EditServiceOrder = () => {
   // ========== SALVAR ORDEM ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const errorList = [];
+
     if (!serviceOrder) return;
+
+    // 1. Cliente
+    if (!serviceOrder.customer_id) {
+      errorList.push("Selecione um cliente");
+    }
+
+    // 2. Veículo
+    if (!serviceOrder.vehicle_id) {
+      errorList.push("Selecione um veículo");
+    }
+
+    // 3. Diagnóstico
+    if (!serviceOrder.diagnosis?.trim()) {
+      errorList.push("Preencha o diagnóstico");
+    }
+
+    // 4. Pelo menos um serviço ou material
+    if (itemMaintenances.length <= 0) {
+      errorList.push("Adicione pelo menos um serviço");
+    }
+
+    if (!serviceOrder.labor_cost) {
+      errorList.push("Adicione um valor de mão de obra");
+    }
+
+    // ========== VALIDAÇÃO DE SERVIÇOS ==========
+
+    const invalidServices = itemMaintenances.filter((job) => {
+      if (!job.maintenance_id) return true;
+
+      return false;
+    });
+
+    if (invalidServices.length > 0) {
+      const errorMessages = invalidServices.map((job, index) => {
+        const errors = [];
+        if (!job.maintenance_id) errors.push("serviço não selecionado");
+        return `Serviço #${index + 1}: ${errors.join(" e ")}`;
+      });
+
+      errorList.push(`Serviços incompletos:\n${errorMessages.join("\n")}`);
+    }
+
+    // ========== VALIDAÇÃO DE MATERIAIS ==========
+
+    const invalidMaterials = itemMaterials.filter((item) => {
+      if (!item.material_id) return true;
+      const quantity = parseFloat(item.quantity) || 0;
+      if (quantity <= 0) return true;
+      const value = parseFloat(item.value_unit) || 0;
+      if (value <= 0) return true;
+      return false;
+    });
+
+    if (invalidMaterials.length > 0) {
+      const errorMessages = invalidMaterials.map((item, index) => {
+        const errors = [];
+        if (!item.material_id) errors.push("material não selecionado");
+        const quantity = parseFloat(item.quantity) || 0;
+        if (quantity <= 0) errors.push("quantidade inválida");
+        const value = parseValue(item.value_unit) || 0;
+        if (value <= 0) errors.push("valor inválido");
+        return `Material #${index + 1}: ${errors.join(" e ")}`;
+      });
+
+      errorList.push(`Materiais incompletos:\n${errorMessages.join("\n")}`);
+    }
+
+    // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
+
+    /*    const hasValidMaterial = materialsList.some((item) => {
+      const quantity = Number(item.quantity) || 0;
+      const value = parseFloat(item.value_unit) || 0;
+      return quantity > 0 && value > 0;
+    });
+
+    if (!hasValidMaterial) {
+      errorList.push("Adicione pelo menos um material com valor válido");
+    } */
+
+    // ========== VALIDAÇÃO DE NOMES ==========
+
+    const servicesWithoutName = itemMaintenances.filter((job) => {
+      job.maintenance_id && !job.name;
+    });
+
+    if (servicesWithoutName.length > 0) {
+      errorList.push(
+        "Alguns serviços não têm nome associado. Selecione novamente.",
+      );
+    }
+
+    const materialsWithoutName = itemMaterials.filter(
+      (item) => !item.material_id && !item.name,
+    );
+
+    if (materialsWithoutName.length > 0) {
+      errorList.push(
+        "Alguns materiais não têm nome associado. Selecione novamente.",
+      );
+    }
+
+    if (errorList.length > 0) {
+      alert(errorList.join("\n"));
+      return;
+    }
 
     setSaving(true);
     setError(null);
