@@ -13,6 +13,7 @@ import { itemMaintenanceApi } from "../api/itemMaintenance";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
+import ProfessionalSelect from "../components/ProfessionalSelect.component";
 
 const EditServiceOrder = () => {
   const { id } = useParams();
@@ -458,20 +459,10 @@ const EditServiceOrder = () => {
             </div>
             <div className="fs-body">
               <div className="form-grid g3 edit-order-form-grid-container">
-                <div className="field">
-                  <label>Técnico Responsável</label>
-                  <select
-                    className="select"
-                    value={serviceOrder.professional || ""}
-                    onChange={(e) =>
-                      handleFormFieldChange("professional", e.target.value)
-                    }
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="João Calazans">João Calazans</option>
-                    <option value="Waguinho">Waguinho</option>
-                  </select>
-                </div>
+                <ProfessionalSelect
+                  handleFormFieldChange={handleFormFieldChange}
+                  professional={serviceOrder.professional}
+                />
                 <div className="field">
                   <label>Status</label>
                   <select

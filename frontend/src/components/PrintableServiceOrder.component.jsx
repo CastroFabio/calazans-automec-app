@@ -294,31 +294,59 @@ export const PrintableServiceOrder = ({ data, componentRef }) => {
       <table className="data-table">
         <thead>
           <tr>
-            <th style={{ width: "8%" }} className="text-center">
+            <th style={{ width: "5%" }} className="text-center">
               #
             </th>
-            <th>Descrição do Serviço</th>
+            <th style={{ width: "28%" }}>Descrição do Serviço</th>
+            <th style={{ width: "5%" }} className="text-center">
+              #
+            </th>
+            <th style={{ width: "28%" }}>Descrição do Serviço</th>
+            <th style={{ width: "5%" }} className="text-center">
+              #
+            </th>
+            <th style={{ width: "28%" }}>Descrição do Serviço</th>
           </tr>
         </thead>
         <tbody>
-          {itemMaintenances.length > 0 ? (
-            itemMaintenances.map((serv, idx) => (
-              <tr key={serv.id || idx}>
-                <td className="text-center">{idx + 1}</td>
-                <td>{serv.maintenancejob.name || ""}</td>
+          {Array.from({ length: 5 }).map((_, rowIndex) => {
+            // Calcula os índices para as 3 colunas duplas da linha atual
+            const idx1 = rowIndex;
+            const idx2 = rowIndex + 5;
+            const idx3 = rowIndex + 10;
+
+            const item1 = itemMaintenances[idx1];
+            const item2 = itemMaintenances[idx2];
+            const item3 = itemMaintenances[idx3];
+
+            return (
+              <tr key={rowIndex}>
+                {/* Colunas 1 e 2 (Itens 1 a 5) */}
+                <td className="text-center">{item1 ? idx1 + 1 : "\u00A0"}</td>
+                <td>
+                  {item1
+                    ? item1.maintenancejob?.name || item1.description || ""
+                    : "\u00A0"}
+                </td>
+
+                {/* Colunas 3 e 4 (Itens 6 a 10) */}
+                <td className="text-center">{item2 ? idx2 + 1 : "\u00A0"}</td>
+                <td>
+                  {item2
+                    ? item2.maintenancejob?.name || item2.description || ""
+                    : "\u00A0"}
+                </td>
+
+                {/* Colunas 5 e 6 (Itens 11 a 15) */}
+                <td className="text-center">{item3 ? idx3 + 1 : "\u00A0"}</td>
+                <td>
+                  {item3
+                    ? item3.maintenancejob?.name || item3.description || ""
+                    : "\u00A0"}
+                </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="2"
-                className="text-center"
-                style={{ fontStyle: "italic", color: "#666" }}
-              >
-                Nenhum serviço informado.
-              </td>
-            </tr>
-          )}
+            );
+          })}
         </tbody>
       </table>
 

@@ -19,20 +19,10 @@ const NewOrderInfo = ({ handleFormFieldChange, formData }) => {
       </div>
       <div className="fs-body">
         <div className="form-grid g3">
-          <div className="field">
-            <label>Técnico Responsável</label>
-            <select
-              className="select"
-              value={formData.professional}
-              onChange={(e) =>
-                handleFormFieldChange("professional", e.target.value)
-              }
-            >
-              <option value="">Selecione...</option>
-              <option value="João Calazans">João Calazans</option>
-              <option value="Waguinho">Waguinho</option>
-            </select>
-          </div>
+          <ProfessionalSelect
+            handleFormFieldChange={handleFormFieldChange}
+            professional={formData.professional}
+          />
           {/* <div className="field">
             <label>Prioridade</label>
             <select
