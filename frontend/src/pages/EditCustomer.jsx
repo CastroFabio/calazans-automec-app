@@ -19,6 +19,8 @@ const EditCustomer = () => {
     license_plate: "",
     brand: "",
     model: "",
+    year: "",
+    color: "",
   });
   const [vehicleSaving, setVehicleSaving] = useState(false);
 
@@ -150,6 +152,8 @@ const EditCustomer = () => {
       license_plate: vehicle.license_plate || "",
       brand: vehicle.brand || "",
       model: vehicle.model || "",
+      color: vehicle.color || "",
+      year: vehicle.year || "",
     });
   };
 
@@ -161,6 +165,8 @@ const EditCustomer = () => {
       license_plate: "",
       brand: "",
       model: "",
+      year: "",
+      color: "",
     });
     setVehicleSaving(false);
   };
@@ -181,6 +187,8 @@ const EditCustomer = () => {
         license_plate: editingVehicleData.license_plate.trim().toUpperCase(),
         brand: editingVehicleData.brand.trim() || null,
         model: editingVehicleData.model.trim() || null,
+        year: Number(editingVehicleData.year.trim()) || null,
+        color: editingVehicleData.color.trim() || null,
         customer_id: customer.id,
       };
 
@@ -363,7 +371,7 @@ const EditCustomer = () => {
                     className="textarea"
                     id="ecObs"
                     placeholder="Notas sobre o cliente..."
-                    value={customer.observation}
+                    value={customer.observation || ""}
                     onChange={(e) =>
                       handleFormFieldChange("observation", e.target.value)
                     }
@@ -463,6 +471,40 @@ const EditCustomer = () => {
                           }
                           onChange={(e) =>
                             handleVehicleChange("model", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label>Cor</label>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="Prata, Branco..."
+                          disabled={!isEditingThis || vehicleSaving}
+                          value={
+                            isEditingThis
+                              ? editingVehicleData.color
+                              : element.color || ""
+                          }
+                          onChange={(e) =>
+                            handleVehicleChange("color", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="field">
+                        <label>Ano</label>
+                        <input
+                          type="text"
+                          className="input"
+                          placeholder="2013,2014..."
+                          disabled={!isEditingThis || vehicleSaving}
+                          value={
+                            isEditingThis
+                              ? editingVehicleData.year
+                              : element.year || ""
+                          }
+                          onChange={(e) =>
+                            handleVehicleChange("year", e.target.value)
                           }
                         />
                       </div>

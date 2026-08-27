@@ -55,6 +55,8 @@ const ServiceOrderDetailPanel = ({
 
   // ========== DESTRUTURAÇÃO COM FALLBACKS (Definidos antes de Hooks) ==========
 
+  console.log(selectedServiceOrder);
+
   const [order, setOrder] = useState(selectedServiceOrder || {});
   const customer = order.customer || {};
   const vehicle = order.vehicle || {};
@@ -197,7 +199,11 @@ const ServiceOrderDetailPanel = ({
             </div>
             <div className="sp-section">
               <div className="sp-label">Cor</div>
-              <div className="sp-value">—</div>
+              <div className="sp-value">{vehicle.color || "—"}</div>
+            </div>
+            <div className="sp-section">
+              <div className="sp-label">Ano</div>
+              <div className="sp-value">{vehicle.year || "—"}</div>
             </div>
             <div className="sp-section">
               <div className="sp-label">Km Entrada</div>

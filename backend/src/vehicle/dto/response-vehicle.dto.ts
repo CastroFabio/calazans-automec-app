@@ -30,11 +30,25 @@ export class VehicleResponseDto {
   brand: string | null;
 
   @ApiProperty({
+    description: 'Cor do veículo',
+    example: 'Prata',
+    nullable: true,
+  })
+  color: string | null;
+
+  @ApiProperty({
     description: 'Modelo do veículo',
     example: 'Corolla',
     nullable: true,
   })
   model: string | null;
+
+  @ApiProperty({
+    description: 'Ano do veículo',
+    example: 2012,
+    nullable: true,
+  })
+  year: number | null;
 
   @ApiProperty({
     description: 'ID do cliente proprietário',

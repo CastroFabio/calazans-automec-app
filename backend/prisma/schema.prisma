@@ -25,6 +25,8 @@ model Vehicle {
   license_plate String   @unique @db.Text
   brand         String?  @db.Text
   model         String?  @db.Text
+  year          Int?
+  color         String?  @db.Text
   customer_id   Int?
 
   // Relacionamentos

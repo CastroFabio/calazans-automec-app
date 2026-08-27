@@ -42,6 +42,8 @@ export class VehicleService {
           license_plate: createVehicleDto.license_plate,
           brand: createVehicleDto.brand || null,
           model: createVehicleDto.model || null,
+          color: createVehicleDto.color || null,
+          year: createVehicleDto.year || null,
           customer_id: createVehicleDto.customer_id || null,
         },
         include: {
@@ -170,6 +172,8 @@ export class VehicleService {
           license_plate: updateVehicleDto.license_plate,
           brand: updateVehicleDto.brand,
           model: updateVehicleDto.model,
+          year: updateVehicleDto.year,
+          color: updateVehicleDto.color,
           customer_id: updateVehicleDto.customer_id,
         },
         include: {

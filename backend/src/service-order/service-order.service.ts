@@ -100,9 +100,7 @@ export class ServiceOrderService {
       orderBy: { created_at: 'desc' },
       include: {
         customer: { select: { id: true, name: true } },
-        vehicle: {
-          select: { id: true, license_plate: true, brand: true, model: true },
-        },
+        vehicle: true,
         itemMaintenances: {
           include: { maintenancejob: { select: { id: true, name: true } } },
         },

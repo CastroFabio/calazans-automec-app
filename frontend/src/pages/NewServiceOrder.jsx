@@ -23,6 +23,7 @@ import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useCustomers } from "../context/Customer.context";
 import InputPriceValue from "../components/InputPriceValue";
 import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
+import { formatarCelular } from "../utils/convertCel";
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -170,8 +171,8 @@ const NewServiceOrder = () => {
     }
 
     // 4. Pelo menos um serviço ou material
-    if (listMaintenanceJobs.length === 0 && materialsList.length === 0) {
-      errorList.push("Adicione pelo menos um serviço ou material");
+    if (listMaintenanceJobs.length <= 0) {
+      errorList.push("Adicione pelo menos um serviço");
     }
 
     if (!formData.labor_cost) {
@@ -223,17 +224,15 @@ const NewServiceOrder = () => {
 
     // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
 
-    const hasValidMaterial = materialsList.some((item) => {
-      const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unit) || 0;
+    /*    const hasValidMaterial = materialsList.some((item) => {
+      const quantity = Number(item.quantity) || 0;
+      const value = parseFloat(item.value_unit) || 0;
       return quantity > 0 && value > 0;
     });
 
     if (!hasValidMaterial) {
-      errorList.push(
-        "Adicione pelo menos um serviço ou material com valor válido",
-      );
-    }
+      errorList.push("Adicione pelo menos um material com valor válido");
+    } */
 
     // ========== VALIDAÇÃO DE NOMES ==========
 
@@ -496,15 +495,17 @@ const NewServiceOrder = () => {
     setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
   };
 
-const handleRemoveMaintenanceJob = (id) => {
-  // 1. Remove a manutenção selecionada
-  setListMaintenanceJobs((prev) => prev.filter((element) => element.id !== id));
+  const handleRemoveMaintenanceJob = (id) => {
+    // 1. Remove a manutenção selecionada
+    setListMaintenanceJobs((prev) =>
+      prev.filter((element) => element.id !== id),
+    );
 
-  // 2. Remove todos os materiais vinculados a essa manutenção
-  setMaterialsList((prev) =>
-    prev.filter((material) => material.itemMaintenance_id !== id)
-  );
-};
+    // 2. Remove todos os materiais vinculados a essa manutenção
+    setMaterialsList((prev) =>
+      prev.filter((material) => material.itemMaintenance_id !== id),
+    );
+  };
 
   // NewOrderMaterial
   const handleAddMaterial = (itemMaintenanceId = null) => {
@@ -684,11 +685,16 @@ const handleRemoveMaintenanceJob = (id) => {
                         <div
                           key={index}
                           className="ac-option"
-                          onClick={() => handleSuggestionClick(element)}
+                          onClick={() => {
+                            handleSuggestionClick(element);
+                            element.vehicles.length === 1
+                              ? handleSelectedVehicle(element.vehicles[0])
+                              : null;
+                          }}
                         >
                           <div className="ac-option-name">{element.name}</div>
                           <div className="ac-option-sub">
-                            {`${element.cell} · ${element.vehicles.length}  veículo(s) `}
+                            {`${formatarCelular(element.cell)} · ${element.vehicles.length}  veículo(s) `}
                           </div>
                         </div>
                       ))
@@ -719,15 +725,9 @@ const handleRemoveMaintenanceJob = (id) => {
                 <label>Veículo *</label>
                 <div className="car-badge-row">
                   {selectedCustomerInfo ? (
-                    selectedCustomerInfo.vehicles.length > 0 ? (
-                      selectedCustomerInfo.vehicles.map((element, index) => (
-                        <div
-                          className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
-                          key={index}
-                          onClick={() => {
-                            handleSelectedVehicle(element);
-                          }}
-                        >
+                    selectedCustomerInfo?.vehicles?.length > 0 ? (
+                      selectedCustomerInfo?.vehicles?.length === 1 ? (
+                        <div className={`car-badge selected`}>
                           <svg
                             className="car-badge-svg"
                             fill="none"
@@ -741,9 +741,34 @@ const handleRemoveMaintenanceJob = (id) => {
                               d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
                             />
                           </svg>
-                          {`${element.license_plate} · ${element.brand} ${element.model}`}
+                          {`${selectedCustomerInfo?.vehicles[0].license_plate} · ${selectedCustomerInfo?.vehicles[0].brand} ${selectedCustomerInfo?.vehicles[0].model}`}
                         </div>
-                      ))
+                      ) : (
+                        selectedCustomerInfo.vehicles.map((element, index) => (
+                          <div
+                            className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
+                            key={index}
+                            onClick={() => {
+                              handleSelectedVehicle(element);
+                            }}
+                          >
+                            <svg
+                              className="car-badge-svg"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
+                              />
+                            </svg>
+                            {`${element.license_plate} · ${element.brand} ${element.model}`}
+                          </div>
+                        ))
+                      )
                     ) : (
                       <>
                         <span className="car-badge-row-text-no-car">

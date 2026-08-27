@@ -2486,6 +2486,7 @@
   background: var(--ink) !important;
   color: #fff !important;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .car-tag-model {

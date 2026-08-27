@@ -1,12 +1,9 @@
-import React from "react";
 import { formattedPrice } from "../utils/convertPrice";
 import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
-import {
-  formatLocalDateTime,
-  formatLocalDateTimeStringISO,
-} from "../utils/convertDateTime";
+import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import VehicleBadge from "./VehicleBadge.component";
+import { formatarCelular } from "../utils/convertCel";
 
 const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
   const sumTotalValueServiceOrder = () => {
@@ -112,10 +109,15 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                 {selectedCustomer.name}
               </div>
               <div className="client-panel-avatar-sub" id="cpSub">
-                {`Tel: ${selectedCustomer.telephone} · Cel: ${selectedCustomer.cell} · `}
+                {`Cel: ${formatarCelular(selectedCustomer.cell)}`}
+                {selectedCustomer.telephone ? (
+                  <>{` · Tel: ${formatarCelular(selectedCustomer.telephone)}`}</>
+                ) : (
+                  ""
+                )}
                 {selectedCustomer.observation ? (
                   <span className="client-panel-observation">
-                    {selectedCustomer.observation}
+                    {` · ${selectedCustomer.observation}`}
                   </span>
                 ) : (
                   ""
@@ -161,7 +163,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                       <div className="car-detail-card-margin-bottom">
                         <VehicleBadge vehicle={element} />
                       </div>
-                      <div className="car-tag-color">Cinza</div>
+                      <div className="car-tag-color">{`${element.color}  ·  ${element.year}`}</div>
                     </div>
                     <span className="badge badge-pri-normal car-tag-badge">
                       {`
@@ -225,7 +227,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
             ))}
           </div>
         </div>
-        <div className="sp-footer">
+        {/* <div className="sp-footer">
           <button className="btn btn-secondary">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -251,7 +253,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
             </svg>
             Nova OS para este cliente
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

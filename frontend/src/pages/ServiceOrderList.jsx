@@ -25,13 +25,8 @@ const TABS = [
 
 const ServiceOrderList = () => {
   // ========== CONTEXTO ==========
-  const {
-    serviceOrders,
-    fetchServiceOrders,
-    loading,
-    error,
-    updateServiceOrder,
-  } = useServiceOrders();
+  const { serviceOrders, fetchServiceOrders, loading, error } =
+    useServiceOrders();
 
   // ========== ESTADOS LOCAIS ==========
   const [searchTerm, setSearchTerm] = useState("");

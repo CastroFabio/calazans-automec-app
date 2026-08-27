@@ -6,6 +6,7 @@ import {
   IsPositive,
   MinLength,
   MaxLength,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -38,6 +39,24 @@ export class CreateVehicleDto {
   @IsOptional()
   @IsString({ message: 'Modelo deve ser uma string' })
   model?: string;
+
+  @ApiPropertyOptional({
+    description: 'Cor do veículo',
+    example: 'Prata',
+  })
+  @IsOptional()
+  @IsString({ message: 'Cor deve ser uma string' })
+  color?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ano do veículo',
+    example: 2012,
+    type: Number,
+  })
+  @IsOptional()
+  @IsPositive({ message: 'ID do cliente deve ser um número positivo' })
+  @IsInt({ message: 'Ano deve ser uma string' })
+  year?: number;
 
   @ApiPropertyOptional({
     description: 'ID do cliente proprietário',

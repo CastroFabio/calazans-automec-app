@@ -37,10 +37,17 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
       return;
     }
 
+    if (!Number(formData.year.trim())) {
+      setError("Ano deve ser número.");
+      return;
+    }
+
     const vehicleData = {
       customer_id: selectedCustomer.id,
       brand: formData.brand.trim(),
       model: formData.model.trim(),
+      color: formData.color.trim(),
+      year: Number(formData.year.trim()),
       license_plate: formData.license_plate.trim(),
     };
 
@@ -159,19 +166,26 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
                 onChange={(e) => handleFormFieldChange("model", e.target.value)}
               />
             </div>
-
-            {/* <div className="field">
+            <div className="field">
               <label>Cor</label>
-              <input type="text" className="input" placeholder="Prata" />
-            </div> */}
-
-            {/* <div className="field col-full">
-              <label>Observações do Veículo</label>
-              <textarea
-                className="textarea modal-container-vehicle-textarea"
-                placeholder="Histórico, modificações, particularidades..."
-              ></textarea>
-            </div> */}
+              <input
+                type="text"
+                className="input"
+                placeholder="Ex: Prata"
+                value={formData.color || ""}
+                onChange={(e) => handleFormFieldChange("color", e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>Ano</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Ex: 2014"
+                value={formData.year || ""}
+                onChange={(e) => handleFormFieldChange("year", e.target.value)}
+              />
+            </div>
           </div>
         </div>
         <div className="modal-footer">
