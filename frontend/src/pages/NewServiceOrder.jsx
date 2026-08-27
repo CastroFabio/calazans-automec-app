@@ -496,11 +496,15 @@ const NewServiceOrder = () => {
     setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
   };
 
-  const handleRemoveMaintenanceJob = (id) => {
-    setListMaintenanceJobs(
-      listMaintenanceJobs.filter((element) => element.id !== id),
-    );
-  };
+const handleRemoveMaintenanceJob = (id) => {
+  // 1. Remove a manutenção selecionada
+  setListMaintenanceJobs((prev) => prev.filter((element) => element.id !== id));
+
+  // 2. Remove todos os materiais vinculados a essa manutenção
+  setMaterialsList((prev) =>
+    prev.filter((material) => material.itemMaintenance_id !== id)
+  );
+};
 
   // NewOrderMaterial
   const handleAddMaterial = (itemMaintenanceId = null) => {
