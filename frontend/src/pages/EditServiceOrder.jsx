@@ -28,6 +28,8 @@ const EditServiceOrder = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [payment, setPayment] = useState("");
+  const [deletedMaterialIds, setDeletedMaterialIds] = useState([]);
+  const [deletedMaintenanceIds, setDeletedMaintenanceIds] = useState([]);
 
   // Estados para serviços (itemMaintenances)
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
@@ -64,7 +66,6 @@ const EditServiceOrder = () => {
         setServiceOrder(data);
         setItemMaintenances(data.itemMaintenances || []);
         setItemMaterials(data.itemMaterials || []);
-        setPayment(data.paid);
 
         // 2. Buscar grupos de serviços (para o select)
         const { data: maintenanceData } = await maintenanceGroupApi.getAll();
@@ -108,7 +109,27 @@ const EditServiceOrder = () => {
   };
 
   const handleRemoveMaintenanceJob = (id) => {
-    setItemMaintenances(itemMaintenances.filter((item) => item.id !== id));
+    // Se for um serviço já salvo no banco, guarda o ID para remover na API
+    if (id <= 1000000) {
+      setDeletedMaintenanceIds((prev) => [...prev, id]);
+    }
+
+    // Remove também todos os materiais associados a este serviço localmente (e do banco se já existiam)
+    const materialsToRemove = itemMaterials.filter(
+      (mat) => mat.itemMaintenance_id === id,
+    );
+
+    materialsToRemove.forEach((mat) => {
+      if (mat.id <= 1000000) {
+        setDeletedMaterialIds((prev) => [...prev, mat.id]);
+      }
+    });
+
+    // Remove do estado local da tela
+    setItemMaterials((prev) =>
+      prev.filter((mat) => mat.itemMaintenance_id !== id),
+    );
+    setItemMaintenances((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleMaintenanceJobChange = (
@@ -170,7 +191,13 @@ const EditServiceOrder = () => {
   };
 
   const handleRemoveMaterial = (id) => {
-    setItemMaterials(itemMaterials.filter((item) => item.id !== id));
+    // Se for um item já persistido no banco (ID normal), guarda para deletar na API
+    if (id <= 1000000) {
+      setDeletedMaterialIds((prev) => [...prev, id]);
+    }
+
+    // Remove do estado local da tela
+    setItemMaterials((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleMaterialInputChange = (id, field, value, materialGroupData) => {
@@ -226,6 +253,23 @@ const EditServiceOrder = () => {
   };
 
   // ========== SALVAR ORDEM ==========
+
+  const handlePaymentOnChange = (e) => {
+    let value = e.target.value;
+    value = value.replace(",", ".");
+    value = value.replace(/[^0-9.]/g, "");
+    const parts = value.split(".");
+
+    if (parts.length > 2) {
+      value = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    if (parts[1] && parts[1].length > 2) {
+      value = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    setPayment(value);
+  };
   // ========== SALVAR ORDEM ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -431,6 +475,22 @@ const EditServiceOrder = () => {
         itemMaterials: updatedItemMaterials,
       };
 
+      // Excluir materiais do backend
+      if (deletedMaterialIds.length > 0) {
+        await Promise.all(
+          deletedMaterialIds.map((id) => itemMaterialApi.delete(id)),
+        );
+        setDeletedMaterialIds([]);
+      }
+
+      // Excluir serviços (itemMaintenances) do backend
+      if (deletedMaintenanceIds.length > 0) {
+        await Promise.all(
+          deletedMaintenanceIds.map((id) => itemMaintenanceApi.delete(id)),
+        );
+        setDeletedMaintenanceIds([]);
+      }
+
       updateServiceOrder(updatedOrder);
       navigate("/");
     } catch (err) {
@@ -449,13 +509,72 @@ const EditServiceOrder = () => {
     setError(null);
 
     try {
-      const updateData = { paid: Number(payment) };
+      // Trata e converte para número
+      const formattedPayment = payment.replace(",", ".");
+      const numericPayment = parseValue(formattedPayment);
+
+      const updateData = { paid: numericPayment };
       const { data } = await orderApi.update(serviceOrder.id, updateData);
       const updatedOrder = { ...serviceOrder, ...data };
       updateServiceOrder(updatedOrder);
+
+      // Opcional: limpa o campo após registrar o pagamento
+      setPayment("");
     } catch (err) {
       console.error("❌ Erro:", err);
       setError(err.response?.data?.message || "Erro ao atualizar ordem");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSetPayment = async (e) => {
+    e.preventDefault();
+    if (!serviceOrder || !payment) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const numericPayment = parseValue(payment);
+      const updateData = { paid: numericPayment };
+
+      const { data } = await orderApi.update(serviceOrder.id, updateData);
+      const updatedOrder = { ...serviceOrder, ...data };
+      updateServiceOrder(updatedOrder);
+
+      setPayment(""); // Limpa o input após a gravação
+    } catch (err) {
+      console.error("❌ Erro:", err);
+      setError(err.response?.data?.message || "Erro ao atualizar ordem");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Soma o valor digitado ao valor que já foi pago anteriormente
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    if (!serviceOrder || !payment) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const currentPaid = parseValue(serviceOrder.paid);
+      const addedValue = parseValue(payment);
+      const newTotalPaid = currentPaid + addedValue;
+
+      const updateData = { paid: newTotalPaid };
+
+      const { data } = await orderApi.update(serviceOrder.id, updateData);
+      const updatedOrder = { ...serviceOrder, ...data };
+      updateServiceOrder(updatedOrder);
+
+      setPayment(""); // Limpa o input após a gravação
+    } catch (err) {
+      console.error("❌ Erro:", err);
+      setError(err.response?.data?.message || "Erro ao adicionar pagamento");
     } finally {
       setSaving(false);
     }
@@ -688,12 +807,12 @@ const EditServiceOrder = () => {
                   </span>
                   <span
                     className={`payment-row-saldo-restante-value ${
-                      Number(serviceOrder.paid) >= calculateGrandTotal()
+                      parseValue(serviceOrder.paid) >= calculateGrandTotal()
                         ? "payment-saldo-ok"
                         : "payment-saldo-due"
                     }`}
                   >
-                    {Number(serviceOrder.paid) >= calculateGrandTotal()
+                    {parseValue(serviceOrder.paid) >= calculateGrandTotal()
                       ? "Quitado"
                       : formattedPrice(
                           calculateGrandTotal() - serviceOrder.paid,
@@ -705,7 +824,14 @@ const EditServiceOrder = () => {
                 <div className="status-card-body-container-registrar-pagamento-text">
                   Registrar pagamento
                 </div>
-                <div className="status-card-body-container-registrar-pagamento-input-container">
+                <div
+                  className="status-card-body-container-registrar-pagamento-input-container"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   <div className="status-card-body-registrar-pagamento-input-container input-prefix">
                     <span>R$</span>
                     <input
@@ -713,15 +839,30 @@ const EditServiceOrder = () => {
                       className="input status-card-body-registrar-pagamento-input"
                       placeholder="0,00"
                       value={payment}
-                      onChange={(e) => setPayment(e.target.value)}
+                      onChange={handlePaymentOnChange}
                     />
                   </div>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSubmitPayment}
-                  >
-                    Registrar
-                  </button>
+
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ flex: 1 }}
+                      onClick={handleAddPayment}
+                      disabled={saving || !payment}
+                    >
+                      Adicionar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      style={{ flex: 1 }}
+                      onClick={handleSetPayment}
+                      disabled={saving || !payment}
+                    >
+                      Registrar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

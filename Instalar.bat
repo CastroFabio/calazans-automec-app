@@ -7,43 +7,36 @@ echo    INSTALANDO SISTEMA CALAZANS AUTOMEC
 echo ========================================
 echo.
 
-echo [1/5] Instalando PM2 globalmente...
+echo [1/6] Instalando PM2 globalmente...
 call npm install -g pm2
 
 echo.
-echo [2/5] Configurando Backend...
+echo [2/6] Instalando dependências do Backend...
 cd /d "%~dp0backend"
 call npm install
 
-if not exist .env (
-    echo Criando .env do Backend...
-    echo DATABASE_URL="postgresql://postgres:123@localhost:5432/calazans_automec_db?schema=public" > .env
-)
-
 echo.
-echo [3/5] Aplicando Migrations e compilando Backend...
+echo [3/6] Gerando cliente Prisma e aplicando Migrations...
 call npx prisma generate
 call npx prisma migrate deploy
+
+echo.
+echo [4/6] Compilando o Backend...
 call npm run build
 
 echo.
-echo [4/5] Configurando Frontend...
+echo [5/6] Instalando dependências do Frontend...
 cd /d "%~dp0frontend"
 call npm install
 
-if not exist .env (
-    echo Criando .env do Frontend...
-    echo VITE_API_URL=http://localhost:3000/ > .env
-)
-
 echo.
-echo [5/5] Gerando Build do Frontend...
+echo [6/6] Buildando o Frontend...
 call npm run build
 
 echo.
 echo ========================================
 echo    INSTALAÇÃO CONCLUÍDA COM SUCESSO!
-echo    Agora execute Iniciar app.bat
+echo    Agora execute INICIAR.bat
 echo ========================================
 echo.
 pause
