@@ -226,6 +226,7 @@ const EditServiceOrder = () => {
   };
 
   // ========== SALVAR ORDEM ==========
+  // ========== SALVAR ORDEM ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!serviceOrder) return;
@@ -247,6 +248,9 @@ const EditServiceOrder = () => {
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
 
+      // Mapeador para associar IDs temporários/antigos aos novos IDs do Backend
+      const maintenanceIdMap = {};
+
       // 1. Processa e atualiza a lista de Manutenções/Serviços
       const updatedItemMaintenances = await Promise.all(
         itemMaintenances.map(async (item) => {
@@ -261,9 +265,17 @@ const EditServiceOrder = () => {
             // Recebe o item criado pelo Backend (com o ID definitivo gerado)
             const { data: createdItem } =
               await itemMaintenanceApi.create(payload);
+
+            // Mapeia o ID temporário (item.id) para o ID real retornado (createdItem.id)
+            maintenanceIdMap[item.id] = createdItem.id;
+
             return createdItem;
           } else {
             await itemMaintenanceApi.update(item.id, payload);
+
+            // Mantém o próprio ID existente no mapa para fallback
+            maintenanceIdMap[item.id] = item.id;
+
             return item;
           }
         }),
@@ -273,10 +285,17 @@ const EditServiceOrder = () => {
       const updatedItemMaterials = await Promise.all(
         itemMaterials.map(async (item) => {
           const isNew = item.id > 1000000;
+
+          // Resolve o itemMaintenance_id real usando o mapeamento
+          const resolvedMaintenanceId =
+            maintenanceIdMap[item.itemMaintenance_id] ||
+            item.itemMaintenance_id ||
+            null;
+
           const payload = {
             serviceorder_id: serviceOrder.id,
             material_id: item.material_id,
-            itemMaintenance_id: item.itemMaintenance_id,
+            itemMaintenance_id: resolvedMaintenanceId,
             quantity: parseValue(item.quantity),
             value_unit: parseValue(item.value_unit),
             receipt: item.receipt || "",
