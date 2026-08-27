@@ -9,6 +9,7 @@ import { useServiceOrders } from "../context/ServiceOrder.context";
 import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
 import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
+import VehicleBadge from "../components/VehicleBadge.component";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
@@ -187,14 +188,7 @@ const ServiceOrderList = () => {
                     </div>
                     <div className="os-table-vehicle-info">
                       {order.vehicle ? (
-                        <span className="car-tag-group">
-                          <span className="svc-tag car-tag-placa">
-                            {order.vehicle.license_plate}
-                          </span>
-                          <span className="svc-tag car-tag-model">
-                            {order.vehicle.brand} {order.vehicle.model}
-                          </span>
-                        </span>
+                        <VehicleBadge vehicle={order.vehicle} />
                       ) : (
                         "—"
                       )}

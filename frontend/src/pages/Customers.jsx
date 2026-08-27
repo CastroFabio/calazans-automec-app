@@ -5,6 +5,7 @@ import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { useCustomers } from "../context/Customer.context";
 import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useNavigate } from "react-router-dom";
+import VehicleBadge from "../components/VehicleBadge.component";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -229,15 +230,8 @@ const Customers = () => {
               <div className="client-footer">
                 <div className="client-vehicle-tags">
                   {element._count.vehicles > 0
-                    ? element.vehicles.map((car, index) => (
-                        <span className="car-tag-group" key={index}>
-                          <span className="svc-tag car-tag-placa">
-                            {car.license_plate}
-                          </span>
-                          <span className="svc-tag car-tag-model">
-                            {car.brand} {car.model}
-                          </span>
-                        </span>
+                    ? element.vehicles.map((vehicle, index) => (
+                        <VehicleBadge vehicle={vehicle} key={index} />
                       ))
                     : ""}
                 </div>

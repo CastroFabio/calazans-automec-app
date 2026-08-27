@@ -1,16 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  statusMap,
-  statusReverseMap,
-  statusReverseMapBadge,
-} from "../utils/statusMap";
+import { statusMap } from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { orderApi } from "../api/orders";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import StatusBadge from "./StatusBadge.component";
+import VehicleBadge from "./VehicleBadge.component";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -192,14 +189,7 @@ const ServiceOrderDetailPanel = ({
               <div className="sp-label">Veículo</div>
               <div className="sp-value">
                 {vehicle.license_plate ? (
-                  <span className="car-tag-group">
-                    <span className="svc-tag car-tag-placa">
-                      {vehicle.license_plate}
-                    </span>
-                    <span className="svc-tag car-tag-model">
-                      {vehicle.brand} {vehicle.model}
-                    </span>
-                  </span>
+                  <VehicleBadge vehicle={vehicle} />
                 ) : (
                   "—"
                 )}

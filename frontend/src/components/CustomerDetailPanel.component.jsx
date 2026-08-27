@@ -6,11 +6,12 @@ import {
   formatLocalDateTime,
   formatLocalDateTimeStringISO,
 } from "../utils/convertDateTime";
+import VehicleBadge from "./VehicleBadge.component";
 
 const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
   const sumTotalValueServiceOrder = () => {
     const total = selectedCustomer.serviceOrders.reduce(
-      (sum, current) => sum + current.subtotal,
+      (sum, current) => sum + parseFloat(current.subtotal),
       0,
     );
 
@@ -158,14 +159,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                   <div className="car-detail-card-container">
                     <div className="car-detail-card-container-flex">
                       <div className="car-detail-card-margin-bottom">
-                        <span className="car-tag-group">
-                          <span className="svc-tag car-tag-placa">
-                            {element.license_plate}
-                          </span>
-                          <span className="svc-tag car-tag-model">
-                            {`${element.brand} ${element.model}`}
-                          </span>
-                        </span>
+                        <VehicleBadge vehicle={element} />
                       </div>
                       <div className="car-tag-color">Cinza</div>
                     </div>

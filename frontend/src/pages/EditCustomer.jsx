@@ -6,6 +6,7 @@ import NewVehicleModal from "../components/NewVehicleModal.component";
 import { vehicleApi } from "../api/vehicle";
 import { statusReverseMap } from "../utils/statusMap";
 import { formattedPrice } from "../utils/convertPrice";
+import VehicleBadge from "../components/VehicleBadge.component";
 
 const EditCustomer = () => {
   const [customer, setCustomer] = useState(null);
@@ -401,14 +402,7 @@ const EditCustomer = () => {
                     <div className="ec-car-card-header">
                       <div className="ec-car-num">{index + 1}</div>
                       <div className="ec-car-label">
-                        <span className="car-tag-group">
-                          <span className="svc-tag car-tag-placa">
-                            {element.license_plate}
-                          </span>
-                          <span className="svc-tag car-tag-model">
-                            {element.brand} {element.model}
-                          </span>
-                        </span>
+                        <VehicleBadge vehicle={element} />
                       </div>
                       <button
                         className="btn btn-sm btn-danger ec-car-btn"
@@ -571,14 +565,7 @@ const EditCustomer = () => {
                       {formattedServiceOrderTitle(element)}
                     </div>
                     <div className="ec-car-label">
-                      <span className="car-tag-group">
-                        <span className="svc-tag car-tag-placa">
-                          {element.vehicle.license_plate}
-                        </span>
-                        <span className="svc-tag car-tag-model">
-                          {element.vehicle.brand} {element.vehicle.model}
-                        </span>
-                      </span>
+                      <VehicleBadge vehicle={element.vehicle} />
                     </div>
                   </div>
                   <div className="os-mini-val">
