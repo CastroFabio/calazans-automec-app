@@ -8,6 +8,7 @@ import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.compo
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
 import Loading from "./Loading";
+import StatusBadge from "../components/StatusBadge.component";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
@@ -224,11 +225,7 @@ const ServiceOrderList = () => {
                   </td>
 
                   <td>
-                    <span
-                      className={`badge badge-${statusReverseMapBadge[order.status] || "default"}`}
-                    >
-                      {statusReverseMap[order.status]}
-                    </span>
+                    <StatusBadge status={order.status} />
                   </td>
                   <td className="td-value">{formattedPrice(order.subtotal)}</td>
                   <td className="td-date">

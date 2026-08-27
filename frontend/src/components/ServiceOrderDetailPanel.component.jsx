@@ -10,6 +10,7 @@ import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { orderApi } from "../api/orders";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import StatusBadge from "./StatusBadge.component";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -171,11 +172,7 @@ const ServiceOrderDetailPanel = ({
               {formatServiceOrderTitle(order)}
             </div>
             <div className="sp-header-badges" id="spBadges">
-              <span
-                className={`badge badge-${statusReverseMapBadge[order.status] || "pending "}`}
-              >
-                {statusReverseMap[order.status] || "Desconhecido"}
-              </span>
+              <StatusBadge status={order.status} />
             </div>
           </div>
           <button className="sp-close" onClick={onClose}>

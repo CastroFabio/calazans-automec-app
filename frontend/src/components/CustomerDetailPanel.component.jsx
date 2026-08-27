@@ -28,14 +28,14 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
 
     // Calcular o subtotal total
     const total = vehicleOrders.reduce(
-      (sum, order) => sum + (order.subtotal || 0),
+      (sum, order) => sum + (parseFloat(order.subtotal) || 0),
       0,
     );
 
     // Detalhes adicionais
     return {
       vehicleId,
-      total: total.toFixed(2),
+      total: total,
       totalNumber: total,
       count: vehicleOrders.length,
       orders: vehicleOrders,
@@ -65,7 +65,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
       status: statusCode,
       statusName,
       total: total,
-      totalFormatted: `R$ ${total.toFixed(2).replace(".", ",")}`,
+      totalFormatted: formattedPrice(total),
       count: filteredOrders.length,
       orders: filteredOrders,
       average: filteredOrders.length > 0 ? total / filteredOrders.length : 0,
@@ -180,10 +180,10 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                   <div className="car-entry-km">
                     <span className="car-entry-km-title">Gasto Total:</span>
                     <span className="car-entry-km-info">
-                      {
+                      {formattedPrice(
                         sumServiceOrdersByVehicle(selectedCustomer, element.id)
-                          .total
-                      }
+                          .total,
+                      )}
                     </span>
                   </div>
                 </div>

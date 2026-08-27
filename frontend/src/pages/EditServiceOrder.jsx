@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { orderApi } from "../api/orders";
-import { statusReverseMap } from "../utils/statusMap";
+import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
@@ -12,6 +12,7 @@ import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import Loading from "./Loading";
+import StatusBadge from "../components/StatusBadge.component";
 
 const EditServiceOrder = () => {
   const { id } = useParams();
@@ -379,12 +380,7 @@ const EditServiceOrder = () => {
           </div>
         </div>
         <div className="edit-order-status-prio-container">
-          <div id="editStatusBadge">
-            {statusReverseMap[serviceOrder.status]}
-          </div>
-          <div id="editPriBadge">
-            {priorityReverseMap[serviceOrder.priority]}
-          </div>
+          <StatusBadge status={serviceOrder.status} />
         </div>
       </div>
 
