@@ -144,6 +144,8 @@ export const CustomerProvider = ({ children }) => {
     const newCustomerWithColor = {
       ...newCustomer,
       color: getRandomNumberBackground(),
+      vehicles: [],
+      serviceOrders: [],
     };
     setCustomers((prev) => [newCustomerWithColor, ...prev]);
   };

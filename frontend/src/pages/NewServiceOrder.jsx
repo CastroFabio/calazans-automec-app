@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatLocalDateTime } from "../utils/convertDateTime";
-import AutoCompleteCustomer from "../components/AutoCompleteCustomer";
+import AutoCompleteCustomer from "../components/AutoCompleteCustomer.component";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
@@ -25,6 +25,7 @@ import InputPriceValue from "../components/InputPriceValue";
 import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
 import { formatarCelular } from "../utils/convertCel";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
+import { PATHS } from "../utils/paths";
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -44,9 +45,7 @@ const NewServiceOrder = () => {
   );
 
   //AutoCompleteCustomer
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -347,7 +346,7 @@ const NewServiceOrder = () => {
       setMaterialsList([]);
 
       // ========== SUCESSO ==========
-      navigate("/");
+      navigate(PATHS.serviceOrder);
     } catch (err) {
       // ✅ Melhor tratamento de erro
       console.error("❌ Erro ao salvar OS:", err);
@@ -437,7 +436,7 @@ const NewServiceOrder = () => {
     handleFormFieldChange("arrived_at", event.target.value);
   };
 
-  //AutoCompleteCustomer
+  /* //AutoCompleteCustomer
   useEffect(() => {
     if (inputValue.trim() === "") {
       setFilteredSuggestions([]);
@@ -482,7 +481,7 @@ const NewServiceOrder = () => {
     setInputValue("");
     setSelectedCustomerInfo(null);
     setSelectedVehicleInfo({});
-  };
+  }; */
 
   // NewOrderMaintenanceJob
   const handleAddMaintenanceJob = () => {
@@ -635,7 +634,17 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="form-grid">
-              <div className="field">
+              <AutoCompleteCustomer
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                customerData={customerData}
+                setSelectedCustomerInfo={setSelectedCustomerInfo}
+                selectedCustomerInfo={selectedCustomerInfo}
+                handleFormFieldChange={handleFormFieldChange}
+                setSelectedVehicleInfo={setSelectedVehicleInfo}
+                handleSelectedVehicle={handleSelectedVehicle}
+              />
+              {/* <div className="field">
                 <label>Cliente *</label>
                 <div className="ac-wrap">
                   <div className="ac-input-row">
@@ -721,7 +730,7 @@ const NewServiceOrder = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
               <div className="field">
                 <label>Veículo *</label>
                 <div className="car-badge-row">

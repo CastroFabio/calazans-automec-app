@@ -132,7 +132,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
           <div className="client-panel-cards-container" id="cpStats">
             <div className="cp-stat">
               <div className="cp-stat-val">
-                {selectedCustomer.serviceOrders.length}
+                {selectedCustomer?.serviceOrders?.length || 0}
               </div>
               <div className="cp-stat-lbl">OS Total</div>
             </div>
@@ -194,38 +194,44 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
 
           <div className="cp-section">
             <div className="cp-section-title">
-              {`Ordens de Serviço (${selectedCustomer.serviceOrders.length})`}
+              {`Ordens de Serviço (${selectedCustomer?.serviceOrders?.length || 0})`}
             </div>
-            {selectedCustomer.serviceOrders.map((element) => (
-              <div key={element.id} className="os-mini-row">
-                <div className="car-panel-service-order-container">
-                  <div className="car-panel-service-order-header">
-                    <span className="os-mini-id">{`#${element.id}`}</span>
-                    <span className="badge car-panel-service-order-status-badge">
-                      {statusReverseMap[element.status]}
-                    </span>
-                    <span className="badge car-panel-service-order-priority-badge">
-                      {priorityReverseMap[element.priority]}
-                    </span>
-                  </div>
-                  <div className="os-mini-svc">
-                    {formattedServiceOrderTitle(element)}
-                  </div>
-                  <div className="os-mini-svc-car">
-                    {`${element.vehicle.license_plate} · ${element.vehicle.brand} ${element.vehicle.model} · ${formatLocalDateTimeStringISO(element.arrived_at)}`}
-                  </div>
-                </div>
-                <div className="os-mini-val">
-                  {element.paid >= element.subtotal ? (
-                    <div className="texto-riscado">
-                      {formattedPrice(element.subtotal)}
+            {selectedCustomer?.serviceOrders?.length > 0 ? (
+              selectedCustomer?.serviceOrders?.map((element) => (
+                <div key={element.id} className="os-mini-row">
+                  <div className="car-panel-service-order-container">
+                    <div className="car-panel-service-order-header">
+                      <span className="os-mini-id">{`#${element.id}`}</span>
+                      <span className="badge car-panel-service-order-status-badge">
+                        {statusReverseMap[element.status]}
+                      </span>
+                      <span className="badge car-panel-service-order-priority-badge">
+                        {priorityReverseMap[element.priority]}
+                      </span>
                     </div>
-                  ) : (
-                    formattedPrice(element.subtotal)
-                  )}
+                    <div className="os-mini-svc">
+                      {formattedServiceOrderTitle(element)}
+                    </div>
+                    <div className="os-mini-svc-car">
+                      {`${element.vehicle.license_plate} · ${element.vehicle.brand} ${element.vehicle.model} · ${formatLocalDateTimeStringISO(element.arrived_at)}`}
+                    </div>
+                  </div>
+                  <div className="os-mini-val">
+                    {element.paid >= element.subtotal ? (
+                      <div className="texto-riscado">
+                        {formattedPrice(element.subtotal)}
+                      </div>
+                    ) : (
+                      formattedPrice(element.subtotal)
+                    )}
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="car-detail-no-car">
+                Nenhuma ordem de serviço cadastrada.
               </div>
-            ))}
+            )}
           </div>
         </div>
         {/* <div className="sp-footer">

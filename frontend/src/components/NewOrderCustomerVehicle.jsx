@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AutoCompleteCustomer from "./AutoCompleteCustomer";
+import AutoCompleteCustomer from "./AutoCompleteCustomer.component";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 
 const NewOrderCustomerVehicle = ({

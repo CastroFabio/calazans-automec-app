@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { customerApi } from "../api/customers";
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
+import { PATHS } from "../utils/paths";
 
 const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
   const [error, setError] = useState(false);
 
   const { addCustomer } = useCustomers();
+  const navigate = useNavigate();
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
@@ -28,6 +30,13 @@ const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
     }
     if (!formData.cell.trim()) {
       setError("Celular é obrigatório.");
+      return;
+    }
+    if (formData.cell.trim().length > 11) {
+      setError("Número de celular muito longo.");
+      return;
+    } else if (formData.cell.trim().length < 8) {
+      setError("Número de celular muito curto.");
       return;
     }
 
@@ -60,6 +69,7 @@ const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
       });
 
       onClose();
+      navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar cliente:", err);
 

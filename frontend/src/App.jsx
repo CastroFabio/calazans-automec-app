@@ -18,6 +18,7 @@ import PrintServiceOrder from "./pages/PrintServiceOrder";
 import Teste from "./pages/Teste";
 import Home from "./pages/Home";
 import { PATHS } from "./utils/paths";
+import IdleRedirectManager from "./components/IdleRedirectManager.component";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
@@ -62,7 +63,9 @@ const App = () => {
     <ServiceOrderProvider>
       <CustomerProvider>
         <BrowserRouter>
-          <MainLayout />
+          <IdleRedirectManager>
+            <MainLayout />
+          </IdleRedirectManager>
         </BrowserRouter>
       </CustomerProvider>
     </ServiceOrderProvider>

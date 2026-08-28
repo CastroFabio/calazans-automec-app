@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "../utils/paths";
+import NewCustomerModal from "../components/NewCustomerModal.component";
+import { useCustomers } from "../context/Customer.context";
+import NewVehicleModal from "../components/NewVehicleModal.component";
 
 const Home = () => {
   const navigate = useNavigate();
+
+  const { customers } = useCustomers();
+
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+
+  const openCustomerModal = () => setIsCustomerModalOpen(true);
+  const closeCustomerModal = () => setIsCustomerModalOpen(false);
+
+  const openVehicleModal = () => setIsVehicleModalOpen(true);
+  const closeVehicleModal = () => setIsVehicleModalOpen(false);
 
   return (
     <div className="page active" id="page-home">
@@ -18,26 +32,12 @@ const Home = () => {
         </div>
         <div className="home-grid">
           {/* Card 1: Nova OS */}
-          <div
-            className="home-card home-card-primary"
-            onClick={() => navigate(PATHS.newServiceOrder)}
-          >
-            <div className="home-card-icon home-card-icon-background">
-              <svg fill="none" stroke="white" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </div>
-            <div className="home-card-label">Nova OS</div>
-            <div className="home-card-sub">Abrir OS de cliente</div>
-          </div>
 
           {/* Card 2: Novo Cliente */}
-          <div className="home-card home-card-primary">
+          <div
+            className="home-card home-card-primary"
+            onClick={openCustomerModal}
+          >
             <div className="home-card-icon home-card-icon-background-customer">
               <svg fill="none" stroke="white" viewBox="0 0 24 24">
                 <path
@@ -53,19 +53,65 @@ const Home = () => {
           </div>
 
           {/* Card 3: Novo Veículo */}
-          <div className="home-card home-card-primary">
+          <div
+            className="home-card home-card-primary"
+            onClick={openVehicleModal}
+          >
             <div className="home-card-icon home-card-icon-background-vehicle">
-              <svg fill="none" stroke="white" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+                className="w-6 h-6"
+              >
+                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H7c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+                <circle cx="7" cy="17" r="2" />
+                <path d="M9 17h6" />
+                <circle cx="17" cy="17" r="2" />
+
+                <path d="M18 2v6" />
+                <path d="M15 5h6" />
               </svg>
             </div>
             <div className="home-card-label">Novo Veículo</div>
             <div className="home-card-sub">Cadastrar veículo</div>
+          </div>
+
+          <div
+            className="home-card home-card-primary"
+            onClick={() => navigate(PATHS.newServiceOrder)}
+          >
+            <div className="home-card-icon home-card-icon-background">
+              <svg
+                fill="none"
+                stroke="white"
+                viewBox="0 0 24 24"
+                className="w-6 h-6"
+              >
+                {/* Prancheta (com a quina inferior direita aberta) */}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h5M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M19 12V7a2 2 0 00-2-2h-2"
+                />
+                {/* Sinal de + (afastado no canto inferior) */}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 19h5m-2.5-2.5v5"
+                />
+              </svg>
+            </div>
+            <div className="home-card-label">Nova Ordem de Serviço</div>
+            <div className="home-card-sub">
+              Abrir Ordem de Serviço de cliente
+            </div>
           </div>
 
           {/* Outros cards da lista mantidos abaixo... */}
@@ -166,6 +212,18 @@ const Home = () => {
           </div>
         </div>
       </div>
+      {isCustomerModalOpen && (
+        <NewCustomerModal
+          isOpen={isCustomerModalOpen}
+          onClose={closeCustomerModal}
+        />
+      )}
+      {isVehicleModalOpen && (
+        <NewVehicleModal
+          isModalOpen={isVehicleModalOpen}
+          onClose={closeVehicleModal}
+        />
+      )}
     </div>
   );
 };

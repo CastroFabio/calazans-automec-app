@@ -2,17 +2,26 @@ import React, { useState } from "react";
 
 import { vehicleApi } from "../api/vehicle";
 import { useCustomers } from "../context/Customer.context";
+import AutoCompleteCustomer from "./AutoCompleteCustomer.component";
+import { PATHS } from "../utils/paths";
+import { useNavigate } from "react-router-dom";
 
-const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
+const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
   const [formData, setFormData] = useState({
     customer_id: "",
     brand: "",
+    color: "",
+    year: "",
     model: "",
     license_plate: "",
   });
   const [error, setError] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [selectedCustomerInfo, setSelectedCustomerInfo] =
+    useState(selectedCustomer);
 
-  const { addVehicleToCustomer } = useCustomers();
+  const { addVehicleToCustomer, customers } = useCustomers();
+  const navigate = useNavigate();
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
@@ -23,10 +32,12 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
 
   const closeWindow = () => {
     setFormData({
-      name: "",
-      cell: "",
-      telephone: "",
-      observation: "",
+      customer_id: "",
+      brand: "",
+      color: "",
+      year: "",
+      model: "",
+      license_plate: "",
     });
     onClose();
   };
@@ -43,7 +54,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
     }
 
     const vehicleData = {
-      customer_id: selectedCustomer.id,
+      customer_id: selectedCustomerInfo.id,
       brand: formData.brand.trim(),
       model: formData.model.trim(),
       color: formData.color.trim(),
@@ -56,16 +67,19 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
 
       const { data } = await vehicleApi.create(vehicleData);
 
-      addVehicleToCustomer(selectedCustomer.id, data);
+      addVehicleToCustomer(selectedCustomerInfo.id, data);
 
       setFormData({
-        name: "",
-        cell: "",
-        telephone: "",
-        observation: "",
+        customer_id: "",
+        brand: "",
+        color: "",
+        year: "",
+        model: "",
+        license_plate: "",
       });
 
       onClose();
+      navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);
 
@@ -100,36 +114,19 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer }) => {
         </div>
         <div className="modal-body">
           <div className="field modal-vehicle-field-customer">
-            <label>Vincular ao Cliente</label>
-            <div className="ac-wrap" id="acCarModalWrap">
-              <div className="ac-input-row">
-                <span className="ac-icon">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </span>
-                <input
-                  className="ac-input"
-                  id="acCarModalInput"
-                  disabled
-                  type="text"
-                  defaultValue={selectedCustomer?.name || ""}
-                />
-                <span
-                  className="ac-clear"
-                  id="acCarModalClear"
-                  onClick={onClose}
-                >
-                  ×
-                </span>
-              </div>
-              <div className="ac-dropdown" id="acCarModalDropdown"></div>
-            </div>
+            <AutoCompleteCustomer
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              customerData={customers}
+              setSelectedCustomerInfo={(customer) => {
+                setSelectedCustomerInfo(customer);
+                if (customer) handleFormFieldChange("customer_id", customer.id);
+              }}
+              selectedCustomerInfo={selectedCustomerInfo}
+              handleFormFieldChange={handleFormFieldChange}
+              setSelectedVehicleInfo={() => {}}
+              handleSelectedVehicle={() => {}}
+            />
           </div>
 
           <div className="form-grid g3 modal-container-vehicle-select">
