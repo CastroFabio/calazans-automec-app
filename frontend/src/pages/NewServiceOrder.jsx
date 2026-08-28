@@ -538,13 +538,23 @@ const NewServiceOrder = () => {
 
   const parseValue = (value) => {
     if (value === null || value === undefined) return 0;
-    if (typeof value === "number") return value;
-    if (typeof value === "string") {
-      const clean = value.replace(",", ".").replace(/[^0-9.]/g, "");
-      const formattedString = parseFloat(clean).toFixed(2);
+    if (typeof value === "number") return +value.toFixed(2);
 
-      return parseFloat(formattedString) || 0;
+    if (typeof value === "string") {
+      let clean = value;
+
+      if (clean.includes(",") && clean.includes(".")) {
+        clean = clean.split(".").join("");
+      }
+
+      clean = clean.replace(",", ".");
+      clean = clean.replace(/[^0-9.]/g, "");
+
+      // Faz o parse e força a limitação de 2 casas decimais
+      const parsed = parseFloat(clean);
+      return parsed ? +parsed.toFixed(2) : 0;
     }
+
     return 0;
   };
 
