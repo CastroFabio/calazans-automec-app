@@ -230,11 +230,23 @@ const EditServiceOrder = () => {
 
   const parseValue = (value) => {
     if (value === null || value === undefined) return 0;
-    if (typeof value === "number") return value;
+    if (typeof value === "number") return +value.toFixed(2);
+
     if (typeof value === "string") {
-      const clean = value.replace(",", ".").replace(/[^0-9.]/g, "");
-      return parseFloat(clean) || 0;
+      let clean = value;
+
+      if (clean.includes(",") && clean.includes(".")) {
+        clean = clean.split(".").join("");
+      }
+
+      clean = clean.replace(",", ".");
+      clean = clean.replace(/[^0-9.]/g, "");
+
+      // Faz o parse e força a limitação de 2 casas decimais
+      const parsed = parseFloat(clean);
+      return parsed ? +parsed.toFixed(2) : 0;
     }
+
     return 0;
   };
 
@@ -302,6 +314,9 @@ const EditServiceOrder = () => {
     if (!serviceOrder.labor_cost) {
       errorList.push("Adicione um valor de mão de obra");
     }
+
+    if (!parseFloat(serviceOrder.labor_cost))
+      errorList.push("Valor de mão de obra deve ser um número.");
 
     // ========== VALIDAÇÃO DE SERVIÇOS ==========
 
