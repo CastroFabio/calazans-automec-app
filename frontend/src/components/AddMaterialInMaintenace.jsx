@@ -110,10 +110,9 @@ const AddMaterialInMaintenace = ({
                     </td>
                     <td>
                       <input
-                        type="number"
+                        type="text"
                         className="input input-new-order-material-qtd"
                         value={element.quantity}
-                        min="1"
                         onChange={(e) =>
                           handleMaterialInputChange(
                             element.id,

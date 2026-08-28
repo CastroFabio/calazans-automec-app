@@ -14,6 +14,7 @@ import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
+import { PATHS } from "../utils/paths";
 
 const EditServiceOrder = () => {
   const { id } = useParams();
@@ -346,16 +347,24 @@ const EditServiceOrder = () => {
     }
 
     // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
+    if (itemMaterials.length > 0) {
+      const hasValidMaterialQty = itemMaterials.some((item) => {
+        const quantity = Number(item.quantity) || 0;
+        return quantity > 0;
+      });
+      const hasValidMaterialValue = itemMaterials.some((item) => {
+        const value = parseFloat(item.value_unit) || 0;
+        return value > 0;
+      });
 
-    /*    const hasValidMaterial = materialsList.some((item) => {
-      const quantity = Number(item.quantity) || 0;
-      const value = parseFloat(item.value_unit) || 0;
-      return quantity > 0 && value > 0;
-    });
+      if (!hasValidMaterialQty) {
+        errorList.push("A quantidade de material tem que ser número.");
+      }
 
-    if (!hasValidMaterial) {
-      errorList.push("Adicione pelo menos um material com valor válido");
-    } */
+      if (!hasValidMaterialValue) {
+        errorList.push("O valor de material tem que ser número.");
+      }
+    }
 
     // ========== VALIDAÇÃO DE NOMES ==========
 
@@ -492,7 +501,7 @@ const EditServiceOrder = () => {
       }
 
       updateServiceOrder(updatedOrder);
-      navigate("/");
+      navigate(PATHS.serviceOrder);
     } catch (err) {
       console.error("❌ Erro:", err);
       setError(err.response?.data?.message || "Erro ao atualizar ordem");
