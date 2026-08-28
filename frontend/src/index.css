@@ -380,12 +380,34 @@
   padding: 7px 12px 7px 30px;
   outline: none;
   transition: border-color 0.14s;
+  padding-right: 30px;
 }
 .search-box input:focus {
   border-color: var(--accent);
 }
 .search-box input::placeholder {
   color: var(--ink3);
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--ink3);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear:hover {
+  color: var(--ink);
 }
 
 .chips {
