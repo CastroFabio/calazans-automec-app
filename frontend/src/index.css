@@ -4156,12 +4156,66 @@
   position: relative;
   overflow: hidden;
 }
+.home-card-register {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  transition:
+    transform 0.13s,
+    box-shadow 0.13s,
+    border-color 0.13s;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-card-disabled {
+  background-color: #8b8b8b; /* Fundo cinza neutro */
+  border-color: #8a8a8a; /* Borda cinza suave */
+  color: #0f0f0f; /* Cor do texto cinza apagado */
+  cursor: not-allowed; /* Ícone de bloqueio no ponteiro do mouse */
+  pointer-events: none; /* Desativa totalmente a ação do clique */
+  user-select: none; /* Evita selecionar o texto */
+  box-shadow: none; /* Remove qualquer sombra de elevação */
+}
+
+/* Opcional: Garante que os ícones internos também fiquem cinza */
+.home-card-disabled .home-card-icon,
+.home-card-disabled svg {
+  background-color: #8b8b8b !important;
+  stroke: #9ca3af !important;
+}
+
+/* Garante que textos internos herdarem a cor cinza */
+.home-card-disabled .home-card-label,
+.home-card-disabled .home-card-sub {
+  color: #9ca3af;
+}
+
 .home-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
   border-color: var(--accent-mid);
+  background-color: var(--accent-mid);
 }
 .home-card:active {
+  transform: translateY(0);
+}
+
+.home-card-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-mid);
+  background-color: var(--ink3);
+}
+.home-card-register:active {
   transform: translateY(0);
 }
 .home-card-icon {

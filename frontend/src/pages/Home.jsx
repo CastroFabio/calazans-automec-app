@@ -35,7 +35,7 @@ const Home = () => {
 
           {/* Card 2: Novo Cliente */}
           <div
-            className="home-card home-card-primary"
+            className="home-card-register home-card-primary"
             onClick={openCustomerModal}
           >
             <div className="home-card-icon home-card-icon-background-customer">
@@ -54,7 +54,7 @@ const Home = () => {
 
           {/* Card 3: Novo Veículo */}
           <div
-            className="home-card home-card-primary"
+            className="home-card-register home-card-primary"
             onClick={openVehicleModal}
           >
             <div className="home-card-icon home-card-icon-background-vehicle">
@@ -82,7 +82,7 @@ const Home = () => {
           </div>
 
           <div
-            className="home-card home-card-primary"
+            className="home-card-register home-card-primary"
             onClick={() => navigate(PATHS.newServiceOrder)}
           >
             <div className="home-card-icon home-card-icon-background">
@@ -155,8 +155,12 @@ const Home = () => {
           </div>
 
           <div
-            className="home-card"
-            onClick={() => navigate(PATHS.serviceOrder)}
+            className="home-card home-card-disabled"
+            onClick={(e) => {
+              if (e.currentTarget.classList.contains("home-card-disabled"))
+                return;
+              navigate(PATHS.serviceOrder);
+            }}
           >
             {/* <div className="home-card-count" id="homeCountPending">
               —
