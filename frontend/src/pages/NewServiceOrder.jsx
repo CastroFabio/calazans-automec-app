@@ -78,18 +78,18 @@ const NewServiceOrder = () => {
     setMaterialsList,
     materialsList,
   } = useServiceOrders();
-  const { getCustomerById } = useCustomers();
+  const { getCustomerById, customers } = useCustomers();
 
   // FETCH
   const handleFetchCustomers = async () => {
-    const { data } = await customerApi.getAll();
+    // const { data } = await customerApi.getAll();
 
-    setCustomerData(data);
+    setCustomerData(customers);
   };
 
   useEffect(() => {
     handleFetchCustomers();
-  }, []);
+  }, [customers]);
 
   const handleFetchMaterialsGroup = async () => {
     const { data } = await materialGroupApi.getAll();
@@ -971,7 +971,7 @@ const NewServiceOrder = () => {
         <NewVehicleModal
           isModalOpen={isVehicleModalOpen}
           onClose={closeVehicleModal}
-          selectedCustomer={getCustomerById()}
+          selectedCustomer={getCustomerById(selectedCustomerInfo.id)}
         />
       )}
     </div>

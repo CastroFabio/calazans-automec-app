@@ -4,6 +4,7 @@ import { priorityReverseMap } from "../utils/priorityMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import VehicleBadge from "./VehicleBadge.component";
 import { formatarCelular } from "../utils/convertCel";
+import { getCustomerNameInitials } from "../utils/CustomerInitials";
 
 const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
   const sumTotalValueServiceOrder = () => {
@@ -101,11 +102,11 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
       >
         <div className="client-panel-header">
           <div className="client-panel-header-content">
-            <div className="client-panel-avatar" id="cpAvatar">
-              JP
+            <div className={`client-panel-avatar bg-${selectedCustomer.color}`}>
+              {getCustomerNameInitials(selectedCustomer.name)}
             </div>
             <div className="client-panel-avatar-name-sub">
-              <div className="client-panel-avatar-name" id="cpName">
+              <div className={`client-panel-avatar-name `}>
                 {selectedCustomer.name}
               </div>
               <div className="client-panel-avatar-sub" id="cpSub">

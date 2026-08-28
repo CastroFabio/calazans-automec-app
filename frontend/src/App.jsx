@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import NavBar from "./components/navBar";
 import SideBar from "./components/sideBar";
@@ -16,47 +16,56 @@ import { CustomerProvider } from "./context/Customer.context";
 import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 import PrintServiceOrder from "./pages/PrintServiceOrder";
 import Teste from "./pages/Teste";
+import Home from "./pages/Home";
+import { PATHS } from "./utils/paths";
+
+// Componente para controlar o Layout dinamicamente de acordo com a rota
+const MainLayout = () => {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+
+  return (
+    <>
+      {/* Exibe a SideBar apenas se NÃO estiver na rota "/" */}
+      {!isHomePage && <SideBar />}
+
+      <div className="main">
+        <NavBar />
+        <div className="content">
+          <Routes>
+            <Route path={PATHS.home} element={<Home />} />
+            <Route path={PATHS.serviceOrder} element={<ServiceOrderList />} />
+            <Route path={PATHS.customer} element={<Customers />} />
+            <Route path={PATHS.services} element={<MaintenanceJobs />} />
+            <Route path={PATHS.materials} element={<Materials />} />
+            <Route path={PATHS.newServiceOrder} element={<NewServiceOrder />} />
+            <Route path={PATHS.editCustomer} element={<EditCustomer />} />
+            <Route
+              path={PATHS.editServiceOrder}
+              element={<EditServiceOrder />}
+            />
+            <Route path={PATHS.notFound} element={<NotFound />} />
+            <Route path="/teste" element={<Teste />} />
+            <Route
+              path={PATHS.printServiceOrder}
+              element={<PrintServiceOrder />}
+            />
+          </Routes>
+        </div>
+      </div>
+    </>
+  );
+};
 
 const App = () => {
   return (
-    <>
-      <ServiceOrderProvider>
-        <CustomerProvider>
-          <BrowserRouter>
-            <SideBar />
-            <div className="main">
-              <NavBar />
-              <div className="content">
-                <Routes>
-                  <Route path="/" element={<ServiceOrderList />} />
-                  <Route path="/customers" element={<Customers />} />
-                  <Route path="/services" element={<MaintenanceJobs />} />
-                  <Route path="/materials" element={<Materials />} />
-                  <Route
-                    path="/new-service-order"
-                    element={<NewServiceOrder />}
-                  />
-                  <Route
-                    path="/customers/edit/:id"
-                    element={<EditCustomer />}
-                  />
-                  <Route
-                    path="/service-order/edit/:id"
-                    element={<EditServiceOrder />}
-                  />
-                  <Route path="*" element={<NotFound />} />
-                  <Route path="/teste" element={<Teste />} />
-                  <Route
-                    path="/service-order/print/:id"
-                    element={<PrintServiceOrder />}
-                  />
-                </Routes>
-              </div>
-            </div>
-          </BrowserRouter>
-        </CustomerProvider>
-      </ServiceOrderProvider>
-    </>
+    <ServiceOrderProvider>
+      <CustomerProvider>
+        <BrowserRouter>
+          <MainLayout />
+        </BrowserRouter>
+      </CustomerProvider>
+    </ServiceOrderProvider>
   );
 };
 

@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { customerListDTO } from "../data/mockDataDTO";
-import { customerApi } from "../api/customers";
-import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
-import { useCustomers } from "../context/Customer.context";
-import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useNavigate } from "react-router-dom";
-import VehicleBadge from "../components/VehicleBadge.component";
+
+import { customerApi } from "../api/customers";
+
+import { useCustomers } from "../context/Customer.context";
+
 import { formatarCelular } from "../utils/convertCel";
+
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import VehicleBadge from "../components/VehicleBadge.component";
+import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
+import { getCustomerNameInitials } from "../utils/CustomerInitials";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -18,7 +22,7 @@ const Customers = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedCustomerModal, setSelectedCustomerModal] = useState(null);
 
-  const { customers, removeCustomer } = useCustomers();
+  const { customers, removeCustomer, fetchCustomerById } = useCustomers();
 
   const filteredData = useMemo(() => {
     if (!searchTerm) {
@@ -40,15 +44,6 @@ const Customers = () => {
     });
   }, [customers, searchTerm]);
 
-  const getCustomerNameInitials = (customerName) => {
-    return customerName
-      .split(" ")
-      .slice(0, 2)
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
-
   const navigate = useNavigate();
 
   const handleSearchChange = (event) => {
@@ -68,8 +63,8 @@ const Customers = () => {
   };
 
   const handleFetchSelectedCustomer = async (customerID) => {
-    const { data } = await customerApi.getById(customerID);
-
+    // const { data } = await customerApi.getById(customerID);
+    const data = await fetchCustomerById(customerID);
     setSelectedCustomer(data);
   };
 
@@ -171,7 +166,7 @@ const Customers = () => {
                 ×
               </button>
               <div className="client-card-header">
-                <div className="client-avatar-lg bg-orange-50">
+                <div className={`client-avatar-lg bg-${element.color}`}>
                   {getCustomerNameInitials(element.name)}
                 </div>
                 <div>
@@ -257,7 +252,6 @@ const Customers = () => {
           </div>
         )}
       </div>
-
       {sidebarOpen && selectedCustomer && (
         <CustomerDetailPanel
           onClose={closeSidebar}

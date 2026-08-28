@@ -7,6 +7,10 @@ import NewCustomerModal from "./NewCustomerModal.component";
 const ROUTES_CONFIG = {
   // Rotas exatas
   "/": {
+    title: "Home",
+    btn: null,
+  },
+  "/service-order": {
     title: "Ordens de Serviço",
     btn: (navigate) => (
       <button

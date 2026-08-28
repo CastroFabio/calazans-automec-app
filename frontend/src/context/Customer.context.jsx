@@ -18,7 +18,13 @@ export const CustomerProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const { data } = await customerApi.getAll();
-      setCustomers(data);
+
+      const dataWithColor = data.map((element) => ({
+        ...element,
+        color: getRandomNumberBackground(),
+      }));
+
+      setCustomers(dataWithColor);
     } catch (err) {
       setError(err.message || "Erro ao carregar clientes");
     } finally {
@@ -28,6 +34,10 @@ export const CustomerProvider = ({ children }) => {
 
   const countAllCustomers = () => {
     return customers.length;
+  };
+
+  const getRandomNumberBackground = () => {
+    return Math.floor(Math.random() * (5 - 1 + 1)) + 1;
   };
 
   // ========== ✅ BUSCAR CLIENTE POR ID NO BACKEND ==========
@@ -131,7 +141,11 @@ export const CustomerProvider = ({ children }) => {
 
   // Função para adicionar cliente (atualiza a lista)
   const addCustomer = (newCustomer) => {
-    setCustomers((prev) => [newCustomer, ...prev]);
+    const newCustomerWithColor = {
+      ...newCustomer,
+      color: getRandomNumberBackground(),
+    };
+    setCustomers((prev) => [newCustomerWithColor, ...prev]);
   };
 
   const removeCustomer = (customerId) => {
