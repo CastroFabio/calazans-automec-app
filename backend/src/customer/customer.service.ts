@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -21,6 +22,35 @@ export class CustomersService {
   // CREATE - Criar um novo cliente
   async create(createCustomerDto: CreateCustomerDto) {
     try {
+      if (!createCustomerDto.name || createCustomerDto.name.trim() === '')
+        throw new BadRequestException('O nome do cliente é obrigatório');
+
+      if (
+        createCustomerDto.cell === null ||
+        createCustomerDto.cell === undefined
+      ) {
+        throw new BadRequestException('O celular é obrigatório');
+      }
+
+      if (typeof createCustomerDto.cell !== 'string')
+        throw new BadRequestException('O celular deve ser uma string');
+
+      if (
+        createCustomerDto.telephone &&
+        typeof createCustomerDto.telephone !== 'string'
+      )
+        throw new BadRequestException('O telefone deve ser uma string');
+
+      if (
+        createCustomerDto.observation &&
+        typeof createCustomerDto.observation !== 'string'
+      )
+        throw new BadRequestException('A observação deve ser uma string');
+
+      if (createCustomerDto.cell.trim() === '') {
+        throw new BadRequestException('O celular é obrigatório');
+      }
+
       // Verifica se o celular já existe
       const existingCustomer = await this.prisma.customer.findUnique({
         where: { cell: createCustomerDto.cell },
@@ -33,7 +63,7 @@ export class CustomersService {
       // Cria o cliente
       const customer = await this.prisma.customer.create({
         data: {
-          name: createCustomerDto.name,
+          name: createCustomerDto.name.trim(),
           cell: createCustomerDto.cell,
           telephone: createCustomerDto.telephone || null,
           observation: createCustomerDto.observation || null,
@@ -42,7 +72,7 @@ export class CustomersService {
 
       return customer;
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao criar cliente');
@@ -70,18 +100,37 @@ export class CustomersService {
 
   // READ - Buscar um cliente por ID
   async findOne(id: number) {
-    return this.prisma.customer.findUnique({
-      where: { id },
-      include: {
-        vehicles: true,
-        serviceOrders: {
-          include: {
-            vehicle: true,
-            itemMaintenances: { include: { maintenancejob: true } },
+    try {
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
+      const customer = await this.prisma.customer.findUnique({
+        where: { id },
+        include: {
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
           },
         },
-      },
-    });
+      });
+
+      if (!customer) {
+        throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
+      }
+
+      return customer;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`);
+    }
   }
 
   // READ - Buscar cliente por celular
