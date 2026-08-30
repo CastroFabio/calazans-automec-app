@@ -11,6 +11,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
+const trimOrUndefined = (value?: string | null) =>
+  typeof value === 'string' ? value.trim() : undefined;
+
+// Mantém null apenas para campos opcionais que ACEITAM null no banco (ex: telephone, observation)
+const trimOrNull = (value?: string | null) =>
+  typeof value === 'string' ? value.trim() : value;
+
 @Injectable()
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
@@ -81,21 +88,28 @@ export class CustomersService {
 
   // READ - Buscar todos os clientes
   async findAll() {
-    return this.prisma.customer.findMany({
-      include: {
-        _count: { select: { serviceOrders: true, vehicles: true } },
-        vehicles: true,
-        serviceOrders: {
-          include: {
-            vehicle: true,
-            itemMaintenances: { include: { maintenancejob: true } },
+    try {
+      return this.prisma.customer.findMany({
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
           },
         },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao criar cliente');
+    }
   }
 
   // READ - Buscar um cliente por ID
@@ -146,14 +160,37 @@ export class CustomersService {
   // UPDATE - Atualizar um cliente
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
     try {
+      if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0)
+        throw new BadRequestException('Nenhum corpo na requisição');
+
       // Verifica se o cliente existe
       const customer = await this.prisma.customer.findUnique({
         where: { id },
       });
 
       if (!customer) {
-        throw new Error('Cliente não encontrado');
+        throw new NotFoundException('Cliente não encontrado');
       }
+
+      if (updateCustomerDto.name && typeof updateCustomerDto.name !== 'string')
+        throw new BadRequestException('O nome do cliente deve ser string');
+
+      if (updateCustomerDto.cell && typeof updateCustomerDto.cell !== 'string')
+        throw new BadRequestException('O celular do cliente deve ser string');
+
+      if (
+        updateCustomerDto.telephone &&
+        typeof updateCustomerDto.telephone !== 'string'
+      )
+        throw new BadRequestException('O telefone do cliente deve ser string');
+
+      if (
+        updateCustomerDto.observation &&
+        typeof updateCustomerDto.observation !== 'string'
+      )
+        throw new BadRequestException(
+          'A observação do cliente deve ser string',
+        );
 
       // Verifica se o novo celular já existe (se estiver sendo alterado)
       if (updateCustomerDto.cell && updateCustomerDto.cell !== customer.cell) {
@@ -170,14 +207,22 @@ export class CustomersService {
       return this.prisma.customer.update({
         where: { id },
         data: {
-          name: updateCustomerDto.name,
-          cell: updateCustomerDto.cell,
-          telephone: updateCustomerDto.telephone,
-          observation: updateCustomerDto.observation,
+          ...(updateCustomerDto.name !== undefined && {
+            name: trimOrUndefined(updateCustomerDto.name), // Nunca passará 'null' para o 'name'
+          }),
+          ...(updateCustomerDto.cell !== undefined && {
+            cell: trimOrUndefined(updateCustomerDto.cell),
+          }),
+          ...(updateCustomerDto.telephone !== undefined && {
+            telephone: trimOrNull(updateCustomerDto.telephone), // Aceita null no Prisma
+          }),
+          ...(updateCustomerDto.observation !== undefined && {
+            observation: trimOrNull(updateCustomerDto.observation), // Aceita null no Prisma
+          }),
         },
       });
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao atualizar cliente');

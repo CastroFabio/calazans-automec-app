@@ -9,7 +9,14 @@ import {
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
-  let prismaMock: { customer: { create: jest.Mock; findUnique: jest.Mock } };
+  let prismaMock: {
+    customer: {
+      create: jest.Mock;
+      findUnique: jest.Mock;
+      findMany: jest.Mock;
+      update: jest.Mock;
+    };
+  };
 
   beforeEach(async () => {
     // 1. Criamos os mocks para as funções do Prisma usadas pelo Service
@@ -17,6 +24,8 @@ describe('CustomersService (Unitario)', () => {
       customer: {
         create: jest.fn(),
         findUnique: jest.fn(),
+        findMany: jest.fn(),
+        update: jest.fn(),
       },
     };
 
@@ -217,6 +226,7 @@ describe('CustomersService (Unitario)', () => {
         serviceOrders: [
           {
             vehicle: {},
+            itemMaintenances: [{ maintenancejob: {} }],
           },
         ],
       };
@@ -243,7 +253,7 @@ describe('CustomersService (Unitario)', () => {
       });
     });
 
-    it('deve lancar NotFoundException se o cliente nao for encontrado', async () => {
+    it('deve lancar NotFoundException se o ID do cliente nao for encontrado', async () => {
       // Arrange
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
@@ -301,6 +311,402 @@ describe('CustomersService (Unitario)', () => {
         new BadRequestException('O ID é obrigatório'),
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findAll', () => {
+    it('deve buscar todos os clientes incluindo todos os seus relacionamentos', async () => {
+      // 1. ARRANGE
+      const mockCustomersList = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      // Ensina o mock do Prisma a retornar a lista de clientes simulada
+      prismaMock.customer.findMany.mockResolvedValue(mockCustomersList);
+
+      // 2. ACT
+      const result = await service.findAll();
+
+      // 3. ASSERT
+      // Valida se o retorno do Service foi a lista esperada
+      expect(result).toEqual(mockCustomersList);
+
+      // Valida se o método findMany foi chamado com os includes exatos de relacionamentos
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    });
+
+    it('deve buscar todos os clientes incluindo todos os seus relacionamentos', async () => {
+      // 1. ARRANGE
+      const mockCustomersList = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      // Ensina o mock do Prisma a retornar a lista de clientes simulada
+      prismaMock.customer.findMany.mockResolvedValue(mockCustomersList);
+
+      // 2. ACT
+      const result = await service.findAll();
+
+      // 3. ASSERT
+      // Valida se o retorno do Service foi a lista esperada
+      expect(result).toEqual(mockCustomersList);
+
+      // Valida se o método findMany foi chamado com os includes exatos de relacionamentos
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    });
+  });
+
+  describe('update', () => {
+    it('deve atualizar um cliente com sucesso quando os dados forem válidos', async () => {
+      const customerInput = {
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const customerID = 1;
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      const result = await service.update(customerID, customerInput as any);
+
+      expect(result).toEqual(updatedCustomer);
+      expect(prismaMock.customer.update).toHaveBeenCalledWith({
+        where: { id: customerID },
+        data: expectedData,
+      });
+    });
+
+    it('deve atualizar um cliente com sucesso quando os dados forem válidos', async () => {
+      const customerID = 1;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      const result = await service.update(customerID, customerInput as any);
+
+      expect(result).toEqual(updatedCustomer);
+      expect(prismaMock.customer.update).toHaveBeenCalledWith({
+        where: { id: customerID },
+        data: expectedData,
+      });
+    });
+
+    it('deve retornar um NotFoundException se o ID não for encontrado', async () => {
+      const customerInput = {
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(null);
+
+      await expect(service.update(999, customerInput as any)).rejects.toThrow(
+        new NotFoundException('Cliente não encontrado'),
+      );
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar BadRequestException se o nome não for string', async () => {
+      const customerID = 1;
+      const customerInput = {
+        name: 23232 as any,
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(
+        new BadRequestException('O nome do cliente deve ser string'),
+      );
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar BadRequestException se o celular não for string', async () => {
+      const customerID = 1;
+      const customerInput = {
+        name: 'João Silva',
+        cell: 21999999999 as any,
+        telephone: null,
+        observation: null,
+      };
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(
+        new BadRequestException('O celular do cliente deve ser string'),
+      );
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar BadRequestException se o telefone não for string', async () => {
+      const customerID = 1;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: 213 as any,
+        observation: null,
+      };
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(
+        new BadRequestException('O telefone do cliente deve ser string'),
+      );
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar BadRequestException se a observação não for string', async () => {
+      const customerID = 1;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: 23232 as any,
+      };
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+      const updatedCustomer = {
+        ...existingCustomer,
+        ...customerInput,
+      };
+      const expectedData = {
+        name: updatedCustomer.name,
+        cell: updatedCustomer.cell,
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(
+        new BadRequestException('A observação do cliente deve ser string'),
+      );
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar ConflictException se o celular já estiver sendo usado', async () => {
+      // 1. ARRANGE
+      const customerID = 1;
+      const customerInput = {
+        cell: '21999999999', // Novo celular desejado
+      };
+
+      const existingCustomer = {
+        id: customerID,
+        name: 'João Silva',
+        cell: '21888888888', // Celular atual diferente do novo
+        telephone: null,
+        observation: null,
+        created_at: new Date(),
+      };
+
+      const anotherCustomerWithSameCell = {
+        id: 2, // Outro cliente com o mesmo celular
+        name: 'Maria Souza',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        created_at: new Date(),
+      };
+
+      // Simula primeiro a busca do cliente atual (por ID)
+      // E na sequencia a busca pelo novo celular
+      prismaMock.customer.findUnique
+        .mockResolvedValueOnce(existingCustomer) // 1ª chamada: busca por id
+        .mockResolvedValueOnce(anotherCustomerWithSameCell); // 2ª chamada: busca por cell
+
+      // 2. ACT & ASSERT
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(new ConflictException('Este celular já está em uso'));
+
+      // Garante que a atualização no banco não foi executada
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar BadRequestException se o body veio vazio', async () => {
+      const customerID = 1;
+      const customerInput = {};
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
+
+      await expect(
+        service.update(customerID, customerInput as any),
+      ).rejects.toThrow(new BadRequestException('Nenhum corpo na requisição'));
+      expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
   });
 });
