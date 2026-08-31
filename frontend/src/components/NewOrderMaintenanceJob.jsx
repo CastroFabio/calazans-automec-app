@@ -23,6 +23,26 @@ const NewOrderMaintenanceJob = ({
   calculateTotalMaterials,
   calculateGrandTotal,
 }) => {
+  const [svcNome, setSvcNome] = useState("");
+  const [svcObs, setSvcObs] = useState("");
+
+  const handleAcFilter = (value) => {
+    setSvcNome(value);
+    // Insira a lógica de busca/filtro do autocomplete aqui
+  };
+
+  const handleAcKey = (event) => {
+    // Insira a lógica de navegação do teclado aqui
+  };
+
+  const handleAddMat = () => {
+    // Insira a lógica para adicionar nova peça/material aqui
+  };
+
+  const handleRegistrarServico = () => {
+    // Insira a lógica para registrar o serviço aqui
+  };
+
   return (
     <div className="form-section">
       <div className="fs-header">
@@ -45,15 +65,141 @@ const NewOrderMaintenanceJob = ({
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span className="fs-title">Serviços</span>
+        <span className="fs-title">Serviços & Materiais</span>
       </div>
-      <div className="fs-body">
-        <div className="services-list">
-          <InputPriceValue
-            labor_cost={formData.labor_cost}
-            handleFormFieldChange={handleFormFieldChange}
+      <div className="fs-body fs-body-new-service-order">
+        <InputPriceValue
+          labor_cost={formData.labor_cost}
+          handleFormFieldChange={handleFormFieldChange}
+        />
+
+        <div className="svc-card-container" style={{ display: "none" }}>
+          <div className="svc-card">
+            <div className="svc-card-header">
+              <div className="svc-card-badge">1</div>
+              <div className="svc-card-title">Nome do serviço</div>
+              <span className={`svc-card-total ${1 > 0 ? "active" : ""}`}>
+                {1 > 0 ? "R$ 1,00" : "—"}
+              </span>
+              <svg
+                className="svc-chevron"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+
+            <div className="svc-card-body">
+              {"s.obs" && <div className="svc-card-obs">Observação</div>}
+
+              <div className="svc-card-content">
+                <div className="svc-card-grid">
+                  {[{}] && [{}].length > 0 ? (
+                    [].map((m, idx) => (
+                      <div key={1} className="svc-item-row">
+                        <span className="svc-item-name">Nome do serviço</span>
+                        <span className="svc-item-qty-price">1x R$ 300,00</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="svc-item-empty">Sem peças</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="svc-card-actions">
+                <button
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => editarSvcRegistrado(i)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="remove-btn"
+                  onClick={() => removeSvcRegistrado(i)}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="svcEntryForm" className="svc-entry-form">
+          <div className="svc-grid-container">
+            {/* Autocomplete de serviço */}
+            <div id="svcAcWrap" className="svc-ac-wrap">
+              <label className="svc-label">Serviço *</label>
+              <input
+                type="text"
+                className="input"
+                id="svcNomeInput"
+                placeholder="Digite o serviço..."
+                autoComplete="off"
+                value={svcNome}
+                onChange={(e) => handleAcFilter(e.target.value)}
+                onKeyDown={handleAcKey}
+                onFocus={(e) => handleAcFilter(e.target.value)}
+              />
+              <div id="svcAcDropdown" className="svc-ac-dropdown"></div>
+            </div>
+
+            {/* Observações */}
+            <div>
+              <label className="svc-label">Observações</label>
+              <input
+                type="text"
+                className="input"
+                id="svcObsInput"
+                placeholder="Opcional..."
+                value={svcObs}
+                onChange={(e) => setSvcObs(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Peças */}
+          <AddMaterialInMaintenace
+            handleAddMaterial={() => handleAddMaterial(1)}
+            materialsList={materialsList}
+            handleMaterialInputChange={handleMaterialInputChange}
+            materialsGroupData={materialsGroupData}
+            handleRemoveMaterial={handleRemoveMaterial}
+            findMaterialById={findMaterialById}
+            itemMaintenance_id={1}
           />
-          {listMaintenanceJobs.length > 0
+
+          {/* Botão registrar */}
+          <div className="svc-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleRegistrarServico}
+            >
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                className="svc-btn-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              Registrar serviço
+            </button>
+          </div>
+
+          {/* {listMaintenanceJobs.length > 0
             ? listMaintenanceJobs.map((element, index) => (
                 <div key={element.id} className="service-row">
                   <div className="service-row-header">
@@ -161,9 +307,8 @@ const NewOrderMaintenanceJob = ({
                   />
                 </div>
               ))
-            : ""}
-        </div>
-        <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
+            : ""} */}
+          {/* <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -173,23 +318,24 @@ const NewOrderMaintenanceJob = ({
             />
           </svg>
           Adicionar serviço
-        </button>
-        <div className="total-row">
-          <div className="total-item">
-            Mão de obra:
-            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
-          </div>
-          <div className="total-row-divider"></div>
-          <div className="total-item">
-            Peças:
-            <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
-          </div>
-          <div className="total-row-divider"></div>
-          <div className="total-item">
-            Total:
-            <span className="grand-total">
-              R$ {calculateGrandTotal().toFixed(2)}
-            </span>
+        </button> */}
+          <div className="total-row">
+            <div className="total-item">
+              Mão de obra:
+              <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+            </div>
+            <div className="total-row-divider"></div>
+            <div className="total-item">
+              Peças:
+              <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+            </div>
+            <div className="total-row-divider"></div>
+            <div className="total-item">
+              Total:
+              <span className="grand-total">
+                R$ {calculateGrandTotal().toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
       </div>
