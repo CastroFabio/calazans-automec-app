@@ -1,0 +1,32 @@
+export const parseValue = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "number") return +value.toFixed(2);
+
+  if (typeof value === "string") {
+    let clean = value;
+
+    // Se houver vírgula e ponto, assume que o ponto é separador de milhar
+    if (clean.includes(",") && clean.includes(".")) {
+      clean = clean.split(".").join("");
+    }
+
+    // Substitui vírgula por ponto e remove tudo que não for dígito ou ponto
+    clean = clean.replace(",", ".").replace(/[^0-9.]/g, "");
+
+    // Mantém apenas o primeiro ponto decimal caso existam múltiplos
+    const parts = clean.split(".");
+    if (parts.length > 2) {
+      clean = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Trunca em no máximo duas casas decimais
+    if (parts[1] && parts[1].length > 2) {
+      clean = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    const parsed = parseFloat(clean);
+    return parsed ? +parsed.toFixed(2) : 0;
+  }
+
+  return 0;
+};

@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const SideBarList = ({ categoryName, tabsDataCategory, isActive }) => {
   const navigate = useNavigate();
+  const { setListMaintenanceJobs } = useServiceOrders();
 
   return (
     <>

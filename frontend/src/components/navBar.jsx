@@ -156,7 +156,9 @@ const NavBar = () => {
 
   return (
     <>
-      <header className="topbar">
+      <header
+        className={`topbar ${activeRoute.title === "Home" ? "home" : ""}`}
+      >
         <button className="hamburger">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -168,7 +170,11 @@ const NavBar = () => {
           </svg>
         </button>
 
-        <span className="page-title">{activeRoute.title}</span>
+        <span
+          className={`page-title ${activeRoute.title === "Home" ? "home" : ""}`}
+        >
+          {activeRoute.title}
+        </span>
 
         <div className="topbar-right">{renderButton()}</div>
 

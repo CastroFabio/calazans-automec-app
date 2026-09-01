@@ -10,6 +10,7 @@ import { useCustomers } from "../context/Customer.context";
 
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import { PATHS } from "../utils/paths";
 
 const ICONS = {
   orders: (
@@ -94,7 +95,7 @@ const SideBar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { countAllCustomers } = useCustomers();
-  const { countAllServiceOrders } = useServiceOrders();
+  const { countAllServiceOrders, setListMaintenanceJobs } = useServiceOrders();
 
   // Estados
   const [counts, setCounts] = useState({
@@ -153,7 +154,7 @@ const SideBar = () => {
           {
             id: "serviceOrdersTab",
             title: "Ordens de Serviço",
-            path: "/service-order",
+            path: PATHS.serviceOrder,
             count: countAllServiceOrders(),
             icon: ICONS.orders,
           },
@@ -172,7 +173,7 @@ const SideBar = () => {
           {
             id: "newServiceOrderTab",
             title: "Nova Ordem de Serviço",
-            path: "/new-service-order",
+            path: PATHS.newServiceOrder,
             count: null,
             icon: ICONS.newOrder,
           },
@@ -180,7 +181,7 @@ const SideBar = () => {
           {
             id: "editCustomerTab",
             title: "Editar Cliente",
-            path: "/customer/edit/:id", // ← Rota dinâmica
+            path: PATHS.editCustomer,
             count: null,
             icon: ICONS.edit,
             hidden: true,
@@ -193,14 +194,14 @@ const SideBar = () => {
           {
             id: "maintenanceJobsTab",
             title: "Serviços",
-            path: "/services",
+            path: PATHS.services,
             count: counts.maintenanceJobs,
             icon: ICONS.services,
           },
           {
             id: "materialsTab",
             title: "Materiais & Peças",
-            path: "/materials",
+            path: PATHS.materials,
             count: counts.materials,
             icon: ICONS.materials,
           },

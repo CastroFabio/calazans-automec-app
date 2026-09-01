@@ -86,6 +86,10 @@ const NewServiceOrder = () => {
   };
 
   useEffect(() => {
+    setListMaintenanceJobs([]);
+  }, [customers]);
+
+  useEffect(() => {
     handleFetchCustomers();
   }, [customers]);
 
@@ -161,9 +165,9 @@ const NewServiceOrder = () => {
       errorList.push("Selecione um veículo.");
     }
 
-    if (!formData.diagnosis?.trim()) {
+    /*  if (!formData.diagnosis?.trim()) {
       errorList.push("Preencha o campo Diagnóstico / Problema.");
-    }
+    } */
 
     if (listMaintenanceJobs.length === 0) {
       errorList.push("Adicione pelo menos um serviço registrado.");
@@ -487,7 +491,7 @@ const NewServiceOrder = () => {
             <svg
               className="fs-header-svg"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               viewBox="0 0 24 24"
             >
               <path
@@ -682,7 +686,7 @@ const NewServiceOrder = () => {
             <svg
               className="fs-header-svg"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               viewBox="0 0 24 24"
             >
               <path
@@ -730,7 +734,7 @@ const NewServiceOrder = () => {
                 </select>
               </div>
               <div className="field col-full">
-                <label>Diagnóstico / Problema *</label>
+                <label>Diagnóstico / Problema</label>
                 <textarea
                   className="textarea"
                   placeholder="Descreva o problema relatado pelo cliente e o diagnóstico realizado..."
@@ -740,7 +744,7 @@ const NewServiceOrder = () => {
                   }
                 />
               </div>
-              <div className="field col-full">
+              {/* <div className="field col-full">
                 <label>Observações Internas</label>
                 <textarea
                   className="textarea form-textarea-obs"
@@ -750,7 +754,7 @@ const NewServiceOrder = () => {
                     handleFormFieldChange("observation", e.target.value)
                   }
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

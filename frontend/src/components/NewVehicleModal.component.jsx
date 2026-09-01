@@ -1,27 +1,37 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { vehicleApi } from "../api/vehicle";
 import { useCustomers } from "../context/Customer.context";
 import AutoComplete from "./AutoComplete.component";
 import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
+import { formatarCelular } from "../utils/convertCel";
 
 const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
   const [formData, setFormData] = useState({
-    customer_id: "",
+    customer_id: selectedCustomer?.id || "",
     brand: "",
     color: "",
     year: "",
     model: "",
     license_plate: "",
   });
+
   const [error, setError] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(selectedCustomer?.name || "");
   const [selectedCustomerInfo, setSelectedCustomerInfo] =
     useState(selectedCustomer);
 
   const { addVehicleToCustomer, customers } = useCustomers();
   const navigate = useNavigate();
+
+  // Sincroniza o cliente caso a prop selectedCustomer mude
+  useEffect(() => {
+    if (selectedCustomer) {
+      setSelectedCustomerInfo(selectedCustomer);
+      setInputValue(selectedCustomer.name || "");
+      setFormData((prev) => ({ ...prev, customer_id: selectedCustomer.id }));
+    }
+  }, [selectedCustomer]);
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
@@ -39,22 +49,32 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
       model: "",
       license_plate: "",
     });
+    setInputValue("");
+    setSelectedCustomerInfo(null);
+    setError(false);
     onClose();
   };
 
   const handleSaveVehicle = async () => {
+    const customerIdToSave = selectedCustomerInfo?.id || formData.customer_id;
+
+    if (!customerIdToSave) {
+      setError("Selecione um cliente.");
+      return;
+    }
+
     if (!formData.license_plate.trim()) {
       setError("Placa é obrigatória.");
       return;
     }
 
     if (!Number(formData.year.trim())) {
-      setError("Ano deve ser número.");
+      setError("Ano deve ser um número válido.");
       return;
     }
 
     const vehicleData = {
-      customer_id: selectedCustomerInfo.id,
+      customer_id: customerIdToSave,
       brand: formData.brand.trim(),
       model: formData.model.trim(),
       color: formData.color.trim(),
@@ -67,26 +87,15 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
 
       const { data } = await vehicleApi.create(vehicleData);
 
-      addVehicleToCustomer(selectedCustomerInfo.id, data);
+      addVehicleToCustomer(customerIdToSave, data);
 
-      setFormData({
-        customer_id: "",
-        brand: "",
-        color: "",
-        year: "",
-        model: "",
-        license_plate: "",
-      });
-
-      onClose();
+      closeWindow();
       navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);
 
       let errorMessage = "Erro ao salvar veículo no cliente";
       if (err.response) {
-        console.error("Status:", err.response.status);
-        console.error("Dados:", err.response.data);
         errorMessage = err.response.data?.message || errorMessage;
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
@@ -100,7 +109,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
     <div
       className={`modal-overlay ${isModalOpen ? "open" : ""}`}
       id="modalCarro"
-      onClick={onClose}
+      onClick={closeWindow}
     >
       <div
         className="modal modal-container-vehicle"
@@ -115,17 +124,31 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
         <div className="modal-body">
           <div className="field modal-vehicle-field-customer">
             <AutoComplete
-              inputValue={inputValue}
-              setInputValue={setInputValue}
-              customerData={customers}
-              setSelectedCustomerInfo={(customer) => {
+              label="Cliente *"
+              placeholder="Digite para buscar o cliente..."
+              items={customers}
+              filterKey="name"
+              value={inputValue}
+              selectedItem={selectedCustomerInfo}
+              onInputChange={(val) => setInputValue(val)}
+              onSelect={(customer) => {
+                setInputValue(customer.name);
                 setSelectedCustomerInfo(customer);
-                if (customer) handleFormFieldChange("customer_id", customer.id);
+                handleFormFieldChange("customer_id", customer.id);
               }}
-              selectedCustomerInfo={selectedCustomerInfo}
-              handleFormFieldChange={handleFormFieldChange}
-              setSelectedVehicleInfo={() => {}}
-              handleSelectedVehicle={() => {}}
+              onClear={() => {
+                setInputValue("");
+                setSelectedCustomerInfo(null);
+                handleFormFieldChange("customer_id", "");
+              }}
+              renderOption={(customer) => (
+                <>
+                  <div className="ac-option-name">{customer.name}</div>
+                  <div className="ac-option-sub">
+                    {`${formatarCelular(customer.cell || customer.telephone || "")} · ${customer.vehicles?.length || 0} veículo(s)`}
+                  </div>
+                </>
+              )}
             />
           </div>
 

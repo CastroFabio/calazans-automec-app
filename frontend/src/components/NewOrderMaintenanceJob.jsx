@@ -12,10 +12,7 @@ const NewOrderMaintenanceJob = ({
   handleRemoveMaintenanceJob,
   setListMaintenanceJobs,
   maintenanceJobsGroupData = [],
-  handleAddMaterial,
-  handleMaterialInputChange,
   materialsGroupData,
-  handleRemoveMaterial,
   findMaterialById,
   handleAddMaintenanceJob,
   calculateTotalMaintenanceJob,
@@ -25,7 +22,7 @@ const NewOrderMaintenanceJob = ({
   const [svcNome, setSvcNome] = useState("");
   const [selectedService, setSelectedService] = useState(null);
   const [svcObs, setSvcObs] = useState("");
-  const [editingJobId, setEditingJobId] = useState(null); // Guarda o ID do item em edição
+  const [editingJobId, setEditingJobId] = useState(null);
 
   const { setMaterialsList, materialsList } = useServiceOrders();
 
@@ -41,23 +38,66 @@ const NewOrderMaintenanceJob = ({
     );
   }, [maintenanceJobsGroupData]);
 
-  // Função para carregar um serviço registrado de volta para os campos do formulário
-  const handleEditMaintenanceJob = (jobToEdit) => {
-    setEditingJobId(jobToEdit.id);
-    setSvcNome(jobToEdit.name);
-    setSelectedService({
-      id: jobToEdit.maintenance_id,
-      name: jobToEdit.name,
-    });
-    setSvcObs(jobToEdit.description || "");
+  // Função para adicionar pecas temporárias ao serviço em criação
+  const handleAddLocalMaterial = () => {
+    const newMaterial = {
+      id: Date.now() + Math.random(),
+      itemMaintenance_id: editingJobId || null, // <-- GARANTE O VÍNCULO
+      material_id: null,
+      name: "",
+      quantity: 1,
+      value_unit: "",
+      receipt: "",
+      supplier: "",
+    };
+    setMaterialsList([...materialsList, newMaterial]);
+  };
 
-    // Carrega a lista de materiais vinculados a esta manutenção
-    setMaterialsList(jobToEdit.materialsList || []);
+  const handleRemoveLocalMaterial = (matId) => {
+    setMaterialsList((prev) => prev.filter((item) => item.id !== matId));
+  };
 
-    // Remove temporariamente da lista para re-inserção ao salvar
-    setListMaintenanceJobs((prev) =>
-      prev.filter((job) => job.id !== jobToEdit.id),
+  const handleLocalMaterialInputChange = (matId, field, value) => {
+    setMaterialsList((prev) =>
+      prev.map((item) => {
+        if (item.id !== matId) return item;
+
+        if (field === "material_id") {
+          if (!value) return { ...item, material_id: null, value_unit: "" };
+          const found = findMaterialById(value);
+          if (found) {
+            return {
+              ...item,
+              material_id: found.id,
+              name: found.name,
+              value_unit: found.value_unit ?? "",
+            };
+          }
+        }
+        return { ...item, [field]: value };
+      }),
     );
+  };
+
+  // Função para carregar os dados do card para o formulário de edição
+  const handleEditMaintenanceJob = (job) => {
+    setEditingJobId(job.id);
+    setSelectedService({
+      id: job.maintenance_id || job.maintenance?.id,
+      name: job.name,
+    });
+    setSvcNome(job.name);
+    setSvcObs(job.description || "");
+
+    // Filtra ou recupera as peças vinculadas a este serviço específico
+
+    const serviceMaterials =
+      job.materialsList ||
+      listMaintenanceJobs.filter(
+        (mat) => Number(mat.itemMaintenance_id) === Number(job.id),
+      );
+
+    setMaterialsList(serviceMaterials);
   };
 
   const handleRegistrarServico = () => {
@@ -66,16 +106,26 @@ const NewOrderMaintenanceJob = ({
       return;
     }
 
+    const formattedMaterials = materialsList.map((mat) => {
+      const foundMat = findMaterialById(mat.material_id);
+      return {
+        ...mat,
+        name: mat.name || foundMat?.name || "Peça",
+      };
+    });
+
     const itemService = {
-      service: selectedService,
+      service: {
+        id: selectedService.id,
+        name: selectedService.name,
+      },
       description: svcObs,
-      materialsList,
+      materialsList: formattedMaterials,
     };
 
-    // Se estava editando, mantemos o ID original, caso contrário criamos um novo
     handleAddMaintenanceJob(itemService, editingJobId);
 
-    // Reseta os estados locais
+    // Limpa o formulário de edição
     setEditingJobId(null);
     setSvcNome("");
     setSelectedService(null);
@@ -83,16 +133,12 @@ const NewOrderMaintenanceJob = ({
     setMaterialsList([]);
   };
 
-  const updatedServices = flatMaintenanceJobs.map((service) => {
-    const isAlreadyAdded = listMaintenanceJobs.some(
+  const updatedServices = flatMaintenanceJobs.map((service) => ({
+    ...service,
+    disabled: listMaintenanceJobs.some(
       (job) => job.maintenance_id === service.id,
-    );
-
-    return {
-      ...service,
-      disabled: isAlreadyAdded,
-    };
-  });
+    ),
+  }));
 
   return (
     <div className="form-section">
@@ -100,7 +146,7 @@ const NewOrderMaintenanceJob = ({
         <svg
           className="fs-header-svg"
           fill="none"
-          stroke="currentColor"
+          stroke="black"
           viewBox="0 0 24 24"
         >
           <path
@@ -166,14 +212,12 @@ const NewOrderMaintenanceJob = ({
                     <div className="ac-option-name">{service.name}</div>
                     <div className="ac-option-sub">{service.groupName}</div>
                   </div>
-
                   {service.disabled && (
                     <span
                       style={{
                         fontSize: "10px",
                         color: "var(--accent)",
                         fontWeight: "700",
-                        whiteSpace: "nowrap",
                         marginLeft: "8px",
                       }}
                     >
@@ -185,11 +229,10 @@ const NewOrderMaintenanceJob = ({
             />
 
             <div className="field">
-              <label className="">Observações</label>
+              <label>Observações</label>
               <input
                 type="text"
                 className="input"
-                id="svcObsInput"
                 placeholder="Opcional..."
                 value={svcObs}
                 onChange={(e) => setSvcObs(e.target.value)}
@@ -198,13 +241,14 @@ const NewOrderMaintenanceJob = ({
           </div>
 
           <AddMaterialInMaintenace
-            handleAddMaterial={() => handleAddMaterial(1)}
+            handleAddMaterial={handleAddLocalMaterial}
             materialsList={materialsList}
-            handleMaterialInputChange={handleMaterialInputChange}
+            handleMaterialInputChange={handleLocalMaterialInputChange}
             materialsGroupData={materialsGroupData}
-            handleRemoveMaterial={handleRemoveMaterial}
+            handleRemoveMaterial={handleRemoveLocalMaterial}
             findMaterialById={findMaterialById}
-            itemMaintenance_id={1}
+            itemMaintenance_id={editingJobId}
+            listMaintenanceJobs={listMaintenanceJobs}
           />
 
           <div className="svc-actions">

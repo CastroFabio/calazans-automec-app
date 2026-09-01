@@ -223,6 +223,15 @@
   gap: 12px;
   flex-shrink: 0;
 }
+
+.topbar.home {
+  background: var(--ink);
+}
+
+.topbar.home {
+  color: var(--bg);
+}
+
 .page-title {
   font-family: "Barlow Condensed", sans-serif;
   font-size: 19px;
@@ -267,8 +276,8 @@
   border: 1px solid var(--border);
 }
 .btn-secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--accent-mid);
+  color: var(--accent-mid);
   background: var(--accent-light);
 }
 .btn-ghost {
@@ -740,7 +749,7 @@
 
 .fs-header {
   padding: 11px 18px;
-  background: var(--accent-mid);
+  background: var(--accent);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -753,7 +762,7 @@
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--ink2);
+  color: var(--bg);
 }
 .fs-body {
   padding: 18px;
@@ -2938,13 +2947,17 @@
 }
 
 .ec-client-fs-body {
-  padding: 0;
+  border-bottom: 1px solid var(--border2);
+}
+
+.ec-client-fs-body:last-child {
+  border-bottom: 0;
 }
 
 .ec-client-fs-body-os-summary {
-  padding: 0;
+  padding: 8px;
   max-height: 480px;
-  overflow-y: auto;
+  overflow: auto !important;
 }
 
 .ec-client-form-section {
@@ -2993,8 +3006,6 @@
 }
 
 .ec-car-card {
-  border-bottom: 1px solid var(--bg);
-  padding: 14px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -3086,6 +3097,7 @@
 .edit-order-input {
   background: var(--surface2);
   color: var(--ink2);
+  font-family: "JetBrains Mono", monospace;
   cursor: default;
 }
 

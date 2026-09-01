@@ -1,4 +1,3 @@
-import React from "react";
 import { formattedPrice } from "../utils/convertPrice";
 
 const SvcRegistradosList = ({

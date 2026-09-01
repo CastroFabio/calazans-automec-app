@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import AutoComplete from "./AutoComplete.component"; // Importe o AutoComplete genérico
+import { parseValue } from "../utils/parseValue";
 
 const AddMaterialInMaintenace = ({
   handleAddMaterial,
@@ -9,13 +10,21 @@ const AddMaterialInMaintenace = ({
   handleRemoveMaterial,
   findMaterialById,
   itemMaintenance_id,
+  listMaintenanceJobs = [],
 }) => {
   // Filtra apenas os materiais deste serviço específico
-  const serviceMaterials = materialsList.filter(
-    (item) => item.itemMaintenance_id === itemMaintenance_id,
-  );
 
-  // Transforma os grupos de materiais em um array linear para a busca do AutoComplete
+  const serviceMaterials = itemMaintenance_id
+    ? materialsList.filter(
+        (item) =>
+          Number(item.itemMaintenance_id) === Number(itemMaintenance_id),
+      )
+    : materialsList;
+
+  const registeredMaterials = useMemo(() => {
+    return listMaintenanceJobs.flatMap((job) => job.materialsList || []);
+  }, [listMaintenanceJobs]);
+
   const flatMaterials = useMemo(() => {
     if (!materialsGroupData || materialsGroupData.length === 0) return [];
 
@@ -30,16 +39,20 @@ const AddMaterialInMaintenace = ({
   // Mapeia os materiais aplicando o status 'disabled' se já estiver na lista deste serviço
   const updatedFlatMaterials = useMemo(() => {
     return flatMaterials.map((mat) => {
-      const isAlreadyAdded = serviceMaterials.some(
+      const isAddedInCurrent = serviceMaterials.some(
+        (item) => Number(item.material_id) === Number(mat.id),
+      );
+
+      const isAddedInRegistered = registeredMaterials.some(
         (item) => Number(item.material_id) === Number(mat.id),
       );
 
       return {
         ...mat,
-        disabled: isAlreadyAdded,
+        disabled: isAddedInCurrent || isAddedInRegistered,
       };
     });
-  }, [flatMaterials, serviceMaterials]);
+  }, [flatMaterials, serviceMaterials, registeredMaterials]);
 
   return (
     <div className="add-material-by-maintenance-container">
@@ -171,14 +184,29 @@ const AddMaterialInMaintenace = ({
                             placeholder="0.00"
                             className="input-new-order-material-cost"
                             value={element.value_unit ?? ""}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              let val = e.target.value
+                                .replace(",", ".")
+                                .replace(/[^0-9.]/g, "");
+
+                              // Garante no máximo um ponto decimal
+                              const parts = val.split(".");
+                              if (parts.length > 2) {
+                                val = parts[0] + "." + parts.slice(1).join("");
+                              }
+
+                              // Limita a no máximo 2 casas decimais
+                              if (parts[1] && parts[1].length > 2) {
+                                val = `${parts[0]}.${parts[1].slice(0, 2)}`;
+                              }
+
                               handleMaterialInputChange(
                                 element.id,
                                 "value_unit",
-                                e.target.value,
+                                val,
                                 materialsGroupData,
-                              )
-                            }
+                              );
+                            }}
                           />
                         </div>
                       </td>
@@ -191,11 +219,8 @@ const AddMaterialInMaintenace = ({
                           value={
                             element.value_unit && element.quantity
                               ? (
-                                  parseFloat(
-                                    String(element.value_unit)
-                                      .replace(",", ".")
-                                      .replace(/[^0-9.]/g, ""),
-                                  ) * parseFloat(element.quantity)
+                                  parseValue(element.value_unit) *
+                                  parseFloat(element.quantity || 0)
                                 ).toFixed(2)
                               : "—"
                           }
