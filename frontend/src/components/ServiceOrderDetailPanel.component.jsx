@@ -250,7 +250,6 @@ const ServiceOrderDetailPanel = ({
             <div className="sp-label">
               Peças & Materiais ({itemMaterials.length})
             </div>
-
             {groupedMaterials.length > 0 ? (
               groupedMaterials.map((group) => {
                 const groupKey = `${group.supplier}-${group.receipt}`;

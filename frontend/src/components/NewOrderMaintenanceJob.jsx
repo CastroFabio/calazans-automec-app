@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import InputPriceValue from "./InputPriceValue";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
-import AutoComplete from "./AutoComplete.component"; // Importe o componente reutilizável
+import AutoComplete from "./AutoComplete.component";
 import SvcRegistradosList from "./SvcRegistradosList.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 
@@ -10,16 +10,13 @@ const NewOrderMaintenanceJob = ({
   handleFormFieldChange,
   listMaintenanceJobs,
   handleRemoveMaintenanceJob,
-  handleMaintenanceJobChange,
-  findMaintenanceJobById,
   setListMaintenanceJobs,
-  maintenanceJobsGroupData = [], // Dados dos grupos de serviços
+  maintenanceJobsGroupData = [],
   handleAddMaterial,
   handleMaterialInputChange,
   materialsGroupData,
   handleRemoveMaterial,
   findMaterialById,
-  itemMaintenance_id,
   handleAddMaintenanceJob,
   calculateTotalMaintenanceJob,
   calculateTotalMaterials,
@@ -28,10 +25,10 @@ const NewOrderMaintenanceJob = ({
   const [svcNome, setSvcNome] = useState("");
   const [selectedService, setSelectedService] = useState(null);
   const [svcObs, setSvcObs] = useState("");
+  const [editingJobId, setEditingJobId] = useState(null); // Guarda o ID do item em edição
 
   const { setMaterialsList, materialsList } = useServiceOrders();
 
-  // Transforma os dados agrupados (maintenanceJobsGroupData) em um array linear para o AutoComplete
   const flatMaintenanceJobs = useMemo(() => {
     if (!maintenanceJobsGroupData || maintenanceJobsGroupData.length === 0)
       return [];
@@ -39,10 +36,29 @@ const NewOrderMaintenanceJob = ({
     return maintenanceJobsGroupData.flatMap((group) =>
       group.maintenanceJobs.map((job) => ({
         ...job,
-        groupName: group.group, // Mantém a referência do nome do grupo
+        groupName: group.group,
       })),
     );
   }, [maintenanceJobsGroupData]);
+
+  // Função para carregar um serviço registrado de volta para os campos do formulário
+  const handleEditMaintenanceJob = (jobToEdit) => {
+    setEditingJobId(jobToEdit.id);
+    setSvcNome(jobToEdit.name);
+    setSelectedService({
+      id: jobToEdit.maintenance_id,
+      name: jobToEdit.name,
+    });
+    setSvcObs(jobToEdit.description || "");
+
+    // Carrega a lista de materiais vinculados a esta manutenção
+    setMaterialsList(jobToEdit.materialsList || []);
+
+    // Remove temporariamente da lista para re-inserção ao salvar
+    setListMaintenanceJobs((prev) =>
+      prev.filter((job) => job.id !== jobToEdit.id),
+    );
+  };
 
   const handleRegistrarServico = () => {
     if (!selectedService) {
@@ -56,14 +72,27 @@ const NewOrderMaintenanceJob = ({
       materialsList,
     };
 
-    handleAddMaintenanceJob(itemService);
+    // Se estava editando, mantemos o ID original, caso contrário criamos um novo
+    handleAddMaintenanceJob(itemService, editingJobId);
 
-    // Limpa os campos após registrar
+    // Reseta os estados locais
+    setEditingJobId(null);
     setSvcNome("");
     setSelectedService(null);
     setSvcObs("");
     setMaterialsList([]);
   };
+
+  const updatedServices = flatMaintenanceJobs.map((service) => {
+    const isAlreadyAdded = listMaintenanceJobs.some(
+      (job) => job.maintenance_id === service.id,
+    );
+
+    return {
+      ...service,
+      disabled: isAlreadyAdded,
+    };
+  });
 
   return (
     <div className="form-section">
@@ -95,23 +124,22 @@ const NewOrderMaintenanceJob = ({
           labor_cost={formData.labor_cost}
           handleFormFieldChange={handleFormFieldChange}
         />
-        {(listMaintenanceJobs?.length || []) > 0 ? (
+
+        {(listMaintenanceJobs?.length || []) > 0 && (
           <SvcRegistradosList
             listMaintenanceJobs={listMaintenanceJobs}
             setListMaintenanceJobs={setListMaintenanceJobs}
             handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
+            onEditMaintenanceJob={handleEditMaintenanceJob}
           />
-        ) : (
-          ""
         )}
 
         <div id="svcEntryForm" className="svc-entry-form">
           <div className="svc-grid-container">
-            {/* Componente AutoComplete para Serviços */}
             <AutoComplete
               label="Serviço *"
               placeholder="Digite o nome do serviço..."
-              items={flatMaintenanceJobs}
+              items={updatedServices}
               filterKey="name"
               value={svcNome}
               selectedItem={selectedService}
@@ -125,16 +153,39 @@ const NewOrderMaintenanceJob = ({
                 setSelectedService(null);
               }}
               renderOption={(service) => (
-                <>
-                  <div className="ac-option-name">{service.name}</div>
-                  <div className="ac-option-sub">{service.groupName}</div>
-                </>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                    opacity: service.disabled ? 0.5 : 1,
+                  }}
+                >
+                  <div>
+                    <div className="ac-option-name">{service.name}</div>
+                    <div className="ac-option-sub">{service.groupName}</div>
+                  </div>
+
+                  {service.disabled && (
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "var(--accent)",
+                        fontWeight: "700",
+                        whiteSpace: "nowrap",
+                        marginLeft: "8px",
+                      }}
+                    >
+                      Já adicionado
+                    </span>
+                  )}
+                </div>
               )}
             />
 
-            {/* Observações */}
             <div className="field">
-              <label className="svc-label">Observações</label>
+              <label className="">Observações</label>
               <input
                 type="text"
                 className="input"
@@ -146,7 +197,6 @@ const NewOrderMaintenanceJob = ({
             </div>
           </div>
 
-          {/* Peças */}
           <AddMaterialInMaintenace
             handleAddMaterial={() => handleAddMaterial(1)}
             materialsList={materialsList}
@@ -157,7 +207,6 @@ const NewOrderMaintenanceJob = ({
             itemMaintenance_id={1}
           />
 
-          {/* Botão registrar */}
           <div className="svc-actions">
             <button
               type="button"
@@ -177,12 +226,11 @@ const NewOrderMaintenanceJob = ({
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              Registrar serviço
+              {editingJobId ? "Atualizar serviço" : "Registrar serviço"}
             </button>
           </div>
         </div>
 
-        {/* Totais */}
         <div className="total-row">
           <div className="total-item">
             Mão de obra:

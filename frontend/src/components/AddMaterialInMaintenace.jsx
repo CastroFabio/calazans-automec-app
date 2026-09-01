@@ -27,6 +27,20 @@ const AddMaterialInMaintenace = ({
     );
   }, [materialsGroupData]);
 
+  // Mapeia os materiais aplicando o status 'disabled' se já estiver na lista deste serviço
+  const updatedFlatMaterials = useMemo(() => {
+    return flatMaterials.map((mat) => {
+      const isAlreadyAdded = serviceMaterials.some(
+        (item) => Number(item.material_id) === Number(mat.id),
+      );
+
+      return {
+        ...mat,
+        disabled: isAlreadyAdded,
+      };
+    });
+  }, [flatMaterials, serviceMaterials]);
+
   return (
     <div className="add-material-by-maintenance-container">
       <div className="add-material-by-maintenance-label">
@@ -60,7 +74,7 @@ const AddMaterialInMaintenace = ({
                       <td>
                         <AutoComplete
                           placeholder="Selecione..."
-                          items={flatMaterials}
+                          items={updatedFlatMaterials} // Usa o array com a flag disabled
                           filterKey="name"
                           value={element.name || ""}
                           selectedItem={selectedMaterial}
@@ -101,12 +115,36 @@ const AddMaterialInMaintenace = ({
                             );
                           }}
                           renderOption={(mat) => (
-                            <>
-                              <div className="ac-option-name">{mat.name}</div>
-                              <div className="ac-option-sub">
-                                {mat.groupName}
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                width: "100%",
+                                opacity: mat.disabled ? 0.5 : 1,
+                              }}
+                            >
+                              <div>
+                                <div className="ac-option-name">{mat.name}</div>
+                                <div className="ac-option-sub">
+                                  {mat.groupName}
+                                </div>
                               </div>
-                            </>
+
+                              {mat.disabled && (
+                                <span
+                                  style={{
+                                    fontSize: "10px",
+                                    color: "var(--accent)",
+                                    fontWeight: "700",
+                                    whiteSpace: "nowrap",
+                                    marginLeft: "8px",
+                                  }}
+                                >
+                                  Já adicionado
+                                </span>
+                              )}
+                            </div>
                           )}
                         />
                       </td>

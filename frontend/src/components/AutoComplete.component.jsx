@@ -92,19 +92,24 @@ const AutoComplete = ({
         {showSuggestions && (
           <div className="ac-dropdown open">
             {filteredSuggestions.length > 0 ? (
-              filteredSuggestions.map((item, index) => (
-                <div
-                  key={item.id || index}
-                  className="ac-option"
-                  onClick={() => handleSuggestionClick(item)}
-                >
-                  {renderOption ? (
-                    renderOption(item)
-                  ) : (
-                    <div className="ac-option-name">{item[filterKey]}</div>
-                  )}
-                </div>
-              ))
+              filteredSuggestions.map((item, index) => {
+                const isDisabled = item.disabled || item.isDisabled;
+                return (
+                  <div
+                    key={item.id || index}
+                    className="ac-option"
+                    onClick={() => {
+                      if (!isDisabled) handleSuggestionClick(item);
+                    }}
+                  >
+                    {renderOption ? (
+                      renderOption(item)
+                    ) : (
+                      <div className="ac-option-name">{item[filterKey]}</div>
+                    )}
+                  </div>
+                );
+              })
             ) : (
               <div className="ac-empty">Nenhum resultado encontrado</div>
             )}
