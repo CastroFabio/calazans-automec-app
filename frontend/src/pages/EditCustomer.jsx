@@ -323,7 +323,9 @@ const EditCustomer = () => {
       <div className="edit-layout ec-client-container">
         <div className="ec-client-info">
           <div className="form-section">
-            <div className="fs-header">Dados do Cliente</div>
+            <div className="fs-header">
+              <span className="fs-title">Dados do Cliente</span>
+            </div>
             <div className="fs-body">
               <div className="form-grid g3">
                 <div className="field col-full">
@@ -383,9 +385,11 @@ const EditCustomer = () => {
 
           <div className="form-section">
             <div className="fs-header ec-client-fs-header">
-              <span>Veículos ({customer.vehicles?.length || 0})</span>
+              <span className="fs-title">
+                Veículos ({customer.vehicles?.length || 0})
+              </span>
               <button
-                className="btn btn-sm btn-secondary"
+                className="btn btn-sm btn-primary"
                 onClick={handleOpenModal}
               >
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -399,6 +403,7 @@ const EditCustomer = () => {
                 Adicionar veículo
               </button>
             </div>
+
             {customer.vehicles?.map((element, index) => {
               const isEditingThis = editingVehicleId === element.id;
 
@@ -575,22 +580,20 @@ const EditCustomer = () => {
                 </div>
               );
             })}
-
-            {(!customer.vehicles || customer.vehicles.length === 0) && (
-              <div className="fs-body">
-                <div className="empty-state">Nenhum veículo cadastrado</div>
-              </div>
-            )}
           </div>
+          {(!customer.vehicles || customer.vehicles.length === 0) && (
+            <div className="fs-body">
+              <div className="empty-state">Nenhum veículo cadastrado</div>
+            </div>
+          )}
         </div>
 
         <div className="edit-side">
           <div className="form-section ec-client-form-section">
-            <div className="fs-header">Histórico de OS</div>
-            <div
-              className="fs-body ec-client-fs-body-os-summary"
-              id="ecOSSummary"
-            >
+            <div className="fs-header">
+              <span className="fs-title">Histórico de OS</span>
+            </div>
+            <div className="ec-client-fs-body-os-summary" id="ecOSSummary">
               {customer.serviceOrders?.map((element) => (
                 <div
                   key={element.id}

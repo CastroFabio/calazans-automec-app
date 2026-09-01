@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatLocalDateTime } from "../utils/convertDateTime";
-import AutoCompleteCustomer from "../components/AutoCompleteCustomer.component";
+import AutoComplete from "../components/AutoComplete.component";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
@@ -44,7 +44,6 @@ const NewServiceOrder = () => {
     formatLocalDateTime(new Date()),
   );
 
-  //AutoCompleteCustomer
   const [inputValue, setInputValue] = useState("");
 
   // State for form fields
@@ -85,6 +84,10 @@ const NewServiceOrder = () => {
 
     setCustomerData(customers);
   };
+
+  useEffect(() => {
+    setListMaintenanceJobs([]);
+  }, [customers]);
 
   useEffect(() => {
     handleFetchCustomers();
@@ -151,116 +154,56 @@ const NewServiceOrder = () => {
 
   // Função para salvar a OS
   const handleSaveOS = async () => {
-    // ========== VALIDAÇÕES BÁSICAS ==========
-
     const errorList = [];
 
-    // 1. Cliente
+    // ========== 1. VALIDAÇÕES BÁSICAS ==========
     if (!formData.customer_id) {
-      errorList.push("Selecione um cliente");
+      errorList.push("Selecione um cliente.");
     }
 
-    // 2. Veículo
     if (!formData.vehicle_id) {
-      errorList.push("Selecione um veículo");
+      errorList.push("Selecione um veículo.");
     }
 
-    // 3. Diagnóstico
-    if (!formData.diagnosis?.trim()) {
-      errorList.push("Preencha o diagnóstico");
+    /*  if (!formData.diagnosis?.trim()) {
+      errorList.push("Preencha o campo Diagnóstico / Problema.");
+    } */
+
+    if (listMaintenanceJobs.length === 0) {
+      errorList.push("Adicione pelo menos um serviço registrado.");
     }
 
-    // 4. Pelo menos um serviço ou material
-    if (listMaintenanceJobs.length <= 0) {
-      errorList.push("Adicione pelo menos um serviço");
-    }
+    // ========== 2. EXTRAIR E VALIDAR MATERIAIS DOS SERVIÇOS ==========
+    // Agrupa os materiais de todos os serviços registrados na lista
+    const allMaterials = listMaintenanceJobs.flatMap((job) =>
+      (job.materialsList || []).map((mat) => ({
+        ...mat,
+        parentJobId: job.id, // ID local temporário do serviço para mapeamento posterior
+      })),
+    );
 
-    if (!formData.labor_cost) {
-      errorList.push("Adicione um valor de mão de obra");
-    }
-
-    // ========== VALIDAÇÃO DE SERVIÇOS ==========
-
-    const invalidServices = listMaintenanceJobs.filter((job) => {
-      if (!job.maintenance_id) return true;
-
-      return false;
-    });
-
-    if (invalidServices.length > 0) {
-      const errorMessages = invalidServices.map((job, index) => {
-        const errors = [];
-        if (!job.maintenance_id) errors.push("serviço não selecionado");
-        return `Serviço #${index + 1}: ${errors.join(" e ")}`;
-      });
-
-      errorList.push(`Serviços incompletos:\n${errorMessages.join("\n")}`);
-    }
-
-    // ========== VALIDAÇÃO DE MATERIAIS ==========
-
-    const invalidMaterials = materialsList.filter((item) => {
+    const invalidMaterials = allMaterials.filter((item) => {
       if (!item.material_id) return true;
       const quantity = parseFloat(item.quantity) || 0;
-      if (quantity <= 0) return true;
-      const value = parseFloat(item.value_unit) || 0;
-      if (value <= 0) return true;
-      return false;
+      const value = parseValue(item.value_unit);
+      return quantity <= 0 || value <= 0;
     });
 
     if (invalidMaterials.length > 0) {
-      const errorMessages = invalidMaterials.map((item, index) => {
-        const errors = [];
-        if (!item.material_id) errors.push("material não selecionado");
-        const quantity = parseFloat(item.quantity) || 0;
-        if (quantity <= 0) errors.push("quantidade inválida");
-        const value = parseValue(item.value_unit) || 0;
-        if (value <= 0) errors.push("valor inválido");
-        return `Material #${index + 1}: ${errors.join(" e ")}`;
-      });
-
-      errorList.push(`Materiais incompletos:\n${errorMessages.join("\n")}`);
-    }
-
-    // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
-
-    /*    const hasValidMaterial = materialsList.some((item) => {
-      const quantity = Number(item.quantity) || 0;
-      const value = parseFloat(item.value_unit) || 0;
-      return quantity > 0 && value > 0;
-    });
-
-    if (!hasValidMaterial) {
-      errorList.push("Adicione pelo menos um material com valor válido");
-    } */
-
-    // ========== VALIDAÇÃO DE NOMES ==========
-
-    const servicesWithoutName = listMaintenanceJobs.filter((job) => {
-      job.maintenance_id && !job.name;
-    });
-
-    if (servicesWithoutName.length > 0) {
       errorList.push(
-        "Alguns serviços não têm nome associado. Selecione novamente.",
+        "Existem materiais cadastrados sem preenchimento correto (Material, Quantidade ou Valor).",
       );
     }
 
-    const materialsWithoutName = materialsList.filter(
-      (item) => item.material_id && !item.name,
-    );
-
-    if (materialsWithoutName.length > 0) {
-      errorList.push(
-        "Alguns materiais não têm nome associado. Selecione novamente.",
-      );
-    }
-
+    // Se houver erros nas validações, interrompe a execução
     if (errorList.length > 0) {
-      alert(errorList.join("\n"));
+      alert(
+        `❌ Verifique os erros antes de salvar:\n\n- ${errorList.join("\n- ")}`,
+      );
       return;
     }
-    // ========== PREPARAR DADOS DA OS ==========
+
+    // ========== 3. PREPARAR DADOS PRINCIPAIS DA OS ==========
     const serviceOrderData = {
       customer_id: formData.customer_id,
       vehicle_id: formData.vehicle_id,
@@ -268,142 +211,94 @@ const NewServiceOrder = () => {
       priority: formData.priority,
       status: formData.status,
       arrived_at: formData.arrived_at,
-      entry_km: parseFloat(formData.entry_km) || 0,
-      labor_cost: parseValue(formData.labor_cost) || 0,
+      entry_km:
+        parseFloat(String(formData.entry_km).replace(/[^0-9.]/g, "")) || 0,
+      labor_cost: parseValue(formData.labor_cost),
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
-      subtotal: parseFloat(calculateGrandTotal().toFixed(2)),
+      subtotal: calculateGrandTotal(),
     };
 
-    // ========== SALVAR ==========
     try {
       setLoading(true);
       setError(null);
 
-      // 1. Criar Service Order principal
+      // 1. Criar a Ordem de Serviço Principal
       const { data: createdServiceOrder } =
         await orderApi.create(serviceOrderData);
       const serviceOrderId = createdServiceOrder.id;
 
-      const maintenanceIdMap = {};
       let savedMaintenances = [];
       let savedMaterials = [];
+      const localToBackendJobIdMap = {};
 
-      // 2. Criar Item Maintenance
+      // 2. Criar Itens de Manutenção (Serviços) em Batch
       if (listMaintenanceJobs.length > 0) {
-        const itemMaintenanceData = listMaintenanceJobs.map((job) => ({
+        const itemMaintenancePayload = listMaintenanceJobs.map((job) => ({
           serviceorder_id: serviceOrderId,
           maintenance_id: job.maintenance_id,
           description: job.description?.trim() || "",
         }));
 
         const { data: createdMaintenances } =
-          await itemMaintenanceApi.createBatch(itemMaintenanceData);
+          await itemMaintenanceApi.createBatch(itemMaintenancePayload);
 
-        // Armazena os itens criados retornados do backend
         savedMaintenances =
           createdMaintenances.items || createdMaintenances || [];
 
-        // Mapeia o ID temporário local para o ID gerado pelo backend
+        // Mapeia o ID temporário local (Date.now()) com o ID real gerado no Banco
         if (Array.isArray(savedMaintenances)) {
           listMaintenanceJobs.forEach((job, index) => {
             if (savedMaintenances[index]) {
-              maintenanceIdMap[job.id] = savedMaintenances[index].id;
+              localToBackendJobIdMap[job.id] = savedMaintenances[index].id;
             }
           });
         }
       }
 
-      // 3. Criar Item Material
-      if ((materialsList || []).length > 0) {
-        const itemMaterialData = materialsList.map((item) => ({
+      // 3. Criar Itens de Material em Batch vinculados à Manutenção correspondente
+      if (allMaterials.length > 0) {
+        const itemMaterialPayload = allMaterials.map((item) => ({
           serviceorder_id: serviceOrderId,
           material_id: item.material_id,
-          itemMaintenance_id: maintenanceIdMap[item.itemMaintenance_id] || null,
+          itemMaintenance_id: localToBackendJobIdMap[item.parentJobId] || null,
           quantity: parseFloat(item.quantity) || 1,
-          value_unit: parseValue(item.value_unit) || 0,
+          value_unit: parseValue(item.value_unit),
           receipt: item.receipt?.trim() || "",
           supplier: item.supplier?.trim() || "",
         }));
 
         const { data: createdMaterials } =
-          await itemMaterialApi.createBatch(itemMaterialData);
+          await itemMaterialApi.createBatch(itemMaterialPayload);
         savedMaterials = createdMaterials.items || createdMaterials || [];
       }
 
-      // 4. Montar a Service Order completa com as listas inseridas/geradas
+      // 4. Atualizar Contexto Local e Redirecionar
       const fullServiceOrder = {
         ...createdServiceOrder,
         itemMaintenances: savedMaintenances,
         itemMaterials: savedMaterials,
       };
 
-      // 5. Salvar localmente via Contexto
       addServiceOrder(fullServiceOrder);
 
-      // Limpar formulários/listas locais
+      // Reseta listas do formulário
       setListMaintenanceJobs([]);
       setMaterialsList([]);
 
-      // ========== SUCESSO ==========
+      // Navega para a listagem
       navigate(PATHS.serviceOrder);
     } catch (err) {
-      // ✅ Melhor tratamento de erro
-      console.error("❌ Erro ao salvar OS:", err);
+      console.error("❌ Erro ao salvar a Ordem de Serviço:", err);
 
-      let errorMessage = "Erro ao salvar Ordem de Serviço";
-
-      if (err.response) {
-        // Erro com resposta do servidor
-        console.error("Status:", err.response.status);
-        console.error("Dados:", err.response.data);
-
-        switch (err.response.status) {
-          case 400:
-            errorMessage =
-              err.response.data?.message ||
-              "Dados inválidos. Verifique os campos preenchidos.";
-            break;
-          case 401:
-            errorMessage = "Não autorizado. Faça login novamente.";
-            break;
-          case 403:
-            errorMessage = "Sem permissão para criar ordens de serviço.";
-            break;
-          case 404:
-            errorMessage = "Recurso não encontrado. Verifique os dados.";
-            break;
-          case 409:
-            errorMessage =
-              err.response.data?.message || "Conflito com dados existentes.";
-            break;
-          case 422:
-            errorMessage =
-              err.response.data?.message ||
-              "Dados inválidos. Verifique as validações.";
-            break;
-          case 500:
-            errorMessage =
-              "Erro interno no servidor. Tente novamente mais tarde.";
-            break;
-          default:
-            errorMessage =
-              err.response.data?.message ||
-              `Erro ${err.response.status}: ${err.response.statusText}`;
-        }
-      } else if (err.request) {
-        // Requisição feita, mas sem resposta
-        errorMessage =
-          "Servidor não respondeu. Verifique sua conexão com a internet.";
+      let errorMessage = "Erro ao salvar Ordem de Serviço.";
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
       } else if (err.message) {
-        // Erro na configuração da requisição
         errorMessage = err.message;
       }
 
-      // ✅ Atualiza o estado de erro com a mensagem amigável
       setError(errorMessage);
-
-      // ✅ Mostra alerta com a mensagem
       alert(`❌ ${errorMessage}`);
     } finally {
       setLoading(false);
@@ -436,63 +331,35 @@ const NewServiceOrder = () => {
     handleFormFieldChange("arrived_at", event.target.value);
   };
 
-  /* //AutoCompleteCustomer
-  useEffect(() => {
-    if (inputValue.trim() === "") {
-      setFilteredSuggestions([]);
-      return;
-    }
-
-    const filtered = customerData.filter((suggestion) =>
-      suggestion.name.toLowerCase().includes(inputValue.toLowerCase()),
+  // NewOrderMaintenanceJob
+  const handleAddMaintenanceJob = (itemService, customId = null) => {
+    const totalPrice = itemService.materialsList.reduce(
+      (accumulator, currentValue) =>
+        parseFloat(currentValue.value_unit || 0) *
+          parseFloat(currentValue.quantity || 0) +
+        accumulator,
+      0,
     );
 
-    setFilteredSuggestions(filtered);
-  }, [inputValue]);
-
-  const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion.name);
-    setSelectedCustomerInfo(suggestion);
-    setShowSuggestions(false);
-    handleFormFieldChange("customer_id", suggestion.id);
-
-    setFilteredSuggestions([]);
-  };
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    setShowSuggestions(true);
-  };
-
-  const handleBlur = () => {
-    // Delay para permitir clique na sugestão
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
-  };
-
-  const handleFocus = () => {
-    if (inputValue.trim() !== "") {
-      setShowSuggestions(true);
-    }
-  };
-
-  const handleClearCustomer = () => {
-    setInputValue("");
-    setSelectedCustomerInfo(null);
-    setSelectedVehicleInfo({});
-  }; */
-
-  // NewOrderMaintenanceJob
-  const handleAddMaintenanceJob = () => {
-    const newMaintenanceJob = {
-      id: Date.now(),
-      maintenance_id: "",
-      description: "",
-      name: "",
+    const updatedJob = {
+      id: customId || Date.now(),
+      isOpen: false,
+      maintenance_id: itemService.service.id,
+      description: itemService.description,
+      name: itemService.service.name,
+      materialsList: itemService.materialsList,
+      totalPrice,
     };
 
-    setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
+    setListMaintenanceJobs((prev) => {
+      // Se o ID já existir na lista, atualiza o item correspondente
+      const exists = prev.some((job) => job.id === customId);
+      if (exists) {
+        return prev.map((job) => (job.id === customId ? updatedJob : job));
+      }
+      // Caso contrário, adiciona o novo serviço à lista
+      return [...prev, updatedJob];
+    });
   };
 
   const handleRemoveMaintenanceJob = (id) => {
@@ -520,6 +387,7 @@ const NewServiceOrder = () => {
       itemMaintenance_id: itemMaintenanceId,
       serviceorder_id: null,
     };
+
     setMaterialsList((prev) => [...prev, newMaterial]);
   };
 
@@ -562,10 +430,11 @@ const NewServiceOrder = () => {
     parseValue(formData.labor_cost || 0);
 
   const calculateTotalMaterials = () => {
-    return materialsList.reduce((total, material) => {
-      const unitValue = parseValue(material.value_unit);
-      const quantity = parseFloat(material.quantity) || 0;
-      return total + unitValue * quantity;
+    return (listMaintenanceJobs || []).reduce((total, material) => {
+      return parseFloat(total + material.totalPrice);
+      /* const unitValue = parseValue(material?.materialsList.value_unit);
+      const quantity = parseFloat(material?.materialsList.quantity) || 0; 
+      return total + unitValue * quantity;*/
     }, 0);
   };
 
@@ -616,7 +485,7 @@ const NewServiceOrder = () => {
       {/* ============== */}
       <div className="page-header">
         <div>
-          <div className="ph-sub">Preencha os dados para registrara</div>
+          <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
         {/* <div className="os-num-badge">#OS-2025-0143</div> */}
       </div>
@@ -630,7 +499,7 @@ const NewServiceOrder = () => {
             <svg
               className="fs-header-svg"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               viewBox="0 0 24 24"
             >
               <path
@@ -644,110 +513,64 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="form-grid">
-              <AutoCompleteCustomer
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-                customerData={customerData}
-                setSelectedCustomerInfo={setSelectedCustomerInfo}
-                selectedCustomerInfo={selectedCustomerInfo}
-                handleFormFieldChange={handleFormFieldChange}
-                setSelectedVehicleInfo={setSelectedVehicleInfo}
-                handleSelectedVehicle={handleSelectedVehicle}
-              />
-              {/* <div className="field">
-                <label>Cliente *</label>
-                <div className="ac-wrap">
-                  <div className="ac-input-row">
-                    <span className="ac-icon">
-                      <svg
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    </span>
-                    {selectedCustomerInfo ? (
-                      <div className="ac-selected-pill">
-                        {selectedCustomerInfo.name}
-                        <button onClick={handleClearCustomer}>×</button>
-                      </div>
-                    ) : (
-                      <>
-                        <input
-                          className="ac-input"
-                          type="text"
-                          placeholder="Digite o nome do cliente..."
-                          value={inputValue}
-                          onChange={handleInputChange}
-                          onFocus={handleFocus}
-                          onBlur={handleBlur}
-                        />
-                        <span
-                          className="ac-clear"
-                          onClick={handleClearCustomer}
-                        >
-                          ×
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div
-                    className={`ac-dropdown ${showSuggestions ? "open" : ""}`}
-                  >
-                    {showSuggestions && filteredSuggestions.length > 0 ? (
-                      filteredSuggestions.map((element, index) => (
-                        <div
-                          key={index}
-                          className="ac-option"
-                          onClick={() => {
-                            handleSuggestionClick(element);
-                            element.vehicles.length === 1
-                              ? handleSelectedVehicle(element.vehicles[0])
-                              : null;
-                          }}
-                        >
-                          <div className="ac-option-name">{element.name}</div>
-                          <div className="ac-option-sub">
-                            {`${formatarCelular(element.cell)} · ${element.vehicles.length}  veículo(s) `}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="ac-empty">Nenhum cliente encontrado</div>
-                    )}
-                    <div className="ac-option-create">
-                      <svg
-                        width="13"
-                        height="13"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      {`Cadastrar "${inputValue}" como novo cliente`}
+              <AutoComplete
+                label="Cliente *"
+                placeholder="Digite o nome do cliente..."
+                items={customers}
+                filterKey="name"
+                value={inputValue}
+                selectedItem={selectedCustomerInfo}
+                onInputChange={(val) => setInputValue(val)}
+                onSelect={(customer) => {
+                  setInputValue(customer.name);
+                  setSelectedCustomerInfo(customer);
+
+                  // Atualiza o ID do cliente no formData
+                  handleFormFieldChange("customer_id", customer.id);
+
+                  // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
+                  if (customer.vehicles?.length === 1) {
+                    handleSelectedVehicle(customer.vehicles[0]);
+                  } else {
+                    // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
+                    setSelectedVehicleInfo(null);
+                    handleFormFieldChange("vehicle_id", "");
+                  }
+                }}
+                onClear={() => {
+                  setInputValue("");
+                  setSelectedCustomerInfo(null);
+                  setSelectedVehicleInfo(null);
+                  handleFormFieldChange("customer_id", "");
+                  handleFormFieldChange("vehicle_id", "");
+                }}
+                onCreateNew={(term) => {
+                  console.log("Abrir modal para criar cliente:", term);
+                }}
+                renderOption={(customer) => (
+                  <>
+                    <div className="ac-option-name">{customer.name}</div>
+                    <div className="ac-option-sub">
+                      {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
                     </div>
-                  </div>
-                </div>
-              </div> */}
+                  </>
+                )}
+              />
+
               <div className="field">
                 <label>Veículo *</label>
                 <div className="car-badge-row">
                   {selectedCustomerInfo ? (
                     selectedCustomerInfo?.vehicles?.length > 0 ? (
                       selectedCustomerInfo?.vehicles?.length === 1 ? (
-                        <div className={`car-badge selected`}>
+                        <div
+                          className={`car-badge ${selectedVehicleInfo?.id === selectedCustomerInfo.vehicles[0].id ? "selected" : ""}`}
+                          onClick={() =>
+                            handleSelectedVehicle(
+                              selectedCustomerInfo.vehicles[0],
+                            )
+                          }
+                        >
                           <svg
                             className="car-badge-svg"
                             fill="none"
@@ -766,11 +589,9 @@ const NewServiceOrder = () => {
                       ) : (
                         selectedCustomerInfo.vehicles.map((element, index) => (
                           <div
-                            className={`car-badge ${selectedVehicleInfo === element ? "selected" : ""}`}
-                            key={index}
-                            onClick={() => {
-                              handleSelectedVehicle(element);
-                            }}
+                            className={`car-badge ${selectedVehicleInfo?.id === element.id ? "selected" : ""}`}
+                            key={element.id || index}
+                            onClick={() => handleSelectedVehicle(element)}
                           >
                             <svg
                               className="car-badge-svg"
@@ -873,7 +694,7 @@ const NewServiceOrder = () => {
             <svg
               className="fs-header-svg"
               fill="none"
-              stroke="currentColor"
+              stroke="black"
               viewBox="0 0 24 24"
             >
               <path
@@ -921,7 +742,7 @@ const NewServiceOrder = () => {
                 </select>
               </div>
               <div className="field col-full">
-                <label>Diagnóstico / Problema *</label>
+                <label>Diagnóstico / Problema</label>
                 <textarea
                   className="textarea"
                   placeholder="Descreva o problema relatado pelo cliente e o diagnóstico realizado..."
@@ -931,7 +752,7 @@ const NewServiceOrder = () => {
                   }
                 />
               </div>
-              <div className="field col-full">
+              {/* <div className="field col-full">
                 <label>Observações Internas</label>
                 <textarea
                   className="textarea form-textarea-obs"
@@ -941,7 +762,7 @@ const NewServiceOrder = () => {
                     handleFormFieldChange("observation", e.target.value)
                   }
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

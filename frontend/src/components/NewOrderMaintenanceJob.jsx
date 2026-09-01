@@ -1,35 +1,150 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import InputPriceValue from "./InputPriceValue";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
+import AutoComplete from "./AutoComplete.component";
+import SvcRegistradosList from "./SvcRegistradosList.component";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const NewOrderMaintenanceJob = ({
   formData,
   handleFormFieldChange,
   listMaintenanceJobs,
   handleRemoveMaintenanceJob,
-  handleMaintenanceJobChange,
-  findMaintenanceJobById,
   setListMaintenanceJobs,
-  maintenanceJobsGroupData,
-  handleAddMaterial,
-  materialsList,
-  handleMaterialInputChange,
+  maintenanceJobsGroupData = [],
   materialsGroupData,
-  handleRemoveMaterial,
   findMaterialById,
-  itemMaintenance_id,
   handleAddMaintenanceJob,
   calculateTotalMaintenanceJob,
   calculateTotalMaterials,
   calculateGrandTotal,
 }) => {
+  const [svcNome, setSvcNome] = useState("");
+  const [selectedService, setSelectedService] = useState(null);
+  const [svcObs, setSvcObs] = useState("");
+  const [editingJobId, setEditingJobId] = useState(null);
+
+  const { setMaterialsList, materialsList } = useServiceOrders();
+
+  const flatMaintenanceJobs = useMemo(() => {
+    if (!maintenanceJobsGroupData || maintenanceJobsGroupData.length === 0)
+      return [];
+
+    return maintenanceJobsGroupData.flatMap((group) =>
+      group.maintenanceJobs.map((job) => ({
+        ...job,
+        groupName: group.group,
+      })),
+    );
+  }, [maintenanceJobsGroupData]);
+
+  // Função para adicionar pecas temporárias ao serviço em criação
+  const handleAddLocalMaterial = () => {
+    const newMaterial = {
+      id: Date.now() + Math.random(),
+      itemMaintenance_id: editingJobId || null, // Garante o vínculo com o serviço que está sendo editado
+      material_id: null,
+      name: "",
+      quantity: 1,
+      value_unit: "",
+      receipt: "",
+      supplier: "",
+    };
+    setMaterialsList((prev) => [...prev, newMaterial]);
+  };
+
+  const handleRemoveLocalMaterial = (matId) => {
+    setMaterialsList((prev) => prev.filter((item) => item.id !== matId));
+  };
+
+  const handleLocalMaterialInputChange = (matId, field, value) => {
+    setMaterialsList((prev) =>
+      prev.map((item) => {
+        if (item.id !== matId) return item;
+
+        if (field === "material_id") {
+          if (!value) return { ...item, material_id: null, value_unit: "" };
+          const found = findMaterialById(value);
+          if (found) {
+            return {
+              ...item,
+              material_id: found.id,
+              name: found.name,
+              value_unit: found.value_unit ?? "",
+            };
+          }
+        }
+        return { ...item, [field]: value };
+      }),
+    );
+  };
+
+  // Função para carregar os dados do card para o formulário de edição
+  const handleEditMaintenanceJob = (job) => {
+    setEditingJobId(job.id);
+    setSelectedService({
+      id: job.maintenance_id || job.maintenance?.id,
+      name: job.name,
+    });
+    setSvcNome(job.name);
+    setSvcObs(job.description || "");
+
+    // Recupera as peças do serviço garantindo o vínculo correto do ID
+    const serviceMaterials = (job.materialsList || []).map((mat) => ({
+      ...mat,
+      itemMaintenance_id: job.id,
+    }));
+
+    setMaterialsList(serviceMaterials);
+  };
+
+  const handleRegistrarServico = () => {
+    if (!selectedService) {
+      alert("Por favor, selecione um serviço!");
+      return;
+    }
+
+    const formattedMaterials = materialsList.map((mat) => {
+      const foundMat = findMaterialById(mat.material_id);
+      return {
+        ...mat,
+        name: mat.name || foundMat?.name || "Peça",
+      };
+    });
+
+    const itemService = {
+      service: {
+        id: selectedService.id,
+        name: selectedService.name,
+      },
+      description: svcObs,
+      materialsList: formattedMaterials,
+    };
+
+    handleAddMaintenanceJob(itemService, editingJobId);
+
+    // Limpa o formulário de edição
+    setEditingJobId(null);
+    setSvcNome("");
+    setSelectedService(null);
+    setSvcObs("");
+    setMaterialsList([]);
+  };
+
+  const updatedServices = flatMaintenanceJobs.map((service) => ({
+    ...service,
+    disabled: listMaintenanceJobs.some(
+      (job) => job.maintenance_id === service.id && job.id !== editingJobId,
+    ),
+  }));
+
   return (
     <div className="form-section">
       <div className="fs-header">
         <svg
           className="fs-header-svg"
           fill="none"
-          stroke="currentColor"
+          stroke="black"
           viewBox="0 0 24 24"
         >
           <path
@@ -45,135 +160,119 @@ const NewOrderMaintenanceJob = ({
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span className="fs-title">Serviços</span>
+        <span className="fs-title">Serviços & Materiais</span>
       </div>
-      <div className="fs-body">
-        <div className="services-list">
-          <InputPriceValue
-            labor_cost={formData.labor_cost}
-            handleFormFieldChange={handleFormFieldChange}
+
+      <div className="fs-body fs-body-new-service-order">
+        <InputPriceValue
+          labor_cost={formData.labor_cost}
+          handleFormFieldChange={handleFormFieldChange}
+        />
+
+        {(listMaintenanceJobs?.length || []) > 0 && (
+          <SvcRegistradosList
+            listMaintenanceJobs={listMaintenanceJobs}
+            setListMaintenanceJobs={setListMaintenanceJobs}
+            handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
+            onEditMaintenanceJob={handleEditMaintenanceJob}
           />
-          {listMaintenanceJobs.length > 0
-            ? listMaintenanceJobs.map((element, index) => (
-                <div key={element.id} className="service-row">
-                  <div className="service-row-header">
-                    <div className="service-num">{index + 1}</div>
-                    <span className="service-row-label">
-                      Serviço #{index + 1}
-                    </span>
-                    <button
-                      className="remove-btn"
-                      onClick={() => handleRemoveMaintenanceJob(element.id)}
+        )}
+
+        <div id="svcEntryForm" className="svc-entry-form">
+          <div className="svc-grid-container">
+            <AutoComplete
+              label="Serviço *"
+              placeholder="Digite o nome do serviço..."
+              items={updatedServices}
+              filterKey="name"
+              value={svcNome}
+              selectedItem={selectedService}
+              onInputChange={(text) => setSvcNome(text)}
+              onSelect={(service) => {
+                setSvcNome(service.name);
+                setSelectedService(service);
+              }}
+              onClear={() => {
+                setSvcNome("");
+                setSelectedService(null);
+              }}
+              renderOption={(service) => (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                    opacity: service.disabled ? 0.5 : 1,
+                  }}
+                >
+                  <div>
+                    <div className="ac-option-name">{service.name}</div>
+                    <div className="ac-option-sub">{service.groupName}</div>
+                  </div>
+                  {service.disabled && (
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "var(--accent)",
+                        fontWeight: "700",
+                        marginLeft: "8px",
+                      }}
                     >
-                      ×
-                    </button>
-                  </div>
-                  <div className="form-grid g3 form-grid-servico">
-                    <div className="field col-2">
-                      <label>Tipo de Serviço *</label>
-                      <select
-                        className="select"
-                        value={element.maintenance_id || ""}
-                        onChange={(e) => {
-                          const selectedId = e.target.value;
-
-                          if (!selectedId) {
-                            handleMaintenanceJobChange(
-                              element.id,
-                              "maintenance_id",
-                              null,
-                              maintenanceJobsGroupData,
-                            );
-
-                            return;
-                          }
-
-                          const foundJob = findMaintenanceJobById(
-                            Number(selectedId),
-                          );
-
-                          if (foundJob) {
-                            setListMaintenanceJobs((prev) =>
-                              prev.map((job) => {
-                                if (job.id !== element.id) return job;
-                                return {
-                                  ...job,
-                                  maintenance_id: foundJob.id,
-                                };
-                              }),
-                            );
-                          }
-                        }}
-                      >
-                        <option value="">Selecione o serviço...</option>
-                        {maintenanceJobsGroupData.map((group, groupIndex) => (
-                          <optgroup key={groupIndex} label={group.group}>
-                            {group.maintenanceJobs.map((item, itemIndex) => {
-                              const isSelected = listMaintenanceJobs.some(
-                                (job) =>
-                                  Number(job.maintenance_id) ===
-                                  Number(item.id),
-                              );
-                              const isCurrentSelection =
-                                Number(element.maintenance_id) ===
-                                Number(item.id);
-
-                              return (
-                                <option
-                                  key={itemIndex}
-                                  value={item.id}
-                                  disabled={isSelected && !isCurrentSelection}
-                                >
-                                  {item.name}
-                                </option>
-                              );
-                            })}
-                          </optgroup>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="field col-full">
-                      <label>Observações</label>
-                      <textarea
-                        className="textarea service-row-textarea"
-                        placeholder="Detalhes adicionais do serviço..."
-                        value={element.description || ""}
-                        onChange={(e) =>
-                          handleMaintenanceJobChange(
-                            element.id, // ID do item na lista
-                            "description", // Campo a ser atualizado
-                            e.target.value, // Novo valor
-                            maintenanceJobsGroupData,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  <AddMaterialInMaintenace
-                    handleAddMaterial={() => handleAddMaterial(element.id)}
-                    materialsList={materialsList}
-                    handleMaterialInputChange={handleMaterialInputChange}
-                    materialsGroupData={materialsGroupData}
-                    handleRemoveMaterial={handleRemoveMaterial}
-                    findMaterialById={findMaterialById}
-                    itemMaintenance_id={element.id}
-                  />
+                      Já adicionado
+                    </span>
+                  )}
                 </div>
-              ))
-            : ""}
-        </div>
-        <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 4v16m8-8H4"
+              )}
             />
-          </svg>
-          Adicionar serviço
-        </button>
+
+            <div className="field">
+              <label>Observações</label>
+              <input
+                type="text"
+                className="input"
+                placeholder="Opcional..."
+                value={svcObs}
+                onChange={(e) => setSvcObs(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <AddMaterialInMaintenace
+            handleAddMaterial={handleAddLocalMaterial}
+            materialsList={materialsList}
+            handleMaterialInputChange={handleLocalMaterialInputChange}
+            materialsGroupData={materialsGroupData}
+            handleRemoveMaterial={handleRemoveLocalMaterial}
+            findMaterialById={findMaterialById}
+            itemMaintenance_id={editingJobId}
+            listMaintenanceJobs={listMaintenanceJobs}
+          />
+
+          <div className="svc-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleRegistrarServico}
+            >
+              <svg
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                className="svc-btn-icon"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              {editingJobId ? "Atualizar serviço" : "Registrar serviço"}
+            </button>
+          </div>
+        </div>
+
         <div className="total-row">
           <div className="total-item">
             Mão de obra:

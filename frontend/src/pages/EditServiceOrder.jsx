@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { orderApi } from "../api/orders";
-import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
-import { priorityReverseMap } from "../utils/priorityMap";
+import { statusReverseMap } from "../utils/statusMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { materialGroupApi } from "../api/materialGroups";
@@ -15,13 +14,14 @@ import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
 import { PATHS } from "../utils/paths";
+import { parseValue } from "../utils/parseValue";
 
 const EditServiceOrder = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   // ========== CONTEXTO ==========
-  const { getServiceOrderById, updateServiceOrder } = useServiceOrders();
+  const { updateServiceOrder } = useServiceOrders();
 
   // ========== ESTADOS ==========
   const [serviceOrder, setServiceOrder] = useState(null);
@@ -47,34 +47,43 @@ const EditServiceOrder = () => {
         setLoading(true);
         setError(null);
 
-        // 1. Buscar ordem de serviço
-        /* let found = getServiceOrderById(Number(id));
-
-        if (found) {
-          setServiceOrder(found);
-          setItemMaintenances(found.itemMaintenances || []);
-          setItemMaterials(found.itemMaterials || []);
-          setPayment(found.paid);
-        } else { 
-          const { data } = await orderApi.getById(Number(id));
-          setServiceOrder(data);
-          setItemMaintenances(data.itemMaintenances || []);
-          setItemMaterials(data.itemMaterials || []);
-          setPayment(data.paid);
-         } */
-
         const { data } = await orderApi.getById(Number(id));
         setServiceOrder(data);
-        setItemMaintenances(data.itemMaintenances || []);
-        setItemMaterials(data.itemMaterials || []);
 
-        // 2. Buscar grupos de serviços (para o select)
+        const allMaterials = data.itemMaterials || [];
+        setItemMaterials(allMaterials);
+
+        // Grupos de serviços e materiais
         const { data: maintenanceData } = await maintenanceGroupApi.getAll();
         setMaintenanceJobsGroupData(maintenanceData);
 
-        // 3. Buscar grupos de materiais (para o select)
         const { data: materialData } = await materialGroupApi.getAll();
         setMaterialsGroupData(materialData);
+
+        // Formata os serviços mapeando suas peças vinculadas e calculando o subtotal
+        const formattedMaintenances = (data.itemMaintenances || []).map((m) => {
+          const linkedMaterials = allMaterials.filter(
+            (mat) => Number(mat.itemMaintenance_id) === Number(m.id),
+          );
+
+          const materialsSum = linkedMaterials.reduce((acc, mat) => {
+            const qty = parseFloat(mat.quantity) || 0;
+            const val = parseFloat(mat.value_unit) || 0;
+            return acc + qty * val;
+          }, 0);
+
+          return {
+            ...m,
+            name: m.maintenancejob.name || "Serviço",
+            materialsList: linkedMaterials.map((mat) => ({
+              ...mat,
+              name: mat.name || mat.material?.name || "Peça",
+            })),
+            totalPrice: materialsSum,
+          };
+        });
+
+        setItemMaintenances(formattedMaintenances);
       } catch (err) {
         console.error("Erro ao carregar dados:", err);
         setError(err.message || "Erro ao carregar dados");
@@ -84,9 +93,56 @@ const EditServiceOrder = () => {
     };
 
     if (id) loadData();
-  }, [id, getServiceOrderById]);
+  }, [id]);
 
-  // ========== FUNÇÕES PARA SERVIÇOS (itemMaintenances) ==========
+  // ========== FUNÇÃO DE ADICIONAR SERVIÇO ==========
+  const handleAddMaintenanceJob = (itemService, editingJobId = null) => {
+    const serviceId = editingJobId || Date.now();
+
+    const formattedMaterials = (itemService.materialsList || []).map((mat) => ({
+      ...mat,
+      id: mat.id || Date.now() + Math.random(),
+      itemMaintenance_id: serviceId,
+    }));
+
+    const serviceTotalPrice = formattedMaterials.reduce((total, mat) => {
+      const qty = parseFloat(mat.quantity) || 0;
+      const val = parseValue(mat.value_unit);
+      return total + qty * val;
+    }, 0);
+
+    const updatedJob = {
+      id: serviceId,
+      maintenance_id: itemService.service.id,
+      name: itemService.service.name,
+      description: itemService.description || "",
+      materialsList: formattedMaterials,
+      totalPrice: serviceTotalPrice,
+      maintenance: {
+        id: itemService.service.id,
+        name: itemService.service.name,
+      },
+    };
+
+    // Se for edição, substitui na lista; se for novo, adiciona
+    setItemMaintenances((prev) => {
+      const exists = prev.some((item) => item.id === serviceId);
+      if (exists) {
+        return prev.map((item) => (item.id === serviceId ? updatedJob : item));
+      }
+      return [...prev, updatedJob];
+    });
+
+    // Atualiza também o estado global das peças (itemMaterials)
+    setItemMaterials((prev) => {
+      const otherMaterials = prev.filter(
+        (mat) => Number(mat.itemMaintenance_id) !== Number(serviceId),
+      );
+      return [...otherMaterials, ...formattedMaterials];
+    });
+  };
+
+  // ========== FUNÇÕES DE SUPORTE E DELEÇÃO ==========
 
   const findMaintenanceJobById = (targetId) => {
     const numericId = Number(targetId);
@@ -99,73 +155,6 @@ const EditServiceOrder = () => {
     return null;
   };
 
-  const handleAddMaintenanceJob = () => {
-    const newJob = {
-      id: Date.now(),
-      maintenance_id: null,
-      value_unit: "",
-      description: "",
-    };
-    setItemMaintenances([...itemMaintenances, newJob]);
-  };
-
-  const handleRemoveMaintenanceJob = (id) => {
-    // Se for um serviço já salvo no banco, guarda o ID para remover na API
-    if (id <= 1000000) {
-      setDeletedMaintenanceIds((prev) => [...prev, id]);
-    }
-
-    // Remove também todos os materiais associados a este serviço localmente (e do banco se já existiam)
-    const materialsToRemove = itemMaterials.filter(
-      (mat) => mat.itemMaintenance_id === id,
-    );
-
-    materialsToRemove.forEach((mat) => {
-      if (mat.id <= 1000000) {
-        setDeletedMaterialIds((prev) => [...prev, mat.id]);
-      }
-    });
-
-    // Remove do estado local da tela
-    setItemMaterials((prev) =>
-      prev.filter((mat) => mat.itemMaintenance_id !== id),
-    );
-    setItemMaintenances((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleMaintenanceJobChange = (
-    id,
-    field,
-    value,
-    maintenanceJobsGroupData,
-  ) => {
-    setItemMaintenances((prev) =>
-      prev.map((job) => {
-        if (job.id !== id) return job;
-
-        if (field === "maintenance_id") {
-          if (!value) {
-            return { ...job, maintenance_id: null, value_unit: "" };
-          }
-          const foundJob = findMaintenanceJobById(value);
-          if (foundJob) {
-            const rawValue = foundJob.value_unit ?? foundJob.value_unit ?? "";
-            return {
-              ...job,
-              maintenance_id: foundJob.id,
-              value_unit:
-                typeof rawValue === "string" ? rawValue : String(rawValue),
-            };
-          }
-        }
-
-        return { ...job, [field]: value };
-      }),
-    );
-  };
-
-  // ========== FUNÇÕES PARA MATERIAIS (itemMaterials) ==========
-
   const findMaterialById = (targetId) => {
     const numericId = Number(targetId);
     for (const group of materialsGroupData) {
@@ -177,31 +166,63 @@ const EditServiceOrder = () => {
     return null;
   };
 
-  const handleAddMaterial = (itemMaintenanceID) => {
-    const newMaterial = {
-      id: Date.now(),
-      material_id: null,
-      itemMaintenance_id: itemMaintenanceID,
-      name: "",
-      quantity: 1,
-      value_unit: "",
-      receipt: "",
-      supplier: "",
+  /*  // Função chamada por NewOrderMaintenanceJob para registrar um novo serviço
+  const handleAddMaintenanceJob = (itemService, editingJobId = null) => {
+    const serviceId = editingJobId || Date.now();
+
+    const newJob = {
+      id: serviceId,
+      maintenance_id: itemService.service.id,
+      name: itemService.service.name,
+      description: itemService.description || "",
+      maintenance: {
+        id: itemService.service.id,
+        name: itemService.service.name,
+      },
     };
-    setItemMaterials([...itemMaterials, newMaterial]);
+
+    setItemMaintenances((prev) => [...prev, newJob]);
+
+    if (itemService.materialsList && itemService.materialsList.length > 0) {
+      const formattedMaterials = itemService.materialsList.map((mat) => ({
+        ...mat,
+        id: mat.id || Date.now() + Math.random(),
+        itemMaintenance_id: serviceId,
+      }));
+
+      setItemMaterials((prev) => [...prev, ...formattedMaterials]);
+    }
+  }; */
+
+  const handleRemoveMaintenanceJob = (id) => {
+    if (id <= 1000000) {
+      setDeletedMaintenanceIds((prev) => [...prev, id]);
+    }
+
+    const materialsToRemove = itemMaterials.filter(
+      (mat) => mat.itemMaintenance_id === id,
+    );
+
+    materialsToRemove.forEach((mat) => {
+      if (mat.id <= 1000000) {
+        setDeletedMaterialIds((prev) => [...prev, mat.id]);
+      }
+    });
+
+    setItemMaterials((prev) =>
+      prev.filter((mat) => mat.itemMaintenance_id !== id),
+    );
+    setItemMaintenances((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleRemoveMaterial = (id) => {
-    // Se for um item já persistido no banco (ID normal), guarda para deletar na API
     if (id <= 1000000) {
       setDeletedMaterialIds((prev) => [...prev, id]);
     }
-
-    // Remove do estado local da tela
     setItemMaterials((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleMaterialInputChange = (id, field, value, materialGroupData) => {
+  const handleMaterialInputChange = (id, field, value) => {
     setItemMaterials((prev) =>
       prev.map((element) => {
         if (element.id !== id) return element;
@@ -216,7 +237,7 @@ const EditServiceOrder = () => {
               ...element,
               material_id: foundMat.id,
               name: foundMat.name,
-              value_unit: foundMat.value_unit ?? foundMat.value_unit ?? "",
+              value_unit: foundMat.value_unit ?? "",
             };
           }
         }
@@ -228,30 +249,8 @@ const EditServiceOrder = () => {
 
   // ========== CÁLCULOS ==========
 
-  const parseValue = (value) => {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === "number") return +value.toFixed(2);
-
-    if (typeof value === "string") {
-      let clean = value;
-
-      if (clean.includes(",") && clean.includes(".")) {
-        clean = clean.split(".").join("");
-      }
-
-      clean = clean.replace(",", ".");
-      clean = clean.replace(/[^0-9.]/g, "");
-
-      // Faz o parse e força a limitação de 2 casas decimais
-      const parsed = parseFloat(clean);
-      return parsed ? +parsed.toFixed(2) : 0;
-    }
-
-    return 0;
-  };
-
   const calculateTotalMaintenanceJob = () =>
-    parseValue(serviceOrder.labor_cost || 0);
+    parseValue(serviceOrder?.labor_cost || 0);
 
   const calculateTotalMaterials = () => {
     return itemMaterials.reduce((total, item) => {
@@ -265,142 +264,42 @@ const EditServiceOrder = () => {
     return calculateTotalMaintenanceJob() + calculateTotalMaterials();
   };
 
-  // ========== SALVAR ORDEM ==========
-
   const handlePaymentOnChange = (e) => {
     let value = e.target.value;
-    value = value.replace(",", ".");
-    value = value.replace(/[^0-9.]/g, "");
-    const parts = value.split(".");
 
+    value = value.replace(",", ".").replace(/[^0-9.]/g, "");
+
+    const parts = value.split(".");
     if (parts.length > 2) {
       value = parts[0] + "." + parts.slice(1).join("");
     }
 
+    // Corta qualquer caractere após a segunda casa decimal
     if (parts[1] && parts[1].length > 2) {
       value = `${parts[0]}.${parts[1].slice(0, 2)}`;
     }
 
     setPayment(value);
   };
-  // ========== SALVAR ORDEM ==========
+
+  // ========== SUBMIT / SALVAR OS ==========
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!serviceOrder) return;
 
     const errorList = [];
 
-    if (!serviceOrder) return;
-
-    // 1. Cliente
-    if (!serviceOrder.customer_id) {
-      errorList.push("Selecione um cliente");
-    }
-
-    // 2. Veículo
-    if (!serviceOrder.vehicle_id) {
-      errorList.push("Selecione um veículo");
-    }
-
-    // 3. Diagnóstico
     if (!serviceOrder.diagnosis?.trim()) {
       errorList.push("Preencha o diagnóstico");
     }
 
-    // 4. Pelo menos um serviço ou material
     if (itemMaintenances.length <= 0) {
       errorList.push("Adicione pelo menos um serviço");
     }
 
-    if (!serviceOrder.labor_cost) {
+    if (serviceOrder.labor_cost === "" || serviceOrder.labor_cost === null) {
       errorList.push("Adicione um valor de mão de obra");
-    }
-
-    if (!parseFloat(serviceOrder.labor_cost))
-      errorList.push("Valor de mão de obra deve ser um número.");
-
-    // ========== VALIDAÇÃO DE SERVIÇOS ==========
-
-    const invalidServices = itemMaintenances.filter((job) => {
-      if (!job.maintenance_id) return true;
-
-      return false;
-    });
-
-    if (invalidServices.length > 0) {
-      const errorMessages = invalidServices.map((job, index) => {
-        const errors = [];
-        if (!job.maintenance_id) errors.push("serviço não selecionado");
-        return `Serviço #${index + 1}: ${errors.join(" e ")}`;
-      });
-
-      errorList.push(`Serviços incompletos:\n${errorMessages.join("\n")}`);
-    }
-
-    // ========== VALIDAÇÃO DE MATERIAIS ==========
-
-    const invalidMaterials = itemMaterials.filter((item) => {
-      if (!item.material_id) return true;
-      const quantity = parseFloat(item.quantity) || 0;
-      if (quantity <= 0) return true;
-      const value = parseFloat(item.value_unit) || 0;
-      if (value <= 0) return true;
-      return false;
-    });
-
-    if (invalidMaterials.length > 0) {
-      const errorMessages = invalidMaterials.map((item, index) => {
-        const errors = [];
-        if (!item.material_id) errors.push("material não selecionado");
-        const quantity = parseFloat(item.quantity) || 0;
-        if (quantity <= 0) errors.push("quantidade inválida");
-        const value = parseValue(item.value_unit) || 0;
-        if (value <= 0) errors.push("valor inválido");
-        return `Material #${index + 1}: ${errors.join(" e ")}`;
-      });
-
-      errorList.push(`Materiais incompletos:\n${errorMessages.join("\n")}`);
-    }
-
-    // ========== VALIDAÇÃO DE VALORES POSITIVOS ==========
-    if (itemMaterials.length > 0) {
-      const hasValidMaterialQty = itemMaterials.some((item) => {
-        const quantity = Number(item.quantity) || 0;
-        return quantity > 0;
-      });
-      const hasValidMaterialValue = itemMaterials.some((item) => {
-        const value = parseFloat(item.value_unit) || 0;
-        return value > 0;
-      });
-
-      if (!hasValidMaterialQty) {
-        errorList.push("A quantidade de material tem que ser número.");
-      }
-
-      if (!hasValidMaterialValue) {
-        errorList.push("O valor de material tem que ser número.");
-      }
-    }
-
-    // ========== VALIDAÇÃO DE NOMES ==========
-
-    const servicesWithoutName = itemMaintenances.filter((job) => {
-      job.maintenance_id && !job.name;
-    });
-
-    if (servicesWithoutName.length > 0) {
-      errorList.push(
-        "Alguns serviços não têm nome associado. Selecione novamente.",
-      );
-    }
-
-    const materialsWithoutName = itemMaterials.filter(
-      (item) => !item.material_id && !item.name,
-    );
-
-    if (materialsWithoutName.length > 0) {
-      errorList.push(
-        "Alguns materiais não têm nome associado. Selecione novamente.",
-      );
     }
 
     if (errorList.length > 0) {
@@ -412,23 +311,37 @@ const EditServiceOrder = () => {
     setError(null);
 
     try {
+      // 1. Apagar itens deletados do BD
+      if (deletedMaterialIds.length > 0) {
+        await Promise.all(
+          deletedMaterialIds.map((id) => itemMaterialApi.delete(id)),
+        );
+        setDeletedMaterialIds([]);
+      }
+
+      if (deletedMaintenanceIds.length > 0) {
+        await Promise.all(
+          deletedMaintenanceIds.map((id) => itemMaintenanceApi.delete(id)),
+        );
+        setDeletedMaintenanceIds([]);
+      }
+
+      // 2. Atualizar OS principal
       const updateData = {
         professional: serviceOrder.professional,
         priority: serviceOrder.priority,
         status: serviceOrder.status,
         diagnosis: serviceOrder.diagnosis,
         observation: serviceOrder.observation,
-        paid: serviceOrder.paid,
+        paid: parseValue(serviceOrder.paid),
         subtotal: parseFloat(calculateGrandTotal().toFixed(2)),
         labor_cost: parseValue(serviceOrder.labor_cost) || 0,
       };
 
       const { data } = await orderApi.update(serviceOrder.id, updateData);
 
-      // Mapeador para associar IDs temporários/antigos aos novos IDs do Backend
+      // 3. Salvar/Atualizar Manutenções
       const maintenanceIdMap = {};
-
-      // 1. Processa e atualiza a lista de Manutenções/Serviços
       const updatedItemMaintenances = await Promise.all(
         itemMaintenances.map(async (item) => {
           const isNew = item.id > 1000000;
@@ -439,31 +352,22 @@ const EditServiceOrder = () => {
           };
 
           if (isNew) {
-            // Recebe o item criado pelo Backend (com o ID definitivo gerado)
             const { data: createdItem } =
               await itemMaintenanceApi.create(payload);
-
-            // Mapeia o ID temporário (item.id) para o ID real retornado (createdItem.id)
             maintenanceIdMap[item.id] = createdItem.id;
-
             return createdItem;
           } else {
             await itemMaintenanceApi.update(item.id, payload);
-
-            // Mantém o próprio ID existente no mapa para fallback
             maintenanceIdMap[item.id] = item.id;
-
             return item;
           }
         }),
       );
 
-      // 2. Processa e atualiza a lista de Peças/Materiais
+      // 4. Salvar/Atualizar Materiais
       const updatedItemMaterials = await Promise.all(
         itemMaterials.map(async (item) => {
           const isNew = item.id > 1000000;
-
-          // Resolve o itemMaintenance_id real usando o mapeamento
           const resolvedMaintenanceId =
             maintenanceIdMap[item.itemMaintenance_id] ||
             item.itemMaintenance_id ||
@@ -480,7 +384,6 @@ const EditServiceOrder = () => {
           };
 
           if (isNew) {
-            // Recebe o material criado pelo Backend (com o ID definitivo gerado)
             const { data: createdMaterial } =
               await itemMaterialApi.create(payload);
             return createdMaterial;
@@ -491,7 +394,6 @@ const EditServiceOrder = () => {
         }),
       );
 
-      // 3. Monta o objeto atualizado com os dados vindos das APIs
       const updatedOrder = {
         ...serviceOrder,
         ...data,
@@ -499,53 +401,10 @@ const EditServiceOrder = () => {
         itemMaterials: updatedItemMaterials,
       };
 
-      // Excluir materiais do backend
-      if (deletedMaterialIds.length > 0) {
-        await Promise.all(
-          deletedMaterialIds.map((id) => itemMaterialApi.delete(id)),
-        );
-        setDeletedMaterialIds([]);
-      }
-
-      // Excluir serviços (itemMaintenances) do backend
-      if (deletedMaintenanceIds.length > 0) {
-        await Promise.all(
-          deletedMaintenanceIds.map((id) => itemMaintenanceApi.delete(id)),
-        );
-        setDeletedMaintenanceIds([]);
-      }
-
       updateServiceOrder(updatedOrder);
       navigate(PATHS.serviceOrder);
     } catch (err) {
-      console.error("❌ Erro:", err);
-      setError(err.response?.data?.message || "Erro ao atualizar ordem");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSubmitPayment = async (e) => {
-    e.preventDefault();
-    if (!serviceOrder) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      // Trata e converte para número
-      const formattedPayment = payment.replace(",", ".");
-      const numericPayment = parseValue(formattedPayment);
-
-      const updateData = { paid: numericPayment };
-      const { data } = await orderApi.update(serviceOrder.id, updateData);
-      const updatedOrder = { ...serviceOrder, ...data };
-      updateServiceOrder(updatedOrder);
-
-      // Opcional: limpa o campo após registrar o pagamento
-      setPayment("");
-    } catch (err) {
-      console.error("❌ Erro:", err);
+      console.error("❌ Erro ao atualizar OS:", err);
       setError(err.response?.data?.message || "Erro ao atualizar ordem");
     } finally {
       setSaving(false);
@@ -557,48 +416,33 @@ const EditServiceOrder = () => {
     if (!serviceOrder || !payment) return;
 
     setSaving(true);
-    setError(null);
-
     try {
       const numericPayment = parseValue(payment);
       const updateData = { paid: numericPayment };
-
       const { data } = await orderApi.update(serviceOrder.id, updateData);
-      const updatedOrder = { ...serviceOrder, ...data };
-      updateServiceOrder(updatedOrder);
-
-      setPayment(""); // Limpa o input após a gravação
+      setServiceOrder((prev) => ({ ...prev, ...data }));
+      setPayment("");
     } catch (err) {
-      console.error("❌ Erro:", err);
-      setError(err.response?.data?.message || "Erro ao atualizar ordem");
+      setError("Erro ao registrar pagamento");
     } finally {
       setSaving(false);
     }
   };
 
-  // Soma o valor digitado ao valor que já foi pago anteriormente
   const handleAddPayment = async (e) => {
     e.preventDefault();
     if (!serviceOrder || !payment) return;
 
     setSaving(true);
-    setError(null);
-
     try {
       const currentPaid = parseValue(serviceOrder.paid);
       const addedValue = parseValue(payment);
-      const newTotalPaid = currentPaid + addedValue;
-
-      const updateData = { paid: newTotalPaid };
-
+      const updateData = { paid: currentPaid + addedValue };
       const { data } = await orderApi.update(serviceOrder.id, updateData);
-      const updatedOrder = { ...serviceOrder, ...data };
-      updateServiceOrder(updatedOrder);
-
-      setPayment(""); // Limpa o input após a gravação
+      setServiceOrder((prev) => ({ ...prev, ...data }));
+      setPayment("");
     } catch (err) {
-      console.error("❌ Erro:", err);
-      setError(err.response?.data?.message || "Erro ao adicionar pagamento");
+      setError("Erro ao adicionar pagamento");
     } finally {
       setSaving(false);
     }
@@ -617,10 +461,9 @@ const EditServiceOrder = () => {
     try {
       setSaving(true);
       await orderApi.delete(serviceOrder.id);
-      navigate("/");
+      navigate(PATHS.serviceOrder);
     } catch (err) {
-      console.error("❌ Erro:", err);
-      setError(err.response?.data?.message || "Erro ao cancelar ordem");
+      setError("Erro ao cancelar ordem");
     } finally {
       setSaving(false);
     }
@@ -634,7 +477,7 @@ const EditServiceOrder = () => {
     <div className="page" id="page-editar-os">
       <div className="edit-order-container">
         <div className="breadcrumb">
-          <a onClick={() => navigate("/")}>Ordens de Serviço</a>
+          <a onClick={() => navigate(PATHS.serviceOrder)}>Ordens de Serviço</a>
           <span className="breadcrumb-sep">›</span>
           <span className="edit-order-id-header" id="editBreadcrumbId">
             #{serviceOrder.id}
@@ -660,9 +503,22 @@ const EditServiceOrder = () => {
 
       <div className="edit-layout">
         <div className="edit-main">
-          {/* ========== CLIENTE & VEÍCULO ========== */}
+          {/* CLIENTE & VEÍCULO */}
           <div className="form-section">
             <div className="fs-header">
+              <svg
+                className="fs-header-svg"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
               <span className="fs-title">Cliente & Veículo</span>
             </div>
             <div className="fs-body">
@@ -678,11 +534,7 @@ const EditServiceOrder = () => {
                   <div className="input edit-order-input">
                     <span>{serviceOrder.vehicle?.license_plate || "—"}</span>
                     {serviceOrder.vehicle?.brand && (
-                      <>
-                        {" "}
-                        · {serviceOrder.vehicle.brand}{" "}
-                        {serviceOrder.vehicle.model}
-                      </>
+                      <>{` · ${serviceOrder.vehicle.brand} ${serviceOrder.vehicle.model}`}</>
                     )}
                   </div>
                 </div>
@@ -702,18 +554,15 @@ const EditServiceOrder = () => {
             </div>
           </div>
 
-          {/* ========== SERVIÇOS ========== */}
+          {/* SERVIÇOS & MATERIAIS */}
           <NewOrderMaintenanceJob
             formData={serviceOrder}
             handleFormFieldChange={handleFormFieldChange}
             listMaintenanceJobs={itemMaintenances}
             handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
-            handleMaintenanceJobChange={handleMaintenanceJobChange}
-            findMaintenanceJobById={findMaintenanceJobById}
             setListMaintenanceJobs={setItemMaintenances}
             maintenanceJobsGroupData={maintenanceJobsGroupData}
-            handleAddMaterial={handleAddMaterial}
-            materialsList={itemMaterials}
+            handleAddMaterial={() => {}}
             handleMaterialInputChange={handleMaterialInputChange}
             materialsGroupData={materialsGroupData}
             handleRemoveMaterial={handleRemoveMaterial}
@@ -723,7 +572,8 @@ const EditServiceOrder = () => {
             calculateTotalMaterials={calculateTotalMaterials}
             calculateGrandTotal={calculateGrandTotal}
           />
-          {/* ========== DIAGNÓSTICO & INFORMAÇÕES ========== */}
+
+          {/* DIAGNÓSTICO & INFORMAÇÕES */}
           <div className="form-section">
             <div className="fs-header">
               <span className="fs-title">Diagnóstico & Informações</span>
@@ -781,15 +631,8 @@ const EditServiceOrder = () => {
             </div>
           </div>
 
-          {/* ========== AÇÕES ========== */}
+          {/* AÇÕES */}
           <div className="form-actions">
-            <button
-              className="btn btn-ghost"
-              onClick={() => navigate("/")}
-              disabled={saving}
-            >
-              Voltar
-            </button>
             <button
               className="btn btn-danger"
               onClick={handleRemoveOrder}
@@ -807,7 +650,7 @@ const EditServiceOrder = () => {
           </div>
         </div>
 
-        {/* ========== SIDEBAR ========== */}
+        {/* SIDEBAR DE PAGAMENTO */}
         <div className="edit-side">
           <div className="status-card">
             <div className="status-card-header">Pagamento</div>
@@ -839,7 +682,7 @@ const EditServiceOrder = () => {
                     {parseValue(serviceOrder.paid) >= calculateGrandTotal()
                       ? "Quitado"
                       : formattedPrice(
-                          calculateGrandTotal() - serviceOrder.paid,
+                          calculateGrandTotal() - parseValue(serviceOrder.paid),
                         )}
                   </span>
                 </div>
