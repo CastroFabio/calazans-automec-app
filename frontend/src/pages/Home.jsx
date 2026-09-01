@@ -31,8 +31,6 @@ const Home = () => {
           </div>
         </div>
         <div className="home-grid">
-          {/* Card 1: Nova OS */}
-
           {/* Card 2: Novo Cliente */}
           <div
             className="home-card-register home-card-primary"
@@ -81,6 +79,7 @@ const Home = () => {
             <div className="home-card-sub">Cadastrar veículo</div>
           </div>
 
+          {/* Card 1: Nova OS */}
           <div
             className="home-card-register home-card-primary"
             onClick={() => navigate(PATHS.newServiceOrder)}

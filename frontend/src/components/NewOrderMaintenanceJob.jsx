@@ -42,7 +42,7 @@ const NewOrderMaintenanceJob = ({
   const handleAddLocalMaterial = () => {
     const newMaterial = {
       id: Date.now() + Math.random(),
-      itemMaintenance_id: editingJobId || null, // <-- GARANTE O VÍNCULO
+      itemMaintenance_id: editingJobId || null, // Garante o vínculo com o serviço que está sendo editado
       material_id: null,
       name: "",
       quantity: 1,
@@ -50,7 +50,7 @@ const NewOrderMaintenanceJob = ({
       receipt: "",
       supplier: "",
     };
-    setMaterialsList([...materialsList, newMaterial]);
+    setMaterialsList((prev) => [...prev, newMaterial]);
   };
 
   const handleRemoveLocalMaterial = (matId) => {
@@ -89,13 +89,11 @@ const NewOrderMaintenanceJob = ({
     setSvcNome(job.name);
     setSvcObs(job.description || "");
 
-    // Filtra ou recupera as peças vinculadas a este serviço específico
-
-    const serviceMaterials =
-      job.materialsList ||
-      listMaintenanceJobs.filter(
-        (mat) => Number(mat.itemMaintenance_id) === Number(job.id),
-      );
+    // Recupera as peças do serviço garantindo o vínculo correto do ID
+    const serviceMaterials = (job.materialsList || []).map((mat) => ({
+      ...mat,
+      itemMaintenance_id: job.id,
+    }));
 
     setMaterialsList(serviceMaterials);
   };
@@ -136,7 +134,7 @@ const NewOrderMaintenanceJob = ({
   const updatedServices = flatMaintenanceJobs.map((service) => ({
     ...service,
     disabled: listMaintenanceJobs.some(
-      (job) => job.maintenance_id === service.id,
+      (job) => job.maintenance_id === service.id && job.id !== editingJobId,
     ),
   }));
 

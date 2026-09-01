@@ -156,9 +156,7 @@ const NavBar = () => {
 
   return (
     <>
-      <header
-        className={`topbar ${activeRoute.title === "Home" ? "home" : ""}`}
-      >
+      <header className={`topbar `}>
         <button className="hamburger">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

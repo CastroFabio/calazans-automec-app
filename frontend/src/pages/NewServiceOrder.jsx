@@ -341,7 +341,7 @@ const NewServiceOrder = () => {
       0,
     );
 
-    const newMaintenanceJob = {
+    const updatedJob = {
       id: customId || Date.now(),
       isOpen: false,
       maintenance_id: itemService.service.id,
@@ -351,7 +351,15 @@ const NewServiceOrder = () => {
       totalPrice,
     };
 
-    setListMaintenanceJobs((prev) => [...prev, newMaintenanceJob]);
+    setListMaintenanceJobs((prev) => {
+      // Se o ID já existir na lista, atualiza o item correspondente
+      const exists = prev.some((job) => job.id === customId);
+      if (exists) {
+        return prev.map((job) => (job.id === customId ? updatedJob : job));
+      }
+      // Caso contrário, adiciona o novo serviço à lista
+      return [...prev, updatedJob];
+    });
   };
 
   const handleRemoveMaintenanceJob = (id) => {
@@ -477,7 +485,7 @@ const NewServiceOrder = () => {
       {/* ============== */}
       <div className="page-header">
         <div>
-          <div className="ph-sub">Preencha os dados para registrara</div>
+          <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
         {/* <div className="os-num-badge">#OS-2025-0143</div> */}
       </div>
