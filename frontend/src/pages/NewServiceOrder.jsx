@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatLocalDateTime } from "../utils/convertDateTime";
-import AutoCompleteCustomer from "../components/AutoCompleteCustomer.component";
+import AutoComplete from "../components/AutoComplete.component";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
@@ -44,7 +44,6 @@ const NewServiceOrder = () => {
     formatLocalDateTime(new Date()),
   );
 
-  //AutoCompleteCustomer
   const [inputValue, setInputValue] = useState("");
 
   // State for form fields
@@ -436,60 +435,24 @@ const NewServiceOrder = () => {
     handleFormFieldChange("arrived_at", event.target.value);
   };
 
-  /* //AutoCompleteCustomer
-  useEffect(() => {
-    if (inputValue.trim() === "") {
-      setFilteredSuggestions([]);
-      return;
-    }
-
-    const filtered = customerData.filter((suggestion) =>
-      suggestion.name.toLowerCase().includes(inputValue.toLowerCase()),
+  // NewOrderMaintenanceJob
+  const handleAddMaintenanceJob = (itemService) => {
+    const totalPrice = itemService.materialsList.reduce(
+      (accumulator, currentValue) =>
+        parseFloat(currentValue.value_unit) *
+          parseFloat(currentValue.quantity) +
+        accumulator,
+      0,
     );
 
-    setFilteredSuggestions(filtered);
-  }, [inputValue]);
-
-  const handleSuggestionClick = (suggestion) => {
-    setInputValue(suggestion.name);
-    setSelectedCustomerInfo(suggestion);
-    setShowSuggestions(false);
-    handleFormFieldChange("customer_id", suggestion.id);
-
-    setFilteredSuggestions([]);
-  };
-
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    setShowSuggestions(true);
-  };
-
-  const handleBlur = () => {
-    // Delay para permitir clique na sugestão
-    setTimeout(() => {
-      setShowSuggestions(false);
-    }, 200);
-  };
-
-  const handleFocus = () => {
-    if (inputValue.trim() !== "") {
-      setShowSuggestions(true);
-    }
-  };
-
-  const handleClearCustomer = () => {
-    setInputValue("");
-    setSelectedCustomerInfo(null);
-    setSelectedVehicleInfo({});
-  }; */
-
-  // NewOrderMaintenanceJob
-  const handleAddMaintenanceJob = () => {
     const newMaintenanceJob = {
       id: Date.now(),
-      maintenance_id: "",
-      description: "",
-      name: "",
+      isOpen: false,
+      maintenance_id: itemService.service.id,
+      description: itemService.description,
+      name: itemService.service.name,
+      materialsList: itemService.materialsList,
+      totalPrice,
     };
 
     setListMaintenanceJobs([...listMaintenanceJobs, newMaintenanceJob]);
@@ -520,6 +483,7 @@ const NewServiceOrder = () => {
       itemMaintenance_id: itemMaintenanceId,
       serviceorder_id: null,
     };
+
     setMaterialsList((prev) => [...prev, newMaterial]);
   };
 
@@ -644,15 +608,41 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="form-grid">
-              <AutoCompleteCustomer
-                inputValue={inputValue}
-                setInputValue={setInputValue}
-                customerData={customerData}
-                setSelectedCustomerInfo={setSelectedCustomerInfo}
-                selectedCustomerInfo={selectedCustomerInfo}
-                handleFormFieldChange={handleFormFieldChange}
-                setSelectedVehicleInfo={setSelectedVehicleInfo}
-                handleSelectedVehicle={handleSelectedVehicle}
+              <AutoComplete
+                label="Cliente *"
+                placeholder="Digite o nome do cliente..."
+                items={customers}
+                filterKey="name"
+                value={inputValue}
+                selectedItem={selectedCustomerInfo}
+                onInputChange={(val) => setInputValue(val)}
+                onSelect={(customer) => {
+                  setInputValue(customer.name);
+                  setSelectedCustomerInfo(customer);
+
+                  // Regra de negócio específica: selecionar veículo se só tiver 1
+                  if (customer.vehicles?.length === 1) {
+                    console.log(
+                      "Veículo selecionado automaticamente:",
+                      customer.vehicles[0],
+                    );
+                  }
+                }}
+                onClear={() => {
+                  setInputValue("");
+                  setSelectedCustomerInfo(null);
+                }}
+                onCreateNew={(term) => {
+                  console.log("Abrir modal para criar cliente:", term);
+                }}
+                renderOption={(customer) => (
+                  <>
+                    <div className="ac-option-name">{customer.name}</div>
+                    <div className="ac-option-sub">
+                      {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
+                    </div>
+                  </>
+                )}
               />
 
               <div className="field">

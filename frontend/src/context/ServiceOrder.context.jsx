@@ -150,9 +150,9 @@ export const ServiceOrderProvider = ({ children }) => {
               if (found) {
                 foundJob = found;
                 foundValue =
-                  typeof found.value_unity === "string"
-                    ? found.value_unity.replace(",", ".")
-                    : String(found.value_unity ?? "");
+                  typeof found.value_unit === "string"
+                    ? found.value_unit.replace(",", ".")
+                    : String(found.value_unit ?? "");
                 break;
               }
             }
@@ -161,12 +161,12 @@ export const ServiceOrderProvider = ({ children }) => {
           return {
             ...element,
             maintenance_id: foundJob ? foundJob.id : selectedId,
-            value_unity: foundJob ? foundValue : element.value_unity,
+            value_unit: foundJob ? foundValue : element.value_unit,
           };
         }
 
         // Se a alteração direta for no campo de valor da mão de obra
-        if (field === "value_unity" && typeof value === "string") {
+        if (field === "value_unit" && typeof value === "string") {
           return { ...element, [field]: value.replace(",", ".") };
         }
 
@@ -199,9 +199,9 @@ export const ServiceOrderProvider = ({ children }) => {
             if (found) {
               foundMaterial = found;
               foundValue =
-                typeof found.value_unity === "string"
-                  ? found.value_unity.replace(",", ".")
-                  : String(found.value_unity ?? "");
+                typeof found.value_unit === "string"
+                  ? found.value_unit.replace(",", ".")
+                  : String(found.value_unit ?? "");
               break;
             }
           }
@@ -210,12 +210,12 @@ export const ServiceOrderProvider = ({ children }) => {
             ...element,
             material_id: foundMaterial ? foundMaterial.id : numericId || null,
             name: foundMaterial ? foundMaterial.name : value,
-            value_unity: foundValue !== "" ? foundValue : element.value_unity,
+            value_unit: foundValue !== "" ? foundValue : element.value_unit,
           };
         }
 
         // Trata digitação direta do preço do material
-        if (field === "value_unity" && typeof value === "string") {
+        if (field === "value_unit" && typeof value === "string") {
           return { ...element, [field]: value.replace(",", ".") };
         }
 
@@ -231,15 +231,15 @@ export const ServiceOrderProvider = ({ children }) => {
 
         if (field === "maintenance_id") {
           if (!value) {
-            return { ...job, maintenance_id: null, value_unity: "" };
+            return { ...job, maintenance_id: null, value_unit: "" };
           }
           const foundJob = findMaintenanceJobById(value);
           if (foundJob) {
-            const rawValue = foundJob.value_unity ?? foundJob.value_unit ?? "";
+            const rawValue = foundJob.value_unit ?? foundJob.value_unit ?? "";
             return {
               ...job,
               maintenance_id: foundJob.id,
-              value_unity:
+              value_unit:
                 typeof rawValue === "string" ? rawValue : String(rawValue),
             };
           }
@@ -257,7 +257,7 @@ export const ServiceOrderProvider = ({ children }) => {
 
         if (field === "material_id") {
           if (!value) {
-            return { ...element, material_id: null, value_unity: "" };
+            return { ...element, material_id: null, value_unit: "" };
           }
           const foundMat = findMaterialById(value);
           if (foundMat) {
@@ -265,7 +265,7 @@ export const ServiceOrderProvider = ({ children }) => {
               ...element,
               material_id: foundMat.id,
               name: foundMat.name,
-              value_unity: foundMat.value_unity ?? foundMat.value_unit ?? "",
+              value_unit: foundMat.value_unit ?? foundMat.value_unit ?? "",
             };
           }
         }

@@ -8,8 +8,8 @@
   --ink2: #4a4a44;
   --ink3: #7a7a72;
   --accent: #d4380d;
-  --accent-light: rgba(212, 56, 13, 0.08);
-  --accent-mid: rgba(212, 56, 13, 0.37);
+  --accent-light: rgba(212, 56, 13, 0.137);
+  --accent-mid: rgba(212, 56, 13, 0.534);
   --green: #0e7c3a;
   --radius: 6px;
   --radius-lg: 10px;
@@ -740,7 +740,7 @@
 
 .fs-header {
   padding: 11px 18px;
-  background: var(--surface2);
+  background: var(--accent-mid);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -992,7 +992,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  z-index: 200;
+  z-index: 200; /* Aumentado para garantir prioridade sobre outros elementos */
   max-height: 220px;
   overflow-y: auto;
   display: none;
@@ -1227,6 +1227,7 @@
   padding-top: 12px;
   border-top: 1px solid var(--border);
   flex-wrap: wrap;
+  padding: 14px 16px;
 }
 
 .total-row-divider {
@@ -4428,6 +4429,10 @@
   display: none;
 }
 
+.svc-card-body.open {
+  display: block;
+}
+
 .svc-card-obs {
   font-size: 10px;
   color: var(--ink3);
@@ -4567,4 +4572,229 @@
   color: var(--accent);
   border-color: var(--accent-mid);
   background: var(--accent-light);
+}
+.ac-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000; /* Aumentado para garantir prioridade sobre outros elementos */
+  max-height: 220px;
+  overflow-y: auto;
+  display: none;
+}
+/* Permite que o dropdown flutue para fora das seções do formulário sem criar scroll */
+.form-section,
+.form-wrap,
+.fs-body,
+.form-grid,
+.field,
+.ac-wrap {
+  overflow: visible !important;
+}
+
+/* Se o dropdown estiver dentro de uma tabela/container de tabela */
+.mat-table-wrap {
+  overflow: visible !important;
+}
+
+/* Garante que elementos acima no HTML se sobreponham aos que vêm abaixo */
+.form-section:nth-child(1) {
+  z-index: 10;
+}
+.form-section:nth-child(2) {
+  z-index: 9;
+}
+.form-section:nth-child(3) {
+  z-index: 8;
+}
+.form-section:nth-child(4) {
+  z-index: 7;
+}
+.form-section:nth-child(5) {
+  z-index: 6;
+}
+
+/* Caso as linhas de material/serviço estejam em lista dinâmica */
+.service-row,
+.mat-table tbody tr {
+  position: relative;
+  z-index: 1;
+}
+
+.service-row:focus-within,
+.service-row:hover,
+.mat-table tbody tr:focus-within {
+  z-index: 100; /* Eleva a linha que está sendo editada/buscada */
+}
+/* Permite que o dropdown transborde além dos limites da tabela */
+.mat-table-wrap {
+  overflow-x: visible; /* Altere de 'auto' para 'visible' se possível, ou adicione min-height */
+  margin-bottom: 12px;
+}
+
+/* Garante que o container da célula e a linha focada/hover tenham prioridade no z-index */
+.add-material-row {
+  position: relative;
+  z-index: 1;
+}
+
+/* Quando o autocomplete de uma linha estiver aberto ou em foco, eleva a prioridade daquela linha */
+.add-material-row:focus-within,
+.add-material-row:hover {
+  z-index: 100;
+}
+
+/* Certifica que o envolvinte do AutoComplete acompanhe o stacking context alto */
+.ac-wrap {
+  position: relative;
+  z-index: 20;
+}
+
+/* 
+    CARD SERVIÇO E MATERIAIS REGISTRADOS 
+*/
+
+.svc-container-card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 4px solid var(--bg);
+  align-items: start; /* Impede que os outros cards estiquem a altura quando um expande */
+}
+
+.svc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.svc-card-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--accent-light);
+  border-bottom: 0px;
+}
+
+.svc-card-header.open {
+  border-bottom: 1px solid var(--border2);
+}
+
+.svc-badge {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.svc-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.svc-total-price {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.svc-total-active {
+  color: var(--accent);
+}
+
+.svc-total-muted {
+  color: var(--ink3);
+}
+
+.svc-chevron {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.svc-chevron.open {
+  transform: rotate(180deg);
+}
+
+.svc-card-body {
+  /* Alterne o display via React state ou mantenha regras padrão */
+}
+
+.svc-obs {
+  font-size: 10px;
+  color: var(--ink3);
+  font-style: italic;
+  padding: 5px 11px 0;
+}
+
+.svc-materials-wrapper {
+  padding: 6px 11px 6px;
+}
+
+.svc-material-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--bg);
+}
+
+.svc-material-name {
+  font-size: 11px;
+  color: var(--ink2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.svc-material-price {
+  font-size: 10px;
+  color: var(--ink3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.svc-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 5px 0;
+  border-top: 1px solid var(--bg);
+}
+
+.svc-btn-edit {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.svc-card-body-no-material {
+  font-size: 11px;
+  color: var(--ink3);
+  font-style: italic;
+  padding: 2px 0;
 }

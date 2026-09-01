@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import InputPriceValue from "./InputPriceValue";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
+import AutoComplete from "./AutoComplete.component"; // Importe o componente reutilizável
+import SvcRegistradosList from "./SvcRegistradosList.component";
+import { useServiceOrders } from "../context/ServiceOrder.context";
 
 const NewOrderMaintenanceJob = ({
   formData,
@@ -10,9 +13,8 @@ const NewOrderMaintenanceJob = ({
   handleMaintenanceJobChange,
   findMaintenanceJobById,
   setListMaintenanceJobs,
-  maintenanceJobsGroupData,
+  maintenanceJobsGroupData = [], // Dados dos grupos de serviços
   handleAddMaterial,
-  materialsList,
   handleMaterialInputChange,
   materialsGroupData,
   handleRemoveMaterial,
@@ -24,23 +26,43 @@ const NewOrderMaintenanceJob = ({
   calculateGrandTotal,
 }) => {
   const [svcNome, setSvcNome] = useState("");
+  const [selectedService, setSelectedService] = useState(null);
   const [svcObs, setSvcObs] = useState("");
 
-  const handleAcFilter = (value) => {
-    setSvcNome(value);
-    // Insira a lógica de busca/filtro do autocomplete aqui
-  };
+  const { setMaterialsList, materialsList } = useServiceOrders();
 
-  const handleAcKey = (event) => {
-    // Insira a lógica de navegação do teclado aqui
-  };
+  // Transforma os dados agrupados (maintenanceJobsGroupData) em um array linear para o AutoComplete
+  const flatMaintenanceJobs = useMemo(() => {
+    if (!maintenanceJobsGroupData || maintenanceJobsGroupData.length === 0)
+      return [];
 
-  const handleAddMat = () => {
-    // Insira a lógica para adicionar nova peça/material aqui
-  };
+    return maintenanceJobsGroupData.flatMap((group) =>
+      group.maintenanceJobs.map((job) => ({
+        ...job,
+        groupName: group.group, // Mantém a referência do nome do grupo
+      })),
+    );
+  }, [maintenanceJobsGroupData]);
 
   const handleRegistrarServico = () => {
-    // Insira a lógica para registrar o serviço aqui
+    if (!selectedService) {
+      alert("Por favor, selecione um serviço!");
+      return;
+    }
+
+    const itemService = {
+      service: selectedService,
+      description: svcObs,
+      materialsList,
+    };
+
+    handleAddMaintenanceJob(itemService);
+
+    // Limpa os campos após registrar
+    setSvcNome("");
+    setSelectedService(null);
+    setSvcObs("");
+    setMaterialsList([]);
   };
 
   return (
@@ -67,91 +89,51 @@ const NewOrderMaintenanceJob = ({
         </svg>
         <span className="fs-title">Serviços & Materiais</span>
       </div>
+
       <div className="fs-body fs-body-new-service-order">
         <InputPriceValue
           labor_cost={formData.labor_cost}
           handleFormFieldChange={handleFormFieldChange}
         />
+        {(listMaintenanceJobs?.length || []) > 0 ? (
+          <SvcRegistradosList
+            listMaintenanceJobs={listMaintenanceJobs}
+            setListMaintenanceJobs={setListMaintenanceJobs}
+            handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
+          />
+        ) : (
+          ""
+        )}
 
-        <div className="svc-card-container" style={{ display: "none" }}>
-          <div className="svc-card">
-            <div className="svc-card-header">
-              <div className="svc-card-badge">1</div>
-              <div className="svc-card-title">Nome do serviço</div>
-              <span className={`svc-card-total ${1 > 0 ? "active" : ""}`}>
-                {1 > 0 ? "R$ 1,00" : "—"}
-              </span>
-              <svg
-                className="svc-chevron"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-
-            <div className="svc-card-body">
-              {"s.obs" && <div className="svc-card-obs">Observação</div>}
-
-              <div className="svc-card-content">
-                <div className="svc-card-grid">
-                  {[{}] && [{}].length > 0 ? (
-                    [].map((m, idx) => (
-                      <div key={1} className="svc-item-row">
-                        <span className="svc-item-name">Nome do serviço</span>
-                        <span className="svc-item-qty-price">1x R$ 300,00</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="svc-item-empty">Sem peças</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="svc-card-actions">
-                <button
-                  className="btn btn-sm btn-ghost"
-                  onClick={() => editarSvcRegistrado(i)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="remove-btn"
-                  onClick={() => removeSvcRegistrado(i)}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
         <div id="svcEntryForm" className="svc-entry-form">
           <div className="svc-grid-container">
-            {/* Autocomplete de serviço */}
-            <div id="svcAcWrap" className="svc-ac-wrap">
-              <label className="svc-label">Serviço *</label>
-              <input
-                type="text"
-                className="input"
-                id="svcNomeInput"
-                placeholder="Digite o serviço..."
-                autoComplete="off"
-                value={svcNome}
-                onChange={(e) => handleAcFilter(e.target.value)}
-                onKeyDown={handleAcKey}
-                onFocus={(e) => handleAcFilter(e.target.value)}
-              />
-              <div id="svcAcDropdown" className="svc-ac-dropdown"></div>
-            </div>
+            {/* Componente AutoComplete para Serviços */}
+            <AutoComplete
+              label="Serviço *"
+              placeholder="Digite o nome do serviço..."
+              items={flatMaintenanceJobs}
+              filterKey="name"
+              value={svcNome}
+              selectedItem={selectedService}
+              onInputChange={(text) => setSvcNome(text)}
+              onSelect={(service) => {
+                setSvcNome(service.name);
+                setSelectedService(service);
+              }}
+              onClear={() => {
+                setSvcNome("");
+                setSelectedService(null);
+              }}
+              renderOption={(service) => (
+                <>
+                  <div className="ac-option-name">{service.name}</div>
+                  <div className="ac-option-sub">{service.groupName}</div>
+                </>
+              )}
+            />
 
             {/* Observações */}
-            <div>
+            <div className="field">
               <label className="svc-label">Observações</label>
               <input
                 type="text"
@@ -198,144 +180,25 @@ const NewOrderMaintenanceJob = ({
               Registrar serviço
             </button>
           </div>
+        </div>
 
-          {/* {listMaintenanceJobs.length > 0
-            ? listMaintenanceJobs.map((element, index) => (
-                <div key={element.id} className="service-row">
-                  <div className="service-row-header">
-                    <div className="service-num">{index + 1}</div>
-                    <span className="service-row-label">
-                      Serviço #{index + 1}
-                    </span>
-                    <button
-                      className="remove-btn"
-                      onClick={() => handleRemoveMaintenanceJob(element.id)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div className="form-grid g3 form-grid-servico">
-                    <div className="field col-2">
-                      <label>Tipo de Serviço *</label>
-                      <select
-                        className="select"
-                        value={element.maintenance_id || ""}
-                        onChange={(e) => {
-                          const selectedId = e.target.value;
-
-                          if (!selectedId) {
-                            handleMaintenanceJobChange(
-                              element.id,
-                              "maintenance_id",
-                              null,
-                              maintenanceJobsGroupData,
-                            );
-
-                            return;
-                          }
-
-                          const foundJob = findMaintenanceJobById(
-                            Number(selectedId),
-                          );
-
-                          if (foundJob) {
-                            setListMaintenanceJobs((prev) =>
-                              prev.map((job) => {
-                                if (job.id !== element.id) return job;
-                                return {
-                                  ...job,
-                                  maintenance_id: foundJob.id,
-                                };
-                              }),
-                            );
-                          }
-                        }}
-                      >
-                        <option value="">Selecione o serviço...</option>
-                        {maintenanceJobsGroupData.map((group, groupIndex) => (
-                          <optgroup key={groupIndex} label={group.group}>
-                            {group.maintenanceJobs.map((item, itemIndex) => {
-                              const isSelected = listMaintenanceJobs.some(
-                                (job) =>
-                                  Number(job.maintenance_id) ===
-                                  Number(item.id),
-                              );
-                              const isCurrentSelection =
-                                Number(element.maintenance_id) ===
-                                Number(item.id);
-
-                              return (
-                                <option
-                                  key={itemIndex}
-                                  value={item.id}
-                                  disabled={isSelected && !isCurrentSelection}
-                                >
-                                  {item.name}
-                                </option>
-                              );
-                            })}
-                          </optgroup>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="field col-full">
-                      <label>Observações</label>
-                      <textarea
-                        className="textarea service-row-textarea"
-                        placeholder="Detalhes adicionais do serviço..."
-                        value={element.description || ""}
-                        onChange={(e) =>
-                          handleMaintenanceJobChange(
-                            element.id, // ID do item na lista
-                            "description", // Campo a ser atualizado
-                            e.target.value, // Novo valor
-                            maintenanceJobsGroupData,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  <AddMaterialInMaintenace
-                    handleAddMaterial={() => handleAddMaterial(element.id)}
-                    materialsList={materialsList}
-                    handleMaterialInputChange={handleMaterialInputChange}
-                    materialsGroupData={materialsGroupData}
-                    handleRemoveMaterial={handleRemoveMaterial}
-                    findMaterialById={findMaterialById}
-                    itemMaintenance_id={element.id}
-                  />
-                </div>
-              ))
-            : ""} */}
-          {/* <button className="add-row-btn" onClick={handleAddMaintenanceJob}>
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Adicionar serviço
-        </button> */}
-          <div className="total-row">
-            <div className="total-item">
-              Mão de obra:
-              <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
-            </div>
-            <div className="total-row-divider"></div>
-            <div className="total-item">
-              Peças:
-              <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
-            </div>
-            <div className="total-row-divider"></div>
-            <div className="total-item">
-              Total:
-              <span className="grand-total">
-                R$ {calculateGrandTotal().toFixed(2)}
-              </span>
-            </div>
+        {/* Totais */}
+        <div className="total-row">
+          <div className="total-item">
+            Mão de obra:
+            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+          </div>
+          <div className="total-row-divider"></div>
+          <div className="total-item">
+            Peças:
+            <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+          </div>
+          <div className="total-row-divider"></div>
+          <div className="total-item">
+            Total:
+            <span className="grand-total">
+              R$ {calculateGrandTotal().toFixed(2)}
+            </span>
           </div>
         </div>
       </div>

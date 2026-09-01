@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import { vehicleApi } from "../api/vehicle";
 import { useCustomers } from "../context/Customer.context";
-import AutoCompleteCustomer from "./AutoCompleteCustomer.component";
+import AutoComplete from "./AutoComplete.component";
 import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
 
@@ -114,7 +114,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
         </div>
         <div className="modal-body">
           <div className="field modal-vehicle-field-customer">
-            <AutoCompleteCustomer
+            <AutoComplete
               inputValue={inputValue}
               setInputValue={setInputValue}
               customerData={customers}

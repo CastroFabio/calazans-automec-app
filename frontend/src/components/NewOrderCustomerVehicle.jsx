@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AutoCompleteCustomer from "./AutoCompleteCustomer.component";
+import AutoComplete from "./AutoComplete.component";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 
 const NewOrderCustomerVehicle = ({
@@ -46,12 +46,18 @@ const NewOrderCustomerVehicle = ({
           <div className="field">
             <label>Cliente *</label>
             {/* <!-- Autocomplete Cliente --> */}
-            <AutoCompleteCustomer
+            <AutoComplete
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              customerData={customers}
+              setSelectedCustomerInfo={(customer) => {
+                setSelectedCustomerInfo(customer);
+                if (customer) handleFormFieldChange("customer_id", customer.id);
+              }}
               selectedCustomerInfo={selectedCustomerInfo}
-              setSelectedCustomerInfo={setSelectedCustomerInfo}
-              setSelectedVehicleInfo={setSelectedVehicleInfo}
-              customerData={customerData}
               handleFormFieldChange={handleFormFieldChange}
+              setSelectedVehicleInfo={() => {}}
+              handleSelectedVehicle={() => {}}
             />
           </div>
           <div className="field">
