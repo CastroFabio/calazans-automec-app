@@ -18,6 +18,9 @@ const trimOrUndefined = (value?: string | null) =>
 const trimOrNull = (value?: string | null) =>
   typeof value === 'string' ? value.trim() : value;
 
+const sanitizePhone = (value?: string | null) =>
+  typeof value === 'string' ? value.replace(/\D/g, '') : value;
+
 @Injectable()
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
@@ -158,12 +161,23 @@ export class CustomersService {
   }
 
   // UPDATE - Atualizar um cliente
+  // Helper functions fora do método
+  trimOrUndefined = (value?: string | null) =>
+    typeof value === 'string' ? value.trim() : undefined;
+
+  trimOrNull = (value?: string | null) =>
+    typeof value === 'string' ? value.trim() : value;
+
+  sanitizePhone = (value?: string | null) =>
+    typeof value === 'string' ? value.replace(/\D/g, '') : value;
+
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
     try {
-      if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0)
+      if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0) {
         throw new BadRequestException('Nenhum corpo na requisição');
+      }
 
-      // Verifica se o cliente existe
+      // 1. Verifica se o cliente existe
       const customer = await this.prisma.customer.findUnique({
         where: { id },
       });
@@ -172,30 +186,44 @@ export class CustomersService {
         throw new NotFoundException('Cliente não encontrado');
       }
 
-      if (updateCustomerDto.name && typeof updateCustomerDto.name !== 'string')
+      // 2. Validações de Tipo
+      if (
+        updateCustomerDto.name &&
+        typeof updateCustomerDto.name !== 'string'
+      ) {
         throw new BadRequestException('O nome do cliente deve ser string');
+      }
 
-      if (updateCustomerDto.cell && typeof updateCustomerDto.cell !== 'string')
+      if (
+        updateCustomerDto.cell &&
+        typeof updateCustomerDto.cell !== 'string'
+      ) {
         throw new BadRequestException('O celular do cliente deve ser string');
+      }
 
       if (
         updateCustomerDto.telephone &&
         typeof updateCustomerDto.telephone !== 'string'
-      )
+      ) {
         throw new BadRequestException('O telefone do cliente deve ser string');
+      }
 
       if (
         updateCustomerDto.observation &&
         typeof updateCustomerDto.observation !== 'string'
-      )
+      ) {
         throw new BadRequestException(
           'A observação do cliente deve ser string',
         );
+      }
 
-      // Verifica se o novo celular já existe (se estiver sendo alterado)
-      if (updateCustomerDto.cell && updateCustomerDto.cell !== customer.cell) {
+      // 3. Sanitização do Celular para verificação de duplicidade
+      const sanitizedCellInput = sanitizePhone(updateCustomerDto.cell);
+
+      // 4. Verifica unicidade do Celular
+      if (sanitizedCellInput && sanitizedCellInput !== customer.cell) {
         const existingCustomer = await this.prisma.customer.findUnique({
-          where: { cell: updateCustomerDto.cell },
+          where: { cell: sanitizedCellInput },
         });
 
         if (existingCustomer) {
@@ -203,21 +231,21 @@ export class CustomersService {
         }
       }
 
-      // Atualiza o cliente
-      return this.prisma.customer.update({
+      // 5. Atualização
+      return await this.prisma.customer.update({
         where: { id },
         data: {
           ...(updateCustomerDto.name !== undefined && {
-            name: trimOrUndefined(updateCustomerDto.name), // Nunca passará 'null' para o 'name'
+            name: trimOrUndefined(updateCustomerDto.name),
           }),
           ...(updateCustomerDto.cell !== undefined && {
-            cell: trimOrUndefined(updateCustomerDto.cell),
+            cell: trimOrUndefined(sanitizedCellInput),
           }),
           ...(updateCustomerDto.telephone !== undefined && {
-            telephone: trimOrNull(updateCustomerDto.telephone), // Aceita null no Prisma
+            telephone: trimOrNull(sanitizePhone(updateCustomerDto.telephone)),
           }),
           ...(updateCustomerDto.observation !== undefined && {
-            observation: trimOrNull(updateCustomerDto.observation), // Aceita null no Prisma
+            observation: trimOrNull(updateCustomerDto.observation),
           }),
         },
       });

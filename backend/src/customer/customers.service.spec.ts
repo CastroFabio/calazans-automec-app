@@ -407,7 +407,7 @@ describe('CustomersService (Unitario)', () => {
       const customerInput = {
         name: 'João Silva',
         cell: '21999999999',
-        telephone: null,
+        telephone: '21999999999',
         observation: null,
       };
       const customerID = 1;
@@ -426,8 +426,8 @@ describe('CustomersService (Unitario)', () => {
       const expectedData = {
         name: updatedCustomer.name,
         cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
+        telephone: updatedCustomer.telephone,
+        observation: updatedCustomer.observation,
       };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
@@ -442,7 +442,7 @@ describe('CustomersService (Unitario)', () => {
       });
     });
 
-    it('deve atualizar um cliente com sucesso quando os dados forem válidos', async () => {
+    it('deve atualizar um cliente com sucesso e retornar o cliente incluindo todos os relacionamentos', async () => {
       const customerID = 1;
       const customerInput = {
         name: 'João Silva',
@@ -450,6 +450,7 @@ describe('CustomersService (Unitario)', () => {
         telephone: null,
         observation: null,
       };
+
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -458,27 +459,22 @@ describe('CustomersService (Unitario)', () => {
         telephone: null,
         observation: null,
       };
-      const updatedCustomer = {
+
+      const updatedCustomerWithRelations = {
         ...existingCustomer,
         ...customerInput,
-      };
-      const expectedData = {
-        name: updatedCustomer.name,
-        cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
+        vehicles: [],
+        serviceOrders: [],
       };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
-      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+      prismaMock.customer.update.mockResolvedValue(
+        updatedCustomerWithRelations as any,
+      );
 
       const result = await service.update(customerID, customerInput as any);
 
-      expect(result).toEqual(updatedCustomer);
-      expect(prismaMock.customer.update).toHaveBeenCalledWith({
-        where: { id: customerID },
-        data: expectedData,
-      });
+      expect(result).toEqual(updatedCustomerWithRelations);
     });
 
     it('deve retornar um NotFoundException se o ID não for encontrado', async () => {
@@ -707,6 +703,58 @@ describe('CustomersService (Unitario)', () => {
         service.update(customerID, customerInput as any),
       ).rejects.toThrow(new BadRequestException('Nenhum corpo na requisição'));
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
+    });
+
+    it('deve sanitizar o celular de um cliente com sucesso', async () => {
+      // 1. ARRANGE
+      const customerID = 1;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '(21)99999-9998',
+        telephone: '(21)88888-8888',
+        observation: null,
+      };
+
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+
+      // O Prisma retornará o registro já atualizado com os dados limpos
+      const updatedCustomer = {
+        ...existingCustomer,
+        name: 'João Silva',
+        cell: '21999999998',
+        telephone: '21888888888',
+        observation: null,
+      };
+
+      // O que esperamos que seja passado para o prisma.customer.update
+      const expectedData = {
+        name: 'João Silva',
+        cell: '21999999998',
+        telephone: '21888888888',
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique
+        .mockResolvedValueOnce(existingCustomer)
+        .mockResolvedValueOnce(null);
+      prismaMock.customer.update.mockResolvedValue(updatedCustomer);
+
+      // 2. ACT
+      const result = await service.update(customerID, customerInput as any);
+
+      // 3. ASSERT
+      expect(result).toEqual(updatedCustomer);
+      expect(prismaMock.customer.update).toHaveBeenCalledWith({
+        where: { id: customerID },
+        data: expectedData,
+      });
     });
   });
 });
