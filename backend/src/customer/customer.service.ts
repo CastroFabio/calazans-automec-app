@@ -173,6 +173,12 @@ export class CustomersService {
 
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
     try {
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
       if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0) {
         throw new BadRequestException('Nenhum corpo na requisição');
       }
@@ -260,10 +266,20 @@ export class CustomersService {
   // DELETE - Remover um cliente
   async remove(id: number): Promise<void> {
     try {
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
+      if (Number(id) <= 0)
+        throw new BadRequestException('O ID deve maior do que zero');
+
       const customer = await this.prisma.customer.findUnique({
         where: { id },
         include: {
           vehicles: true,
+          serviceOrders: true,
         },
       });
 
@@ -274,6 +290,21 @@ export class CustomersService {
       if (customer.vehicles.length > 0) {
         throw new BadRequestException(
           'Não é possível excluir um cliente que possui veículos',
+        );
+      }
+
+      const listDebitoPendete = (customer.serviceOrders || []).filter(
+        (order) => Number(order.paid) < Number(order.subtotal),
+      );
+
+      if (listDebitoPendete.length > 0)
+        throw new BadRequestException(
+          'Cliente ainda possui ordens de serviço pendente',
+        );
+
+      if (customer.serviceOrders.length > 0) {
+        throw new BadRequestException(
+          'Não é possível excluir um cliente que possui ordem de serviço',
         );
       }
 
@@ -289,6 +320,7 @@ export class CustomersService {
       ) {
         throw error;
       }
+
       throw new InternalServerErrorException('Erro ao remover cliente');
     }
   }

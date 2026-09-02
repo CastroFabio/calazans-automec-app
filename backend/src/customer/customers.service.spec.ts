@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import {
   BadRequestException,
   ConflictException,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 
@@ -15,6 +16,7 @@ describe('CustomersService (Unitario)', () => {
       findUnique: jest.Mock;
       findMany: jest.Mock;
       update: jest.Mock;
+      delete: jest.Mock;
     };
   };
 
@@ -26,6 +28,7 @@ describe('CustomersService (Unitario)', () => {
         findUnique: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
+        delete: jest.fn(),
       },
     };
 
@@ -477,6 +480,29 @@ describe('CustomersService (Unitario)', () => {
       expect(result).toEqual(updatedCustomerWithRelations);
     });
 
+    it('deve permitir atualizar mantendo o mesmo número de celular sem lancar ConflictException', async () => {
+      const customerID = 1;
+      const existingCustomer = {
+        id: customerID,
+        name: 'João',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValueOnce(
+        existingCustomer as any,
+      );
+      prismaMock.customer.update.mockResolvedValue(existingCustomer as any);
+
+      // Enviando o mesmo celular sanitizado
+      await service.update(customerID, { cell: '21999999999' });
+
+      // findUnique deve ter sido chamado Apenas 1 vez (para checar a existência do cliente)
+      expect(prismaMock.customer.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaMock.customer.update).toHaveBeenCalled();
+    });
+
     it('deve retornar um NotFoundException se o ID não for encontrado', async () => {
       const customerInput = {
         name: 'João Silva',
@@ -755,6 +781,265 @@ describe('CustomersService (Unitario)', () => {
         where: { id: customerID },
         data: expectedData,
       });
+    });
+
+    it('deve retornar BadRequestException caso o ID não seja um número', async () => {
+      const invalidID = 'n' as any;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '(21)99999-9998',
+        telephone: '(21)88888-8888',
+        observation: null,
+      };
+      await expect(
+        service.update(invalidID, customerInput as any),
+      ).rejects.toThrow(new BadRequestException('O ID deve ser um número'));
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja null', async () => {
+      const invalidID = null as any;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '(21)99999-9998',
+        telephone: '(21)88888-8888',
+        observation: null,
+      };
+      await expect(
+        service.update(invalidID, customerInput as any),
+      ).rejects.toThrow(new BadRequestException('O ID é obrigatório'));
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja undefined', async () => {
+      const invalidID = undefined as any;
+      const customerInput = {
+        name: 'João Silva',
+        cell: '(21)99999-9998',
+        telephone: '(21)88888-8888',
+        observation: null,
+      };
+      await expect(
+        service.update(invalidID, customerInput as any),
+      ).rejects.toThrow(new BadRequestException('O ID é obrigatório'));
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar InternalServerErrorException ao ocorrer erro inesperado no banco', async () => {
+      const customerInput = {
+        name: 'João Silva',
+        cell: '(21)99999-9998',
+        telephone: '(21)88888-8888',
+        observation: null,
+      };
+      prismaMock.customer.findUnique.mockRejectedValue(
+        new Error('Database offline'),
+      );
+
+      await expect(service.update(1, customerInput as any)).rejects.toThrow(
+        new InternalServerErrorException('Erro ao atualizar cliente'),
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it('deve remover um cliente com sucesso', async () => {
+      const customerID = 1;
+      const mockCustomer = {
+        id: customerID,
+        name: 'João da Silva',
+        cell: '212329994',
+        telephone: null,
+        observation: '',
+        vehicles: [],
+        serviceOrders: [],
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(mockCustomer as any);
+      prismaMock.customer.delete.mockResolvedValue(mockCustomer as any);
+
+      const result = await service.remove(customerID);
+
+      expect(result).toBeUndefined();
+      expect(prismaMock.customer.findUnique).toHaveBeenCalledWith({
+        where: { id: customerID },
+        include: { vehicles: true, serviceOrders: true },
+      });
+      expect(prismaMock.customer.delete).toHaveBeenCalledWith({
+        where: { id: customerID },
+      });
+      expect(prismaMock.customer.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('deve lancar NotFoundException se o ID do cliente nao for encontrado', async () => {
+      // Arrange
+      prismaMock.customer.findUnique.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.remove(999)).rejects.toThrow(
+        new NotFoundException('Cliente não encontrado'),
+      );
+      expect(prismaMock.customer.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID não seja um número', async () => {
+      const invalidID = 'n' as any;
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        new BadRequestException('O ID deve ser um número'),
+      );
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja menor do que zero', async () => {
+      const invalidID = -1;
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        new BadRequestException('O ID deve maior do que zero'),
+      );
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja igual a zero', async () => {
+      const invalidID = 0;
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        new BadRequestException('O ID deve maior do que zero'),
+      );
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja null', async () => {
+      const invalidID = null as any;
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        new BadRequestException('O ID é obrigatório'),
+      );
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o ID seja undefined', async () => {
+      const invalidID = undefined as any;
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        new BadRequestException('O ID é obrigatório'),
+      );
+      expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o cliente esteja vinculado a um veículo', async () => {
+      const customerID = 1;
+
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        vehicles: [
+          {
+            license_plate: 'ABC1D23',
+            brand: 'Fiat',
+            model: 'Uno',
+            year: '2010',
+            color: 'Prata',
+          },
+        ],
+        serviceOrders: [],
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+
+      await expect(service.remove(customerID)).rejects.toThrow(
+        new BadRequestException(
+          'Não é possível excluir um cliente que possui veículos',
+        ),
+      );
+
+      expect(prismaMock.customer.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o cliente esteja vinculado a uma ordem de serviço', async () => {
+      const customerID = 1;
+
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        vehicles: [],
+        serviceOrders: [
+          {
+            professional: 'a',
+            priority: 'a',
+            status: 'a',
+            arrived_at: 'a',
+            customer_id: 'a',
+            vehicle_id: 'a',
+            entry_km: 'a',
+            diagnosis: 'a',
+            observation: 'a',
+          },
+        ],
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+
+      await expect(service.remove(customerID)).rejects.toThrow(
+        new BadRequestException(
+          'Não é possível excluir um cliente que possui ordem de serviço',
+        ),
+      );
+
+      expect(prismaMock.customer.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve retornar BadRequestException caso o cliente esteja vinculado a uma ordem de serviço', async () => {
+      const customerID = 1;
+
+      const existingCustomer = {
+        id: customerID,
+        created_at: new Date(),
+        name: 'João Antigo',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        vehicles: [],
+        serviceOrders: [
+          {
+            professional: 'a',
+            priority: 'a',
+            status: 'a',
+            arrived_at: 'a',
+            customer_id: 'a',
+            vehicle_id: 'a',
+            entry_km: 'a',
+            diagnosis: 'a',
+            observation: 'a',
+            labor_cost: 2.55,
+            subtotal: 2.55,
+            paid: 1.55,
+          },
+        ],
+      };
+
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+
+      await expect(service.remove(customerID)).rejects.toThrow(
+        new BadRequestException(
+          'Cliente ainda possui ordens de serviço pendente',
+        ),
+      );
+
+      expect(prismaMock.customer.delete).not.toHaveBeenCalled();
+    });
+
+    it('deve lancar InternalServerErrorException ao ocorrer erro inesperado no banco', async () => {
+      prismaMock.customer.findUnique.mockRejectedValue(
+        new Error('Database offline'),
+      );
+
+      await expect(service.remove(1)).rejects.toThrow(
+        new InternalServerErrorException('Erro ao remover cliente'),
+      );
     });
   });
 });
