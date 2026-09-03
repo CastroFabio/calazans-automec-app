@@ -1,71 +1,99 @@
 # Plano de Tarefas - Sistema de Ordens de Serviço (Oficina Mecânica)
 
-## 1. UX/UI & Redesign do Fluxo de Criação de OS (Navegação em Etapas / Wizard)
+## 1. UX/UI & Redesign do Fluxo de Criação de OS (Wizard em 4 Passos)
 
-### [UX/UI] Reestruturação da Criação da OS em Etapas
+### [UX/UI] Reestruturação da Criação da OS em 4 Passos
 
-- **Objetivo:** Tornar o processo intuitivo e simplificado para usuários leigos, dividindo o preenchimento em um passo a passo guiado.
-- **Etapa 1 - Cliente e Veículo:**
-  - Seleção/cadastro de cliente e seleção/cadastro de veículo.
-- **Etapa 2 - Serviços e Materiais:**
-  - Tabela de inclusão de peças e mão de obra.
-  - Inclusão dos botões de adição no topo.
-  - Autocomplete com suporte a cadastro rápido e auto-foco no valor unitário.
-  - Opção de marcar item como "Fornecido pelo cliente".
-- **Etapa 3 - Informações da OS & Diagnóstico:**
+- **Passo 1 - Cliente e Veículo:**
+  - Busca e seleção de cliente e veículo.
+  - Botão/Modal de **Novo Cliente**.
+  - Botão/Modal de **Novo Veículo** (vinculado diretamente ao cliente selecionado).
+- **Passo 2 - Serviços e Materiais:**
+  - **Botão "Registrar serviço":** Posicionado no topo do formulário.
+  - **Mão de obra (labor_cost):** Campo para valor/custo da mão de obra.
+  - **Lista de serviços:** Renderização dos serviços adicionados.
+  - **Peças/Materiais:** Adição e listagem de peças associadas a cada serviço.
+  - Botão de acionamento do Modal de Cadastro Rápido de Peça e Serviço.
+- **Passo 3 - Informações da OS & Pagamento:**
   - Atribuição de profissional/mecânico responsável.
-  - Status da Ordem de Serviço.
-  - Status de Pagamento (com opção de marcação rápida "Quitado").
+  - Status da Ordem de Serviço (Aguardando, Em Andamento, Concluída, etc.).
+  - Status do Pagamento (Pendente, Parcial, Quitado).
+  - **Check / Ação de Pagamento Efetivado:** Se a OS já estiver paga, liberar etapa/opção para "Efetuar Pagamento" imediato com os detalhes da transação.
   - Campo para diagnóstico e observações técnicas.
+- **Passo 4 - Resumo da OS:**
+  - Tela final de conferência de todos os dados preenchidos (Cliente, Veículo, Serviços, Peças, Valores Totais, Responsável e Pagamento).
+  - Botão final para salvar e emitir a OS.
 
 ---
 
-## 2. Correções Urgentes & Bugs de UX/UI
+## 2. Formulários, Modais & Cadastro Rápido
+
+### [Modal] Cadastro Rápido de Cliente e Veículo na Criação da OS
+
+- **Ação:** Adicionar botões para abrir modais de cadastro direto na Etapa 1 do Wizard:
+  - "Cadastrar Novo Cliente".
+  - "Cadastrar Novo Veículo" (já associando ao ID do cliente selecionado).
+
+### [Modal] Modal de Cadastro Rápido de Peça e Serviço
+
+- **Ação:** Criar modal acessível na Etapa 2 de Serviços/Materiais para permitir o cadastro imediato de uma nova peça ou serviço no banco de dados sem perder o progresso da OS.
+
+### [UX/OS] Reposicionamento do Botão "Registrar Serviço"
+
+- **Ação:** Mover o botão de registro/adição de serviço para o topo da seção de serviços no formulário.
+
+### [UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço
+
+- **Ação:** Mover o foco do cursor (`focus()`) automaticamente para o input de preço/valor unitário assim que um serviço for selecionado no autocomplete.
+
+### [Feature/OS] Campo / Marcação "Fornecido pelo cliente"
+
+- **Ação:** Adicionar checkbox no item da OS para indicar se a peça/material foi fornecido pelo cliente.
+
+### [Feature/OS] Atalho "Levar para OS"
+
+- **Ação:** Criar botão para converter orçamentos/cotações diretamente em uma nova OS.
+
+---
+
+## 3. Auditoria de Código & Validação de Inputs de Preço (Decimal)
+
+### [Refactor/Code] Verificação Geral de Inputs de Preço e Totais
+
+- **Objetivo:** Garantir que todos os inputs de valor monetário aceitem e tratem corretamente o formato decimal de 2 casas (`R$ 0,00` ou `float/number` com 2 casas), evitando inconsistências de parsing, NaN ou quebra de concatenação no estado.
+- **Mapeamento de Locais para Auditoria/Ajuste:**
+  - **Criação de OS (`NewServiceOrder` / `NewOrderMaintenanceJob`):**
+    - `value_unit` do material (valor unitário das peças).
+    - `labor_cost` / `labor_job` (mão de obra).
+    - Valores de pagamento.
+    - Total acumulado de serviços.
+    - Total acumulado de materiais.
+    - Total geral da OS (`grand_total`).
+  - **Edição de OS (`EditServiceOrder` / componentes correlatos):**
+    - `value_unit` do material.
+    - `labor_cost` / `labor_job`.
+    - Valores e parcelas de pagamento.
+    - Total acumulado de serviços.
+    - Total acumulado de materiais.
+    - Total geral da OS.
+
+---
+
+## 4. Bugs Urgentes de UX/UI
 
 ### [Bug] Desbloquear clique do Autocomplete
 
 - **Problema:** O clique nos itens do Autocomplete não está sendo registrado.
-- **Causa provável:** O botão de adicionar peça/serviço (ou container de fundo) está sobreposto ao dropdown/menu popover (z-index ou evento de clique bloqueado).
-- **Ação:** Corrigir a sobreposição e z-index para garantir a seleção adequada.
-
-### [Bug/Form] Ajustar formatação e validação de preço (Input Decimal)
-
-- **Problema:** O campo de preço só aceita decimais com 2 casas de precisão, mas permite formatos inválidos ou apresenta comportamento inconsistente.
-- **Ação:** Revisar a máscara e o parser do input de preço para aceitar e formatar corretamente os valores decimais (ex: R$ 0,00).
+- **Causa provável:** Sobreposição do botão/container de fundo ao menu popover (z-index ou evento bloqueado).
+- **Ação:** Ajustar z-index e manipuladores de evento do menu dropdown.
 
 ---
 
-## 3. Melhorias na Lista e Formulário de Ordem de Serviço (OS)
+## 5. Módulo de Pagamentos, Recibos e Outros
 
-### [UX/OS] Mover botões de adição para o topo das tabelas
+### [Financeiro] Status de Pagamento e Botão "Quitado"
 
-- **Ação:** Mudar a posição do botão de adicionar material e serviço para cima da lista (atualmente no rodapé/embaixo da lista).
-
-### [UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço
-
-- **Ação:** Assim que o usuário selecionar um serviço no autocomplete, mover o foco do cursor (`focus()`) automaticamente para o input de preço/valor unitário.
-
-### [UX/OS] Botão de cadastro rápido no Autocomplete
-
-- **Ação:** Adicionar o botão "Cadastrar novo material/serviço" diretamente dentro ou ao lado do dropdown do autocomplete para pesquisas sem resultado.
-
-### [Feature/OS] Campo / Marcação "Fornecido pelo cliente"
-
-- **Ação:** Adicionar uma opção/checkbox no item da OS para indicar se o material/peça foi fornecido diretamente pelo cliente.
-
-### [Feature/OS] Atalho "Levar para OS"
-
-- **Ação:** Criar um botão direto que permita converter/enviar uma cotação, orçamento ou registro para a tela de Ordem de Serviço.
-
----
-
-## 4. Módulo de Pagamentos e Recibos
-
-### [Financeiro] Adicionar Status de Pagamento e Botão "Quitado"
-
-- **Ação:**
-  - Exibir o status do pagamento (Pendente, Parcial, Quitado).
-  - Adicionar o botão rápido "Quitado" no formulário/modal de pagamento para liquidação imediata.
+- **Ação:** Exibir status do pagamento e disponibilizar botão rápido "Quitado" no formulário/modal para liquidação direta.
 
 ### [Financeiro] Recibos & Fornecedores
 
@@ -75,48 +103,46 @@
 
 - **Ação:** Reposicionar/reorganizar onde o fluxo de pagamento é acessado dentro da aplicação.
 
----
+### [UI/Home] Logo na Tela Inicial
 
-## 5. Layout e Outros Módulos
-
-### [UI/Home] Adicionar Logo na Tela Inicial (Home)
-
-- **Ação:** Inserir a identidade visual/logo da oficina no header ou banner principal da Home.
+- **Ação:** Inserir a logo da oficina na página inicial.
 
 ### [Módulo] Módulo de Inventário / Estoque
 
-- **Ação:** Estruturar a tela de Inventário básica para controle de materiais e peças (funcionalidade secundária).
+- **Ação:** Estruturar a tela de Inventário básica para controle de materiais e peças.
 
 ---
 
 ## Nomes de Branches Git Sugeridos
 
-Padrão recomendado: `<tipo>/<escopo>-<descrição-curta>`
+Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
-### Redesign & UX em Etapas
+### Wizard de OS & Modais de Criação
 
-- **Wizard / Formulário por etapas:** `feature/os-stepper-wizard`
-- **Botão "Levar para OS":** `feature/os-convert-shortcut`
+- **Wizard em 4 Passos com Resumo:** `feature/os-4step-wizard-summary`
+- **Passo de Pagamento na OS:** `feature/os-payment-step-integration`
+- **Modal Novo Cliente e Novo Veículo na OS:** `feature/os-quick-add-customer-vehicle`
+- **Modal Cadastro Rápido Peça e Serviço:** `feature/modal-quick-add-part-service`
+- **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
+- **Atalho "Levar para OS":** `feature/os-convert-shortcut`
 
-### Bugs & Correções
+### Auditoria e Correção de Preços (Inputs)
+
+- **Padronização e validação de inputs de preço (Criação e Edição):** `refactor/price-inputs-decimal-validation`
+
+### Formulário de OS & UX
+
+- **Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`
+- **Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`
+
+### Bugs & Fixes
 
 - **Fix clique no Autocomplete:** `fix/autocomplete-click-blocking`
-- **Fix validação de Input Decimal:** `fix/price-input-decimal-mask`
 
-### Formulário de OS & Itens
-
-- **Reorganizar botões da lista no topo:** `refactor/os-items-add-buttons-top`
-- **Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`
-- **Cadastrar material no autocomplete:** `feature/autocomplete-quick-register`
-- **Opção "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`
-
-### Financeiro
+### Financeiro & Outros
 
 - **Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`
 - **Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`
-- **Reorganização da tela de pagamento:** `refactor/payment-flow-location`
-
-### General & Módulos Secundários
-
+- **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
 - **Logo na Home:** `feature/home-logo-branding`
 - **Módulo de Inventário:** `feature/inventory-module-basic`
