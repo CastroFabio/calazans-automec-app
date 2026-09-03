@@ -3,6 +3,9 @@ import { materialGroupApi } from "../api/materialGroups";
 import { materialApi } from "../api/materials";
 import MaterialGroupList from "../components/MaterialGroupList.component";
 import MaterialActiveGroupItemList from "../components/MaterialActiveGroupItemList.component";
+import ActiveGroupItemList from "../components/ActiveGroupItemList.component";
+import ItemGroupList from "../components/ItemGroupList.component";
+import ItemGroupHeader from "../components/ItemGroupHeader.component";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -290,27 +293,21 @@ const Materials = () => {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <div className="ph-sub">
-            Catálogo de materiais disponíveis na oficina
-          </div>
-        </div>
-      </div>
+      <ItemGroupHeader category={"material"} />
       <div className="cad-layout">
-        <MaterialGroupList
+        <ItemGroupList
           setIsCreatingGroup={setIsCreatingGroup}
           isCreatingGroup={isCreatingGroup}
           handleClickCreatingGroup={handleClickCreatingGroup}
           creatingGroupName={creatingGroupName}
           handleChangeCreatingGroup={handleChangeCreatingGroup}
           handleCancelCreatingGroup={handleCancelCreatingGroup}
-          materialsGroupData={materialsGroupData}
+          itemGroupData={materialsGroupData}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
         />
 
-        <MaterialActiveGroupItemList
+        <ActiveGroupItemList
           editingItem={editingItem}
           setEditingItem={setEditingItem}
           activeTab={activeTab}

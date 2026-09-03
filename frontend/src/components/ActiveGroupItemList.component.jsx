@@ -1,4 +1,4 @@
-const MaterialActiveGroupItemList = ({
+const ActiveGroupItemList = ({
   editingItem,
   setEditingItem,
   activeTab,
@@ -14,6 +14,10 @@ const MaterialActiveGroupItemList = ({
   handleRemoveItem,
   handleAddItem,
 }) => {
+  // Extrai a lista de itens, seja de materiais ou de serviços de manutenção
+  const itemsList =
+    activeGroup?.materials || activeGroup?.maintenanceJobs || [];
+
   return (
     <div className="cad-items-outer">
       <div className="cad-add-form">
@@ -21,7 +25,7 @@ const MaterialActiveGroupItemList = ({
           type="text"
           className="input cad-input"
           id="svcNewItem"
-          placeholder="Nome do novo material..."
+          placeholder="Nome do novo item..."
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
         />
@@ -45,22 +49,23 @@ const MaterialActiveGroupItemList = ({
           Adicionar
         </button>
       </div>
+
       <div className="cad-items-wrap">
         {activeTab.groupName ? (
-          <div className="cad-items-header ">
-            <span className="cad-items-title " id="svcGroupTitle">
+          <div className="cad-items-header">
+            <span className="cad-items-title" id="svcGroupTitle">
               {editingItem.group === activeTab.groupName &&
               editingItem.index === activeTab.groupIndex ? (
                 <input
                   type="text"
                   className="input cad-input cad-edit-input"
                   value={editingItem.value}
-                  onChange={(e) => {
+                  onChange={(e) =>
                     setEditingItem({
                       ...editingItem,
                       value: e.target.value,
-                    });
-                  }}
+                    })
+                  }
                   onBlur={handleEditSaveGroup}
                   onKeyDown={handleEditKeyPressGroup}
                   autoFocus
@@ -85,14 +90,15 @@ const MaterialActiveGroupItemList = ({
             </button>
           </div>
         ) : (
-          <div className="cad-items-header ">
-            <span className="cad-items-title " id="svcGroupTitle">
+          <div className="cad-items-header">
+            <span className="cad-items-title" id="svcGroupTitle">
               Selecione um grupo
             </span>
           </div>
         )}
-        {activeGroup && activeGroup.materials.length > 0 ? (
-          activeGroup.materials.map((element) => (
+
+        {itemsList.length > 0 ? (
+          itemsList.map((element) => (
             <div key={element.id} className="cad-item-row">
               {editingItem.group === activeTab.groupName &&
               editingItem.index === element.id ? (
@@ -139,7 +145,7 @@ const MaterialActiveGroupItemList = ({
           <div id="svcItemList">
             <div className="cad-empty">
               {activeTab.groupName
-                ? "Nenhum material encontrado neste grupo"
+                ? "Nenhum item encontrado neste grupo"
                 : "Selecione um grupo à esquerda"}
             </div>
           </div>
@@ -149,4 +155,4 @@ const MaterialActiveGroupItemList = ({
   );
 };
 
-export default MaterialActiveGroupItemList;
+export default ActiveGroupItemList;

@@ -6,10 +6,10 @@
 
 - **Ação:** Implementar uma barra de pesquisa com autocomplete no topo da página/tabela de Peças e Serviços para filtragem instantânea dos itens cadastrados.
 
-### [UX/UI] Ajuste de Layout e Scroll na Tabela de Peças e Serviços
+### ~~[UX/UI] Ajuste de Layout e Scroll na Tabela de Peças e Serviços~~
 
-- **Problema:** A lista de peças e serviços é muito extensa e causa rolagem excessiva em toda a página.
-- **Ação:** Fixar a altura máxima (`max-height`) do container da lista com rolagem interna (`overflow-y: auto`), mantendo o cabeçalho e os controles fixos na tela.
+- ~~**Problema:** A lista de peças e serviços é muito extensa e causa rolagem excessiva em toda a página.~~
+- ~~**Ação:** Fixar a altura máxima (`max-height`) do container da lista com rolagem interna (`overflow-y: auto`), mantendo o cabeçalho e os controles fixos na tela.~~
 
 ### [UX/UI] Reformulação da Edição de Itens (Peças e Serviços)
 
@@ -127,19 +127,30 @@
 
 - **Ação:** Estruturar a tela de Inventário básica para controle de materiais e peças.
 
+## 7. [UI/UX] Componente Global de Tratamento e Exibição de Erros
+
+- **Objetivo:** Criar um componente/modal/banner reutilizável (`ErrorNotification`) para capturar exceções da API e exibir mensagens amigáveis ao usuário[cite: 1, 2].
+- **Cenários/Erros Mapeados:**
+  - **HTTP 400 (Bad Request):** Dados de formulário/input inválidos (ex: validação de DTO, preço/valor em formato incorreto ou nome obrigatório não preenchido)[cite: 1, 2].
+  - **HTTP 404 (Not Found):** Registro inexistente (ex: tentar carregar um cliente, peça ou OS pelo ID incorreto)[cite: 1, 2].
+  - **HTTP 409 (Conflict):** Conflito de cadastro no banco (ex: tentativa de cadastrar um cliente com celular/CPF já em uso)[cite: 1, 2].
+  - **HTTP 401 / 403 (Unauthorized / Forbidden):** Sessão expirada ou sem permissão de acesso[cite: 2].
+  - **HTTP 500 (Internal Server Error):** Erro imprevisto no servidor ou banco de dados[cite: 2].
+  - **Erro de Conexão/Rede:** Servidor indisponível ou queda de internet no cliente.
+
 ---
 
-## Nomes de Branches Git Sugeridos
+# Nomes de Branches Git Sugeridos
 
 Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
-### Módulo de Peças e Serviços
+## Módulo de Peças e Serviços
 
 - **Autocomplete de busca em Peças/Serviços:** `feature/parts-services-autocomplete-search`
 - **Scroll e limitação de altura da lista:** `refactor/parts-services-list-scroll`
 - **Novo modal/fluxo de edição de itens:** `refactor/parts-services-edit-modal-flow`
 
-### Wizard de OS & Modais de Criação
+## Wizard de OS & Modais de Criação
 
 - **Wizard em 4 Passos com Resumo:** `feature/os-4step-wizard-summary`
 - **Passo de Pagamento na OS:** `feature/os-payment-step-integration`
@@ -148,23 +159,27 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
 - **Atalho "Levar para OS":** `feature/os-convert-shortcut`
 
-### Auditoria e Correção de Preços (Inputs)
+## Auditoria e Correção de Preços (Inputs)
 
 - **Padronização e validação de inputs de preço:** `refactor/price-inputs-decimal-validation`
 
-### Formulário de OS & UX
+## Formulário de OS & UX
 
 - **Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`
 - **Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`
 
-### Bugs & Fixes
+## Bugs & Fixes
 
 - **Fix clique no Autocomplete:** `fix/autocomplete-click-blocking`
 
-### Financeiro & Outros
+## Financeiro & Outros
 
 - **Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`
 - **Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`
 - **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
 - **Logo na Home:** `feature/home-logo-branding`
 - **Módulo de Inventário:** `feature/inventory-module-basic`
+
+## Componente Global de Tratamento e Exibição de Erros
+
+- **Branch:** `feature/ui-global-error-handling-component`
