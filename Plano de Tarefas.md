@@ -147,7 +147,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 ## Módulo de Peças e Serviços
 
 - **Autocomplete de busca em Peças/Serviços:** `feature/parts-services-autocomplete-search`
-- **Scroll e limitação de altura da lista:** `refactor/parts-services-list-scroll`
+- ~~**Scroll e limitação de altura da lista:** `refactor/parts-services-list-scroll`~~
 - **Novo modal/fluxo de edição de itens:** `refactor/parts-services-edit-modal-flow`
 
 ## Wizard de OS & Modais de Criação
