@@ -1,6 +1,26 @@
 # Plano de Tarefas - Sistema de Ordens de Serviço (Oficina Mecânica)
 
-## 1. UX/UI & Redesign do Fluxo de Criação de OS (Wizard em 4 Passos)
+## 1. Módulo de Peças e Serviços (Gestão de Cadastros)
+
+### [UX/UI] Barra de Pesquisa Autocomplete em Peças e Serviços
+
+- **Ação:** Implementar uma barra de pesquisa com autocomplete no topo da página/tabela de Peças e Serviços para filtragem instantânea dos itens cadastrados.
+
+### [UX/UI] Ajuste de Layout e Scroll na Tabela de Peças e Serviços
+
+- **Problema:** A lista de peças e serviços é muito extensa e causa rolagem excessiva em toda a página.
+- **Ação:** Fixar a altura máxima (`max-height`) do container da lista com rolagem interna (`overflow-y: auto`), mantendo o cabeçalho e os controles fixos na tela.
+
+### [UX/UI] Reformulação da Edição de Itens (Peças e Serviços)
+
+- **Problema:** A edição atual é em linha (inline) na tabela e exige o pressionamento de `Enter` para salvar, o que é pouco intuitivo e causa confusão.
+- **Ação:** Substituir o modo de confirmação por `Enter` por uma abordagem explicita e intuitiva:
+  - **Opção Recomendada (Modal de Edição):** Ao clicar no botão de editar da linha, abrir um modal com os campos preenchidos e botões explícitos "Salvar Alterações" e "Cancelar".
+  - **Opção Alternativa (Edição Inline com Ações Visíveis):** Ao clicar no botão editar, alterar os campos da linha para inputs e exibir claramente os ícones/botões de "Confirmar (Check)" e "Cancelar (X)".
+
+---
+
+## 2. UX/UI & Redesign do Fluxo de Criação de OS (Wizard em 4 Passos)
 
 ### [UX/UI] Reestruturação da Criação da OS em 4 Passos
 
@@ -9,16 +29,16 @@
   - Botão/Modal de **Novo Cliente**.
   - Botão/Modal de **Novo Veículo** (vinculado diretamente ao cliente selecionado).
 - **Passo 2 - Serviços e Materiais:**
-  - **Botão "Registrar serviço":** Posicionado no topo do formulário.
-  - **Mão de obra (labor_cost):** Campo para valor/custo da mão de obra.
-  - **Lista de serviços:** Renderização dos serviços adicionados.
-  - **Peças/Materiais:** Adição e listagem de peças associadas a cada serviço.
+  - **Input de Mão de Obra:** Custo no topo da seção[cite: 2].
+  - **Botão "Registrar serviço":** Posicionado no topo do formulário[cite: 2].
+  - **Lista de serviços:** Renderização dos serviços adicionados com autocomplete[cite: 2].
+  - **Peças/Materiais:** Adição e listagem de peças associadas a cada serviço[cite: 2].
   - Botão de acionamento do Modal de Cadastro Rápido de Peça e Serviço.
 - **Passo 3 - Informações da OS & Pagamento:**
   - Atribuição de profissional/mecânico responsável.
   - Status da Ordem de Serviço (Aguardando, Em Andamento, Concluída, etc.).
   - Status do Pagamento (Pendente, Parcial, Quitado).
-  - **Check / Ação de Pagamento Efetivado:** Se a OS já estiver paga, liberar etapa/opção para "Efetuar Pagamento" imediato com os detalhes da transação.
+  - **Ação de Pagamento Efetivado:** Se a OS já estiver paga, liberar etapa/opção para "Efetuar Pagamento" imediato com os detalhes da transação.
   - Campo para diagnóstico e observações técnicas.
 - **Passo 4 - Resumo da OS:**
   - Tela final de conferência de todos os dados preenchidos (Cliente, Veículo, Serviços, Peças, Valores Totais, Responsável e Pagamento).
@@ -26,21 +46,17 @@
 
 ---
 
-## 2. Formulários, Modais & Cadastro Rápido
+## 3. Formulários, Modais & Cadastro Rápido
 
 ### [Modal] Cadastro Rápido de Cliente e Veículo na Criação da OS
 
 - **Ação:** Adicionar botões para abrir modais de cadastro direto na Etapa 1 do Wizard:
   - "Cadastrar Novo Cliente".
-  - "Cadastrar Novo Veículo" (já associando ao ID do cliente selecionado).
+  - "Cadastrar Novo Veículo" (associando ao cliente selecionado).
 
 ### [Modal] Modal de Cadastro Rápido de Peça e Serviço
 
 - **Ação:** Criar modal acessível na Etapa 2 de Serviços/Materiais para permitir o cadastro imediato de uma nova peça ou serviço no banco de dados sem perder o progresso da OS.
-
-### [UX/OS] Reposicionamento do Botão "Registrar Serviço"
-
-- **Ação:** Mover o botão de registro/adição de serviço para o topo da seção de serviços no formulário.
 
 ### [UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço
 
@@ -56,19 +72,19 @@
 
 ---
 
-## 3. Auditoria de Código & Validação de Inputs de Preço (Decimal)
+## 4. Auditoria de Código & Validação de Inputs de Preço (Decimal)
 
 ### [Refactor/Code] Verificação Geral de Inputs de Preço e Totais
 
 - **Objetivo:** Garantir que todos os inputs de valor monetário aceitem e tratem corretamente o formato decimal de 2 casas (`R$ 0,00` ou `float/number` com 2 casas), evitando inconsistências de parsing, NaN ou quebra de concatenação no estado.
 - **Mapeamento de Locais para Auditoria/Ajuste:**
   - **Criação de OS (`NewServiceOrder` / `NewOrderMaintenanceJob`):**
-    - `value_unit` do material (valor unitário das peças).
-    - `labor_cost` / `labor_job` (mão de obra).
+    - `value_unit` do material[cite: 2].
+    - `labor_cost` / `labor_job`[cite: 2].
     - Valores de pagamento.
-    - Total acumulado de serviços.
-    - Total acumulado de materiais.
-    - Total geral da OS (`grand_total`).
+    - Total acumulado de serviços[cite: 2].
+    - Total acumulado de materiais[cite: 2].
+    - Total geral da OS (`grand_total`)[cite: 2].
   - **Edição de OS (`EditServiceOrder` / componentes correlatos):**
     - `value_unit` do material.
     - `labor_cost` / `labor_job`.
@@ -79,7 +95,7 @@
 
 ---
 
-## 4. Bugs Urgentes de UX/UI
+## 5. Bugs Urgentes de UX/UI
 
 ### [Bug] Desbloquear clique do Autocomplete
 
@@ -89,7 +105,7 @@
 
 ---
 
-## 5. Módulo de Pagamentos, Recibos e Outros
+## 6. Módulo de Pagamentos, Recibos e Outros
 
 ### [Financeiro] Status de Pagamento e Botão "Quitado"
 
@@ -117,6 +133,12 @@
 
 Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
+### Módulo de Peças e Serviços
+
+- **Autocomplete de busca em Peças/Serviços:** `feature/parts-services-autocomplete-search`
+- **Scroll e limitação de altura da lista:** `refactor/parts-services-list-scroll`
+- **Novo modal/fluxo de edição de itens:** `refactor/parts-services-edit-modal-flow`
+
 ### Wizard de OS & Modais de Criação
 
 - **Wizard em 4 Passos com Resumo:** `feature/os-4step-wizard-summary`
@@ -128,7 +150,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ### Auditoria e Correção de Preços (Inputs)
 
-- **Padronização e validação de inputs de preço (Criação e Edição):** `refactor/price-inputs-decimal-validation`
+- **Padronização e validação de inputs de preço:** `refactor/price-inputs-decimal-validation`
 
 ### Formulário de OS & UX
 

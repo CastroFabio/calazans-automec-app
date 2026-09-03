@@ -2107,7 +2107,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  overflow: hidden;
+
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
 }
 .cad-items-header {
   padding: 11px 16px;
@@ -2116,6 +2118,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 .cad-items-title {
   font-family: "Barlow Condensed", sans-serif;
@@ -2154,7 +2160,6 @@
 .cad-add-form {
   padding: 13px 16px;
   background: var(--surface);
-  border-top: 1px solid var(--border);
   display: flex;
   gap: 8px;
   align-items: center;

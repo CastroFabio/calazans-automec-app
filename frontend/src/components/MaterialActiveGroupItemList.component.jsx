@@ -18,6 +18,35 @@ const MaterialActiveGroupItemList = ({
 }) => {
   return (
     <div className="cad-items-outer">
+      <div className="cad-add-form">
+        <input
+          type="text"
+          className="input cad-input"
+          id="svcNewItem"
+          placeholder="Nome do novo material..."
+          value={newItemName}
+          onChange={(e) => setNewItemName(e.target.value)}
+        />
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => {
+            if (activeTab.groupName && newItemName.trim()) {
+              handleAddItem(activeTab.groupIndex, newItemName);
+              setNewItemName("");
+            }
+          }}
+        >
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Adicionar
+        </button>
+      </div>
       <div className="cad-items-wrap">
         {activeTab.groupName ? (
           <div className="cad-items-header ">
@@ -117,35 +146,6 @@ const MaterialActiveGroupItemList = ({
             </div>
           </div>
         )}
-        <div className="cad-add-form">
-          <input
-            type="text"
-            className="input cad-input"
-            id="svcNewItem"
-            placeholder="Nome do novo material..."
-            value={newItemName}
-            onChange={(e) => setNewItemName(e.target.value)}
-          />
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => {
-              if (activeTab.groupName && newItemName.trim()) {
-                handleAddItem(activeTab.groupIndex, newItemName);
-                setNewItemName("");
-              }
-            }}
-          >
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Adicionar
-          </button>
-        </div>
       </div>
     </div>
   );
