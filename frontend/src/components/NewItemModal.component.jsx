@@ -1,7 +1,15 @@
 import { useState } from "react";
 import AutoComplete from "./AutoComplete.component";
 
-const NewItemModal = ({ closeModal, isModalOpen, createItem, items }) => {
+const NewItemModal = ({
+  closeModal,
+  isModalOpen,
+  createItem,
+  items,
+  title,
+  placeholder,
+  buttonLabel,
+}) => {
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -72,7 +80,7 @@ const NewItemModal = ({ closeModal, isModalOpen, createItem, items }) => {
     >
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <span className="modal-title">Novo Item</span>
+          <span className="modal-title">{title}</span>
           <button className="sp-close" onClick={closeModal}>
             ×
           </button>
@@ -80,8 +88,8 @@ const NewItemModal = ({ closeModal, isModalOpen, createItem, items }) => {
         <div className="modal-body">
           <div className="form-grid modal-customer-form-grid">
             <AutoComplete
-              label="Nome do material"
-              placeholder="Digite o nome material..."
+              label="Grupo"
+              placeholder="Digite o grupo..."
               items={items}
               filterKey="group"
               value={inputValue}
@@ -102,7 +110,7 @@ const NewItemModal = ({ closeModal, isModalOpen, createItem, items }) => {
                 type="text"
                 className="input"
                 id="novoClienteTel"
-                placeholder={`Digite ${"material"}...`}
+                placeholder={placeholder}
                 value={formData.name}
                 onChange={(e) => {
                   handleFormFieldChange("name", e.target.value);
@@ -124,7 +132,7 @@ const NewItemModal = ({ closeModal, isModalOpen, createItem, items }) => {
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            Salvar e Cadastrar Item
+            {buttonLabel}
           </button>
         </div>
         <div className="customer-error-message-container">

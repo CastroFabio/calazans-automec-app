@@ -840,6 +840,9 @@ const NewServiceOrder = () => {
       {/* Modal para Serviços de Manutenção */}
       {isMaintenanceModalOpen && (
         <NewItemModal
+          title="Novo Serviço"
+          placeholder="Digite o novo serviço..."
+          buttonLabel="Salvar e cadastrar serviço"
           closeModal={closeMaintenanceModal}
           isModalOpen={isMaintenanceModalOpen}
           items={maintenanceJobsGroupData}
@@ -886,6 +889,9 @@ const NewServiceOrder = () => {
       {/* Modal para Materiais */}
       {isMaterialModalOpen && (
         <NewItemModal
+          title="Novo Material"
+          placeholder="Digite o novo material..."
+          buttonLabel="Salvar e cadastrar material"
           closeModal={closeMaterialModal}
           isModalOpen={isMaterialModalOpen}
           items={materialsGroupData}
