@@ -6,6 +6,7 @@ import MaterialActiveGroupItemList from "../components/MaterialActiveGroupItemLi
 import ActiveGroupItemList from "../components/ActiveGroupItemList.component";
 import ItemGroupList from "../components/ItemGroupList.component";
 import ItemGroupHeader from "../components/ItemGroupHeader.component";
+import NewItemModal from "../components/NewItemModal.component";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -19,7 +20,7 @@ const Materials = () => {
   });
   const [creatingGroupName, setCreatingGroupName] = useState("");
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
-  const [newItemName, setNewItemName] = useState("");
+  const [newItem, setNewItem] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -226,15 +227,18 @@ const Materials = () => {
   };
 
   // ========== ADICIONAR ITEM ==========
-  const handleAddItem = async (groupIndex, newItemName) => {
-    if (!newItemName.trim()) return;
+  const handleAddItem = async (groupIndex, newItemname) => {
+    if (!newItemname.trim()) {
+      setError("Nome completo é obrigatório.");
+      return;
+    }
 
     setIsAdding(true);
     setError(null);
 
     try {
       const newItem = {
-        name: newItemName.trim(),
+        name: newItemname.trim(),
         group_id: groupIndex,
       };
 
@@ -254,7 +258,7 @@ const Materials = () => {
       });
 
       // Limpar o campo
-      setNewItemName("");
+      setNewItem("");
     } catch (error) {
       console.error("Erro ao adicionar material:", error);
       const message =
@@ -291,8 +295,17 @@ const Materials = () => {
     }
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div className="page">
+      <button className="btn btn-primary" onClick={openModal}>
+        Modal
+      </button>
+
       <ItemGroupHeader category={"material"} />
       <div className="cad-layout">
         <ItemGroupList
@@ -312,8 +325,8 @@ const Materials = () => {
           setEditingItem={setEditingItem}
           activeTab={activeTab}
           activeGroup={activeGroup}
-          newItemName={newItemName}
-          setNewItemName={setNewItemName}
+          newItem={newItem}
+          setNewItem={setNewItem}
           handleEditSaveGroup={handleEditSaveGroup}
           handleEditSave={handleEditSave}
           handleEditKeyPress={handleEditKeyPress}

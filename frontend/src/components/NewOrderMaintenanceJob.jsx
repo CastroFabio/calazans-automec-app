@@ -4,6 +4,7 @@ import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
 import AutoComplete from "./AutoComplete.component";
 import SvcRegistradosList from "./SvcRegistradosList.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import WizardBtn from "./WizardBtn.component";
 
 const NewOrderMaintenanceJob = ({
   formData,
@@ -18,6 +19,8 @@ const NewOrderMaintenanceJob = ({
   calculateTotalMaintenanceJob,
   calculateTotalMaterials,
   calculateGrandTotal,
+  openMaintenanceModal,
+  openMaterialModal,
 }) => {
   const [svcNome, setSvcNome] = useState("");
   const [selectedService, setSelectedService] = useState(null);
@@ -237,6 +240,12 @@ const NewOrderMaintenanceJob = ({
               />
             </div>
           </div>
+          {true && (
+            <WizardBtn
+              label={"Novo serviço"}
+              openModal={openMaintenanceModal}
+            />
+          )}
 
           <AddMaterialInMaintenace
             handleAddMaterial={handleAddLocalMaterial}

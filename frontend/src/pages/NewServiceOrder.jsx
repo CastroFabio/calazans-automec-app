@@ -26,6 +26,8 @@ import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
 import { formatarCelular } from "../utils/convertCel";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
 import { PATHS } from "../utils/paths";
+import NewItemModal from "../components/NewItemModal.component";
+import { maintenanceJobApi } from "../api/maintenanceJobs";
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -36,6 +38,8 @@ const NewServiceOrder = () => {
   const [error, setError] = useState(false);
   const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
   const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
+  const [isMaterialModalOpen, setMaterialIsModalOpen] = useState(false);
 
   // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
@@ -478,6 +482,22 @@ const NewServiceOrder = () => {
     setVehicleIsModalOpen(true);
   };
 
+  const closeMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(false);
+  };
+
+  const handleOpenMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(true);
+  };
+
+  const closeMaterialModal = () => {
+    setMaterialIsModalOpen(false);
+  };
+
+  const handleOpenMaterialModal = () => {
+    setMaterialIsModalOpen(true);
+  };
+
   return (
     <div className="page">
       {/* ============== */}
@@ -684,6 +704,8 @@ const NewServiceOrder = () => {
           calculateTotalMaintenanceJob={calculateTotalMaintenanceJob}
           calculateTotalMaterials={calculateTotalMaterials}
           calculateGrandTotal={calculateGrandTotal}
+          openMaintenanceModal={handleOpenMaintenanceModal}
+          openMaterialModal={handleOpenMaterialModal}
         />
 
         {/* =================== */}
@@ -812,6 +834,95 @@ const NewServiceOrder = () => {
           isModalOpen={isVehicleModalOpen}
           onClose={closeVehicleModal}
           selectedCustomer={getCustomerById(selectedCustomerInfo.id)}
+        />
+      )}
+
+      {/* Modal para Serviços de Manutenção */}
+      {isMaintenanceModalOpen && (
+        <NewItemModal
+          closeModal={closeMaintenanceModal}
+          isModalOpen={isMaintenanceModalOpen}
+          items={maintenanceJobsGroupData}
+          createItem={async (groupIndex, newItemName) => {
+            if (!newItemName.trim() || !groupIndex) return;
+
+            try {
+              const newItem = {
+                name: newItemName.trim(),
+                group_id: groupIndex,
+              };
+
+              // 1. Chamada de API (ajuste para a rota correta da sua API se necessário)
+              const response = await maintenanceJobApi.create(newItem);
+              const createdItem = response.data || response;
+
+              // 2. Atualiza o estado local maintenanceJobsGroupData
+              setMaintenanceJobsGroupData((prevData) =>
+                prevData.map((group) => {
+                  if (group.id === groupIndex) {
+                    return {
+                      ...group,
+                      maintenanceJobs: [
+                        ...(group.maintenanceJobs || []),
+                        createdItem,
+                      ],
+                    };
+                  }
+                  return group;
+                }),
+              );
+
+              closeMaintenanceModal();
+            } catch (err) {
+              console.error("Erro ao adicionar serviço:", err);
+              alert(
+                err.response?.data?.message || "Erro ao adicionar serviço.",
+              );
+            }
+          }}
+        />
+      )}
+
+      {/* Modal para Materiais */}
+      {isMaterialModalOpen && (
+        <NewItemModal
+          closeModal={closeMaterialModal}
+          isModalOpen={isMaterialModalOpen}
+          items={materialsGroupData}
+          createItem={async (groupIndex, newItemName) => {
+            if (!newItemName.trim() || !groupIndex) return;
+
+            try {
+              const newItem = {
+                name: newItemName.trim(),
+                group_id: groupIndex,
+              };
+
+              // 1. Chamada de API de Materiais
+              const response = await materialApi.create(newItem);
+              const createdItem = response.data || response;
+
+              // 2. Atualiza o estado local materialsGroupData
+              setMaterialsGroupData((prevData) =>
+                prevData.map((group) => {
+                  if (group.id === groupIndex) {
+                    return {
+                      ...group,
+                      materials: [...(group.materials || []), createdItem],
+                    };
+                  }
+                  return group;
+                }),
+              );
+
+              closeMaterialModal();
+            } catch (err) {
+              console.error("Erro ao adicionar material:", err);
+              alert(
+                err.response?.data?.message || "Erro ao adicionar material.",
+              );
+            }
+          }}
         />
       )}
     </div>
