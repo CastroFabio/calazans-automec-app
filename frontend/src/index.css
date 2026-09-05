@@ -4616,7 +4616,7 @@
   overflow: visible !important;
 }
 
-/* Garante que elementos acima no HTML se sobreponham aos que vêm abaixo */
+/* /* Garante que elementos acima no HTML se sobreponham aos que vêm abaixo 
 .form-section:nth-child(1) {
   z-index: 10;
 }
@@ -4632,6 +4632,7 @@
 .form-section:nth-child(5) {
   z-index: 6;
 }
+*/
 
 /* Caso as linhas de material/serviço estejam em lista dinâmica */
 .service-row,

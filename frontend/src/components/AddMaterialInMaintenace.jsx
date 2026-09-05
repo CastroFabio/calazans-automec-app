@@ -1,6 +1,9 @@
-import React, { useMemo } from "react";
+import { useMemo, useState } from "react";
 import AutoComplete from "./AutoComplete.component"; // Importe o AutoComplete genérico
 import { parseValue } from "../utils/parseValue";
+import NewItemModal from "../components/NewItemModal.component";
+import WizardBtn from "./WizardBtn.component";
+import { materialApi } from "../api/materials";
 
 const AddMaterialInMaintenace = ({
   handleAddMaterial,
@@ -8,12 +11,14 @@ const AddMaterialInMaintenace = ({
   handleMaterialInputChange,
   materialsGroupData = [],
   handleRemoveMaterial,
-  findMaterialById,
   itemMaintenance_id,
   listMaintenanceJobs = [],
+  setMaterialsGroupData,
 }) => {
-  // Filtra apenas os materiais deste serviço específico
+  const [isMaterialModalOpen, setMaterialIsModalOpen] = useState(false);
+  const [error, setError] = useState(null);
 
+  // Filtra apenas os materiais deste serviço específico
   const serviceMaterials = itemMaintenance_id
     ? materialsList.filter(
         (item) =>
@@ -54,11 +59,20 @@ const AddMaterialInMaintenace = ({
     });
   }, [flatMaterials, serviceMaterials, registeredMaterials]);
 
+  const closeMaterialModal = () => {
+    setMaterialIsModalOpen(false);
+  };
+
+  const handleOpenMaterialModal = () => {
+    setMaterialIsModalOpen(true);
+  };
+
   return (
     <div className="add-material-by-maintenance-container">
       <div className="add-material-by-maintenance-label">
         Peças & Materiais deste serviço
       </div>
+      <WizardBtn label={"Novo material"} openModal={handleOpenMaterialModal} />
       <div className="mat-table-wrap">
         <table className="mat-table">
           <thead>
@@ -289,6 +303,63 @@ const AddMaterialInMaintenace = ({
         </svg>
         Adicionar peça / material
       </button>
+      {/* Modal para Materiais */}
+      {isMaterialModalOpen && (
+        <NewItemModal
+          title="Novo Material"
+          placeholder="Digite o novo material..."
+          buttonLabel="Salvar e cadastrar material"
+          closeModal={closeMaterialModal}
+          isModalOpen={isMaterialModalOpen}
+          items={materialsGroupData}
+          createItem={async (groupIndex, newItemName) => {
+            if (!newItemName.trim()) {
+              setError("O nome do material é obrigatório");
+              return;
+            }
+
+            if (!groupIndex) {
+              setError("Selecione um grupo");
+              return;
+            }
+
+            try {
+              const newItem = {
+                name: newItemName.trim(),
+                group_id: groupIndex,
+              };
+
+              // 1. Chamada de API de Materiais
+              const response = await materialApi.create(newItem);
+              const createdItem = response.data || response;
+
+              // 2. Atualiza o estado local materialsGroupData
+              setMaterialsGroupData((prevData) =>
+                prevData.map((group) => {
+                  if (group.id === groupIndex) {
+                    return {
+                      ...group,
+                      materials: [...(group.materials || []), createdItem],
+                    };
+                  }
+                  return group;
+                }),
+              );
+
+              closeMaterialModal();
+            } catch (err) {
+              console.error("Erro ao adicionar material:", err);
+              setError(
+                err.response?.data?.message || "Erro ao adicionar material.",
+              );
+              /* alert(
+                err.response?.data?.message || "Erro ao adicionar material.",
+              ); */
+            }
+          }}
+          onError={error}
+        />
+      )}
     </div>
   );
 };

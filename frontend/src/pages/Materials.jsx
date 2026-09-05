@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { materialGroupApi } from "../api/materialGroups";
 import { materialApi } from "../api/materials";
-import MaterialGroupList from "../components/MaterialGroupList.component";
-import MaterialActiveGroupItemList from "../components/MaterialActiveGroupItemList.component";
 import ActiveGroupItemList from "../components/ActiveGroupItemList.component";
 import ItemGroupList from "../components/ItemGroupList.component";
 import ItemGroupHeader from "../components/ItemGroupHeader.component";
-import NewItemModal from "../components/NewItemModal.component";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -295,17 +292,8 @@ const Materials = () => {
     }
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
   return (
     <div className="page">
-      <button className="btn btn-primary" onClick={openModal}>
-        Modal
-      </button>
-
       <ItemGroupHeader category={"material"} />
       <div className="cad-layout">
         <ItemGroupList

@@ -25,7 +25,7 @@ const TABS = [
 
 const ServiceOrderList = () => {
   // ========== CONTEXTO ==========
-  const { serviceOrders, fetchServiceOrders, loading, error } =
+  const { serviceOrders, fetchServiceOrders, loading, error, setError } =
     useServiceOrders();
 
   // ========== ESTADOS LOCAIS ==========
@@ -83,6 +83,9 @@ const ServiceOrderList = () => {
       }
     } catch (err) {
       console.error("Erro ao buscar ordem:", err);
+      const message =
+        error.response?.data?.message || "Erro ao buscar clientes";
+      setError(message);
     } finally {
       setLocalLoading(false);
     }

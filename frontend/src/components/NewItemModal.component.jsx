@@ -8,6 +8,7 @@ const NewItemModal = ({
   items,
   title,
   placeholder,
+  onError,
   buttonLabel,
 }) => {
   const [formData, setFormData] = useState({
@@ -44,8 +45,6 @@ const NewItemModal = ({
       name: formData.name.trim(),
       group_id: Number(selectedGroup.id),
     };
-
-    console.log("Item Data: ", itemData);
 
     try {
       setError(null);
@@ -139,6 +138,7 @@ const NewItemModal = ({
           {error && <p>{error}</p>}
         </div>
       </div>
+      {onError && <p>{onError}</p>}
     </div>
   );
 };

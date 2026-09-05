@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import InputPriceValue from "./InputPriceValue";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
 import AutoComplete from "./AutoComplete.component";
 import SvcRegistradosList from "./SvcRegistradosList.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import WizardBtn from "./WizardBtn.component";
+import { materialGroupApi } from "../api/materialGroups";
 
 const NewOrderMaintenanceJob = ({
   formData,
@@ -13,21 +14,29 @@ const NewOrderMaintenanceJob = ({
   handleRemoveMaintenanceJob,
   setListMaintenanceJobs,
   maintenanceJobsGroupData = [],
-  materialsGroupData,
-  findMaterialById,
   handleAddMaintenanceJob,
   calculateTotalMaintenanceJob,
   calculateTotalMaterials,
   calculateGrandTotal,
   openMaintenanceModal,
-  openMaterialModal,
 }) => {
   const [svcNome, setSvcNome] = useState("");
   const [selectedService, setSelectedService] = useState(null);
   const [svcObs, setSvcObs] = useState("");
   const [editingJobId, setEditingJobId] = useState(null);
+  const [materialsGroupData, setMaterialsGroupData] = useState([]);
 
   const { setMaterialsList, materialsList } = useServiceOrders();
+
+  const handleFetchMaterialsGroup = async () => {
+    const { data } = await materialGroupApi.getAll();
+
+    setMaterialsGroupData(data);
+  };
+
+  useEffect(() => {
+    handleFetchMaterialsGroup();
+  }, []);
 
   const flatMaintenanceJobs = useMemo(() => {
     if (!maintenanceJobsGroupData || maintenanceJobsGroupData.length === 0)
@@ -141,6 +150,15 @@ const NewOrderMaintenanceJob = ({
     ),
   }));
 
+  const findMaterialById = (id) => {
+    if (!id) return null;
+    for (const group of materialsGroupData) {
+      const found = group.materials.find((item) => item.id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
   return (
     <div className="form-section">
       <div className="fs-header">
@@ -253,9 +271,9 @@ const NewOrderMaintenanceJob = ({
             handleMaterialInputChange={handleLocalMaterialInputChange}
             materialsGroupData={materialsGroupData}
             handleRemoveMaterial={handleRemoveLocalMaterial}
-            findMaterialById={findMaterialById}
             itemMaintenance_id={editingJobId}
             listMaintenanceJobs={listMaintenanceJobs}
+            setMaterialsGroupData={setMaterialsGroupData}
           />
 
           <div className="svc-actions">
