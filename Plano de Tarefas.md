@@ -66,9 +66,10 @@
 
 - **Ação:** Adicionar checkbox no item da OS para indicar se a peça/material foi fornecido pelo cliente.
 
-### [Feature/OS] Atalho "Levar para OS"
+### [Feature/Customer] Atalho "Criar OS" no Card do Veículo do Cliente
 
-- **Ação:** Criar botão para converter orçamentos/cotações diretamente em uma nova OS.
+- **Ação:** Criar um botão de atalho direto ("Criar OS" / "Gerar Ordem de Serviço") dentro do card de cada veículo no painel lateral de detalhes do cliente.
+- **Comportamento Esperado:** Ao clicar no botão, redirecionar o usuário para a tela de criação da Ordem de Serviço (Wizard) pré-selecionando e preenchendo automaticamente tanto o **Cliente** quanto o **Veículo** correspondente na Etapa 1.
 
 ---
 
@@ -155,9 +156,9 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - **Wizard em 4 Passos com Resumo:** `feature/os-4step-wizard-summary`
 - **Passo de Pagamento na OS:** `feature/os-payment-step-integration`
 - **Modal Novo Cliente e Novo Veículo na OS:** `feature/os-quick-add-customer-vehicle`
-- **Modal Cadastro Rápido Peça e Serviço:** `feature/modal-quick-add-part-service`
+- ~~**Modal Cadastro Rápido Peça e Serviço:** `feature/modal-quick-add-part-service`~~
 - **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
-- **Atalho "Levar para OS":** `feature/os-convert-shortcut`
+- **Atalho "Criar OS" no Card do Veículo do Cliente:** `feature/customer-vehicle-card-create-os-shortcut`
 
 ## Auditoria e Correção de Preços (Inputs)
 
