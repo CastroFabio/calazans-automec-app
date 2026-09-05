@@ -112,10 +112,6 @@ const NewServiceOrder = () => {
 
   useEffect(() => {
     if (Object.keys(selectedCustomerFromDetailPanel).length !== 0) {
-      console.log(
-        "selectedCustomerFromDetailPanel",
-        selectedCustomerFromDetailPanel,
-      );
       setSelectedCustomerInfo(selectedCustomerFromDetailPanel);
       setSelectedVehicleInfo(selectedCustomerFromDetailPanel.vehicles[0]);
       setFormData((prev) => ({
