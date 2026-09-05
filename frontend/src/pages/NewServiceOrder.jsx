@@ -78,7 +78,12 @@ const NewServiceOrder = () => {
     setMaterialsList,
     materialsList,
   } = useServiceOrders();
-  const { getCustomerById, customers } = useCustomers();
+  const {
+    getCustomerById,
+    customers,
+    selectedCustomerFromDetailPanel,
+    setSelectedCustomerFromDetailPanel,
+  } = useCustomers();
 
   // FETCH
   const handleFetchCustomers = async () => {
@@ -104,6 +109,22 @@ const NewServiceOrder = () => {
   useEffect(() => {
     handleFetchGroupMaintenanceJobData();
   }, []);
+
+  useEffect(() => {
+    if (Object.keys(selectedCustomerFromDetailPanel).length !== 0) {
+      console.log(
+        "selectedCustomerFromDetailPanel",
+        selectedCustomerFromDetailPanel,
+      );
+      setSelectedCustomerInfo(selectedCustomerFromDetailPanel);
+      setSelectedVehicleInfo(selectedCustomerFromDetailPanel.vehicles[0]);
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: selectedCustomerFromDetailPanel.id,
+        vehicle_id: selectedCustomerFromDetailPanel.vehicles[0].id,
+      }));
+    }
+  }, [selectedCustomerFromDetailPanel]);
 
   // Função específica para prioridade
   const handlePriorityChange = (value) => {
@@ -277,6 +298,20 @@ const NewServiceOrder = () => {
       // Reseta listas do formulário
       setListMaintenanceJobs([]);
       setMaterialsList([]);
+      setFormData({
+        professional: "",
+        priority: 1,
+        status: 1,
+        arrived_at: new Date().toISOString(),
+        entry_km: "",
+        diagnosis: "",
+        labor_cost: "",
+        observation: "",
+        subtotal: null,
+        customer_id: "",
+        vehicle_id: "",
+      });
+      setSelectedCustomerFromDetailPanel({});
 
       // Navega para a listagem
       navigate(PATHS.serviceOrder);
@@ -534,6 +569,7 @@ const NewServiceOrder = () => {
                   setSelectedVehicleInfo(null);
                   handleFormFieldChange("customer_id", "");
                   handleFormFieldChange("vehicle_id", "");
+                  setSelectedCustomerFromDetailPanel(null);
                 }}
                 onCreateNew={(term) => {
                   console.log("Abrir modal para criar cliente:", term);

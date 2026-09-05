@@ -11,6 +11,8 @@ export const CustomerProvider = ({ children }) => {
   const [customerCount, setCustomerCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedCustomerFromDetailPanel, setSelectedCustomerFromDetailPanel] =
+    useState({});
 
   // Função para buscar clientes
   const fetchCustomers = async () => {
@@ -275,6 +277,8 @@ export const CustomerProvider = ({ children }) => {
         getFirstCustomer,
         customerID,
         setCustomerID,
+        selectedCustomerFromDetailPanel,
+        setSelectedCustomerFromDetailPanel,
       }}
     >
       {children}

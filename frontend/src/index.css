@@ -1885,8 +1885,27 @@
 
 .car-entry-km {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.car-entry-km-container {
+  display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-nova-os-detail-customer {
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.btn-nova-os-detail-customer svg {
+  width: 11px;
+  height: 11px;
 }
 
 .car-tag-badge {

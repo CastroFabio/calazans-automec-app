@@ -66,10 +66,10 @@
 
 - **Ação:** Adicionar checkbox no item da OS para indicar se a peça/material foi fornecido pelo cliente.
 
-### [Feature/Customer] Atalho "Criar OS" no Card do Veículo do Cliente
+### ~~[Feature/Customer] Atalho "Criar OS" no Card do Veículo do Cliente~~
 
-- **Ação:** Criar um botão de atalho direto ("Criar OS" / "Gerar Ordem de Serviço") dentro do card de cada veículo no painel lateral de detalhes do cliente.
-- **Comportamento Esperado:** Ao clicar no botão, redirecionar o usuário para a tela de criação da Ordem de Serviço (Wizard) pré-selecionando e preenchendo automaticamente tanto o **Cliente** quanto o **Veículo** correspondente na Etapa 1.
+- ~~**Ação:** Criar um botão de atalho direto ("Criar OS" / "Gerar Ordem de Serviço") dentro do card de cada veículo no painel lateral de detalhes do cliente.~~
+- ~~**Comportamento Esperado:** Ao clicar no botão, redirecionar o usuário para a tela de criação da Ordem de Serviço (Wizard) pré-selecionando e preenchendo automaticamente tanto o **Cliente** quanto o **Veículo** correspondente na Etapa 1.~~
 
 ---
 
@@ -158,7 +158,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - **Modal Novo Cliente e Novo Veículo na OS:** `feature/os-quick-add-customer-vehicle`
 - ~~**Modal Cadastro Rápido Peça e Serviço:** `feature/modal-quick-add-part-service`~~
 - **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
-- **Atalho "Criar OS" no Card do Veículo do Cliente:** `feature/customer-vehicle-card-create-os-shortcut`
+- ~~**Atalho "Criar OS" no Card do Veículo do Cliente:** `feature/customer-vehicle-card-create-os-shortcut`~~
 
 ## Auditoria e Correção de Preços (Inputs)
 

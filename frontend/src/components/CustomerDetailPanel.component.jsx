@@ -5,8 +5,16 @@ import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import VehicleBadge from "./VehicleBadge.component";
 import { formatarCelular } from "../utils/convertCel";
 import { getCustomerNameInitials } from "../utils/CustomerInitials";
+import { useCustomers } from "../context/Customer.context";
+import { useNavigate } from "react-router-dom";
+import { PATHS } from "../utils/paths";
 
 const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
+  const { setSelectedCustomerFromDetailPanel, getCustomerById } =
+    useCustomers();
+
+  const navigate = useNavigate();
+
   const sumTotalValueServiceOrder = () => {
     const total = selectedCustomer.serviceOrders.reduce(
       (sum, current) => sum + parseFloat(current.subtotal),
@@ -175,13 +183,48 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                     </span>
                   </div>
                   <div className="car-entry-km">
-                    <span className="car-entry-km-title">Gasto Total:</span>
-                    <span className="car-entry-km-info">
-                      {formattedPrice(
-                        sumServiceOrdersByVehicle(selectedCustomer, element.id)
-                          .total,
-                      )}
-                    </span>
+                    <div className="car-entry-km-container">
+                      <span className="car-entry-km-title">Gasto Total:</span>
+                      <span className="car-entry-km-info">
+                        {formattedPrice(
+                          sumServiceOrdersByVehicle(
+                            selectedCustomer,
+                            element.id,
+                          ).total,
+                        )}
+                      </span>
+                    </div>
+                    <button
+                      className="btn btn-sm btn-primary btn-nova-os-detail-customer"
+                      onClick={() => {
+                        const selectedCustomerFromContext = getCustomerById(
+                          selectedCustomer.id,
+                        );
+                        const selectedCustomerForNewOS = {
+                          ...selectedCustomerFromContext,
+                          vehicles: [element],
+                        };
+                        setSelectedCustomerFromDetailPanel(
+                          selectedCustomerForNewOS,
+                        );
+
+                        navigate(PATHS.newServiceOrder);
+                      }}
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      Nova OS
+                    </button>
                   </div>
                 </div>
               ))
