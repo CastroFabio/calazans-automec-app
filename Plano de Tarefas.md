@@ -54,9 +54,9 @@
   - "Cadastrar Novo Cliente".
   - "Cadastrar Novo Veículo" (associando ao cliente selecionado).
 
-### [Modal] Modal de Cadastro Rápido de Peça e Serviço
+### ~~[Modal] Modal de Cadastro Rápido de Peça e Serviço~~
 
-- **Ação:** Criar modal acessível na Etapa 2 de Serviços/Materiais para permitir o cadastro imediato de uma nova peça ou serviço no banco de dados sem perder o progresso da OS.
+- ~~**Ação:** Criar modal acessível na Etapa 2 de Serviços/Materiais para permitir o cadastro imediato de uma nova peça ou serviço no banco de dados sem perder o progresso da OS.~~
 
 ### [UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço
 
