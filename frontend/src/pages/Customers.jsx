@@ -11,6 +11,7 @@ import NewVehicleModal from "../components/NewVehicleModal.component";
 import VehicleBadge from "../components/VehicleBadge.component";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { getCustomerNameInitials } from "../utils/CustomerInitials";
+import Loading from "./Loading";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -82,8 +83,14 @@ const Customers = () => {
     setIsModalOpen(true);
   };
 
-  const handleRemoveCustomer = async (customerID, event) => {
+  const handleRemoveCustomer = async (customerID, event, customer) => {
     event.stopPropagation(); // Impede abrir o sidebar
+
+    if (customer.vehicles.length > 0) {
+      setError("Não é possível deletar cliente que possui carros");
+      alert(error);
+      return;
+    }
 
     if (!window.confirm("Tem certeza que deseja remover este cliente?")) {
       return;
@@ -119,8 +126,7 @@ const Customers = () => {
     navigate(`/customers/edit/${customerID}`);
   };
 
-  if (loading) return <div>Carregando clientes...</div>;
-  if (error) return <div>Erro: {error}</div>;
+  if (loading) return <Loading />;
 
   return (
     <div className="page" id="page-clientes">
@@ -159,22 +165,24 @@ const Customers = () => {
                 handleFetchSelectedCustomer(element.id);
               }}
             >
-              <button
-                className="sp-close "
-                onClick={(e) => handleRemoveCustomer(element.id, e)}
-              >
-                ×
-              </button>
-              <div className="client-card-header">
-                <div className={`client-avatar-lg bg-${element.color}`}>
-                  {getCustomerNameInitials(element.name)}
-                </div>
-                <div>
-                  <div className="client-name">{element.name}</div>
-                  <div className="client-sub">
-                    {`${element._count.serviceOrders} OS · ${element._count.vehicles} veículo(s)`}
+              <div style={{ display: "flex" }}>
+                <div className="client-card-header">
+                  <div className={`client-avatar-lg bg-${element.color}`}>
+                    {getCustomerNameInitials(element.name)}
+                  </div>
+                  <div>
+                    <div className="client-name">{element.name}</div>
+                    <div className="client-sub">
+                      {`${element._count.serviceOrders} OS · ${element._count.vehicles} veículo(s)`}
+                    </div>
                   </div>
                 </div>
+                <button
+                  className="sp-close "
+                  onClick={(e) => handleRemoveCustomer(element.id, e, element)}
+                >
+                  ×
+                </button>
               </div>
               {element.telephone ? (
                 <div className="client-info-row ">

@@ -653,11 +653,13 @@
   transition: all 0.14s;
   box-shadow: var(--shadow);
 }
+
 .client-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
+
 .client-card-header {
   display: flex;
   align-items: center;
