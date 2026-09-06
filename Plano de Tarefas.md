@@ -48,11 +48,11 @@
 
 ## 3. Formulários, Modais & Cadastro Rápido
 
-### [Modal] Cadastro Rápido de Cliente e Veículo na Criação da OS
+### ~~[Modal] Cadastro Rápido de Cliente e Veículo na Criação da OS~~
 
-- **Ação:** Adicionar botões para abrir modais de cadastro direto na Etapa 1 do Wizard:
-  - "Cadastrar Novo Cliente".
-  - "Cadastrar Novo Veículo" (associando ao cliente selecionado).
+- ~~**Ação:** Adicionar botões para abrir modais de cadastro direto na Etapa 1 do Wizard:~~
+  - ~~"Cadastrar Novo Cliente".~~
+  - ~~"Cadastrar Novo Veículo" (associando ao cliente selecionado).~~
 
 ### ~~[Modal] Modal de Cadastro Rápido de Peça e Serviço~~
 
@@ -161,7 +161,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 - **Wizard em 4 Passos com Resumo:** `feature/os-4step-wizard-summary`
 - **Passo de Pagamento na OS:** `feature/os-payment-step-integration`
-- **Modal Novo Cliente e Novo Veículo na OS:** `feature/os-quick-add-customer-vehicle`
+- ~~**Modal Novo Cliente e Novo Veículo na OS:** `feature/os-quick-add-customer-vehicle`~~
 - ~~**Modal Cadastro Rápido Peça e Serviço:** `feature/modal-quick-add-part-service`~~
 - **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
 - ~~**Atalho "Criar OS" no Card do Veículo do Cliente:** `feature/customer-vehicle-card-create-os-shortcut`~~
