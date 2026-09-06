@@ -118,6 +118,7 @@ model ItemMaterial {
   material_id        Int
   receipt            String?  @db.Text
   supplier           String?  @db.Text
+  isCustomerSupplier Boolean? @default(false)
 
   // Relacionamentos
   serviceorder    ServiceOrder     @relation(fields: [serviceorder_id], references: [id], onDelete: Cascade)

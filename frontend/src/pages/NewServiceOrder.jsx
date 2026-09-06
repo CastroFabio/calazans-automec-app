@@ -188,20 +188,36 @@ const NewServiceOrder = () => {
       (job.materialsList || []).map((mat) => ({
         ...mat,
         parentJobId: job.id, // ID local temporário do serviço para mapeamento posterior
+        maintenanceName: job.name, // ID local temporário do serviço para mapeamento posterior
       })),
     );
 
-    const invalidMaterials = allMaterials.filter((item) => {
+    const invalidMaterialsID = allMaterials.filter((item) => {
       if (!item.material_id) return true;
-      const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unit);
-      return quantity <= 0 || value <= 0;
     });
 
-    if (invalidMaterials.length > 0) {
-      errorList.push(
-        "Existem materiais cadastrados sem preenchimento correto (Material, Quantidade ou Valor).",
-      );
+    if (invalidMaterialsID.length > 0) {
+      invalidMaterialsID.forEach((material) => {
+        errorList.push(
+          `A peça do serviço ${material.maintenanceName} não foi corretamente registrada.`,
+        );
+      });
+    }
+
+    const invalidMaterialsValueAndQty = allMaterials.filter((item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      const value = parseValue(item.value_unit);
+      return (quantity <= 0 || value <= 0) && !item.customerSupplierCheck;
+    });
+
+    if (invalidMaterialsValueAndQty.length > 0 && !isCustomerSupplier) {
+      invalidMaterialsValueAndQty.forEach((material) => {
+        if (material.name) {
+          errorList.push(
+            `O material ${material.name} no serviço de ${material.maintenanceName} precisa ser o preenchida corretamente (Material, Quantidade ou Valor).`,
+          );
+        }
+      });
     }
 
     // Se houver erros nas validações, interrompe a execução
@@ -226,6 +242,7 @@ const NewServiceOrder = () => {
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
       subtotal: calculateGrandTotal(),
+      isCustomerSupplier: formData.isCustomerSupplier,
     };
 
     try {

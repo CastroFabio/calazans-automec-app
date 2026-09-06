@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -87,4 +88,14 @@ export class CreateMaterialItemDto {
   @IsOptional()
   @IsString({ message: 'Nome do fornecedor deve ser uma string' })
   supplier?: string;
+
+  @ApiPropertyOptional({
+    description: 'Indica se é cliente/fornecedor (opcional)',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean({ message: 'O campo deve ser um valor booleano' })
+  isCustomerSupplier?: boolean;
 }

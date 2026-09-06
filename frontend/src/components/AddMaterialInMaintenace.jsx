@@ -17,6 +17,7 @@ const AddMaterialInMaintenace = ({
 }) => {
   const [isMaterialModalOpen, setMaterialIsModalOpen] = useState(false);
   const [error, setError] = useState(null);
+  const [checkedItems, setCheckedItems] = useState({});
 
   // Filtra apenas os materiais deste serviço específico
   const serviceMaterials = itemMaintenance_id
@@ -67,6 +68,14 @@ const AddMaterialInMaintenace = ({
     setMaterialIsModalOpen(true);
   };
 
+  const handleCheckboxChange = (event, materialID) => {
+    const isChecked = event.target.checked;
+    setCheckedItems((prev) => ({
+      ...prev,
+      [materialID]: isChecked,
+    }));
+  };
+
   return (
     <div className="add-material-by-maintenance-container">
       <div className="add-material-by-maintenance-label">
@@ -79,6 +88,7 @@ const AddMaterialInMaintenace = ({
             <tr>
               <th className="mat-table-content-desc">Descrição</th>
               <th className="mat-table-content-qtd">Qtd.</th>
+              <th className="mat-table-content-qtd">Fornecido pelo cliente?</th>
               <th className="mat-table-content-value">Unit.</th>
               <th className="mat-table-content-total">Total</th>
               <th className="mat-table-content-supplier">Fornecedor</th>
@@ -191,12 +201,56 @@ const AddMaterialInMaintenace = ({
                         />
                       </td>
                       <td>
-                        <div className="input-prefix">
+                        <div
+                          className="mat-client-check"
+                          title="Fornecido pelo cliente"
+                        >
+                          <input
+                            type="checkbox"
+                            id={`matClient-${element.id}`}
+                            className="mat-client-cb"
+                            checked={!!checkedItems[element.id]} // Ensures boolean value
+                            onChange={(event) => {
+                              handleCheckboxChange(event, element.id);
+                              handleMaterialInputChange(
+                                element.id,
+                                "customerSupplierCheck",
+                                event.target.checked,
+                                materialsGroupData,
+                              );
+                              handleMaterialInputChange(
+                                element.id,
+                                "value_unit",
+                                0,
+                                materialsGroupData,
+                              );
+                              handleMaterialInputChange(
+                                element.id,
+                                "supplier",
+                                "",
+                                materialsGroupData,
+                              );
+                              handleMaterialInputChange(
+                                element.id,
+                                "supplier",
+                                "",
+                                materialsGroupData,
+                              );
+                            }}
+                          />
+                          <label className="mat-client-label">Cliente</label>
+                        </div>
+                      </td>
+                      <td>
+                        <div
+                          className={`input-prefix ${!!checkedItems[element.id] ? "input-div-disabled" : ""}`}
+                        >
                           <span>R$</span>
                           <input
                             type="text"
                             placeholder="0.00"
                             className="input-new-order-material-cost"
+                            disabled={!!checkedItems[element.id]}
                             value={element.value_unit ?? ""}
                             onChange={(e) => {
                               let val = e.target.value
@@ -224,10 +278,11 @@ const AddMaterialInMaintenace = ({
                           />
                         </div>
                       </td>
+
                       <td>
                         <input
                           type="text"
-                          className="input input-new-order-material-total"
+                          className={`input input-new-order-material-total ${!!checkedItems[element.id] ? "input-div-disabled" : ""}`}
                           readOnly
                           disabled
                           value={
@@ -243,7 +298,7 @@ const AddMaterialInMaintenace = ({
                       <td>
                         <input
                           type="text"
-                          className="input input-new-order-material-ref"
+                          className={`input input-new-order-material-ref ${!!checkedItems[element.id] ? "input-div-disabled" : ""}`}
                           placeholder="Ref."
                           value={element.supplier || ""}
                           onChange={(e) =>
@@ -259,7 +314,7 @@ const AddMaterialInMaintenace = ({
                       <td>
                         <input
                           type="text"
-                          className="input input-new-order-material-ref"
+                          className={`input input-new-order-material-ref ${!!checkedItems[element.id] ? "input-div-disabled" : ""}`}
                           placeholder="Ref."
                           value={element.receipt || ""}
                           onChange={(e) =>

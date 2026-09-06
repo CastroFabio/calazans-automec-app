@@ -71,7 +71,11 @@ const ServiceOrderDetailPanel = ({
 
     const groups = itemMaterials.reduce((acc, item) => {
       // Normalização de chaves para evitar duplicações por espaços ou maiúsculas/minúsculas
-      const supplierStr = (item.supplier || "Sem Fornecedor").trim();
+      const supplierStr = String(
+        item.isCustomerSupplier
+          ? "Fornecido pelo cliente"
+          : item.supplier || "Sem Fornecedor",
+      ).trim();
       const receiptStr = (item.receipt || "Sem Recibo").trim();
       const groupKey = `${supplierStr.toLowerCase()}_${receiptStr.toLowerCase()}`;
 
@@ -89,6 +93,8 @@ const ServiceOrderDetailPanel = ({
 
     return Object.values(groups);
   }, [itemMaterials]);
+
+  console.log(itemMaterials);
 
   // ========== VALIDAÇÃO INICIAL ==========
   if (!sidebarOpen) return null;

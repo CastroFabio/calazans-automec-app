@@ -1167,6 +1167,11 @@
   font-size: 12px;
 }
 
+.input-div-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .input-new-order-material-qtd {
   padding: 5px 7px;
   font-size: 12px;
@@ -5035,4 +5040,29 @@
   .wz-footer {
     padding: 12px 16px;
   }
+}
+.mat-client-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding: 2px 4px;
+}
+.mat-client-cb {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.mat-client-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
 }
