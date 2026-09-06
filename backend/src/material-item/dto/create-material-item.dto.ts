@@ -90,7 +90,7 @@ export class CreateMaterialItemDto {
   supplier?: string;
 
   @ApiPropertyOptional({
-    description: 'Indica se é cliente/fornecedor (opcional)',
+    description: 'Indica se o cliente é o fornecedor  (opcional)',
     example: true,
     type: Boolean,
   })
