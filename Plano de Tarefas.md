@@ -62,15 +62,15 @@
 
 - **Ação:** Mover o foco do cursor (`focus()`) automaticamente para o input de preço/valor unitário assim que um serviço for selecionado no autocomplete.
 
-### [Feature/OS] Campo / Marcação "Fornecido pelo cliente"
+### ~~[Feature/OS] Campo / Marcação "Fornecido pelo cliente"~~
 
 - ~~**Ação:** Adicionar checkbox no item da OS para indicar se a peça/material foi fornecido pelo cliente.~~
 
-#### O que falta?
+#### ~~O que falta?~~
 
-1. Desenvolver a lógica para que o value_unit, supplier e receipt daquele itemMaterial sejam 0/''/'', respectivamente.
-2. Adicionar no handleSaveOS no NewServiceOrder para enviar o itemMaterial com o isCustomerSupplier
-3. Adicionar no banco de dados a coluna isCustomerSupplier (`isCustomerSupplier Boolean @default(false)`) na tabela de itemMaterial
+1. ~~Desenvolver a lógica para que o value_unit, supplier e receipt daquele itemMaterial sejam 0/''/'', respectivamente.~~
+2. ~~Adicionar no handleSaveOS no NewServiceOrder para enviar o itemMaterial com o isCustomerSupplier~~
+3. ~~Adicionar no banco de dados a coluna isCustomerSupplier (`isCustomerSupplier Boolean @default(false)`) na tabela de itemMaterial~~
 
 ### ~~[Feature/Customer] Atalho "Criar OS" no Card do Veículo do Cliente~~
 

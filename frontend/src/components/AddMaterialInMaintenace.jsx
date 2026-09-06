@@ -214,7 +214,7 @@ const AddMaterialInMaintenace = ({
                               handleCheckboxChange(event, element.id);
                               handleMaterialInputChange(
                                 element.id,
-                                "customerSupplierCheck",
+                                "isCustomerSupplier",
                                 event.target.checked,
                                 materialsGroupData,
                               );

@@ -210,9 +210,9 @@ const NewServiceOrder = () => {
       return (quantity <= 0 || value <= 0) && !item.customerSupplierCheck;
     });
 
-    if (invalidMaterialsValueAndQty.length > 0 && !isCustomerSupplier) {
+    if (invalidMaterialsValueAndQty.length > 0) {
       invalidMaterialsValueAndQty.forEach((material) => {
-        if (material.name) {
+        if (!material.isCustomerSupplier) {
           errorList.push(
             `O material ${material.name} no serviço de ${material.maintenanceName} precisa ser o preenchida corretamente (Material, Quantidade ou Valor).`,
           );
@@ -229,6 +229,7 @@ const NewServiceOrder = () => {
     }
 
     // ========== 3. PREPARAR DADOS PRINCIPAIS DA OS ==========
+
     const serviceOrderData = {
       customer_id: formData.customer_id,
       vehicle_id: formData.vehicle_id,
@@ -292,6 +293,7 @@ const NewServiceOrder = () => {
           value_unit: parseValue(item.value_unit),
           receipt: item.receipt?.trim() || "",
           supplier: item.supplier?.trim() || "",
+          isCustomerSupplier: item.isCustomerSupplier || false,
         }));
 
         const { data: createdMaterials } =

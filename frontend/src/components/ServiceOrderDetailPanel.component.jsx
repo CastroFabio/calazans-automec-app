@@ -71,6 +71,7 @@ const ServiceOrderDetailPanel = ({
 
     const groups = itemMaterials.reduce((acc, item) => {
       // Normalização de chaves para evitar duplicações por espaços ou maiúsculas/minúsculas
+
       const supplierStr = String(
         item.isCustomerSupplier
           ? "Fornecido pelo cliente"
@@ -93,8 +94,6 @@ const ServiceOrderDetailPanel = ({
 
     return Object.values(groups);
   }, [itemMaterials]);
-
-  console.log(itemMaterials);
 
   // ========== VALIDAÇÃO INICIAL ==========
   if (!sidebarOpen) return null;
@@ -265,34 +264,56 @@ const ServiceOrderDetailPanel = ({
                     key={groupKey}
                     className="detail-panel-service-order-material-fieldset"
                   >
-                    <legend className="detail-panel-service-order-material-legend">
-                      <span className="detail-panel-service-order-supplier">
-                        {group.supplier}
-                      </span>{" "}
-                      ·{" "}
-                      <span className="detail-panel-service-order-receipt">
-                        Recibo {group.receipt}
-                      </span>
-                    </legend>
+                    {group.supplier === "Fornecido pelo cliente" ? (
+                      <legend className="detail-panel-service-order-material-legend">
+                        <span className="detail-panel-service-order-supplier">
+                          {group.supplier}
+                        </span>
+                      </legend>
+                    ) : (
+                      <legend className="detail-panel-service-order-material-legend">
+                        <span className="detail-panel-service-order-supplier">
+                          {group.supplier}
+                        </span>{" "}
+                        ·{" "}
+                        <span className="detail-panel-service-order-receipt">
+                          Recibo {group.receipt}
+                        </span>
+                      </legend>
+                    )}
 
-                    {group.items.map((element, itemIdx) => (
-                      <div
-                        key={element.id || itemIdx}
-                        className="detail-panel-service-order-material-container"
-                      >
-                        <span className="detail-panel-service-order-material-name">
-                          · {element.material?.name || "Material sem nome"}
-                        </span>
-                        <span className="detail-panel-service-order-material-price">
-                          {`${Number(element.quantity || 1)}x ${parseFloat(
-                            element.value_unit || 0,
-                          ).toFixed(2)} (${formattedPrice(
-                            parseFloat(element.value_unit || 0) *
-                              Number(element.quantity || 1),
-                          )})`}
-                        </span>
-                      </div>
-                    ))}
+                    {group.supplier === "Fornecido pelo cliente"
+                      ? group.items.map((element, itemIdx) => (
+                          <div
+                            key={element.id || itemIdx}
+                            className="detail-panel-service-order-material-container"
+                          >
+                            <span className="detail-panel-service-order-material-name">
+                              · {element.material?.name || "Material sem nome"}
+                            </span>
+                            <span className="detail-panel-service-order-material-price">
+                              {`${Number(element.quantity || 1)}x`}
+                            </span>
+                          </div>
+                        ))
+                      : group.items.map((element, itemIdx) => (
+                          <div
+                            key={element.id || itemIdx}
+                            className="detail-panel-service-order-material-container"
+                          >
+                            <span className="detail-panel-service-order-material-name">
+                              · {element.material?.name || "Material sem nome"}
+                            </span>
+                            <span className="detail-panel-service-order-material-price">
+                              {`${Number(element.quantity || 1)}x ${parseFloat(
+                                element.value_unit || 0,
+                              ).toFixed(2)} (${formattedPrice(
+                                parseFloat(element.value_unit || 0) *
+                                  Number(element.quantity || 1),
+                              )})`}
+                            </span>
+                          </div>
+                        ))}
                   </fieldset>
                 );
               })
