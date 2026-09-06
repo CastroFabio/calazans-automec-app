@@ -173,7 +173,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 ## Formulário de OS & UX
 
 - **Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`
-- **Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`
+- ~~**Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`~~
 
 ## Bugs & Fixes
 
