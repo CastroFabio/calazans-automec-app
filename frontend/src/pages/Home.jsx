@@ -4,6 +4,7 @@ import { PATHS } from "../utils/paths";
 import NewCustomerModal from "../components/NewCustomerModal.component";
 import { useCustomers } from "../context/Customer.context";
 import NewVehicleModal from "../components/NewVehicleModal.component";
+import logo from "../assets/LogoCalazansAutomec.png";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -20,12 +21,17 @@ const Home = () => {
   const closeVehicleModal = () => setIsVehicleModalOpen(false);
 
   return (
-    <div className="page active" id="page-home">
+    <div className="page active home-page-body">
       <div className="home-page">
         <div className="home-greeting">
-          <div className="home-greeting-title">
+          <img
+            src={logo}
+            alt="Logo Oficina"
+            className="home-header-logo-image"
+          />
+          {/* <div className="home-greeting-title">
             Calazans<span className="home-greeting-accent"> Auto</span>mec
-          </div>
+          </div> */}
           <div className="home-greeting-sub">
             O que você precisa fazer hoje?
           </div>
