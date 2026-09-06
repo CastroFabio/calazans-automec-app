@@ -118,9 +118,9 @@
 
 - **Ação:** Exibir status do pagamento e disponibilizar botão rápido "Quitado" no formulário/modal para liquidação direta.
 
-### [Financeiro] Recibos & Fornecedores
+### ~~[Financeiro] Recibos & Fornecedores~~
 
-- **Ação:** Adicionar botão para copiar dados do recibo e dados do fornecedor para a área de transferência.
+- ~~**Ação:** Adicionar botão para copiar dados do recibo e dados do fornecedor para a área de transferência.~~
 
 ### [Financeiro] Refatorar localização do Módulo/Tela de Pagamento
 
@@ -182,7 +182,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 ## Financeiro & Outros
 
 - **Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`
-- **Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`
+- ~~**Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`~~
 - **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
 - **Logo na Home:** `feature/home-logo-branding`
 - **Módulo de Inventário:** `feature/inventory-module-basic`
