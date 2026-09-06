@@ -62,7 +62,7 @@ export class ServiceOrderService {
       const serviceOrder = await this.prisma.serviceOrder.create({
         data: {
           professional: createServiceOrderDto.professional,
-          priority: createServiceOrderDto.priority,
+          paymentStatus: createServiceOrderDto.paymentStatus,
           status: createServiceOrderDto.status,
           arrived_at: createServiceOrderDto.arrived_at,
           customer_id: createServiceOrderDto.customer_id,
@@ -179,7 +179,7 @@ export class ServiceOrderService {
         where: { id },
         data: {
           professional: updateServiceOrderDto.professional,
-          priority: updateServiceOrderDto.priority,
+          paymentStatus: updateServiceOrderDto.paymentStatus,
           status: updateServiceOrderDto.status,
           arrived_at: updateServiceOrderDto.arrived_at,
           customer_id: updateServiceOrderDto.customer_id,

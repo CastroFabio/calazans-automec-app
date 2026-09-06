@@ -23,11 +23,11 @@ export class ServiceOrderResponseDto {
 
   @ApiProperty({
     description:
-      'Prioridade da ordem de serviço (normal [1], baixa [2], alta [3], urgente [4])',
+      'Status de pagamento da ordem de serviço (Aguardando Pagamento [1], Pago Parcialmente [2], Pago Integralmente [3], Sem Pagamento [4])',
     example: 1,
     type: Number,
   })
-  priority: Number;
+  paymentStatus: Number;
 
   @ApiProperty({
     description:

@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { statusMap } from "../utils/statusMap";
+import {
+  statusMap,
+  statusReverseMap,
+  statusReverseMapBadge,
+} from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
@@ -8,6 +12,10 @@ import { orderApi } from "../api/orders";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import StatusBadge from "./StatusBadge.component";
 import VehicleBadge from "./VehicleBadge.component";
+import {
+  paymentStatusReverseMap,
+  paymentStatusReverseMapBadge,
+} from "../utils/paymentStatusMap";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -174,7 +182,16 @@ const ServiceOrderDetailPanel = ({
               {formatServiceOrderTitle(order)}
             </div>
             <div className="sp-header-badges" id="spBadges">
-              <StatusBadge status={order.status} />
+              <StatusBadge
+                reverseMapBadge={statusReverseMapBadge[order.status]}
+                reverseMap={statusReverseMap[order.status]}
+              />{" "}
+              <StatusBadge
+                reverseMapBadge={
+                  paymentStatusReverseMapBadge[order.paymentStatus]
+                }
+                reverseMap={paymentStatusReverseMap[order.paymentStatus]}
+              />
             </div>
           </div>
           <button className="sp-close" onClick={onClose}>

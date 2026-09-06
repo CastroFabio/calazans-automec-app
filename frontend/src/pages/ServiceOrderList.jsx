@@ -7,6 +7,11 @@ import { convertPriority, convertStatus } from "../utils/convertPriorityStatus";
 import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
+import {
+  paymentStatusMap,
+  paymentStatusReverseMap,
+  paymentStatusReverseMapBadge,
+} from "../utils/paymentStatusMap";
 import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
 import VehicleBadge from "../components/VehicleBadge.component";
@@ -168,7 +173,7 @@ const ServiceOrderList = () => {
               <th>Serviços</th>
               {/* <th>Técnico</th> */}
               <th>Status</th>
-              <th>Status</th>
+              <th>Status de Pagamento</th>
               <th>Valor</th>
               <th>Entrada</th>
               <th className="os-table-th-center">Pago?</th>
@@ -226,13 +231,18 @@ const ServiceOrderList = () => {
                   <td>
                     <StatusBadge
                       className="os-table-th-center"
-                      status={order.status}
+                      reverseMapBadge={statusReverseMapBadge[order.status]}
+                      reverseMap={statusReverseMap[order.status]}
                     />
-                  </td>{" "}
+                  </td>
                   <td>
+                    {console.log(order)}
                     <StatusBadge
                       className="os-table-th-center"
-                      status={order.status}
+                      reverseMapBadge={
+                        paymentStatusReverseMapBadge[order.paymentStatus]
+                      }
+                      reverseMap={paymentStatusReverseMap[order.paymentStatus]}
                     />
                   </td>
                   <td className="td-value">{formattedPrice(order.subtotal)}</td>
@@ -248,18 +258,29 @@ const ServiceOrderList = () => {
 
                         try {
                           const updatedValue = Number(order.subtotal);
+                          console.log({
+                            paid: updatedValue,
+                            paymentStatus:
+                              paymentStatusMap["Pago Integralmente"],
+                          });
 
                           // 1. Envia a atualização para a API
                           const { data } = await orderApi.update(order.id, {
                             paid: updatedValue,
+                            paymentStatus:
+                              paymentStatusMap["Pago Integralmente"],
                           });
+                          console.log(data);
 
                           // 2. Prepara o objeto atualizado (usa a resposta do servidor ou mescla localmente)
                           const updatedOrder = {
                             ...order,
                             paid: updatedValue,
+                            paymentStatus:
+                              paymentStatusMap["Pago Integralmente"],
                             ...(data || {}),
                           };
+                          console.log(updatedOrder);
 
                           // 3. Atualiza o estado global no Contexto
                           updateServiceOrder(updatedOrder);

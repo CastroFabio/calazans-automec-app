@@ -5,7 +5,7 @@ export const statusMap = {
   Aberta: 4,
   "Aguardando peças": 5,
   Cancelada: 6,
-  "Ainda a pagar": 6,
+  "Ainda a pagar": 7,
 };
 
 export const statusReverseMap = {

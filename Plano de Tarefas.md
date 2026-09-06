@@ -114,9 +114,9 @@
 
 ## 6. Módulo de Pagamentos, Recibos e Outros
 
-### [Financeiro] Status de Pagamento e Botão "Quitado"
+### ~~[Financeiro] Status de Pagamento e Botão "Quitado"~~
 
-- **Ação:** Exibir status do pagamento e disponibilizar botão rápido "Quitado" no formulário/modal para liquidação direta.
+- ~~**Ação:** Exibir status do pagamento e disponibilizar botão rápido "Quitado" no formulário/modal para liquidação direta.~~
 
 ### ~~[Financeiro] Recibos & Fornecedores~~
 
@@ -181,7 +181,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ## Financeiro & Outros
 
-- **Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`
+- ~~**Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`~~
 - ~~**Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`~~
 - **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
 - **Logo na Home:** `feature/home-logo-branding`
