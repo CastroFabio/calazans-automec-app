@@ -12,7 +12,6 @@ import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { formattedPrice } from "../utils/convertPrice";
 import { materialApi } from "../api/materials";
 import { materialGroupApi } from "../api/materialGroups";
-import { priorityMap, priorityReverseMap } from "../utils/priorityMap";
 import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { orderApi } from "../api/orders";
 import { itemMaterialApi } from "../api/itemMaterial";
@@ -57,8 +56,8 @@ const NewServiceOrder = () => {
   // State for form fields
   const [formData, setFormData] = useState({
     professional: "",
-    priority: 1,
     status: 1,
+    paymentStatus: 1,
     arrived_at: new Date().toISOString(),
     entry_km: "",
     diagnosis: "",
@@ -153,14 +152,6 @@ const NewServiceOrder = () => {
     selectedVehicleInfo,
     selectedVehicleFromModal,
   ]);
-
-  // Função específica para prioridade
-  const handlePriorityChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      priority: priorityMap[value] || 1, // ← Converte texto para ID
-    }));
-  };
 
   // Função específica para status
   const handleStatusChange = (value) => {
@@ -266,8 +257,8 @@ const NewServiceOrder = () => {
       customer_id: formData.customer_id,
       vehicle_id: formData.vehicle_id,
       professional: formData.professional || null,
-      priority: formData.priority,
       status: formData.status,
+      paymentStatus: formData.paymentStatus,
       arrived_at: formData.arrived_at,
       entry_km:
         parseFloat(String(formData.entry_km).replace(/[^0-9.]/g, "")) || 0,
@@ -350,8 +341,8 @@ const NewServiceOrder = () => {
       setMaterialsList([]);
       setFormData({
         professional: "",
-        priority: 1,
         status: 1,
+        paymentStatus: 1,
         arrived_at: new Date().toISOString(),
         entry_km: "",
         diagnosis: "",
