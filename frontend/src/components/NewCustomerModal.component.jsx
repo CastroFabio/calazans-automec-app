@@ -4,7 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
 import { PATHS } from "../utils/paths";
 
-const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
+const NewCustomerModal = ({
+  isOpen,
+  onClose,
+  customerName,
+  setSelectedCustomerFromNewServiceOrder,
+}) => {
   const [formData, setFormData] = useState({
     name: customerName || "",
     cell: "",
@@ -68,8 +73,8 @@ const NewCustomerModal = ({ isOpen, onClose, customerName }) => {
         observation: "",
       });
 
+      setSelectedCustomerFromNewServiceOrder(newCustomerData);
       onClose();
-      navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar cliente:", err);
 

@@ -28,6 +28,7 @@ import ProfessionalSelect from "../components/ProfessionalSelect.component";
 import { PATHS } from "../utils/paths";
 import NewItemModal from "../components/NewItemModal.component";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
+import WizardBtn from "../components/WizardBtn.component";
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -44,6 +45,10 @@ const NewServiceOrder = () => {
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
     formatLocalDateTime(new Date()),
+  );
+
+  const [selectedCustomerFromModal, setSelectedCustomerFromModal] = useState(
+    {},
   );
 
   const [inputValue, setInputValue] = useState("");
@@ -121,6 +126,16 @@ const NewServiceOrder = () => {
       }));
     }
   }, [selectedCustomerFromDetailPanel]);
+
+  useEffect(() => {
+    if (Object.keys(selectedCustomerFromModal).length !== 0) {
+      setSelectedCustomerInfo(selectedCustomerFromModal);
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: selectedCustomerFromModal.id,
+      }));
+    }
+  }, [selectedCustomerFromModal]);
 
   // Função específica para prioridade
   const handlePriorityChange = (value) => {
@@ -554,50 +569,55 @@ const NewServiceOrder = () => {
           </div>
           <div className="fs-body">
             <div className="form-grid">
-              <AutoComplete
-                label="Cliente *"
-                placeholder="Digite o nome do cliente..."
-                items={customers}
-                filterKey="name"
-                value={inputValue}
-                selectedItem={selectedCustomerInfo}
-                onInputChange={(val) => setInputValue(val)}
-                onSelect={(customer) => {
-                  setInputValue(customer.name);
-                  setSelectedCustomerInfo(customer);
+              <div>
+                <AutoComplete
+                  label="Cliente *"
+                  placeholder="Digite o nome do cliente..."
+                  items={customers}
+                  filterKey="name"
+                  value={inputValue}
+                  selectedItem={selectedCustomerInfo}
+                  onInputChange={(val) => setInputValue(val)}
+                  onSelect={(customer) => {
+                    console.log(customer);
 
-                  // Atualiza o ID do cliente no formData
-                  handleFormFieldChange("customer_id", customer.id);
+                    setInputValue(customer.name);
+                    setSelectedCustomerInfo(customer);
 
-                  // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
-                  if (customer.vehicles?.length === 1) {
-                    handleSelectedVehicle(customer.vehicles[0]);
-                  } else {
-                    // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
+                    // Atualiza o ID do cliente no formData
+                    handleFormFieldChange("customer_id", customer.id);
+
+                    // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
+                    if (customer.vehicles?.length === 1) {
+                      handleSelectedVehicle(customer.vehicles[0]);
+                    } else {
+                      // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
+                      setSelectedVehicleInfo(null);
+                      handleFormFieldChange("vehicle_id", "");
+                    }
+                  }}
+                  onClear={() => {
+                    setInputValue("");
+                    setSelectedCustomerInfo(null);
                     setSelectedVehicleInfo(null);
+                    handleFormFieldChange("customer_id", "");
                     handleFormFieldChange("vehicle_id", "");
-                  }
-                }}
-                onClear={() => {
-                  setInputValue("");
-                  setSelectedCustomerInfo(null);
-                  setSelectedVehicleInfo(null);
-                  handleFormFieldChange("customer_id", "");
-                  handleFormFieldChange("vehicle_id", "");
-                  setSelectedCustomerFromDetailPanel(null);
-                }}
-                onCreateNew={(term) => {
-                  console.log("Abrir modal para criar cliente:", term);
-                }}
-                renderOption={(customer) => (
-                  <>
-                    <div className="ac-option-name">{customer.name}</div>
-                    <div className="ac-option-sub">
-                      {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
-                    </div>
-                  </>
-                )}
-              />
+                    setSelectedCustomerFromDetailPanel({});
+                  }}
+                  renderOption={(customer) => (
+                    <>
+                      <div className="ac-option-name">{customer.name}</div>
+                      <div className="ac-option-sub">
+                        {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
+                      </div>
+                    </>
+                  )}
+                />
+                <WizardBtn
+                  label="Novo cliente"
+                  openModal={handleOpenCustomerModal}
+                />
+              </div>
 
               <div className="field">
                 <label>Veículo *</label>
@@ -846,6 +866,7 @@ const NewServiceOrder = () => {
           isOpen={isCustomerModalOpen}
           onClose={closeCustomerModal}
           customerName={inputValue}
+          setSelectedCustomerFromNewServiceOrder={setSelectedCustomerFromModal}
         />
       )}
       {isVehicleModalOpen && (
