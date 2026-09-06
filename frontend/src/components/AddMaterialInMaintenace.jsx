@@ -93,7 +93,6 @@ const AddMaterialInMaintenace = ({
               <th className="mat-table-content-total">Total</th>
               <th className="mat-table-content-supplier">Fornecedor</th>
               <th className="mat-table-content-receipt">Nº Recibo</th>
-              <th></th>
             </tr>
           </thead>
           <tbody className="svc-mat-body">
