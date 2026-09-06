@@ -25,8 +25,14 @@ const TABS = [
 
 const ServiceOrderList = () => {
   // ========== CONTEXTO ==========
-  const { serviceOrders, fetchServiceOrders, loading, error, setError } =
-    useServiceOrders();
+  const {
+    serviceOrders,
+    fetchServiceOrders,
+    loading,
+    error,
+    setError,
+    updateServiceOrder,
+  } = useServiceOrders();
 
   // ========== ESTADOS LOCAIS ==========
   const [searchTerm, setSearchTerm] = useState("");
@@ -160,10 +166,12 @@ const ServiceOrderList = () => {
               <th>Nº OS</th>
               <th>Cliente / Veículo</th>
               <th>Serviços</th>
-              <th>Técnico</th>
+              {/* <th>Técnico</th> */}
+              <th>Status</th>
               <th>Status</th>
               <th>Valor</th>
               <th>Entrada</th>
+              <th className="os-table-th-center">Pago?</th>
             </tr>
           </thead>
           <tbody>
@@ -212,16 +220,67 @@ const ServiceOrderList = () => {
                         )}
                     </div>
                   </td>
-                  <td className="os-table-professional-name">
+                  {/*    <td className="os-table-professional-name">
                     {order.professional || "—"}
-                  </td>
-
+                  </td> */}
                   <td>
-                    <StatusBadge status={order.status} />
+                    <StatusBadge
+                      className="os-table-th-center"
+                      status={order.status}
+                    />
+                  </td>{" "}
+                  <td>
+                    <StatusBadge
+                      className="os-table-th-center"
+                      status={order.status}
+                    />
                   </td>
                   <td className="td-value">{formattedPrice(order.subtotal)}</td>
                   <td className="td-date">
                     {formatLocalDateTimeStringISO(order.arrived_at)}
+                  </td>
+                  <td className="td-date">
+                    <button
+                      className={`${Number(order.paid) >= Number(order.subtotal) ? "btn btn-sm btn-ghost" : "btn btn-sm btn-primary"}`}
+                      disabled={Number(order.paid) >= Number(order.subtotal)}
+                      onClick={async (event) => {
+                        event.stopPropagation(); // Evita abrir a sidebar ao clicar no botão
+
+                        try {
+                          const updatedValue = Number(order.subtotal);
+
+                          // 1. Envia a atualização para a API
+                          const { data } = await orderApi.update(order.id, {
+                            paid: updatedValue,
+                          });
+
+                          // 2. Prepara o objeto atualizado (usa a resposta do servidor ou mescla localmente)
+                          const updatedOrder = {
+                            ...order,
+                            paid: updatedValue,
+                            ...(data || {}),
+                          };
+
+                          // 3. Atualiza o estado global no Contexto
+                          updateServiceOrder(updatedOrder);
+
+                          // 4. Se a ordem clicada estiver aberta no painel lateral, atualiza ela também
+                          if (selectedServiceOrder?.id === order.id) {
+                            setSelectedServiceOrder(updatedOrder);
+                          }
+                        } catch (err) {
+                          console.error("Erro ao quitar pagamento da OS:", err);
+                          alert(
+                            err.response?.data?.message ||
+                              "Ocorreu um erro ao quitar o pagamento.",
+                          );
+                        }
+                      }}
+                    >
+                      {Number(order.paid) >= Number(order.subtotal)
+                        ? "Quitado"
+                        : "Quitar"}
+                    </button>
                   </td>
                 </tr>
               ))

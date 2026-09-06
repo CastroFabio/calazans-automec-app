@@ -477,6 +477,9 @@
   overflow: hidden;
   box-shadow: var(--shadow);
 }
+.os-table-th-center {
+  text-align: center;
+}
 .os-table thead th {
   padding: 9px 14px;
   text-align: left;
@@ -504,6 +507,12 @@
   padding: 11px 14px;
   font-size: 13px;
   vertical-align: middle;
+}
+.os-table-th-center {
+  text-align: center !important;
+}
+.os-table-th-paid {
+  text-align: center !important;
 }
 .td-id {
   font-family: "JetBrains Mono", monospace;
