@@ -8,7 +8,7 @@ const NewCustomerModal = ({
   isOpen,
   onClose,
   customerName,
-  setSelectedCustomerFromNewServiceOrder,
+  setSelectedCustomerFromNewServiceOrder = null,
 }) => {
   const [formData, setFormData] = useState({
     name: customerName || "",

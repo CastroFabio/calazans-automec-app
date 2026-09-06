@@ -50,6 +50,7 @@ const NewServiceOrder = () => {
   const [selectedCustomerFromModal, setSelectedCustomerFromModal] = useState(
     {},
   );
+  const [selectedVehicleFromModal, setSelectedVehicleFromModal] = useState({});
 
   const [inputValue, setInputValue] = useState("");
 
@@ -88,6 +89,7 @@ const NewServiceOrder = () => {
     customers,
     selectedCustomerFromDetailPanel,
     setSelectedCustomerFromDetailPanel,
+    addServiceOrderToCustomer,
   } = useCustomers();
 
   // FETCH
@@ -118,7 +120,7 @@ const NewServiceOrder = () => {
   useEffect(() => {
     if (Object.keys(selectedCustomerFromDetailPanel).length !== 0) {
       setSelectedCustomerInfo(selectedCustomerFromDetailPanel);
-      setSelectedVehicleInfo(selectedCustomerFromDetailPanel.vehicles[0]);
+      handleSelectedVehicle(selectedCustomerFromDetailPanel.vehicles[0]);
       setFormData((prev) => ({
         ...prev,
         customer_id: selectedCustomerFromDetailPanel.id,
@@ -135,7 +137,22 @@ const NewServiceOrder = () => {
         customer_id: selectedCustomerFromModal.id,
       }));
     }
-  }, [selectedCustomerFromModal]);
+    if (Object.keys(selectedVehicleFromModal).length !== 0) {
+      handleSelectedVehicle(selectedVehicleFromModal);
+      setSelectedCustomerInfo((prev) => ({
+        ...prev,
+        vehicles: [selectedVehicleFromModal],
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        vehicle_id: selectedVehicleFromModal.id,
+      }));
+    }
+  }, [
+    selectedCustomerFromModal,
+    selectedVehicleInfo,
+    selectedVehicleFromModal,
+  ]);
 
   // Função específica para prioridade
   const handlePriorityChange = (value) => {
@@ -268,6 +285,9 @@ const NewServiceOrder = () => {
       // 1. Criar a Ordem de Serviço Principal
       const { data: createdServiceOrder } =
         await orderApi.create(serviceOrderData);
+
+      addServiceOrderToCustomer(formData.customer_id, createdServiceOrder);
+
       const serviceOrderId = createdServiceOrder.id;
 
       let savedMaintenances = [];
@@ -579,8 +599,6 @@ const NewServiceOrder = () => {
                   selectedItem={selectedCustomerInfo}
                   onInputChange={(val) => setInputValue(val)}
                   onSelect={(customer) => {
-                    console.log(customer);
-
                     setInputValue(customer.name);
                     setSelectedCustomerInfo(customer);
 
@@ -874,6 +892,7 @@ const NewServiceOrder = () => {
           isModalOpen={isVehicleModalOpen}
           onClose={closeVehicleModal}
           selectedCustomer={getCustomerById(selectedCustomerInfo.id)}
+          setSelectedVehicleFromNewServiceOrder={setSelectedVehicleFromModal}
         />
       )}
 

@@ -208,6 +208,26 @@ export const CustomerProvider = ({ children }) => {
     );
   };
 
+  const addServiceOrderToCustomer = (customerId, newServiceOrder) => {
+    setCustomers((prev) =>
+      prev.map((customer) => {
+        if (customer.id !== customerId) return customer;
+
+        // Atualizar o cliente com o novo veículo
+        const updatedCustomer = {
+          ...customer,
+          serviceOrders: [...(customer.serviceOrders || []), newServiceOrder],
+          _count: {
+            ...customer._count,
+            serviceOrders: (customer._count?.serviceOrders || 0) + 1,
+          },
+        };
+
+        return updatedCustomer;
+      }),
+    );
+  };
+
   const removeVehicleFromCustomer = (customerId, vehicleId) => {
     setCustomers((prev) =>
       prev.map((customer) => {
@@ -268,6 +288,7 @@ export const CustomerProvider = ({ children }) => {
         updateCustomer,
         countAllCustomers,
         addVehicleToCustomer,
+        addServiceOrderToCustomer,
         removeVehicleFromCustomer,
         updateVehicleFromCustomer,
         fetchCustomerById,

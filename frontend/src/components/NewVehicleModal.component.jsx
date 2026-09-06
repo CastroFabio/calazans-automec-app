@@ -6,7 +6,12 @@ import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
 import { formatarCelular } from "../utils/convertCel";
 
-const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
+const NewVehicleModal = ({
+  isModalOpen,
+  onClose,
+  selectedCustomer = null,
+  setSelectedVehicleFromNewServiceOrder = null,
+}) => {
   const [formData, setFormData] = useState({
     customer_id: selectedCustomer?.id || "",
     brand: "",
@@ -89,8 +94,8 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
 
       addVehicleToCustomer(customerIdToSave, data);
 
+      setSelectedVehicleFromNewServiceOrder(data);
       closeWindow();
-      navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);
 
