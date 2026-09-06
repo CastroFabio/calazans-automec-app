@@ -26,8 +26,8 @@
 
 - **Passo 1 - Cliente e Veículo:**
   - Busca e seleção de cliente e veículo.
-  - Botão/Modal de **Novo Cliente**.
-  - Botão/Modal de **Novo Veículo** (vinculado diretamente ao cliente selecionado).
+  - ~~Botão/Modal de **Novo Cliente**.~~
+  - ~~Botão/Modal de **Novo Veículo** (vinculado diretamente ao cliente selecionado).~~
 - **Passo 2 - Serviços e Materiais:**
   - **Input de Mão de Obra:** Custo no topo da seção[cite: 2].
   - **Botão "Registrar serviço":** Posicionado no topo do formulário[cite: 2].

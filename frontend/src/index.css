@@ -5068,3 +5068,31 @@
   white-space: nowrap;
   line-height: 1;
 }
+
+.mat-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px 8px;
+  color: var(--ink3);
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.mat-action-btn:hover {
+  color: var(--ink);
+  border-color: var(--border2);
+}
+.mat-action-copy {
+  color: var(--accent);
+  border-color: var(--accent-mid);
+  background: var(--accent-light);
+}
+.mat-action-copy:hover {
+  background: var(--accent-mid);
+}

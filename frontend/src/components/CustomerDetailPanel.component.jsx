@@ -1,5 +1,9 @@
 import { formattedPrice } from "../utils/convertPrice";
-import { statusMap, statusReverseMap } from "../utils/statusMap";
+import {
+  statusMap,
+  statusReverseMap,
+  statusReverseMapBadge,
+} from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import VehicleBadge from "./VehicleBadge.component";
@@ -8,6 +12,7 @@ import { getCustomerNameInitials } from "../utils/CustomerInitials";
 import { useCustomers } from "../context/Customer.context";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "../utils/paths";
+import StatusBadge from "./StatusBadge.component";
 
 const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
   const { setSelectedCustomerFromDetailPanel, getCustomerById } =
@@ -245,12 +250,11 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                   <div className="car-panel-service-order-container">
                     <div className="car-panel-service-order-header">
                       <span className="os-mini-id">{`#${element.id}`}</span>
-                      <span className="badge car-panel-service-order-status-badge">
-                        {statusReverseMap[element.status]}
-                      </span>
-                      <span className="badge car-panel-service-order-priority-badge">
+                      <StatusBadge status={element.status} />
+
+                      {/* <span className="badge car-panel-service-order-priority-badge">
                         {priorityReverseMap[element.priority]}
-                      </span>
+                      </span> */}
                     </div>
                     <div className="os-mini-svc">
                       {formattedServiceOrderTitle(element)}
