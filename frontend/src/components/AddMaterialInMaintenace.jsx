@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import AutoComplete from "./AutoComplete.component"; // Importe o AutoComplete genérico
 import { parseValue } from "../utils/parseValue";
 import NewItemModal from "../components/NewItemModal.component";
@@ -18,6 +18,8 @@ const AddMaterialInMaintenace = ({
   const [isMaterialModalOpen, setMaterialIsModalOpen] = useState(false);
   const [error, setError] = useState(null);
   const [checkedItems, setCheckedItems] = useState({});
+
+  const materialRef = useRef({});
 
   // Filtra apenas os materiais deste serviço específico
   const serviceMaterials = itemMaintenance_id
@@ -74,6 +76,13 @@ const AddMaterialInMaintenace = ({
       ...prev,
       [materialID]: isChecked,
     }));
+  };
+
+  const handleFocusOnValueUnit = (index) => {
+    if (materialRef.current[index]) {
+      materialRef.current[index].focus();
+      materialRef.current[index].select();
+    }
   };
 
   return (
@@ -135,6 +144,7 @@ const AddMaterialInMaintenace = ({
                               foundMaterial.name,
                               materialsGroupData,
                             );
+                            handleFocusOnValueUnit(element.id);
                           }}
                           onClear={() => {
                             handleMaterialInputChange(
@@ -250,6 +260,7 @@ const AddMaterialInMaintenace = ({
                             placeholder="0.00"
                             className="input-new-order-material-cost"
                             disabled={!!checkedItems[element.id]}
+                            ref={(el) => (materialRef.current[element.id] = el)}
                             value={element.value_unit ?? ""}
                             onChange={(e) => {
                               let val = e.target.value

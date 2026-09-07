@@ -46,8 +46,6 @@ const ServiceOrderList = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
 
-  // ========== CARREGAR DADOS AO INICIAR ==========
-
   // ========== FILTRAR ORDENS ==========
   const filteredOrders = useMemo(() => {
     return serviceOrders.filter((order) => {
