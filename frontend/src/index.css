@@ -680,7 +680,7 @@
 }
 .client-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
@@ -692,6 +692,10 @@
   border-color: var(--accent);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+}
+
+.client-card:active {
+  background: var(--accent-mid);
 }
 
 .client-card-header {
@@ -738,7 +742,7 @@
 .client-footer {
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid var(--bg);
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
