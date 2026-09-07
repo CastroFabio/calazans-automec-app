@@ -1,7 +1,7 @@
-const InputPriceValue = ({ labor_cost, handleFormFieldChange }) => {
+const InputPriceValue = ({ labor_cost, handleFormFieldChange, label }) => {
   return (
     <div className="form-grid g3 form-grid-input-price form-grid-input-price-container">
-      <label className="form-grid-input-price-label">Mão de Obra</label>
+      <label className="form-grid-input-price-label">{label}</label>
       <div className="input-prefix input-prefix-price">
         <span>R$</span>
         <input

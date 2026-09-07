@@ -188,6 +188,7 @@ const NewOrderMaintenanceJob = ({
         <InputPriceValue
           labor_cost={formData.labor_cost}
           handleFormFieldChange={handleFormFieldChange}
+          label={"Mão de obra"}
         />
 
         {(listMaintenanceJobs?.length || []) > 0 && (

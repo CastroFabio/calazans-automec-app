@@ -6,6 +6,7 @@ import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
 import NewOrderMaterial from "../components/NewOrderMaterial";
 import NewOrderInfo from "../components/NewOrderInfo";
 import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
+import FormSectionHeader from "../components/FormSectionHeader.component";
 
 import { customerApi } from "../api/customers";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
@@ -28,6 +29,82 @@ import { PATHS } from "../utils/paths";
 import NewItemModal from "../components/NewItemModal.component";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
 import WizardBtn from "../components/WizardBtn.component";
+import PaymentStatusSelector from "../components/PaymentStatusSelector.component";
+
+const CATEGORIES = {
+  customer: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Cliente & Veículo",
+  },
+  service: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Serviços & Materiais",
+  },
+  payment: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Pagamento",
+  },
+  details: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+    title: "DETALHES OS",
+  },
+};
 
 const NewServiceOrder = () => {
   const [materialsData, setMaterialsData] = useState([]);
@@ -562,22 +639,10 @@ const NewServiceOrder = () => {
         {/* === CLIENTE E VEÍCULO === */}
         {/* ========================= */}
         <div className="form-section">
-          <div className="fs-header">
-            <svg
-              className="fs-header-svg"
-              fill="none"
-              stroke="black"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            <span className="fs-title">Cliente & Veículo</span>
-          </div>
+          <FormSectionHeader
+            title={CATEGORIES.customer.title}
+            icon={CATEGORIES.customer.icon}
+          />
           <div className="fs-body">
             <div className="form-grid">
               <div>
@@ -757,25 +822,83 @@ const NewServiceOrder = () => {
         />
 
         {/* =================== */}
+        {/* ==== PAGAMENTO ==== */}
+        {/* =================== */}
+        <div className="form-section">
+          <FormSectionHeader
+            title={CATEGORIES.payment.title}
+            icon={CATEGORIES.payment.icon}
+          />
+          <div className="fs-body">
+            <div className="status-card-body status-card-body-container-registrar-pagamento">
+              <div className="grand-total os-new-status-card-title">
+                {`Subtotal: ${formattedPrice(calculateGrandTotal())} || Pago: ${formattedPrice(formData.paid || 0)}`}
+              </div>
+              <div className="status-card-body-container-registrar-pagamento-text os-new-status-card-title">
+                Registrar pagamento
+              </div>
+              <div
+                className="status-card-body-container-registrar-pagamento-input-container"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
+              >
+                <div className="status-card-body-registrar-pagamento-input-container input-prefix">
+                  <span>R$</span>
+                  <input
+                    type="text"
+                    className="input status-card-body-registrar-pagamento-input"
+                    placeholder="0,00"
+                    value={formData.paid}
+                    onClick={() => {
+                      console.log(formData.paid);
+                      handleFormFieldChange("paid", formData.paid);
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    style={{ flex: 1 }}
+
+                    // disabled={saving || !payment}
+                  >
+                    Adicionar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    style={{ flex: 1 }}
+                    onClick={() => {
+                      const total = calculateGrandTotal();
+                      handleFormFieldChange("paid", total);
+                    }}
+                    // disabled={saving || !payment}
+                  >
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <PaymentStatusSelector
+              handleFormFieldChange={handleFormFieldChange}
+            />
+          </div>
+        </div>
+
+        {/* =================== */}
         {/* === DETALHES OS === */}
         {/* =================== */}
         <div className="form-section">
-          <div className="fs-header">
-            <svg
-              className="fs-header-svg"
-              fill="none"
-              stroke="black"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="fs-title">Informações da OS</span>
-          </div>
+          <FormSectionHeader
+            title={CATEGORIES.details.title}
+            icon={CATEGORIES.details.icon}
+          />
           <div className="fs-body">
             <div className="form-grid g3">
               <ProfessionalSelect

@@ -2407,6 +2407,12 @@
   margin-bottom: 5px;
 }
 
+.os-new-status-card-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .status-card-body-container-registrar-pagamento-input-container {
   display: flex;
   gap: 8px;
@@ -4834,10 +4840,6 @@
   transform: rotate(180deg);
 }
 
-.svc-card-body {
-  /* Alterne o display via React state ou mantenha regras padrão */
-}
-
 .svc-obs {
   font-size: 10px;
   color: var(--ink3);
@@ -5004,6 +5006,13 @@
   opacity: 0.75;
 }
 /* Payment step */
+.field-margin-bottom {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
 .wz-pay-opt {
   display: flex;
   align-items: center;
@@ -5148,4 +5157,91 @@
 }
 .mat-action-copy:hover {
   background: var(--accent-mid);
+}
+
+/* Payment step */
+.wz-pay-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  width: 100%;
+}
+.wz-pay-opt:hover {
+  border-color: var(--border2);
+}
+.wz-pay-opt.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+.wz-pay-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.wz-pay-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.wz-pay-sub {
+  font-size: 10px;
+  color: var(--ink3);
+  margin-top: 1px;
+}
+.wz-forma-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.wz-forma-btn:hover {
+  border-color: var(--border2);
+  color: var(--ink);
+}
+.wz-forma-btn.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+/* Grid para os botões de opção de pagamento */
+.wz-pay-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Indicadores de cor (Dots) */
+.wz-pay-dot-yellow {
+  background-color: #eab308;
+}
+
+.wz-pay-dot-orange {
+  background-color: #f97316;
+}
+
+.wz-pay-dot-green {
+  background-color: #22c55e;
+}
+
+.wz-pay-dot-gray {
+  background-color: #94a3b8;
+}
+
+/* Estado ativo do botão selecionado (opcional) */
+.wz-pay-opt.active {
+  border-color: var(--accent, #2563eb);
+  background-color: var(--surface-hover, #f8fafc);
 }
