@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import SideBarList from "../components/sideBarList";
+import logo from "../assets/LogoCalazansAutomec.png";
 
 import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
@@ -218,13 +219,24 @@ const SideBar = () => {
     <aside className="sidebar" id="sidebar">
       {/* Logo */}
       <div className="sidebar-logo" onClick={() => navigate("/")}>
-        <div className="logo-wrap">
-          <div className="logo-icon">{ICONS.logo}</div>
-          <div className="logo-text">
-            Calazans<span className="home-greeting-accent"> Auto</span>mec
-            <small>Gestão de oficina</small>
+        {logo ? (
+          <div className="logo-wrap">
+            <img
+              src={logo}
+              alt="Logo Oficina"
+              className="print-header-logo-image"
+            />
           </div>
-        </div>
+        ) : (
+          <div className="logo-wrap">
+            <div className="logo-icon">{ICONS.logo}</div>
+
+            <div className="logo-text">
+              Calazans<span className="home-greeting-accent"> Auto</span>mec
+              <small>Gestão de oficina</small>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navegação */}

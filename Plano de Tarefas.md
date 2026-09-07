@@ -126,9 +126,9 @@
 
 - **Ação:** Reposicionar/reorganizar onde o fluxo de pagamento é acessado dentro da aplicação.
 
-### [UI/Home] Logo na Tela Inicial
+### ~~[UI/Home] Logo na Tela Inicial~~
 
-- **Ação:** Inserir a logo da oficina na página inicial.
+- ~~**Ação:** Inserir a logo da oficina na página inicial.~~
 
 ### [Módulo] Módulo de Inventário / Estoque
 
@@ -184,7 +184,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - ~~**Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`~~
 - ~~**Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`~~
 - **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
-- **Logo na Home:** `feature/home-logo-branding`
+- ~~**Logo na Home:** `feature/home-logo-branding`~~
 - **Módulo de Inventário:** `feature/inventory-module-basic`
 
 ## Componente Global de Tratamento e Exibição de Erros

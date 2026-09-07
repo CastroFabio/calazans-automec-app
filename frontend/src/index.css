@@ -71,6 +71,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-direction: column;
 }
 .logo-icon {
   width: 32px;
@@ -3772,6 +3773,9 @@
 .print-header-logo-image {
   width: 100px;
 }
+.home-header-logo-image {
+  width: 260px;
+}
 
 .print-shop-info {
   text-align: right;
@@ -4219,6 +4223,17 @@
   gap: 6px;
 }
 
+.home-page-body {
+  height: 100vh;
+  max-height: 100dvh; /* Garante ajuste perfeito em navegadores mobile */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 .home-page {
   display: flex;
   flex-direction: column;
@@ -4227,6 +4242,7 @@
   min-height: calc(100vh - 52px);
   padding: 40px 24px 60px;
   background: var(--bg);
+  height: 100%;
 }
 .home-greeting {
   text-align: center;
