@@ -694,8 +694,8 @@
   box-shadow: var(--shadow-lg);
 }
 
-.client-card:active {
-  background: var(--accent-mid);
+.client-footer:active {
+  border-top: 1px solid var(--accent);
 }
 
 .client-card-header {

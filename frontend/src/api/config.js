@@ -14,14 +14,14 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response) {
-      // Extrai mensagem de erro da resposta
-      const message = error.response.data?.message || "Erro na requisição";
-      error.message = message;
-    } else if (error.request) {
-      error.message = "Servidor não respondeu";
-    } else {
-      error.message = "Erro ao fazer requisição";
+    if (!error.response) {
+      const customError = {
+        message:
+          "O servidor está temporariamente indisponível. Tente novamente mais tarde.",
+        isNetworkError: true,
+        status: 503,
+      };
+      return Promise.reject(customError);
     }
     return Promise.reject(error);
   },

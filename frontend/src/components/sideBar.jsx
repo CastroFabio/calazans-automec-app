@@ -218,7 +218,7 @@ const SideBar = () => {
   return (
     <aside className="sidebar" id="sidebar">
       {/* Logo */}
-      <div className="sidebar-logo" onClick={() => navigate("/")}>
+      <div className="sidebar-logo" onClick={() => navigate(PATHS.home)}>
         {logo ? (
           <div className="logo-wrap">
             <img

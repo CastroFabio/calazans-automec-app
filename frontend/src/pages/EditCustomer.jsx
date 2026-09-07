@@ -7,6 +7,7 @@ import { vehicleApi } from "../api/vehicle";
 import { statusReverseMap } from "../utils/statusMap";
 import { formattedPrice } from "../utils/convertPrice";
 import VehicleBadge from "../components/VehicleBadge.component";
+import { PATHS } from "../utils/paths";
 
 const EditCustomer = () => {
   const [customer, setCustomer] = useState(null);
@@ -118,10 +119,7 @@ const EditCustomer = () => {
       setOriginalCustomer(JSON.parse(JSON.stringify(mergedCustomer)));
       setSuccess(true);
 
-      // 5. Redirecionar após 1.5 segundos
-      setTimeout(() => {
-        navigate("/customers");
-      }, 1500);
+      navigate(PATHS.customer);
     } catch (err) {
       console.error("❌ Erro ao atualizar:", err);
 

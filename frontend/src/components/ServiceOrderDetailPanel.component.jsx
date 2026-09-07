@@ -16,6 +16,7 @@ import {
   paymentStatusReverseMap,
   paymentStatusReverseMapBadge,
 } from "../utils/paymentStatusMap";
+import { PATHS } from "../utils/paths";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -128,12 +129,12 @@ const ServiceOrderDetailPanel = ({
 
   // ========== HANDLERS ==========
   const handleEditOrder = () => {
-    navigate(`/service-order/edit/${order.id}`);
+    navigate(PATHS.editServiceOrderFN(order.id));
     if (onClose) onClose();
   };
 
   const handlePrintOrder = () => {
-    navigate(`/service-order/print/${order.id}`);
+    navigate(PATHS.printServiceOrderFN(order.id));
     if (onClose) onClose();
   };
 

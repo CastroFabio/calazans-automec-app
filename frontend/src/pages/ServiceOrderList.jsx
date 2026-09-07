@@ -105,10 +105,6 @@ const ServiceOrderList = () => {
   // ========== RENDER ==========
   if (loading) return <Loading />;
 
-  if (error) {
-    return <div className="error">❌ {error}</div>;
-  }
-
   return (
     <div className="page active" id="page-os">
       {/* HEADER */}
@@ -236,7 +232,6 @@ const ServiceOrderList = () => {
                     />
                   </td>
                   <td>
-                    {console.log(order)}
                     <StatusBadge
                       className="os-table-th-center"
                       reverseMapBadge={
@@ -258,11 +253,6 @@ const ServiceOrderList = () => {
 
                         try {
                           const updatedValue = Number(order.subtotal);
-                          console.log({
-                            paid: updatedValue,
-                            paymentStatus:
-                              paymentStatusMap["Pago Integralmente"],
-                          });
 
                           // 1. Envia a atualização para a API
                           const { data } = await orderApi.update(order.id, {
@@ -270,7 +260,6 @@ const ServiceOrderList = () => {
                             paymentStatus:
                               paymentStatusMap["Pago Integralmente"],
                           });
-                          console.log(data);
 
                           // 2. Prepara o objeto atualizado (usa a resposta do servidor ou mescla localmente)
                           const updatedOrder = {
@@ -280,7 +269,6 @@ const ServiceOrderList = () => {
                               paymentStatusMap["Pago Integralmente"],
                             ...(data || {}),
                           };
-                          console.log(updatedOrder);
 
                           // 3. Atualiza o estado global no Contexto
                           updateServiceOrder(updatedOrder);

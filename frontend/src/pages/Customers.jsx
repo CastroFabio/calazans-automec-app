@@ -12,6 +12,7 @@ import VehicleBadge from "../components/VehicleBadge.component";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { getCustomerNameInitials } from "../utils/CustomerInitials";
 import Loading from "./Loading";
+import { PATHS } from "../utils/paths";
 
 const Customers = () => {
   const [itemColors, setItemColors] = useState({});
@@ -123,7 +124,7 @@ const Customers = () => {
   };
 
   const handleEditCustomerClick = async (customerID) => {
-    navigate(`/customers/edit/${customerID}`);
+    navigate(PATHS.editCustomerFN(customerID));
   };
 
   if (loading) return <Loading />;
