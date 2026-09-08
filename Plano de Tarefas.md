@@ -122,9 +122,9 @@
 
 - ~~**Ação:** Adicionar botão para copiar dados do recibo e dados do fornecedor para a área de transferência.~~
 
-### [Financeiro] Refatorar localização do Módulo/Tela de Pagamento
+### ~~[Financeiro] Refatorar localização do Módulo/Tela de Pagamento~~
 
-- **Ação:** Reposicionar/reorganizar onde o fluxo de pagamento é acessado dentro da aplicação.
+- ~~**Ação:** Reposicionar/reorganizar onde o fluxo de pagamento é acessado dentro da aplicação.~~
 
 ### ~~[UI/Home] Logo na Tela Inicial~~
 
@@ -183,7 +183,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 - ~~**Status de Pagamento & Botão Quitado:** `feature/payment-status-quick-settle`~~
 - ~~**Botões de cópia de recibo e fornecedor:** `feature/receipt-vendor-copy-buttons`~~
-- **Refatoração da tela de pagamento:** `refactor/payment-flow-location`
+- ~~**Refatoração da tela de pagamento:** `refactor/payment-flow-location`~~
 - ~~**Logo na Home:** `feature/home-logo-branding`~~
 - **Módulo de Inventário:** `feature/inventory-module-basic`
 
