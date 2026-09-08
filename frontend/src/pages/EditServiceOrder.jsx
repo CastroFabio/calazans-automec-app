@@ -470,7 +470,6 @@ const EditServiceOrder = () => {
   };
 
   if (loading) return <Loading />;
-  if (error) return <div>Erro: {error}</div>;
   if (!serviceOrder) return <div>Ordem de serviço não encontrada</div>;
 
   return (

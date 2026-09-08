@@ -1,10 +1,37 @@
 import React, { useState } from "react";
+import { PATHS } from "../utils/paths";
+import {
+  paymentStatusMap,
+  paymentStatusReverseMap,
+  paymentStatusReverseMapBadge,
+} from "../utils/paymentStatusMap";
 
-const PaymentStatusSelector = () => {
-  const [paymentStatus, setPaymentStatus] = useState("awaiting-payment");
+const PaymentStatusSelector = ({
+  handleFormFieldChange,
+  isPaidFully,
+  setIsPaidFully,
+  newOrderPaidValue,
+  grandTotalValue,
+}) => {
+  const [paymentStatus, setPaymentStatus] = useState(
+    paymentStatusReverseMapBadge[1],
+  );
 
   const handleSelectPay = (status) => {
-    setPaymentStatus(status);
+    if (newOrderPaidValue < grandTotalValue) {
+      setPaymentStatus(paymentStatusReverseMapBadge[status]);
+      handleFormFieldChange("paymentStatus", status);
+      status != paymentStatusMap["Pago Integralmente"]
+        ? setIsPaidFully(false)
+        : setIsPaidFully(true);
+      return;
+    }
+
+    setPaymentStatus(paymentStatusReverseMapBadge[3]);
+    handleFormFieldChange(
+      "paymentStatus",
+      paymentStatusMap["Pago Integralmente"],
+    );
   };
 
   return (
@@ -13,9 +40,11 @@ const PaymentStatusSelector = () => {
       <div className="wz-pay-options-grid">
         <button
           type="button"
-          className={`wz-pay-opt ${paymentStatus === "awaiting-payment" ? "active" : ""}`}
+          className={`wz-pay-opt ${paymentStatus === paymentStatusReverseMapBadge[1] && !isPaidFully ? "active" : ""}`}
           id="wzPayOpt-awaiting-payment"
-          onClick={() => handleSelectPay("awaiting-payment")}
+          onClick={() =>
+            handleSelectPay(paymentStatusMap["Aguardando Pagamento"])
+          }
         >
           <div className="wz-pay-dot wz-pay-dot-yellow"></div>
           <div>
@@ -26,9 +55,13 @@ const PaymentStatusSelector = () => {
 
         <button
           type="button"
-          className={`wz-pay-opt ${paymentStatus === "partial" ? "active" : ""}`}
+          className={`wz-pay-opt ${
+            paymentStatus === paymentStatusReverseMapBadge[2] && !isPaidFully
+              ? "active"
+              : ""
+          }`}
           id="wzPayOpt-partial"
-          onClick={() => handleSelectPay("partial")}
+          onClick={() => handleSelectPay(paymentStatusMap["Pago Parcialmente"])}
         >
           <div className="wz-pay-dot wz-pay-dot-orange"></div>
           <div>
@@ -39,9 +72,11 @@ const PaymentStatusSelector = () => {
 
         <button
           type="button"
-          className={`wz-pay-opt ${paymentStatus === "done" ? "active" : ""}`}
+          className={`wz-pay-opt ${paymentStatus === paymentStatusReverseMapBadge[3] || isPaidFully ? "active" : ""}`}
           id="wzPayOpt-done"
-          onClick={() => handleSelectPay("done")}
+          onClick={() =>
+            handleSelectPay(paymentStatusMap["Pago Integralmente"])
+          }
         >
           <div className="wz-pay-dot wz-pay-dot-green"></div>
           <div>
@@ -52,9 +87,9 @@ const PaymentStatusSelector = () => {
 
         <button
           type="button"
-          className={`wz-pay-opt ${paymentStatus === "pending" ? "active" : ""}`}
+          className={`wz-pay-opt ${paymentStatus === paymentStatusReverseMapBadge[4] && !isPaidFully ? "active" : ""}`}
           id="wzPayOpt-pending"
-          onClick={() => handleSelectPay("pending")}
+          onClick={() => handleSelectPay(paymentStatusMap["Sem Pagamento"])}
         >
           <div className="wz-pay-dot wz-pay-dot-gray"></div>
           <div>

@@ -30,6 +30,7 @@ import NewItemModal from "../components/NewItemModal.component";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
 import WizardBtn from "../components/WizardBtn.component";
 import PaymentStatusSelector from "../components/PaymentStatusSelector.component";
+import { paymentStatusMap } from "../utils/paymentStatusMap";
 
 const CATEGORIES = {
   customer: {
@@ -115,6 +116,8 @@ const NewServiceOrder = () => {
   const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
   const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
+  const [payment, setPayment] = useState("");
+  const [isPaidFully, setIsPaidFully] = useState(false);
 
   // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
@@ -140,7 +143,8 @@ const NewServiceOrder = () => {
     diagnosis: "",
     labor_cost: "",
     observation: "",
-    subtotal: null,
+    subtotal: 0,
+    paid: 0,
     customer_id: "",
     vehicle_id: "",
   });
@@ -598,6 +602,59 @@ const NewServiceOrder = () => {
     return null;
   };
 
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    if (!payment) {
+      alert("Valor de pagamento é obrigatório");
+      return;
+    }
+
+    try {
+      const currentPaid = parseValue(formData.paid);
+      const addedValue = parseValue(payment);
+      const totalPaid = currentPaid + addedValue;
+      handleFormFieldChange("paid", totalPaid);
+
+      setPayment("");
+    } catch (err) {
+      setError("Erro ao adicionar pagamento");
+    }
+  };
+
+  const handlePayFully = async (e) => {
+    e.preventDefault();
+    try {
+      const total = calculateGrandTotal();
+      handleFormFieldChange("paid", total);
+      handleFormFieldChange(
+        "paymentStatus",
+        paymentStatusMap["Pago Integralmente"],
+      );
+      setIsPaidFully(true);
+      setPayment("");
+    } catch (err) {
+      setError("Erro ao quitar pagamento");
+    }
+  };
+
+  const handlePaymentOnChange = (e) => {
+    let value = e.target.value;
+
+    value = value.replace(",", ".").replace(/[^0-9.]/g, "");
+
+    const parts = value.split(".");
+    if (parts.length > 2) {
+      value = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Corta qualquer caractere após a segunda casa decimal
+    if (parts[1] && parts[1].length > 2) {
+      value = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    setPayment(value);
+  };
+
   const closeCustomerModal = () => {
     setCustomerIsModalOpen(false);
   };
@@ -830,9 +887,11 @@ const NewServiceOrder = () => {
             icon={CATEGORIES.payment.icon}
           />
           <div className="fs-body">
-            <div className="status-card-body status-card-body-container-registrar-pagamento">
+            {/* <div className="status-card-body status-card-body-container-registrar-pagamento">
               <div className="grand-total os-new-status-card-title">
-                {`Subtotal: ${formattedPrice(calculateGrandTotal())} || Pago: ${formattedPrice(formData.paid || 0)}`}
+                {formData.paymentStatus === paymentStatusMap["Sem Pagamento"]
+                  ? "Não requer pagamento"
+                  : `Subtotal: ${formattedPrice(calculateGrandTotal())} || Pago: ${formattedPrice(formData.paid || 0)}`}
               </div>
               <div className="status-card-body-container-registrar-pagamento-text os-new-status-card-title">
                 Registrar pagamento
@@ -851,11 +910,8 @@ const NewServiceOrder = () => {
                     type="text"
                     className="input status-card-body-registrar-pagamento-input"
                     placeholder="0,00"
-                    value={formData.paid}
-                    onClick={() => {
-                      console.log(formData.paid);
-                      handleFormFieldChange("paid", formData.paid);
-                    }}
+                    value={payment}
+                    onChange={handlePaymentOnChange}
                   />
                 </div>
 
@@ -864,8 +920,7 @@ const NewServiceOrder = () => {
                     type="button"
                     className="btn btn-secondary btn-sm"
                     style={{ flex: 1 }}
-
-                    // disabled={saving || !payment}
+                    onClick={handleAddPayment}
                   >
                     Adicionar
                   </button>
@@ -873,20 +928,110 @@ const NewServiceOrder = () => {
                     type="button"
                     className="btn btn-primary btn-sm"
                     style={{ flex: 1 }}
-                    onClick={() => {
-                      const total = calculateGrandTotal();
-                      handleFormFieldChange("paid", total);
-                    }}
-                    // disabled={saving || !payment}
+                    onClick={handlePayFully}
                   >
                     Quitar
                   </button>
+                </div>
+              </div>
+            </div> */}
+            <div className="status-card-body status-card-body-container">
+              <div className="payment-container">
+                {/* Totais e Valores */}
+                {formData.paymentStatus ===
+                paymentStatusMap["Sem Pagamento"] ? (
+                  <div className="grand-total os-new-status-card-title">
+                    Não requer pagamento
+                  </div>
+                ) : (
+                  <div
+                    id="editPaymentRows"
+                    className="status-card-row-container"
+                  >
+                    <div className="payment-row payment-row-item">
+                      <span className="payment-row-total-os">Total da OS</span>
+                      <span className="payment-total payment-total-value">
+                        {formattedPrice(calculateGrandTotal())}
+                      </span>
+                    </div>
+
+                    <div className="payment-row payment-row-item">
+                      <span className="payment-row-total-pago">Total pago</span>
+                      <span className="payment-row-total-pago-value">
+                        {formattedPrice(Number(formData.paid || 0))}
+                      </span>
+                    </div>
+
+                    <div className="payment-divider"></div>
+
+                    <div className="payment-row payment-row-item">
+                      <span className="payment-row-saldo-restante">
+                        Saldo restante
+                      </span>
+                      <span
+                        className={`payment-row-saldo-restante-value ${
+                          parseValue(formData.paid) >= calculateGrandTotal()
+                            ? "payment-saldo-ok"
+                            : "payment-saldo-due"
+                        }`}
+                      >
+                        {parseValue(formData.paid) >= calculateGrandTotal()
+                          ? "Quitado"
+                          : formattedPrice(
+                              calculateGrandTotal() - parseValue(formData.paid),
+                            )}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {/* Campo Registrar Pagamento */}
+                <div className="status-card-body-container-registrar-pagamento">
+                  <div className="status-card-body-container-registrar-pagamento-text">
+                    Registrar pagamento
+                  </div>
+                  <div className="status-card-body-container-registrar-pagamento-input-container">
+                    <div className="status-card-body-container-registrar-pagamento-input">
+                      <div className="status-card-body-registrar-pagamento-input-container input-prefix">
+                        <span>R$</span>
+                        <input
+                          type="text"
+                          className="input status-card-body-registrar-pagamento-input"
+                          placeholder="0,00"
+                          value={payment}
+                          onChange={handlePaymentOnChange}
+                        />
+                      </div>
+
+                      <div className="status-card-body-container-registrar-pagamento-input-container-btns">
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          style={{ flex: 1 }}
+                          onClick={handleAddPayment}
+                        >
+                          Adicionar
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          style={{ flex: 1 }}
+                          onClick={handlePayFully}
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <PaymentStatusSelector
               handleFormFieldChange={handleFormFieldChange}
+              isPaidFully={isPaidFully}
+              setIsPaidFully={setIsPaidFully}
+              newOrderPaidValue={formData.paid || 0}
+              grandTotalValue={calculateGrandTotal()}
             />
           </div>
         </div>
