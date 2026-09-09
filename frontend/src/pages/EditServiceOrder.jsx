@@ -290,10 +290,10 @@ const EditServiceOrder = () => {
 
     const errorList = [];
 
-    if (!serviceOrder.diagnosis?.trim()) {
+    /*   if (!serviceOrder.diagnosis?.trim()) {
       errorList.push("Preencha o diagnóstico");
     }
-
+ */
     if (itemMaintenances.length <= 0) {
       errorList.push("Adicione pelo menos um serviço");
     }

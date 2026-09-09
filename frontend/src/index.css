@@ -468,13 +468,16 @@
 
 .os-table-wrap {
   padding: 0 24px;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  position: relative;
 }
 .os-table {
   width: 100%;
-  border-collapse: collapse;
-  background: var(--surface);
   border: 1px solid var(--border);
+  border-spacing: 0;
   border-radius: var(--radius-lg);
+  background: var(--surface);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
@@ -492,11 +495,29 @@
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
   white-space: nowrap;
+
+  color: var(--bg);
+  background-color: var(--accent);
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: 2px solid var(--border);
 }
 .os-table tbody tr {
   border-bottom: 1px solid var(--bg);
   transition: background 0.12s;
   cursor: pointer;
+}
+
+.os-table-cabecalho {
+}
+.os-table thead tr:first-child th:first-child {
+  border-top-left-radius: var(--radius-lg);
+}
+
+.os-table thead tr:first-child th:last-child {
+  border-top-right-radius: var(--radius-lg);
 }
 .os-table tbody tr:last-child {
   border-bottom: none;
@@ -2776,9 +2797,7 @@
   .page-header {
     padding: 16px 14px 12px;
   }
-  .os-table-wrap {
-    padding: 0 14px;
-  }
+
   .toolbar {
     padding: 0 14px 10px;
   }
@@ -2886,10 +2905,7 @@
   }
 
   /* ── OS table → card list ── */
-  .os-table-wrap {
-    padding: 0 12px;
-    overflow: visible;
-  }
+
   .os-table thead {
     display: none;
   }

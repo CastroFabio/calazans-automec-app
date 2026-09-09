@@ -160,7 +160,7 @@ const ServiceOrderList = () => {
       {/* TABELA */}
       <div className="os-table-wrap">
         <table className="os-table">
-          <thead>
+          <thead className="os-table-cabecalho">
             <tr>
               <th>Nº OS</th>
               <th>Cliente / Veículo</th>
