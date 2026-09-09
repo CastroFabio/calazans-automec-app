@@ -31,6 +31,7 @@ import { maintenanceJobApi } from "../api/maintenanceJobs";
 import WizardBtn from "../components/WizardBtn.component";
 import PaymentStatusSelector from "../components/PaymentStatusSelector.component";
 import { paymentStatusMap } from "../utils/paymentStatusMap";
+import { parseValue } from "../utils/parseValue";
 
 const CATEGORIES = {
   customer: {
@@ -343,12 +344,14 @@ const NewServiceOrder = () => {
       arrived_at: formData.arrived_at,
       entry_km:
         parseFloat(String(formData.entry_km).replace(/[^0-9.]/g, "")) || 0,
-      labor_cost: parseValue(formData.labor_cost),
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
-      subtotal: calculateGrandTotal(),
+      subtotal: parseValue(calculateGrandTotal()),
+      paid: parseValue(formData.paid),
+      labor_cost: parseValue(formData.labor_cost),
       isCustomerSupplier: formData.isCustomerSupplier,
     };
+    console.log(serviceOrderData);
 
     try {
       setLoading(true);
@@ -544,28 +547,6 @@ const NewServiceOrder = () => {
     setMaterialsList(materialsList.filter((material) => material.id !== id));
   };
 
-  const parseValue = (value) => {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === "number") return +value.toFixed(2);
-
-    if (typeof value === "string") {
-      let clean = value;
-
-      if (clean.includes(",") && clean.includes(".")) {
-        clean = clean.split(".").join("");
-      }
-
-      clean = clean.replace(",", ".");
-      clean = clean.replace(/[^0-9.]/g, "");
-
-      // Faz o parse e força a limitação de 2 casas decimais
-      const parsed = parseFloat(clean);
-      return parsed ? +parsed.toFixed(2) : 0;
-    }
-
-    return 0;
-  };
-
   const calculateTotalMaintenanceJob = () =>
     parseValue(formData.labor_cost || 0);
 
@@ -625,6 +606,8 @@ const NewServiceOrder = () => {
     e.preventDefault();
     try {
       const total = calculateGrandTotal();
+      console.log(total);
+
       handleFormFieldChange("paid", total);
       handleFormFieldChange(
         "paymentStatus",

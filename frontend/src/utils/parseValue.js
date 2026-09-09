@@ -1,4 +1,4 @@
-export const parseValue = (value) => {
+/* export const parseValue = (value) => {
   if (value === null || value === undefined) return 0;
   if (typeof value === "number") return +value.toFixed(2);
 
@@ -24,6 +24,28 @@ export const parseValue = (value) => {
       clean = `${parts[0]}.${parts[1].slice(0, 2)}`;
     }
 
+    const parsed = parseFloat(clean);
+    return parsed ? +parsed.toFixed(2) : 0;
+  }
+
+  return 0;
+}; */
+
+export const parseValue = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === "number") return +value.toFixed(2);
+
+  if (typeof value === "string") {
+    let clean = value;
+
+    if (clean.includes(",") && clean.includes(".")) {
+      clean = clean.split(".").join("");
+    }
+
+    clean = clean.replace(",", ".");
+    clean = clean.replace(/[^0-9.]/g, "");
+
+    // Faz o parse e força a limitação de 2 casas decimais
     const parsed = parseFloat(clean);
     return parsed ? +parsed.toFixed(2) : 0;
   }
