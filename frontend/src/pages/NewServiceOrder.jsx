@@ -351,7 +351,6 @@ const NewServiceOrder = () => {
       labor_cost: parseValue(formData.labor_cost),
       isCustomerSupplier: formData.isCustomerSupplier,
     };
-    console.log(serviceOrderData);
 
     try {
       setLoading(true);
@@ -606,7 +605,6 @@ const NewServiceOrder = () => {
     e.preventDefault();
     try {
       const total = calculateGrandTotal();
-      console.log(total);
 
       handleFormFieldChange("paid", total);
       handleFormFieldChange(
