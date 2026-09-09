@@ -77,7 +77,11 @@ const ActiveGroupItemList = ({
             <button
               className="btn btn-sm btn-ghost cad-btn-editar"
               onClick={() =>
-                handleEditClick(activeTab.groupName, activeTab.groupIndex, "")
+                handleEditClick(
+                  activeTab.groupName,
+                  activeTab.groupIndex,
+                  activeTab.groupName,
+                )
               }
             >
               Editar
