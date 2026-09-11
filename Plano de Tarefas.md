@@ -46,7 +46,7 @@
 
 ---
 
-## 3. Formulários, Modais & Cadastro Rápido
+## ~~3. Formulários, Modais & Cadastro Rápido~~
 
 ### ~~[Modal] Cadastro Rápido de Cliente e Veículo na Criação da OS~~
 
@@ -58,9 +58,9 @@
 
 - ~~**Ação:** Criar modal acessível na Etapa 2 de Serviços/Materiais para permitir o cadastro imediato de uma nova peça ou serviço no banco de dados sem perder o progresso da OS.~~
 
-### [UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço
+### ~~[UX/OS] Auto-foco no campo "Valor Unitário" após selecionar serviço~~
 
-- **Ação:** Mover o foco do cursor (`focus()`) automaticamente para o input de preço/valor unitário assim que um serviço for selecionado no autocomplete.
+- ~~**Ação:** Mover o foco do cursor (`focus()`) automaticamente para o input de preço/valor unitário assim que um serviço for selecionado no autocomplete.~~
 
 ### ~~[Feature/OS] Campo / Marcação "Fornecido pelo cliente"~~
 
@@ -172,7 +172,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ## Formulário de OS & UX
 
-- **Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`
+- ~~**Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`~~
 - ~~**Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`~~
 
 ## Bugs & Fixes
