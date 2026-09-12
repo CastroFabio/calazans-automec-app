@@ -17,6 +17,7 @@ export const ENDPOINTS = {
   // Orders (Service Orders)
   orders: {
     base: "/service-order",
+    perPage: "/service-order/page",
     byId: (id) => `/service-order/${id}`,
     status: (id) => `/service-order/${id}/status`,
     byCustomer: (customerId) => `/service-order/customer/${customerId}`,

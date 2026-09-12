@@ -86,7 +86,7 @@ export class ServiceOrderController {
     return this.serviceOrderService.findAll();
   }
 
-  @Get()
+  @Get('page')
   @ApiOperation({
     summary: 'Listar todas as ordens de serviço paginadas',
     description:
@@ -97,34 +97,12 @@ export class ServiceOrderController {
     type: PaginatedServiceOrderResponseDto,
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
-  findAllPerPage(
-    @Query(new ValidationPipe({ transform: true }))
-    paginationDto: PaginationDto,
-  ) {
-    const { page, limit, customerId, search } = paginationDto;
+  findAllPerPage(@Query() paginationDto: PaginationDto) {
+    // Garantimos a conversão explícita para evitar que venha string do Query Params
+    const page = Number(paginationDto.page) || 1;
+    const limit = Number(paginationDto.limit) || 10;
 
-    // Montando o objeto de filtro tipado do Prisma de forma dinâmica
-    const where: Prisma.ServiceOrderWhereInput = {};
-
-    if (customerId) {
-      where.customerId = customerId;
-    }
-
-    if (search) {
-      where.OR = [
-        {
-          vehicle: { licensePlate: { contains: search, mode: 'insensitive' } },
-        },
-        { status: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-
-    // Repassamos a paginação e o objeto de filtro tratado para o service
-    return this.serviceOrderService.findAllPerPage({
-      page,
-      limit,
-      where,
-    });
+    return this.serviceOrderService.findAllPerPage({ page, limit });
   }
 
   @Get(':id')

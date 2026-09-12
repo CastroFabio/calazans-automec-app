@@ -7,7 +7,7 @@ export const orderApi = {
 
   getAllPerPage: (params = {}) => {
     const { page = 1, limit = 10, search = "" } = params;
-    return api.get(ENDPOINTS.orders.base, {
+    return api.get(ENDPOINTS.orders.perPage, {
       params: { page, limit, search },
     });
   },

@@ -17,31 +17,53 @@ export class ServiceOrderService {
     return await this.prisma.serviceOrder.count();
   }
 
-  async findAllPerPage(params: { page: number; limit: number; where?: any }) {
-    const { page, limit, where } = params;
+  async findAllPerPage(paginationDto: PaginationDto) {
+    const page = Number(paginationDto.page) || 1;
+    const limit = Number(paginationDto.limit) || 10;
+    const search = paginationDto.search?.trim() || '';
 
-    // Cálculo do Offset
     const skip = (page - 1) * limit;
 
-    // Executa a busca e a contagem no Prisma em paralelo
+    // Filtro condicional: busca por nome do cliente OU placa do veículo
+    const whereClause = search
+      ? {
+          OR: [
+            {
+              customer: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive' as const, // Busca case-insensitive
+                },
+              },
+            },
+            {
+              vehicle: {
+                license_plate: {
+                  contains: search,
+                  mode: 'insensitive' as const,
+                },
+              },
+            },
+          ],
+        }
+      : {};
+
+    // Consulta transacional para buscar dados e total geral filtrado
     const [data, totalItems] = await this.prisma.$transaction([
       this.prisma.serviceOrder.findMany({
+        where: whereClause,
         skip,
         take: limit,
-        orderBy: {
-          id: 'desc',
-        },
+        orderBy: { id: 'desc' },
         include: {
           customer: true,
           vehicle: true,
           itemMaintenances: {
-            include: {
-              maintenancejob: true,
-            },
+            include: { maintenancejob: true },
           },
         },
       }),
-      this.prisma.serviceOrder.count({ where }),
+      this.prisma.serviceOrder.count({ where: whereClause }),
     ]);
 
     const totalPages = Math.ceil(totalItems / limit) || 1;

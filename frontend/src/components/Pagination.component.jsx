@@ -2,11 +2,9 @@ import React from "react";
 
 const Pagination = ({
   osPage,
-  osPerPage,
   totalPages,
   pagesArray = [],
   onPageChange,
-  onPerPageChange,
   totalItems = 0,
 }) => {
   return (

@@ -15,6 +15,8 @@ import {
 import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
 import VehicleBadge from "../components/VehicleBadge.component";
+import Pagination from "../components/Pagination.component";
+import { getNumberValue } from "../utils/parseValue";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
@@ -46,9 +48,19 @@ const ServiceOrderList = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [localLoading, setLocalLoading] = useState(false);
 
+  const [serviceOrdersPerPage, setServiceOrdersPerPage] = useState([]);
+  const [paginationMeta, setPaginationMeta] = useState({
+    currentPage: 1,
+    perPage: 5,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
+
   // ========== FILTRAR ORDENS ==========
   const filteredOrders = useMemo(() => {
-    return serviceOrders.filter((order) => {
+    return serviceOrdersPerPage.filter((order) => {
       // Filtrar por status (tab)
       const activeTabConfig = TABS.find((tab) => tab.id === activeTab);
       const matchesTab =
@@ -63,7 +75,7 @@ const ServiceOrderList = () => {
 
       return matchesTab && matchesSearch;
     });
-  }, [serviceOrders, activeTab, searchTerm]);
+  }, [serviceOrdersPerPage, activeTab, searchTerm]);
 
   // ========== HANDLERS ==========
   const handleCardClick = (order) => {
@@ -81,7 +93,7 @@ const ServiceOrderList = () => {
       setLocalLoading(true);
 
       // Buscar no contexto primeiro
-      let found = serviceOrders.find((order) => order.id === orderId);
+      let found = serviceOrdersPerPage.find((order) => order.id === orderId);
 
       if (found) {
         setSelectedServiceOrder(found);
@@ -100,35 +112,56 @@ const ServiceOrderList = () => {
     }
   };
 
-  const [serviceOrdersPerPage, setServiceOrdersPerPage] = useState([]);
-  const [paginationMeta, setPaginationMeta] = useState({
-    currentPage: 1,
-    perPage: 10,
-    totalItems: 0,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
-
-  const fetchServiceOrdersPerPage = async (page = 1, limit = 10) => {
+  const fetchServiceOrdersPerPage = async (
+    page = 1,
+    limit = 5,
+    search = "",
+    status = null,
+  ) => {
     try {
-      // O Axios devolve a resposta do NestJS dentro da chave 'data'
-      const result = await orderApi.getAllPerPage({ page, limit });
+      const { data: result } = await orderApi.getAllPerPage({
+        page,
+        limit,
+        search,
+      });
 
-      console.log("Retorno do NestJS:", result);
-
-      // response possui a estrutura { data: [...], meta: { ... } } do seu serviço NestJS
-      // setServiceOrdersPerPage(response.data);
-      // setPaginationMeta(response.meta);
+      setServiceOrdersPerPage(result.data); //
+      setPaginationMeta(result.meta); //
     } catch (err) {
-      setError(err.message || "Erro ao carregar ordens de serviço.");
-      console.error("Erro ao buscar ordens:", err);
+      setError(err.message || "Erro ao carregar ordens de serviço."); //
+      console.error("Erro ao buscar ordens:", err); //
     }
   };
 
   useEffect(() => {
-    fetchServiceOrdersPerPage(1, 10);
-  }, []);
+    const timer = setTimeout(() => {
+      const activeTabConfig = TABS.find((tab) => tab.id === activeTab);
+      const statusParam = activeTab === 0 ? null : activeTabConfig?.status;
+
+      // Reseta para a página 1 e traz os dados novos filtrados do backend
+      fetchServiceOrdersPerPage(1, paginationMeta.perPage, searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, activeTab]);
+
+  const getPagesArray = (currentPage, totalPages) => {
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== "...") {
+        pages.push("...");
+      }
+    }
+
+    return pages;
+  };
 
   // ========== RENDER ==========
   if (loading) return <Loading />;
@@ -176,16 +209,39 @@ const ServiceOrderList = () => {
               {`${tab.title} (`}
               {tab.id !== 0 ? (
                 <span className="chip-count">
-                  {serviceOrders.filter((o) => o.status === tab.status).length}
+                  {
+                    serviceOrdersPerPage.filter((o) => o.status === tab.status)
+                      .length
+                  }
                 </span>
               ) : (
-                <span className="chip-count">{serviceOrders.length}</span>
+                <span className="chip-count">
+                  {serviceOrdersPerPage.length}
+                </span>
               )}
               {`)`}
             </div>
           ))}
         </div>
       </div>
+
+      <Pagination
+        osPage={paginationMeta.currentPage}
+        totalPages={paginationMeta.totalPages}
+        totalItems={paginationMeta.totalItems}
+        pagesArray={getPagesArray(
+          paginationMeta.currentPage,
+          paginationMeta.totalPages,
+        )}
+        onPageChange={(newPage) => {
+          const activeTabConfig = TABS.find((tab) => tab.id === activeTab);
+          fetchServiceOrdersPerPage(
+            newPage,
+            paginationMeta.perPage,
+            searchTerm,
+          );
+        }}
+      />
 
       {/* TABELA */}
       <div className="os-table-wrap">
@@ -204,123 +260,133 @@ const ServiceOrderList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  onClick={() => {
-                    handleCardClick(order);
-                    handleFetchSelectedServiceOrder(order.id);
-                  }}
-                  className="os-row"
-                >
-                  <td>
-                    <span className="td-id">#{order.id}</span>
-                  </td>
-                  <td>
-                    <div className="os-table-customer-name">
-                      {order.customer?.name || "—"}
-                    </div>
-                    <div className="os-table-vehicle-info">
-                      {order.vehicle ? (
-                        <VehicleBadge vehicle={order.vehicle} />
-                      ) : (
-                        "—"
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="os-services-tags">
-                      {order.itemMaintenances &&
-                      order.itemMaintenances.length > 0 ? (
-                        order.itemMaintenances.slice(0, 3).map((item) => (
-                          <span key={item.id} className="svc-tag">
-                            {item.maintenancejob?.name || "Serviço"}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="no-services">—</span>
-                      )}
-                      {order.itemMaintenances &&
-                        order.itemMaintenances.length > 3 && (
-                          <span className="svc-tag more-tag">
-                            +{order.itemMaintenances.length - 3}
-                          </span>
+            {serviceOrdersPerPage.length > 0 ? (
+              serviceOrdersPerPage.map((order) => {
+                const isPaid =
+                  getNumberValue(order.paid) >= getNumberValue(order.subtotal);
+                return (
+                  <tr
+                    key={order.id}
+                    onClick={() => {
+                      handleCardClick(order);
+                      handleFetchSelectedServiceOrder(order.id);
+                    }}
+                    className="os-row"
+                  >
+                    {console.log(order)}
+                    <td>
+                      <span className="td-id">#{order.id}</span>
+                    </td>
+                    <td>
+                      <div className="os-table-customer-name">
+                        {order.customer?.name || "—"}
+                      </div>
+                      <div className="os-table-vehicle-info">
+                        {order.vehicle ? (
+                          <VehicleBadge vehicle={order.vehicle} />
+                        ) : (
+                          "—"
                         )}
-                    </div>
-                  </td>
-                  {/*    <td className="os-table-professional-name">
+                      </div>
+                    </td>
+                    <td>
+                      <div className="os-services-tags">
+                        {order.itemMaintenances &&
+                        order.itemMaintenances.length > 0 ? (
+                          order.itemMaintenances.slice(0, 2).map((item) => (
+                            <span key={item.id} className="svc-tag">
+                              {item.maintenancejob?.name || "Serviço"}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="no-services">—</span>
+                        )}
+                        {order.itemMaintenances &&
+                          order.itemMaintenances.length > 2 && (
+                            <span className="svc-tag more-tag">
+                              +{order.itemMaintenances.length - 2}
+                            </span>
+                          )}
+                      </div>
+                    </td>
+                    {/*    <td className="os-table-professional-name">
                     {order.professional || "—"}
                   </td> */}
-                  <td>
-                    <StatusBadge
-                      className="os-table-th-center"
-                      reverseMapBadge={statusReverseMapBadge[order.status]}
-                      reverseMap={statusReverseMap[order.status]}
-                    />
-                  </td>
-                  <td>
-                    <StatusBadge
-                      className="os-table-th-center"
-                      reverseMapBadge={
-                        paymentStatusReverseMapBadge[order.paymentStatus]
-                      }
-                      reverseMap={paymentStatusReverseMap[order.paymentStatus]}
-                    />
-                  </td>
-                  <td className="td-value">{formattedPrice(order.subtotal)}</td>
-                  <td className="td-date">
-                    {formatLocalDateTimeStringISO(order.arrived_at)}
-                  </td>
-                  <td className="td-date">
-                    <button
-                      className={`${Number(order.paid) >= Number(order.subtotal) ? "btn btn-sm btn-ghost" : "btn btn-sm btn-primary"}`}
-                      disabled={Number(order.paid) >= Number(order.subtotal)}
-                      onClick={async (event) => {
-                        event.stopPropagation(); // Evita abrir a sidebar ao clicar no botão
-
-                        try {
-                          const updatedValue = Number(order.subtotal);
-
-                          // 1. Envia a atualização para a API
-                          const { data } = await orderApi.update(order.id, {
-                            paid: updatedValue,
-                            paymentStatus:
-                              paymentStatusMap["Pago Integralmente"],
-                          });
-
-                          // 2. Prepara o objeto atualizado (usa a resposta do servidor ou mescla localmente)
-                          const updatedOrder = {
-                            ...order,
-                            paid: updatedValue,
-                            paymentStatus:
-                              paymentStatusMap["Pago Integralmente"],
-                            ...(data || {}),
-                          };
-
-                          // 3. Atualiza o estado global no Contexto
-                          updateServiceOrder(updatedOrder);
-
-                          // 4. Se a ordem clicada estiver aberta no painel lateral, atualiza ela também
-                          if (selectedServiceOrder?.id === order.id) {
-                            setSelectedServiceOrder(updatedOrder);
-                          }
-                        } catch (err) {
-                          console.error("Erro ao quitar pagamento da OS:", err);
-                          alert(
-                            err.response?.data?.message ||
-                              "Ocorreu um erro ao quitar o pagamento.",
-                          );
+                    <td>
+                      <StatusBadge
+                        className="os-table-th-center"
+                        reverseMapBadge={statusReverseMapBadge[order.status]}
+                        reverseMap={statusReverseMap[order.status]}
+                      />
+                    </td>
+                    <td>
+                      <StatusBadge
+                        className="os-table-th-center"
+                        reverseMapBadge={
+                          paymentStatusReverseMapBadge[order.paymentStatus]
                         }
-                      }}
-                    >
-                      {Number(order.paid) >= Number(order.subtotal)
-                        ? "Quitado"
-                        : "Quitar"}
-                    </button>
-                  </td>
-                </tr>
-              ))
+                        reverseMap={
+                          paymentStatusReverseMap[order.paymentStatus]
+                        }
+                      />
+                    </td>
+                    <td className="td-value">
+                      {formattedPrice(order.subtotal)}
+                    </td>
+                    <td className="td-date">
+                      {formatLocalDateTimeStringISO(order.arrived_at)}
+                    </td>
+                    <td className="td-date">
+                      <button
+                        className={`${isPaid ? "btn btn-sm btn-ghost" : "btn btn-sm btn-primary"}`}
+                        disabled={isPaid}
+                        onClick={async (event) => {
+                          event.stopPropagation(); // Evita abrir a sidebar ao clicar no botão
+
+                          try {
+                            const updatedValue = getNumberValue(order.subtotal);
+
+                            // 1. Envia a atualização para a API
+                            const { data } = await orderApi.update(order.id, {
+                              paid: updatedValue,
+                              paymentStatus:
+                                paymentStatusMap["Pago Integralmente"],
+                            });
+
+                            // 2. Prepara o objeto atualizado (usa a resposta do servidor ou mescla localmente)
+                            const updatedOrder = {
+                              ...order,
+                              paid: updatedValue,
+                              paymentStatus:
+                                paymentStatusMap["Pago Integralmente"],
+                              ...(data || {}),
+                            };
+
+                            // 3. Atualiza o estado global no Contexto
+                            updateServiceOrder(updatedOrder);
+
+                            // 4. Se a ordem clicada estiver aberta no painel lateral, atualiza ela também
+                            if (selectedServiceOrder?.id === order.id) {
+                              setSelectedServiceOrder(updatedOrder);
+                            }
+                          } catch (err) {
+                            console.error(
+                              "Erro ao quitar pagamento da OS:",
+                              err,
+                            );
+                            alert(
+                              err.response?.data?.message ||
+                                "Ocorreu um erro ao quitar o pagamento.",
+                            );
+                          }
+                        }}
+                      >
+                        {isPaid ? "Quitado" : "Quitar"}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr className="empty-row">
                 <td colSpan="7">

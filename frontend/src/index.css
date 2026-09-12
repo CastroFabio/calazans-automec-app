@@ -468,7 +468,7 @@
 
 .os-table-wrap {
   padding: 0 24px;
-  max-height: calc(100vh - 303px);
+  max-height: 100vh;
   overflow-y: auto;
   position: relative;
 }
@@ -5331,7 +5331,6 @@
   padding: 10px 24px;
   flex-wrap: wrap;
   gap: 8px;
-  border-top: 1px solid var(--border);
 }
 .pagination-info {
   font-size: 12px;
