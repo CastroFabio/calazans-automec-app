@@ -5,6 +5,13 @@ export const orderApi = {
   // Buscar todas as ordens de serviço
   getAll: () => api.get(ENDPOINTS.orders.base),
 
+  getAllPerPage: (params = {}) => {
+    const { page = 1, limit = 10, search = "" } = params;
+    return api.get(ENDPOINTS.orders.base, {
+      params: { page, limit, search },
+    });
+  },
+
   // Buscar uma ordem por ID
   getById: (id) => api.get(ENDPOINTS.orders.byId(id)),
 

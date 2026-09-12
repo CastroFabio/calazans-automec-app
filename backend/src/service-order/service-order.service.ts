@@ -7,6 +7,7 @@ import {
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class ServiceOrderService {
@@ -14,6 +15,48 @@ export class ServiceOrderService {
 
   async countAll() {
     return await this.prisma.serviceOrder.count();
+  }
+
+  async findAllPerPage(params: { page: number; limit: number; where?: any }) {
+    const { page, limit, where } = params;
+
+    // Cálculo do Offset
+    const skip = (page - 1) * limit;
+
+    // Executa a busca e a contagem no Prisma em paralelo
+    const [data, totalItems] = await this.prisma.$transaction([
+      this.prisma.serviceOrder.findMany({
+        skip,
+        take: limit,
+        orderBy: {
+          id: 'desc',
+        },
+        include: {
+          customer: true,
+          vehicle: true,
+          itemMaintenances: {
+            include: {
+              maintenancejob: true,
+            },
+          },
+        },
+      }),
+      this.prisma.serviceOrder.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+
+    return {
+      data,
+      meta: {
+        currentPage: page,
+        perPage: limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   // CREATE - Criar uma ordem de serviço

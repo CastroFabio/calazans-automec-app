@@ -468,7 +468,7 @@
 
 .os-table-wrap {
   padding: 0 24px;
-  max-height: calc(100vh - 250px);
+  max-height: calc(100vh - 303px);
   overflow-y: auto;
   position: relative;
 }
@@ -5390,6 +5390,20 @@
   color: var(--ink);
   cursor: pointer;
 }
+
+.pagination-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pg-ellipsis {
+  padding: 0 2px;
+  color: var(--ink3);
+  font-size: 12px;
+}
+
 @media (max-width: 600px) {
   .pagination {
     padding: 8px 12px;

@@ -9291,12 +9291,18 @@
           return;
         }
 
-        const prev = `<button class="pg-btn" onclick="pgGo(${osPage - 1})" ${osPage === 1 ? "disabled" : ""}>
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-  </button>`;
-        const next = `<button class="pg-btn" onclick="pgGo(${osPage + 1})" ${osPage === totalPages ? "disabled" : ""}>
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-  </button>`;
+        const prev = `
+        <button class="pg-btn" onclick="pgGo(${osPage - 1})" ${osPage === 1 ? "disabled" : ""}>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>`;
+        const next = `
+        <button class="pg-btn" onclick="pgGo(${osPage + 1})" ${osPage === totalPages ? "disabled" : ""}>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>`;
 
         // Show at most 5 page numbers with ellipsis
         let pages = [];

@@ -100,6 +100,36 @@ const ServiceOrderList = () => {
     }
   };
 
+  const [serviceOrdersPerPage, setServiceOrdersPerPage] = useState([]);
+  const [paginationMeta, setPaginationMeta] = useState({
+    currentPage: 1,
+    perPage: 10,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
+
+  const fetchServiceOrdersPerPage = async (page = 1, limit = 10) => {
+    try {
+      // O Axios devolve a resposta do NestJS dentro da chave 'data'
+      const result = await orderApi.getAllPerPage({ page, limit });
+
+      console.log("Retorno do NestJS:", result);
+
+      // response possui a estrutura { data: [...], meta: { ... } } do seu serviço NestJS
+      // setServiceOrdersPerPage(response.data);
+      // setPaginationMeta(response.meta);
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço.");
+      console.error("Erro ao buscar ordens:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchServiceOrdersPerPage(1, 10);
+  }, []);
+
   // ========== RENDER ==========
   if (loading) return <Loading />;
 

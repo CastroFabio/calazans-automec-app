@@ -9,6 +9,8 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  Query,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ServiceOrderService } from './service-order.service';
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
@@ -27,6 +29,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ServiceOrderResponseDto } from './dto/response-service-order.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { PaginatedServiceOrderResponseDto } from './dto/paginated-service-order-response.dto';
 
 @ApiTags('service-order')
 @Controller('service-order')
@@ -80,6 +84,47 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   findAll() {
     return this.serviceOrderService.findAll();
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'Listar todas as ordens de serviço paginadas',
+    description:
+      'Retorna uma lista paginada com as ordens de serviço cadastradas e metadados de paginação',
+  })
+  @ApiOkResponse({
+    description: 'Lista paginada de ordens de serviço retornada com sucesso',
+    type: PaginatedServiceOrderResponseDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  findAllPerPage(
+    @Query(new ValidationPipe({ transform: true }))
+    paginationDto: PaginationDto,
+  ) {
+    const { page, limit, customerId, search } = paginationDto;
+
+    // Montando o objeto de filtro tipado do Prisma de forma dinâmica
+    const where: Prisma.ServiceOrderWhereInput = {};
+
+    if (customerId) {
+      where.customerId = customerId;
+    }
+
+    if (search) {
+      where.OR = [
+        {
+          vehicle: { licensePlate: { contains: search, mode: 'insensitive' } },
+        },
+        { status: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Repassamos a paginação e o objeto de filtro tratado para o service
+    return this.serviceOrderService.findAllPerPage({
+      page,
+      limit,
+      where,
+    });
   }
 
   @Get(':id')
