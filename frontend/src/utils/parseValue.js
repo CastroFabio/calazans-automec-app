@@ -52,3 +52,30 @@ export const parseValue = (value) => {
 
   return 0;
 };
+
+export const parseInputValue = (value) => {
+  if (!value) return "";
+
+  // Transforma vírgula em ponto e remove caracteres inválidos
+  let val = String(value)
+    .replace(",", ".")
+    .replace(/[^0-9.]/g, "");
+
+  // Impede múltiplos pontos decimais
+  const parts = val.split(".");
+  if (parts.length > 2) {
+    val = parts[0] + "." + parts.slice(1).join("");
+  }
+
+  // Limita a no máximo 2 casas decimais
+  if (parts[1] && parts[1].length > 2) {
+    val = `${parts[0]}.${parts[1].slice(0, 2)}`;
+  }
+
+  return val; // Retorna a STRING limpa para o input permitir a vírgula/ponto
+};
+
+export const getNumberValue = (value) => {
+  const num = parseFloat(value);
+  return isNaN(num) ? 0 : num;
+};

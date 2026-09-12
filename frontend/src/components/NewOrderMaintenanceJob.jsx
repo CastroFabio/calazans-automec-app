@@ -1,11 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
-import InputPriceValue from "./InputPriceValue";
+import CurrencyInput from "./CurrencyInput.component";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
 import AutoComplete from "./AutoComplete.component";
 import SvcRegistradosList from "./SvcRegistradosList.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import WizardBtn from "./WizardBtn.component";
 import { materialGroupApi } from "../api/materialGroups";
+import { getNumberValue, parseInputValue } from "../utils/parseValue";
+import { formattedPrice } from "../utils/convertPrice";
 
 const NewOrderMaintenanceJob = ({
   formData,
@@ -15,7 +17,7 @@ const NewOrderMaintenanceJob = ({
   setListMaintenanceJobs,
   maintenanceJobsGroupData = [],
   handleAddMaintenanceJob,
-  calculateTotalMaintenanceJob,
+  formDataLaborCost,
   calculateTotalMaterials,
   calculateGrandTotal,
   openMaintenanceModal,
@@ -83,6 +85,20 @@ const NewOrderMaintenanceJob = ({
               material_id: found.id,
               name: found.name,
               value_unit: found.value_unit ?? "",
+            };
+          }
+        }
+
+        if (field === "value_unit") {
+          if (!value) return { ...item, value_unit: "" };
+          const found = findMaterialListById(matId);
+
+          const valueUnitParsed = parseInputValue(value);
+
+          if (found) {
+            return {
+              ...item,
+              value_unit: valueUnitParsed,
             };
           }
         }
@@ -159,6 +175,13 @@ const NewOrderMaintenanceJob = ({
     return null;
   };
 
+  const findMaterialListById = (id) => {
+    if (!id) return null;
+    const found = materialsList.find((item) => item.id === id);
+    if (found) return found;
+    return null;
+  };
+
   return (
     <div className="form-section">
       <div className="fs-header">
@@ -185,9 +208,11 @@ const NewOrderMaintenanceJob = ({
       </div>
 
       <div className="fs-body fs-body-new-service-order">
-        <InputPriceValue
-          labor_cost={formData.labor_cost}
-          handleFormFieldChange={handleFormFieldChange}
+        <CurrencyInput
+          value={formData.labor_cost}
+          handleFormFieldChange={(e) =>
+            handleFormFieldChange("labor_cost", e.target.value)
+          }
           label={"Mão de obra"}
         />
 
@@ -304,19 +329,17 @@ const NewOrderMaintenanceJob = ({
         <div className="total-row">
           <div className="total-item">
             Mão de obra:
-            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+            <strong>{` ${formattedPrice(formDataLaborCost)}`}</strong>
           </div>
           <div className="total-row-divider"></div>
           <div className="total-item">
             Peças:
-            <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+            <strong>{` ${formattedPrice(calculateTotalMaterials())}`}</strong>
           </div>
           <div className="total-row-divider"></div>
           <div className="total-item">
             Total:
-            <span className="grand-total">
-              R$ {calculateGrandTotal().toFixed(2)}
-            </span>
+            <span className="grand-total">{` ${formattedPrice(calculateGrandTotal())}`}</span>
           </div>
         </div>
       </div>

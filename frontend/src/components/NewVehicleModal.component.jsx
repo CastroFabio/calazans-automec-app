@@ -93,8 +93,9 @@ const NewVehicleModal = ({
       const { data } = await vehicleApi.create(vehicleData);
 
       addVehicleToCustomer(customerIdToSave, data);
-
-      setSelectedVehicleFromNewServiceOrder(data);
+      if (setSelectedVehicleFromNewServiceOrder) {
+        setSelectedVehicleFromNewServiceOrder(data);
+      }
       closeWindow();
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);

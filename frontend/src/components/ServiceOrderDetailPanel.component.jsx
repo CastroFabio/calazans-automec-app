@@ -242,6 +242,14 @@ const ServiceOrderDetailPanel = ({
                 </span>
               </div>
             </div>
+            <div className="sp-section">
+              <div className="sp-label">Valor Pago</div>
+              <div className="sp-value">
+                <span className="sp-subtotal">
+                  {formattedPrice(order.paid)}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* ===== SERVIÇOS ===== */}

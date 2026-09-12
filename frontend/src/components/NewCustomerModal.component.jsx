@@ -73,7 +73,10 @@ const NewCustomerModal = ({
         observation: "",
       });
 
-      setSelectedCustomerFromNewServiceOrder(newCustomerData);
+      if (setSelectedCustomerFromNewServiceOrder) {
+        setSelectedCustomerFromNewServiceOrder(newCustomerData);
+      }
+
       onClose();
     } catch (err) {
       console.error("Erro ao salvar cliente:", err);

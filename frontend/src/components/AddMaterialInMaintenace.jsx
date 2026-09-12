@@ -263,25 +263,10 @@ const AddMaterialInMaintenace = ({
                             ref={(el) => (materialRef.current[element.id] = el)}
                             value={element.value_unit ?? ""}
                             onChange={(e) => {
-                              let val = e.target.value
-                                .replace(",", ".")
-                                .replace(/[^0-9.]/g, "");
-
-                              // Garante no máximo um ponto decimal
-                              const parts = val.split(".");
-                              if (parts.length > 2) {
-                                val = parts[0] + "." + parts.slice(1).join("");
-                              }
-
-                              // Limita a no máximo 2 casas decimais
-                              if (parts[1] && parts[1].length > 2) {
-                                val = `${parts[0]}.${parts[1].slice(0, 2)}`;
-                              }
-
                               handleMaterialInputChange(
                                 element.id,
                                 "value_unit",
-                                val,
+                                e.target.value,
                                 materialsGroupData,
                               );
                             }}

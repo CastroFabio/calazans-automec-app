@@ -14,7 +14,14 @@ import Loading from "./Loading";
 import StatusBadge from "../components/StatusBadge.component";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
 import { PATHS } from "../utils/paths";
-import { parseValue } from "../utils/parseValue";
+import {
+  getNumberValue,
+  parseInputValue,
+  parseValue,
+} from "../utils/parseValue";
+import NewCustomerModal from "../components/NewCustomerModal.component";
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import NewItemModal from "../components/NewItemModal.component";
 
 const EditServiceOrder = () => {
   const { id } = useParams();
@@ -39,6 +46,17 @@ const EditServiceOrder = () => {
   // Estados para materiais (itemMaterials)
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
   const [itemMaterials, setItemMaterials] = useState([]);
+
+  const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
+  const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
+
+  const [selectedCustomerFromModal, setSelectedCustomerFromModal] = useState(
+    {},
+  );
+  const [selectedVehicleFromModal, setSelectedVehicleFromModal] = useState({});
+
+  const [inputValue, setInputValue] = useState("");
 
   // ========== BUSCAR DADOS ==========
   useEffect(() => {
@@ -106,9 +124,13 @@ const EditServiceOrder = () => {
     }));
 
     const serviceTotalPrice = formattedMaterials.reduce((total, mat) => {
-      const qty = parseFloat(mat.quantity) || 0;
-      const val = parseValue(mat.value_unit);
-      return total + qty * val;
+      const materialQuantityNumber = getNumberValue(mat.quantity) || 0;
+
+      const materialValueParsed = parseInputValue(mat.value_unit);
+
+      const materialValueNumber = getNumberValue(materialValueParsed);
+
+      return total + materialQuantityNumber * materialValueNumber;
     }, 0);
 
     const updatedJob = {
@@ -117,7 +139,7 @@ const EditServiceOrder = () => {
       name: itemService.service.name,
       description: itemService.description || "",
       materialsList: formattedMaterials,
-      totalPrice: serviceTotalPrice,
+      totalPrice: getNumberValue(serviceTotalPrice),
       maintenance: {
         id: itemService.service.id,
         name: itemService.service.name,
@@ -163,6 +185,13 @@ const EditServiceOrder = () => {
       );
       if (found) return found;
     }
+    return null;
+  };
+
+  const findMaterialListById = (id) => {
+    if (!id) return null;
+    const found = materialsList.find((item) => item.id === id);
+    if (found) return found;
     return null;
   };
 
@@ -242,6 +271,20 @@ const EditServiceOrder = () => {
           }
         }
 
+        if (field === "value_unit") {
+          if (!value) return { ...item, value_unit: "" };
+          const found = findMaterialListById(matId);
+
+          const valueUnitParsed = parseInputValue(value);
+
+          if (found) {
+            return {
+              ...item,
+              value_unit: valueUnitParsed,
+            };
+          }
+        }
+
         return { ...element, [field]: value };
       }),
     );
@@ -250,13 +293,21 @@ const EditServiceOrder = () => {
   // ========== CÁLCULOS ==========
 
   const calculateTotalMaintenanceJob = () =>
-    parseValue(serviceOrder?.labor_cost || 0);
+    getNumberValue(serviceOrder?.labor_cost || 0);
 
   const calculateTotalMaterials = () => {
-    return itemMaterials.reduce((total, item) => {
-      const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unit);
-      return total + quantity * value;
+    return (itemMaterials || []).reduce((total, item) => {
+      const materialItemTotalPriceParsed = parseInputValue(item.quantity);
+
+      const materialItemQuantityNumber = getNumberValue(item.value_unit);
+      const materialItemTotalPriceNumber = getNumberValue(
+        materialItemTotalPriceParsed,
+      );
+
+      const grandTotalPrice =
+        total + materialItemTotalPriceNumber * materialItemQuantityNumber;
+
+      return grandTotalPrice;
     }, 0);
   };
 
@@ -469,6 +520,30 @@ const EditServiceOrder = () => {
     }
   };
 
+  const closeCustomerModal = () => {
+    setCustomerIsModalOpen(false);
+  };
+
+  const handleOpenCustomerModal = () => {
+    setCustomerIsModalOpen(true);
+  };
+
+  const closeVehicleModal = () => {
+    setVehicleIsModalOpen(false);
+  };
+
+  const handleOpenVehicleModal = () => {
+    setVehicleIsModalOpen(true);
+  };
+
+  const closeMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(false);
+  };
+
+  const handleOpenMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(true);
+  };
+
   if (loading) return <Loading />;
   if (!serviceOrder) return <div>Ordem de serviço não encontrada</div>;
 
@@ -561,15 +636,11 @@ const EditServiceOrder = () => {
             handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
             setListMaintenanceJobs={setItemMaintenances}
             maintenanceJobsGroupData={maintenanceJobsGroupData}
-            handleAddMaterial={() => {}}
-            handleMaterialInputChange={handleMaterialInputChange}
-            materialsGroupData={materialsGroupData}
-            handleRemoveMaterial={handleRemoveMaterial}
-            findMaterialById={findMaterialById}
             handleAddMaintenanceJob={handleAddMaintenanceJob}
-            calculateTotalMaintenanceJob={calculateTotalMaintenanceJob}
+            formDataLaborCost={getNumberValue(serviceOrder?.labor_cost)}
             calculateTotalMaterials={calculateTotalMaterials}
             calculateGrandTotal={calculateGrandTotal}
+            openMaintenanceModal={handleOpenMaintenanceModal}
           />
 
           {/* DIAGNÓSTICO & INFORMAÇÕES */}
@@ -735,6 +806,72 @@ const EditServiceOrder = () => {
           </div>
         </div>
       </div>
+
+      {isCustomerModalOpen && (
+        <NewCustomerModal
+          isOpen={isCustomerModalOpen}
+          onClose={closeCustomerModal}
+          customerName={inputValue}
+          setSelectedCustomerFromNewServiceOrder={setSelectedCustomerFromModal}
+        />
+      )}
+      {isVehicleModalOpen && (
+        <NewVehicleModal
+          isModalOpen={isVehicleModalOpen}
+          onClose={closeVehicleModal}
+          selectedCustomer={getCustomerById(selectedCustomerInfo.id)}
+          setSelectedVehicleFromNewServiceOrder={setSelectedVehicleFromModal}
+        />
+      )}
+
+      {/* Modal para Serviços de Manutenção */}
+      {isMaintenanceModalOpen && (
+        <NewItemModal
+          title="Novo Serviço"
+          placeholder="Digite o novo serviço..."
+          buttonLabel="Salvar e cadastrar serviço"
+          closeModal={closeMaintenanceModal}
+          isModalOpen={isMaintenanceModalOpen}
+          items={maintenanceJobsGroupData}
+          createItem={async (groupIndex, newItemName) => {
+            if (!newItemName.trim() || !groupIndex) return;
+
+            try {
+              const newItem = {
+                name: newItemName.trim(),
+                group_id: groupIndex,
+              };
+
+              // 1. Chamada de API (ajuste para a rota correta da sua API se necessário)
+              const response = await maintenanceJobApi.create(newItem);
+              const createdItem = response.data || response;
+
+              // 2. Atualiza o estado local maintenanceJobsGroupData
+              setMaintenanceJobsGroupData((prevData) =>
+                prevData.map((group) => {
+                  if (group.id === groupIndex) {
+                    return {
+                      ...group,
+                      maintenanceJobs: [
+                        ...(group.maintenanceJobs || []),
+                        createdItem,
+                      ],
+                    };
+                  }
+                  return group;
+                }),
+              );
+
+              closeMaintenanceModal();
+            } catch (err) {
+              console.error("Erro ao adicionar serviço:", err);
+              alert(
+                err.response?.data?.message || "Erro ao adicionar serviço.",
+              );
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

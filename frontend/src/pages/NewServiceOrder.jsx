@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { formatLocalDateTime } from "../utils/convertDateTime";
 import AutoComplete from "../components/AutoComplete.component";
 import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
-import NewOrderMaterial from "../components/NewOrderMaterial";
-import NewOrderInfo from "../components/NewOrderInfo";
-import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
 import FormSectionHeader from "../components/FormSectionHeader.component";
 
 import { customerApi } from "../api/customers";
@@ -21,7 +18,7 @@ import { useServiceOrders } from "../context/ServiceOrder.context";
 import NewCustomerModal from "../components/NewCustomerModal.component";
 import NewVehicleModal from "../components/NewVehicleModal.component";
 import { useCustomers } from "../context/Customer.context";
-import InputPriceValue from "../components/InputPriceValue";
+import CurrencyInput from "../components/CurrencyInput.component";
 import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
 import { formatarCelular } from "../utils/convertCel";
 import ProfessionalSelect from "../components/ProfessionalSelect.component";
@@ -31,7 +28,7 @@ import { maintenanceJobApi } from "../api/maintenanceJobs";
 import WizardBtn from "../components/WizardBtn.component";
 import PaymentStatusSelector from "../components/PaymentStatusSelector.component";
 import { paymentStatusMap } from "../utils/paymentStatusMap";
-import { parseValue } from "../utils/parseValue";
+import { getNumberValue, parseInputValue } from "../utils/parseValue";
 
 const CATEGORIES = {
   customer: {
@@ -118,9 +115,7 @@ const NewServiceOrder = () => {
   const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
   const [payment, setPayment] = useState("");
-  const [isPaidFully, setIsPaidFully] = useState(false);
 
-  // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
@@ -142,7 +137,7 @@ const NewServiceOrder = () => {
     arrived_at: new Date().toISOString(),
     entry_km: "",
     diagnosis: "",
-    labor_cost: "",
+    labor_cost: 0,
     observation: "",
     subtotal: 0,
     paid: 0,
@@ -311,7 +306,8 @@ const NewServiceOrder = () => {
 
     const invalidMaterialsValueAndQty = allMaterials.filter((item) => {
       const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unit);
+      const value = getNumberValue(item.value_unit);
+
       return (quantity <= 0 || value <= 0) && !item.customerSupplierCheck;
     });
 
@@ -346,9 +342,9 @@ const NewServiceOrder = () => {
         parseFloat(String(formData.entry_km).replace(/[^0-9.]/g, "")) || 0,
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
-      subtotal: parseValue(calculateGrandTotal()),
-      paid: parseValue(formData.paid),
-      labor_cost: parseValue(formData.labor_cost),
+      subtotal: getNumberValue(calculateGrandTotal()),
+      paid: getNumberValue(formData.paid),
+      labor_cost: getNumberValue(formData.labor_cost),
       isCustomerSupplier: formData.isCustomerSupplier,
     };
 
@@ -399,7 +395,7 @@ const NewServiceOrder = () => {
           material_id: item.material_id,
           itemMaintenance_id: localToBackendJobIdMap[item.parentJobId] || null,
           quantity: parseFloat(item.quantity) || 1,
-          value_unit: parseValue(item.value_unit),
+          value_unit: getNumberValue(item.value_unit),
           receipt: item.receipt?.trim() || "",
           supplier: item.supplier?.trim() || "",
           isCustomerSupplier: item.isCustomerSupplier || false,
@@ -458,20 +454,22 @@ const NewServiceOrder = () => {
 
   // HANDLES
   const handleFormFieldChange = (field, value) => {
+    if (field === "labor_cost" || field === "subtotal") {
+      const cleanValue = parseInputValue(value);
+
+      setFormData((prev) => ({
+        ...prev,
+        [field]: cleanValue,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleFormFieldChangeMaintenance = (field, value) => {
-    setFormDataItemMaintenance((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // NewOrderCustomerVehicle
   const handleSelectedVehicle = (vehicle) => {
     setSelectedVehicleInfo(vehicle);
     handleFormFieldChange("vehicle_id", vehicle.id);
@@ -546,20 +544,43 @@ const NewServiceOrder = () => {
     setMaterialsList(materialsList.filter((material) => material.id !== id));
   };
 
-  const calculateTotalMaintenanceJob = () =>
-    parseValue(formData.labor_cost || 0);
-
   const calculateTotalMaterials = () => {
     return (listMaintenanceJobs || []).reduce((total, material) => {
-      return parseFloat(total + material.totalPrice);
-      /* const unitValue = parseValue(material?.materialsList.value_unit);
-      const quantity = parseFloat(material?.materialsList.quantity) || 0; 
-      return total + unitValue * quantity;*/
+      const totalParsed = parseInputValue(total);
+      const materialItemTotalPriceParsed = parseInputValue(material.totalPrice);
+
+      const totalNumber = getNumberValue(totalParsed);
+      const materialItemTotalPriceNumber = getNumberValue(
+        materialItemTotalPriceParsed,
+      );
+
+      const grandTotalPrice = totalNumber + materialItemTotalPriceNumber;
+
+      return grandTotalPrice;
     }, 0);
   };
 
-  const calculateGrandTotal = () =>
-    calculateTotalMaintenanceJob() + calculateTotalMaterials();
+  const calculateGrandTotal = () => {
+    const laborCostParsed = parseInputValue(formData.labor_cost);
+    const calculatedTotalMaterialParsed = parseInputValue(
+      calculateTotalMaterials(),
+    );
+
+    const laborCostNumber = getNumberValue(laborCostParsed);
+    const calculatedTotalMaterialNumber = getNumberValue(
+      calculatedTotalMaterialParsed,
+    );
+
+    const grandTotalMaintenanceMaterialParsed = parseInputValue(
+      laborCostNumber + calculatedTotalMaterialNumber,
+    );
+
+    const grandTotalMaintenanceMaterialNumber = getNumberValue(
+      grandTotalMaintenanceMaterialParsed,
+    );
+
+    return grandTotalMaintenanceMaterialNumber;
+  };
 
   // SELECT MAINTENANCE
   // Função para encontrar serviço por ID
@@ -590,10 +611,23 @@ const NewServiceOrder = () => {
     }
 
     try {
-      const currentPaid = parseValue(formData.paid);
-      const addedValue = parseValue(payment);
-      const totalPaid = currentPaid + addedValue;
-      handleFormFieldChange("paid", totalPaid);
+      const currentPaidParsed = parseInputValue(formData.paid);
+      const addedValueParsed = parseInputValue(payment);
+
+      const currentPaidNumber = getNumberValue(currentPaidParsed);
+      const addedValueNumber = getNumberValue(addedValueParsed);
+
+      const totalPaidParsed = parseInputValue(
+        currentPaidNumber + addedValueNumber,
+      );
+
+      const totalPaidNumber = getNumberValue(totalPaidParsed);
+
+      handleFormFieldChange("paid", totalPaidNumber);
+      handleFormFieldChange(
+        "paymentStatus",
+        paymentStatusMap["Pago Parcialmente"],
+      );
 
       setPayment("");
     } catch (err) {
@@ -604,14 +638,14 @@ const NewServiceOrder = () => {
   const handlePayFully = async (e) => {
     e.preventDefault();
     try {
-      const total = calculateGrandTotal();
+      const grandTotal = calculateGrandTotal();
+      const parsedTotal = parseInputValue(grandTotal);
 
-      handleFormFieldChange("paid", total);
+      handleFormFieldChange("paid", parsedTotal);
       handleFormFieldChange(
         "paymentStatus",
         paymentStatusMap["Pago Integralmente"],
       );
-      setIsPaidFully(true);
       setPayment("");
     } catch (err) {
       setError("Erro ao quitar pagamento");
@@ -619,21 +653,9 @@ const NewServiceOrder = () => {
   };
 
   const handlePaymentOnChange = (e) => {
-    let value = e.target.value;
+    const cleanValue = parseInputValue(e.target.value);
 
-    value = value.replace(",", ".").replace(/[^0-9.]/g, "");
-
-    const parts = value.split(".");
-    if (parts.length > 2) {
-      value = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    // Corta qualquer caractere após a segunda casa decimal
-    if (parts[1] && parts[1].length > 2) {
-      value = `${parts[0]}.${parts[1].slice(0, 2)}`;
-    }
-
-    setPayment(value);
+    setPayment(cleanValue);
   };
 
   const closeCustomerModal = () => {
@@ -669,7 +691,6 @@ const NewServiceOrder = () => {
         <div>
           <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
-        {/* <div className="os-num-badge">#OS-2025-0143</div> */}
       </div>
 
       <div className="form-wrap">
@@ -829,13 +850,6 @@ const NewServiceOrder = () => {
           </div>
         </div>
 
-        {/* <!-- Cliente & Veículo --> 
-        <NewOrderCustomerVehicle
-          handleFormFieldChange={handleFormFieldChange}
-          customerData={customerData}
-          formData={formData}
-        />*/}
-
         {/* =============== */}
         {/* === SERVIÇO === */}
         {/* =============== */}
@@ -853,7 +867,7 @@ const NewServiceOrder = () => {
           handleMaterialInputChange={handleMaterialInputChange}
           handleRemoveMaterial={handleRemoveMaterial}
           handleAddMaintenanceJob={handleAddMaintenanceJob}
-          calculateTotalMaintenanceJob={calculateTotalMaintenanceJob}
+          formDataLaborCost={formData.labor_cost}
           calculateTotalMaterials={calculateTotalMaterials}
           calculateGrandTotal={calculateGrandTotal}
           openMaintenanceModal={handleOpenMaintenanceModal}
@@ -868,54 +882,6 @@ const NewServiceOrder = () => {
             icon={CATEGORIES.payment.icon}
           />
           <div className="fs-body">
-            {/* <div className="status-card-body status-card-body-container-registrar-pagamento">
-              <div className="grand-total os-new-status-card-title">
-                {formData.paymentStatus === paymentStatusMap["Sem Pagamento"]
-                  ? "Não requer pagamento"
-                  : `Subtotal: ${formattedPrice(calculateGrandTotal())} || Pago: ${formattedPrice(formData.paid || 0)}`}
-              </div>
-              <div className="status-card-body-container-registrar-pagamento-text os-new-status-card-title">
-                Registrar pagamento
-              </div>
-              <div
-                className="status-card-body-container-registrar-pagamento-input-container"
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}
-              >
-                <div className="status-card-body-registrar-pagamento-input-container input-prefix">
-                  <span>R$</span>
-                  <input
-                    type="text"
-                    className="input status-card-body-registrar-pagamento-input"
-                    placeholder="0,00"
-                    value={payment}
-                    onChange={handlePaymentOnChange}
-                  />
-                </div>
-
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    style={{ flex: 1 }}
-                    onClick={handleAddPayment}
-                  >
-                    Adicionar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    style={{ flex: 1 }}
-                    onClick={handlePayFully}
-                  >
-                    Quitar
-                  </button>
-                </div>
-              </div>
-            </div> */}
             <div className="status-card-body status-card-body-container">
               <div className="payment-container">
                 {/* Totais e Valores */}
@@ -939,7 +905,7 @@ const NewServiceOrder = () => {
                     <div className="payment-row payment-row-item">
                       <span className="payment-row-total-pago">Total pago</span>
                       <span className="payment-row-total-pago-value">
-                        {formattedPrice(Number(formData.paid || 0))}
+                        {formattedPrice(parseInputValue(formData.paid || ""))}
                       </span>
                     </div>
 
@@ -951,15 +917,18 @@ const NewServiceOrder = () => {
                       </span>
                       <span
                         className={`payment-row-saldo-restante-value ${
-                          parseValue(formData.paid) >= calculateGrandTotal()
+                          getNumberValue(parseInputValue(formData.paid)) >=
+                          calculateGrandTotal()
                             ? "payment-saldo-ok"
                             : "payment-saldo-due"
                         }`}
                       >
-                        {parseValue(formData.paid) >= calculateGrandTotal()
+                        {getNumberValue(parseInputValue(formData.paid)) >=
+                        calculateGrandTotal()
                           ? "Quitado"
                           : formattedPrice(
-                              calculateGrandTotal() - parseValue(formData.paid),
+                              calculateGrandTotal() -
+                                getNumberValue(parseInputValue(formData.paid)),
                             )}
                       </span>
                     </div>
@@ -967,21 +936,13 @@ const NewServiceOrder = () => {
                 )}
                 {/* Campo Registrar Pagamento */}
                 <div className="status-card-body-container-registrar-pagamento">
-                  <div className="status-card-body-container-registrar-pagamento-text">
-                    Registrar pagamento
-                  </div>
                   <div className="status-card-body-container-registrar-pagamento-input-container">
                     <div className="status-card-body-container-registrar-pagamento-input">
-                      <div className="status-card-body-registrar-pagamento-input-container input-prefix">
-                        <span>R$</span>
-                        <input
-                          type="text"
-                          className="input status-card-body-registrar-pagamento-input"
-                          placeholder="0,00"
-                          value={payment}
-                          onChange={handlePaymentOnChange}
-                        />
-                      </div>
+                      <CurrencyInput
+                        value={payment}
+                        handleFormFieldChange={handlePaymentOnChange}
+                        label={"Registrar pagamento"}
+                      />
 
                       <div className="status-card-body-container-registrar-pagamento-input-container-btns">
                         <button
@@ -1009,10 +970,9 @@ const NewServiceOrder = () => {
 
             <PaymentStatusSelector
               handleFormFieldChange={handleFormFieldChange}
-              isPaidFully={isPaidFully}
-              setIsPaidFully={setIsPaidFully}
               newOrderPaidValue={formData.paid || 0}
               grandTotalValue={calculateGrandTotal()}
+              paymentStatus={formData.paymentStatus}
             />
           </div>
         </div>
