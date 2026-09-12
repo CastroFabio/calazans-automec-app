@@ -5402,3 +5402,76 @@
 .display-none {
   display: none;
 }
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.summary-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.card-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 3px;
+}
+
+.card-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Variações de Pago */
+.label-paid,
+.value-paid {
+  color: #065f46;
+}
+
+/* Variações de Saldo (Pendente) */
+.card-pending {
+  background: rgba(212, 56, 13, 0.06);
+  border-color: rgba(212, 56, 13, 0.2);
+}
+
+.card-cleared {
+  background: var(--surface2);
+  border-color: var(--border);
+}
+
+.label-pending,
+.value-pending {
+  color: var(--accent);
+}
+
+.sp-payment-label {
+  margin-bottom: 8px;
+}
+
+.sp-payment-rows {
+  margin-bottom: 10px;
+}
+
+.sp-payment-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sp-payment-input-container {
+  flex: 1;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", monospace;
+}

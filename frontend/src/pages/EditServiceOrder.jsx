@@ -565,8 +565,6 @@ const EditServiceOrder = () => {
         itemMaterials: updatedItemMaterials,
       };
 
-      console.log("updatedOrder", updatedOrder);
-
       updateServiceOrder(updatedOrder);
       navigate(PATHS.serviceOrder);
     } catch (err) {

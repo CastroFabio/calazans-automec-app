@@ -106,7 +106,7 @@ const CustomerAndVehicleForm = ({
                         <div
                           className={`car-badge ${selectedVehicleInfo?.id === element.id ? "selected" : ""}`}
                           key={element.id || index}
-                          onClick={handleSelectedVehicle}
+                          onClick={() => handleSelectedVehicle(element)}
                         >
                           <svg
                             className="car-badge-svg"

@@ -17,6 +17,7 @@ import {
   paymentStatusReverseMapBadge,
 } from "../utils/paymentStatusMap";
 import { PATHS } from "../utils/paths";
+import { getNumberValue } from "../utils/parseValue";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -73,7 +74,7 @@ const ServiceOrderDetailPanel = ({
   // Garantir que os arrays existem
   const itemMaintenances = safeArray(order.itemMaintenances);
   const itemMaterials = safeArray(order.itemMaterials);
-
+  const isClear = order.paid >= order.subtotal;
   // ========== AGRUPAMENTO COM USEMEMO ==========
   const groupedMaterials = useMemo(() => {
     if (!itemMaterials || itemMaterials.length === 0) return [];
@@ -235,19 +236,60 @@ const ServiceOrderDetailPanel = ({
               <div className="sp-value">{order.professional || "—"}</div>
             </div>
             <div className="sp-section">
-              <div className="sp-label">Valor Total</div>
+              <div className="sp-label">Data de Entrada</div>
               <div className="sp-value">
-                <span className="sp-subtotal">
-                  {formattedPrice(order.subtotal)}
-                </span>
+                {formatLocalDateTimeStringISO(order.arrived_at) || "—"}
               </div>
             </div>
-            <div className="sp-section">
-              <div className="sp-label">Valor Pago</div>
-              <div className="sp-value">
-                <span className="sp-subtotal">
-                  {formattedPrice(order.paid)}
-                </span>
+          </div>
+          {/* ===== DIAGNÓSTICO ===== */}
+          <div className="sp-section">
+            <div className="sp-label">Diagnóstico</div>
+            <div className="sp-value sp-value-diagnostic" id="spDesc">
+              {order.diagnosis || "Sem diagnóstico"}
+            </div>
+          </div>
+
+          <div className="sp-section" id="spPaymentSection">
+            <div className="sp-label sp-payment-label">Pagamento</div>
+            <div id="spPaymentRows" className="sp-payment-rows">
+              <div className="payment-summary-grid">
+                {/* Total */}
+                <div className="summary-card">
+                  <div className="card-label">Total</div>
+                  <div className="card-value">
+                    {formattedPrice(order.subtotal)}
+                  </div>
+                </div>
+
+                {/* Pago */}
+                <div className="summary-card">
+                  <div className="card-label label-paid">Pago</div>
+                  <div className="card-value value-paid">
+                    {formattedPrice(order.paid)}
+                  </div>
+                </div>
+
+                {/* Saldo */}
+                <div
+                  className={`summary-card ${isClear ? "card-cleared" : "card-pending"}`}
+                >
+                  <div
+                    className={`card-label ${isClear ? "" : "label-pending"}`}
+                  >
+                    Saldo
+                  </div>
+                  <div
+                    className={`card-value ${isClear ? "value-paid" : "value-pending"}`}
+                  >
+                    {isClear
+                      ? "Quitado"
+                      : formattedPrice(
+                          getNumberValue(order.subtotal) -
+                            getNumberValue(order.paid),
+                        )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -346,30 +388,6 @@ const ServiceOrderDetailPanel = ({
             ) : (
               <div className="empty-text">Nenhum material registrado</div>
             )}
-          </div>
-
-          {/* ===== DIAGNÓSTICO ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Diagnóstico</div>
-            <div className="sp-value sp-value-diagnostic" id="spDesc">
-              {order.diagnosis || "Sem diagnóstico"}
-            </div>
-          </div>
-
-          {/* ===== OBSERVAÇÕES ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Observações</div>
-            <div className="sp-value sp-value-observation" id="spObservation">
-              {order.observation || "Sem observações"}
-            </div>
-          </div>
-
-          {/* ===== DATA DE ENTRADA ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Data de Entrada</div>
-            <div className="sp-value">
-              {formatLocalDateTimeStringISO(order.arrived_at) || "—"}
-            </div>
           </div>
         </div>
 

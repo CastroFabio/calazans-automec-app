@@ -727,7 +727,7 @@ const NewServiceOrder = () => {
           formDataEntryKm={formData.entry_km}
           dateTimeValue={dateTimeValue}
           handleChange={handleChange}
-          handleSelectedVehicle={() => handleSelectedVehicle(element)}
+          handleSelectedVehicle={(element) => handleSelectedVehicle(element)}
           handleFormFieldChange={handleFormFieldChange}
         />
 
