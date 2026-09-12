@@ -116,7 +116,7 @@ const EditServiceOrder = () => {
   const navigate = useNavigate();
 
   // ========== CONTEXTO ==========
-  const { updateServiceOrder } = useServiceOrders();
+  const { updateServiceOrder, transformBackendToUIJob } = useServiceOrders();
 
   // ========== ESTADOS ==========
   const [serviceOrder, setServiceOrder] = useState(null);
@@ -490,16 +490,40 @@ const EditServiceOrder = () => {
             description: item.description || "",
           };
 
+          let savedItem;
+
           if (isNew) {
             const { data: createdItem } =
               await itemMaintenanceApi.create(payload);
             maintenanceIdMap[item.id] = createdItem.id;
-            return createdItem;
+            savedItem = createdItem;
           } else {
             await itemMaintenanceApi.update(item.id, payload);
             maintenanceIdMap[item.id] = item.id;
-            return item;
+            savedItem = item;
           }
+
+          // Mapeia o item mantendo os dados formatados para a UI
+          const finalId = maintenanceIdMap[item.id];
+          const linkedMaterials = itemMaterials.filter(
+            (mat) =>
+              Number(mat.itemMaintenance_id) === Number(item.id) ||
+              Number(mat.itemMaintenance_id) === Number(finalId),
+          );
+
+          return {
+            ...savedItem,
+            id: finalId,
+            name: item.name || savedItem.maintenancejob?.name || "Serviço",
+            description: savedItem.description || "",
+            materialsList: item.materialsList || linkedMaterials,
+            totalPrice: item.totalPrice || 0,
+            maintenance: {
+              id: item.maintenance_id,
+              name: item.name || savedItem.maintenancejob?.name || "Serviço",
+            },
+            isOpen: true,
+          };
         }),
       );
 
@@ -540,6 +564,8 @@ const EditServiceOrder = () => {
         itemMaintenances: updatedItemMaintenances,
         itemMaterials: updatedItemMaterials,
       };
+
+      console.log("updatedOrder", updatedOrder);
 
       updateServiceOrder(updatedOrder);
       navigate(PATHS.serviceOrder);
