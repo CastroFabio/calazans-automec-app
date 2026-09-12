@@ -27,8 +27,7 @@ const NewOrderMaintenanceJob = ({
   const [svcObs, setSvcObs] = useState("");
   const [editingJobId, setEditingJobId] = useState(null);
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
-
-  const { setMaterialsList, materialsList } = useServiceOrders();
+  const [materialsList, setMaterialsList] = useState([]);
 
   const handleFetchMaterialsGroup = async () => {
     const { data } = await materialGroupApi.getAll();
@@ -76,6 +75,22 @@ const NewOrderMaintenanceJob = ({
       prev.map((item) => {
         if (item.id !== matId) return item;
 
+        // Trata a alteração do checkbox de fornecedor cliente
+        if (field === "isCustomerSupplier") {
+          return {
+            ...item,
+            isCustomerSupplier: value,
+            // Se for marcado como true, já zera os campos dependentes de uma vez só
+            ...(value
+              ? {
+                  value_unit: 0,
+                  supplier: "",
+                  receipt: "",
+                }
+              : {}),
+          };
+        }
+
         if (field === "material_id") {
           if (!value) return { ...item, material_id: null, value_unit: "" };
           const found = findMaterialById(value);
@@ -102,6 +117,7 @@ const NewOrderMaintenanceJob = ({
             };
           }
         }
+
         return { ...item, [field]: value };
       }),
     );
@@ -137,6 +153,7 @@ const NewOrderMaintenanceJob = ({
       return {
         ...mat,
         name: mat.name || foundMat?.name || "Peça",
+        isCustomerSupplier: !!mat.isCustomerSupplier,
       };
     });
 

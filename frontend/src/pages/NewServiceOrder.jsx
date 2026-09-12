@@ -1,34 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatLocalDateTime } from "../utils/convertDateTime";
-import AutoComplete from "../components/AutoComplete.component";
-import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
-import FormSectionHeader from "../components/FormSectionHeader.component";
 
-import { customerApi } from "../api/customers";
+import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
+import NewCustomerModal from "../components/NewCustomerModal.component";
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import NewItemModal from "../components/NewItemModal.component";
+import PaymentStatusForm from "../components/PaymentStatusForm.component";
+import ServiceOrderDetailsForm from "../components/ServiceOrderDetailsForm.component";
+import CustomerAndVehicleForm from "../components/CustomerAndVehicleForm.component";
+
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
-import { formattedPrice } from "../utils/convertPrice";
-import { materialApi } from "../api/materials";
-import { materialGroupApi } from "../api/materialGroups";
-import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { orderApi } from "../api/orders";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
-import { useServiceOrders } from "../context/ServiceOrder.context";
-import NewCustomerModal from "../components/NewCustomerModal.component";
-import NewVehicleModal from "../components/NewVehicleModal.component";
-import { useCustomers } from "../context/Customer.context";
-import CurrencyInput from "../components/CurrencyInput.component";
-import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
-import { formatarCelular } from "../utils/convertCel";
-import ProfessionalSelect from "../components/ProfessionalSelect.component";
-import { PATHS } from "../utils/paths";
-import NewItemModal from "../components/NewItemModal.component";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
-import WizardBtn from "../components/WizardBtn.component";
-import PaymentStatusSelector from "../components/PaymentStatusSelector.component";
+
+import { useCustomers } from "../context/Customer.context";
+import { useServiceOrders } from "../context/ServiceOrder.context";
+
+import { formatLocalDateTime } from "../utils/convertDateTime";
+import { statusMap } from "../utils/statusMap";
+import { PATHS } from "../utils/paths";
 import { paymentStatusMap } from "../utils/paymentStatusMap";
 import { getNumberValue, parseInputValue } from "../utils/parseValue";
+import { formatarCelular } from "../utils/convertCel";
 
 const CATEGORIES = {
   customer: {
@@ -106,7 +101,6 @@ const CATEGORIES = {
 };
 
 const NewServiceOrder = () => {
-  const [materialsData, setMaterialsData] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -593,16 +587,6 @@ const NewServiceOrder = () => {
     return null;
   };
 
-  // Função para encontrar serviço por Nome
-  const findMaintenanceJobByName = (name) => {
-    if (!name) return null;
-    for (const group of maintenanceJobsGroupData) {
-      const found = group.maintenanceJobs.find((item) => item.name === name);
-      if (found) return found;
-    }
-    return null;
-  };
-
   const handleAddPayment = async (e) => {
     e.preventDefault();
     if (!payment) {
@@ -697,158 +681,55 @@ const NewServiceOrder = () => {
         {/* ========================= */}
         {/* === CLIENTE E VEÍCULO === */}
         {/* ========================= */}
-        <div className="form-section">
-          <FormSectionHeader
-            title={CATEGORIES.customer.title}
-            icon={CATEGORIES.customer.icon}
-          />
-          <div className="fs-body">
-            <div className="form-grid">
-              <div>
-                <AutoComplete
-                  label="Cliente *"
-                  placeholder="Digite o nome do cliente..."
-                  items={customers}
-                  filterKey="name"
-                  value={inputValue}
-                  selectedItem={selectedCustomerInfo}
-                  onInputChange={(val) => setInputValue(val)}
-                  onSelect={(customer) => {
-                    setInputValue(customer.name);
-                    setSelectedCustomerInfo(customer);
+        <CustomerAndVehicleForm
+          title={CATEGORIES.customer.title}
+          icon={CATEGORIES.customer.icon}
+          isAutocompleteDisabled={false}
+          customers={customers}
+          inputValue={inputValue}
+          selectedCustomerInfo={selectedCustomerInfo}
+          selectedVehicleInfo={selectedVehicleInfo}
+          onInputChange={(val) => setInputValue(val)}
+          onSelect={(customer) => {
+            setInputValue(customer.name);
+            setSelectedCustomerInfo(customer);
 
-                    // Atualiza o ID do cliente no formData
-                    handleFormFieldChange("customer_id", customer.id);
+            // Atualiza o ID do cliente no formData
+            handleFormFieldChange("customer_id", customer.id);
 
-                    // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
-                    if (customer.vehicles?.length === 1) {
-                      handleSelectedVehicle(customer.vehicles[0]);
-                    } else {
-                      // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
-                      setSelectedVehicleInfo(null);
-                      handleFormFieldChange("vehicle_id", "");
-                    }
-                  }}
-                  onClear={() => {
-                    setInputValue("");
-                    setSelectedCustomerInfo(null);
-                    setSelectedVehicleInfo(null);
-                    handleFormFieldChange("customer_id", "");
-                    handleFormFieldChange("vehicle_id", "");
-                    setSelectedCustomerFromDetailPanel({});
-                  }}
-                  renderOption={(customer) => (
-                    <>
-                      <div className="ac-option-name">{customer.name}</div>
-                      <div className="ac-option-sub">
-                        {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
-                      </div>
-                    </>
-                  )}
-                />
-                <WizardBtn
-                  label="Novo cliente"
-                  openModal={handleOpenCustomerModal}
-                />
+            // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
+            if (customer.vehicles?.length === 1) {
+              handleSelectedVehicle(customer.vehicles[0]);
+            } else {
+              // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
+              setSelectedVehicleInfo(null);
+              handleFormFieldChange("vehicle_id", "");
+            }
+          }}
+          onClear={() => {
+            setInputValue("");
+            setSelectedCustomerInfo(null);
+            setSelectedVehicleInfo(null);
+            handleFormFieldChange("customer_id", "");
+            handleFormFieldChange("vehicle_id", "");
+            setSelectedCustomerFromDetailPanel({});
+          }}
+          renderOption={(customer) => (
+            <>
+              <div className="ac-option-name">{customer.name}</div>
+              <div className="ac-option-sub">
+                {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
               </div>
-
-              <div className="field">
-                <label>Veículo *</label>
-                <div className="car-badge-row">
-                  {selectedCustomerInfo ? (
-                    selectedCustomerInfo?.vehicles?.length > 0 ? (
-                      selectedCustomerInfo?.vehicles?.length === 1 ? (
-                        <div
-                          className={`car-badge ${selectedVehicleInfo?.id === selectedCustomerInfo.vehicles[0].id ? "selected" : ""}`}
-                          onClick={() =>
-                            handleSelectedVehicle(
-                              selectedCustomerInfo.vehicles[0],
-                            )
-                          }
-                        >
-                          <svg
-                            className="car-badge-svg"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
-                            />
-                          </svg>
-                          {`${selectedCustomerInfo?.vehicles[0].license_plate} · ${selectedCustomerInfo?.vehicles[0].brand} ${selectedCustomerInfo?.vehicles[0].model}`}
-                        </div>
-                      ) : (
-                        selectedCustomerInfo.vehicles.map((element, index) => (
-                          <div
-                            className={`car-badge ${selectedVehicleInfo?.id === element.id ? "selected" : ""}`}
-                            key={element.id || index}
-                            onClick={() => handleSelectedVehicle(element)}
-                          >
-                            <svg
-                              className="car-badge-svg"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
-                              />
-                            </svg>
-                            {`${element.license_plate} · ${element.brand} ${element.model}`}
-                          </div>
-                        ))
-                      )
-                    ) : (
-                      <>
-                        <span className="car-badge-row-text-no-car">
-                          Nenhum veículo cadastrado
-                        </span>
-                        <button
-                          className="add-row-btn add-row-btn-car-badge"
-                          onClick={handleOpenVehicleModal}
-                        >
-                          + Cadastrar veículo
-                        </button>
-                      </>
-                    )
-                  ) : (
-                    <span className="car-badge-row-text">
-                      Selecione o cliente primeiro
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="field">
-                <label>Km na entrada</label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Ex: 52.300 km"
-                  value={formData.entry_km}
-                  onChange={(e) => {
-                    handleFormFieldChange("entry_km", e.target.value);
-                  }}
-                />
-              </div>
-              <div className="field">
-                <label>Data / Hora de Entrada</label>
-                <input
-                  type="datetime-local"
-                  className="input"
-                  value={dateTimeValue}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+            </>
+          )}
+          handleOpenCustomerModal={handleOpenCustomerModal}
+          handleOpenVehicleModal={handleOpenVehicleModal}
+          formDataEntryKm={formData.entry_km}
+          dateTimeValue={dateTimeValue}
+          handleChange={handleChange}
+          handleSelectedVehicle={() => handleSelectedVehicle(element)}
+          handleFormFieldChange={handleFormFieldChange}
+        />
 
         {/* =============== */}
         {/* === SERVIÇO === */}
@@ -876,192 +757,36 @@ const NewServiceOrder = () => {
         {/* =================== */}
         {/* ==== PAGAMENTO ==== */}
         {/* =================== */}
-        <div className="form-section">
-          <FormSectionHeader
-            title={CATEGORIES.payment.title}
-            icon={CATEGORIES.payment.icon}
-          />
-          <div className="fs-body">
-            <div className="status-card-body status-card-body-container">
-              <div className="payment-container">
-                {/* Totais e Valores */}
-                {formData.paymentStatus ===
-                paymentStatusMap["Sem Pagamento"] ? (
-                  <div className="grand-total os-new-status-card-title">
-                    Não requer pagamento
-                  </div>
-                ) : (
-                  <div
-                    id="editPaymentRows"
-                    className="status-card-row-container"
-                  >
-                    <div className="payment-row payment-row-item">
-                      <span className="payment-row-total-os">Total da OS</span>
-                      <span className="payment-total payment-total-value">
-                        {formattedPrice(calculateGrandTotal())}
-                      </span>
-                    </div>
-
-                    <div className="payment-row payment-row-item">
-                      <span className="payment-row-total-pago">Total pago</span>
-                      <span className="payment-row-total-pago-value">
-                        {formattedPrice(parseInputValue(formData.paid || ""))}
-                      </span>
-                    </div>
-
-                    <div className="payment-divider"></div>
-
-                    <div className="payment-row payment-row-item">
-                      <span className="payment-row-saldo-restante">
-                        Saldo restante
-                      </span>
-                      <span
-                        className={`payment-row-saldo-restante-value ${
-                          getNumberValue(parseInputValue(formData.paid)) >=
-                          calculateGrandTotal()
-                            ? "payment-saldo-ok"
-                            : "payment-saldo-due"
-                        }`}
-                      >
-                        {getNumberValue(parseInputValue(formData.paid)) >=
-                        calculateGrandTotal()
-                          ? "Quitado"
-                          : formattedPrice(
-                              calculateGrandTotal() -
-                                getNumberValue(parseInputValue(formData.paid)),
-                            )}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {/* Campo Registrar Pagamento */}
-                <div className="status-card-body-container-registrar-pagamento">
-                  <div className="status-card-body-container-registrar-pagamento-input-container">
-                    <div className="status-card-body-container-registrar-pagamento-input">
-                      <CurrencyInput
-                        value={payment}
-                        handleFormFieldChange={handlePaymentOnChange}
-                        label={"Registrar pagamento"}
-                      />
-
-                      <div className="status-card-body-container-registrar-pagamento-input-container-btns">
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          style={{ flex: 1 }}
-                          onClick={handleAddPayment}
-                        >
-                          Adicionar
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-primary btn-sm"
-                          style={{ flex: 1 }}
-                          onClick={handlePayFully}
-                        >
-                          Quitar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <PaymentStatusSelector
-              handleFormFieldChange={handleFormFieldChange}
-              newOrderPaidValue={formData.paid || 0}
-              grandTotalValue={calculateGrandTotal()}
-              paymentStatus={formData.paymentStatus}
-            />
-          </div>
-        </div>
+        <PaymentStatusForm
+          headerTitle={CATEGORIES.payment.title}
+          headerIcon={CATEGORIES.payment.icon}
+          formDataPaymentStatus={formData.paymentStatus}
+          calculateGrandTotal={calculateGrandTotal}
+          formDataPaid={parseInputValue(formData.paid || "")}
+          payment={payment}
+          handlePaymentOnChange={handlePaymentOnChange}
+          handleAddPayment={handleAddPayment}
+          handlePayFully={handlePayFully}
+          handleFormFieldChange={handleFormFieldChange}
+        />
 
         {/* =================== */}
         {/* === DETALHES OS === */}
         {/* =================== */}
-        <div className="form-section">
-          <FormSectionHeader
-            title={CATEGORIES.details.title}
-            icon={CATEGORIES.details.icon}
-          />
-          <div className="fs-body">
-            <div className="form-grid g3">
-              <ProfessionalSelect
-                handleFormFieldChange={handleFormFieldChange}
-                professional={formData.professional}
-              />
-              {/* <div className="field">
-                <label>Prioridade</label>
-                <select
-                  className="select"
-                  value={priorityReverseMap[formData.priority] || "Normal"} // ← Mostra texto
-                  onChange={(e) => handlePriorityChange(e.target.value)} // ← Salva ID
-                >
-                  <option value="Normal">Normal</option>
-                  <option value="Baixa">Baixa</option>
-                  <option value="Alta">Alta</option>
-                  <option value="Urgente">Urgente</option>
-                </select>
-              </div> */}
-
-              <div className="field">
-                <label>Status Inicial</label>
-                <select
-                  className="select"
-                  value={statusReverseMap[formData.status] || "Pendente"} // ← Mostra texto
-                  onChange={(e) => handleStatusChange(e.target.value)} // ← Salva ID
-                >
-                  <option value="Pendente">Pendente</option>
-                  <option value="Em andamento">Em andamento</option>
-                  <option value="Concluído">Concluído</option>
-                  <option value="Aberta">Aberta</option>
-                  <option value="Aguardando peças">Aguardando peças</option>
-                  <option value="Cancelada">Cancelada</option>
-                </select>
-              </div>
-              <div className="field col-full">
-                <label>Diagnóstico / Problema</label>
-                <textarea
-                  className="textarea"
-                  placeholder="Descreva o problema relatado pelo cliente e o diagnóstico realizado..."
-                  value={formData.diagnosis}
-                  onChange={(e) =>
-                    handleFormFieldChange("diagnosis", e.target.value)
-                  }
-                />
-              </div>
-              {/* <div className="field col-full">
-                <label>Observações Internas</label>
-                <textarea
-                  className="textarea form-textarea-obs"
-                  placeholder="Notas internas da equipe..."
-                  value={formData.observation}
-                  onChange={(e) =>
-                    handleFormFieldChange("observation", e.target.value)
-                  }
-                />
-              </div> */}
-            </div>
-          </div>
-        </div>
+        <ServiceOrderDetailsForm
+          title={CATEGORIES.details.title}
+          subtitle={CATEGORIES.details.icon}
+          handleFormFieldChange={handleFormFieldChange}
+          formDataProfessional={formData.professional}
+          formDataStatus={formData.status}
+          handleStatusChange={(e) => handleStatusChange(e.target.value)}
+          formDataDiagnosis={formData.diagnosis}
+        />
 
         {/* =================== */}
         {/* === FINALIZAÇÃO === */}
         {/* =================== */}
         <div className="form-actions">
-          {/* <button className="btn btn-ghost">Cancelar</button> */}
-          {/* <button className="btn btn-secondary">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z"
-              />
-            </svg>
-            Imprimir
-          </button> */}
           <button
             className="btn btn-primary"
             onClick={handleSaveOS}

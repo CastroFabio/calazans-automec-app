@@ -6,6 +6,7 @@ import {
 } from "../utils/paymentStatusMap";
 
 import PaymentStatusButton from "./PaymentStatusButton.component";
+import { getNumberValue, parseInputValue } from "../utils/parseValue";
 
 const PaymentStatusSelector = ({
   handleFormFieldChange,
@@ -14,7 +15,13 @@ const PaymentStatusSelector = ({
   paymentStatus,
 }) => {
   const handleSelectPay = (status) => {
-    if (newOrderPaidValue >= grandTotalValue && grandTotalValue !== 0) {
+    const newOrderPaidValueParsed = parseInputValue(newOrderPaidValue);
+    const newOrderPaidValueNumber = getNumberValue(newOrderPaidValueParsed);
+
+    if (
+      newOrderPaidValueNumber >= grandTotalValue() &&
+      grandTotalValue() !== 0
+    ) {
       handleFormFieldChange(
         "paymentStatus",
         paymentStatusMap["Pago Integralmente"],

@@ -1,27 +1,115 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 import { useNavigate, useParams } from "react-router-dom";
+
 import { useServiceOrders } from "../context/ServiceOrder.context";
+
 import { orderApi } from "../api/orders";
-import { statusReverseMap } from "../utils/statusMap";
-import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { materialGroupApi } from "../api/materialGroups";
-import { formattedPrice } from "../utils/convertPrice";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
-import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
-import Loading from "./Loading";
-import StatusBadge from "../components/StatusBadge.component";
-import ProfessionalSelect from "../components/ProfessionalSelect.component";
+
+import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
+import { statusMap, statusReverseMap } from "../utils/statusMap";
+import { formattedPrice } from "../utils/convertPrice";
 import { PATHS } from "../utils/paths";
 import {
   getNumberValue,
   parseInputValue,
   parseValue,
 } from "../utils/parseValue";
+
+import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
+import ProfessionalSelect from "../components/ProfessionalSelect.component";
 import NewCustomerModal from "../components/NewCustomerModal.component";
 import NewVehicleModal from "../components/NewVehicleModal.component";
 import NewItemModal from "../components/NewItemModal.component";
+import StatusBadge from "../components/StatusBadge.component";
+
+import Loading from "./Loading";
+import CustomerAndVehicleForm from "../components/CustomerAndVehicleForm.component";
+import ServiceOrderDetailsForm from "../components/ServiceOrderDetailsForm.component";
+import PaymentStatusForm from "../components/PaymentStatusForm.component";
+import {
+  paymentStatusMap,
+  paymentStatusReverseMap,
+} from "../utils/paymentStatusMap";
+
+const CATEGORIES = {
+  customer: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Cliente & Veículo",
+  },
+  service: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Serviços & Materiais",
+  },
+  payment: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Pagamento",
+  },
+  details: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+    title: "DETALHES OS",
+  },
+};
 
 const EditServiceOrder = () => {
   const { id } = useParams();
@@ -432,6 +520,7 @@ const EditServiceOrder = () => {
             value_unit: parseValue(item.value_unit),
             receipt: item.receipt || "",
             supplier: item.supplier || "",
+            isCustomerSupplier: item.isCustomerSupplier,
           };
 
           if (isNew) {
@@ -480,17 +569,58 @@ const EditServiceOrder = () => {
     }
   };
 
+  const handlePayFully = async (e) => {
+    e.preventDefault();
+    if (!serviceOrder) return;
+
+    setSaving(true);
+    try {
+      const grandTotalParsed = parseInputValue(calculateGrandTotal());
+
+      const grandTotalNumber = getNumberValue(grandTotalParsed);
+
+      handleFormFieldChange("paid", grandTotalNumber);
+      handleFormFieldChange(
+        "paymentStatus",
+        paymentStatusMap["Pago Integralmente"],
+      );
+
+      setPayment("");
+    } catch (err) {
+      setError("Erro ao quitar pagamento");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleAddPayment = async (e) => {
     e.preventDefault();
     if (!serviceOrder || !payment) return;
 
     setSaving(true);
     try {
-      const currentPaid = parseValue(serviceOrder.paid);
-      const addedValue = parseValue(payment);
-      const updateData = { paid: currentPaid + addedValue };
-      const { data } = await orderApi.update(serviceOrder.id, updateData);
-      setServiceOrder((prev) => ({ ...prev, ...data }));
+      const currentPaidParsed = parseInputValue(serviceOrder.paid);
+      const addedValueParsed = parseInputValue(payment);
+
+      const currentPaidNumber = getNumberValue(currentPaidParsed);
+      const addedValueNumber = getNumberValue(addedValueParsed);
+
+      const updateData = currentPaidNumber + addedValueNumber;
+
+      handleFormFieldChange("paid", updateData);
+
+      if (serviceOrder.paid >= serviceOrder.subtotal) {
+        handleFormFieldChange(
+          "paymentStatus",
+          paymentStatusMap["Pago Integralmente"],
+        );
+      } else {
+        handleFormFieldChange(
+          "paymentStatus",
+          paymentStatusMap["Pago Parcialmente"],
+        );
+      }
+
       setPayment("");
     } catch (err) {
       setError("Erro ao adicionar pagamento");
@@ -518,6 +648,13 @@ const EditServiceOrder = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleStatusChange = (value) => {
+    setServiceOrder((prev) => ({
+      ...prev,
+      status: statusMap[value] || 1,
+    }));
   };
 
   const closeCustomerModal = () => {
@@ -548,7 +685,7 @@ const EditServiceOrder = () => {
   if (!serviceOrder) return <div>Ordem de serviço não encontrada</div>;
 
   return (
-    <div className="page" id="page-editar-os">
+    <div className="page">
       <div className="edit-order-container">
         <div className="breadcrumb">
           <a onClick={() => navigate(PATHS.serviceOrder)}>Ordens de Serviço</a>
@@ -561,9 +698,6 @@ const EditServiceOrder = () => {
 
       <div className="page-header edit-order-page-header">
         <div>
-          <div className="ph-title" id="editPageTitle">
-            Editar Ordem de Serviço
-          </div>
           <div className="ph-sub" id="editPageSub">
             Atualize os dados, status e registre observações
           </div>
@@ -575,235 +709,79 @@ const EditServiceOrder = () => {
 
       {error && <div className="error-message">❌ {error}</div>}
 
-      <div className="edit-layout">
-        <div className="edit-main">
-          {/* CLIENTE & VEÍCULO */}
-          <div className="form-section">
-            <div className="fs-header">
-              <svg
-                className="fs-header-svg"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              <span className="fs-title">Cliente & Veículo</span>
-            </div>
-            <div className="fs-body">
-              <div className="form-grid edit-order-form-grid">
-                <div className="field">
-                  <label>Cliente</label>
-                  <div className="input edit-order-input">
-                    {serviceOrder.customer?.name || "—"}
-                  </div>
-                </div>
-                <div className="field">
-                  <label>Veículo</label>
-                  <div className="input edit-order-input">
-                    <span>{serviceOrder.vehicle?.license_plate || "—"}</span>
-                    {serviceOrder.vehicle?.brand && (
-                      <>{` · ${serviceOrder.vehicle.brand} ${serviceOrder.vehicle.model}`}</>
-                    )}
-                  </div>
-                </div>
-                <div className="field">
-                  <label>Km na Entrada</label>
-                  <div className="input edit-order-input-km">
-                    {serviceOrder.entry_km}
-                  </div>
-                </div>
-                <div className="field">
-                  <label>Data / Hora Entrada</label>
-                  <div className="input edit-order-input">
-                    {formatLocalDateTimeStringISO(serviceOrder.arrived_at)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="form-wrap">
+        {/* ========================= */}
+        {/* === CLIENTE E VEÍCULO === */}
+        {/* ========================= */}
+        <CustomerAndVehicleForm
+          title={CATEGORIES.customer.title}
+          icon={CATEGORIES.customer.icon}
+          isAutocompleteDisabled={true}
+          serviceOrder={serviceOrder}
+        />
 
-          {/* SERVIÇOS & MATERIAIS */}
-          <NewOrderMaintenanceJob
-            formData={serviceOrder}
-            handleFormFieldChange={handleFormFieldChange}
-            listMaintenanceJobs={itemMaintenances}
-            handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
-            setListMaintenanceJobs={setItemMaintenances}
-            maintenanceJobsGroupData={maintenanceJobsGroupData}
-            handleAddMaintenanceJob={handleAddMaintenanceJob}
-            formDataLaborCost={getNumberValue(serviceOrder?.labor_cost)}
-            calculateTotalMaterials={calculateTotalMaterials}
-            calculateGrandTotal={calculateGrandTotal}
-            openMaintenanceModal={handleOpenMaintenanceModal}
-          />
+        {/* =============== */}
+        {/* === SERVIÇO === */}
+        {/* =============== */}
+        <NewOrderMaintenanceJob
+          formData={serviceOrder}
+          handleFormFieldChange={handleFormFieldChange}
+          listMaintenanceJobs={itemMaintenances}
+          handleRemoveMaintenanceJob={handleRemoveMaintenanceJob}
+          setListMaintenanceJobs={setItemMaintenances}
+          maintenanceJobsGroupData={maintenanceJobsGroupData}
+          handleAddMaintenanceJob={handleAddMaintenanceJob}
+          formDataLaborCost={getNumberValue(serviceOrder?.labor_cost)}
+          calculateTotalMaterials={calculateTotalMaterials}
+          calculateGrandTotal={calculateGrandTotal}
+          openMaintenanceModal={handleOpenMaintenanceModal}
+        />
 
-          {/* DIAGNÓSTICO & INFORMAÇÕES */}
-          <div className="form-section">
-            <div className="fs-header">
-              <span className="fs-title">Diagnóstico & Informações</span>
-            </div>
-            <div className="fs-body">
-              <div className="form-grid g3 edit-order-form-grid-container">
-                <ProfessionalSelect
-                  handleFormFieldChange={handleFormFieldChange}
-                  professional={serviceOrder.professional}
-                />
-                <div className="field">
-                  <label>Status</label>
-                  <select
-                    className="select"
-                    value={serviceOrder.status || ""}
-                    onChange={(e) =>
-                      handleFormFieldChange("status", Number(e.target.value))
-                    }
-                  >
-                    <option value="">Selecione...</option>
-                    <option value={1}>{statusReverseMap[1]}</option>
-                    <option value={2}>{statusReverseMap[2]}</option>
-                    <option value={3}>{statusReverseMap[3]}</option>
-                    <option value={4}>{statusReverseMap[4]}</option>
-                    <option value={5}>{statusReverseMap[5]}</option>
-                    <option value={6}>{statusReverseMap[6]}</option>
-                    <option value={7}>{statusReverseMap[7]}</option>
-                  </select>
-                </div>
-                <div className="field col-full">
-                  <label>Diagnóstico / Descrição *</label>
-                  <textarea
-                    className="textarea"
-                    value={serviceOrder.diagnosis || ""}
-                    onChange={(e) =>
-                      handleFormFieldChange("diagnosis", e.target.value)
-                    }
-                    placeholder="Descreva o problema e diagnóstico..."
-                    rows={3}
-                  />
-                </div>
-                <div className="field col-full">
-                  <label>Observações Internas</label>
-                  <textarea
-                    className="textarea edit-order-textarea"
-                    value={serviceOrder.observation || ""}
-                    onChange={(e) =>
-                      handleFormFieldChange("observation", e.target.value)
-                    }
-                    placeholder="Notas internas da equipe..."
-                    rows={2}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* =================== */}
+        {/* ==== PAGAMENTO ==== */}
+        {/* =================== */}
+        <PaymentStatusForm
+          headerTitle={CATEGORIES.payment.title}
+          headerIcon={CATEGORIES.payment.icon}
+          formDataPaymentStatus={serviceOrder.paymentStatus}
+          calculateGrandTotal={calculateGrandTotal}
+          formDataPaid={parseInputValue(serviceOrder.paid || "")}
+          payment={payment}
+          handlePaymentOnChange={handlePaymentOnChange}
+          handleAddPayment={handleAddPayment}
+          handlePayFully={handlePayFully}
+          handleFormFieldChange={handleFormFieldChange}
+        />
 
-          {/* AÇÕES */}
-          <div className="form-actions">
-            <button
-              className="btn btn-danger"
-              onClick={handleRemoveOrder}
-              disabled={saving}
-            >
-              Cancelar OS
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleSubmit}
-              disabled={saving}
-            >
-              {saving ? "Salvando..." : "Salvar Alterações"}
-            </button>
-          </div>
-        </div>
+        {/* =================== */}
+        {/* === DETALHES OS === */}
+        {/* =================== */}
+        <ServiceOrderDetailsForm
+          title={CATEGORIES.details.title}
+          subtitle={CATEGORIES.details.icon}
+          handleFormFieldChange={handleFormFieldChange}
+          formDataProfessional={serviceOrder.professional}
+          formDataStatus={serviceOrder.status}
+          handleStatusChange={(e) => handleStatusChange(e.target.value)}
+          formDataDiagnosis={serviceOrder.diagnosis}
+        />
 
-        {/* SIDEBAR DE PAGAMENTO */}
-        <div className="edit-side">
-          <div className="status-card">
-            <div className="status-card-header">Pagamento</div>
-            <div className="status-card-body status-card-body-container">
-              <div id="editPaymentRows">
-                <div className="payment-row">
-                  <span className="payment-row-total-os">Total da OS</span>
-                  <span className="payment-total payment-total-value">
-                    {formattedPrice(calculateGrandTotal())}
-                  </span>
-                </div>
-                <div className="payment-row">
-                  <span className="payment-row-total-pago">Total pago</span>
-                  <span className="payment-row-total-pago-value">
-                    {formattedPrice(serviceOrder.paid)}
-                  </span>
-                </div>
-                <div className="payment-row payment-row-container">
-                  <span className="payment-row-saldo-restante">
-                    Saldo restante
-                  </span>
-                  <span
-                    className={`payment-row-saldo-restante-value ${
-                      parseValue(serviceOrder.paid) >= calculateGrandTotal()
-                        ? "payment-saldo-ok"
-                        : "payment-saldo-due"
-                    }`}
-                  >
-                    {parseValue(serviceOrder.paid) >= calculateGrandTotal()
-                      ? "Quitado"
-                      : formattedPrice(
-                          calculateGrandTotal() - parseValue(serviceOrder.paid),
-                        )}
-                  </span>
-                </div>
-              </div>
-              <div className="status-card-body status-card-body-container-registrar-pagamento">
-                <div className="status-card-body-container-registrar-pagamento-text">
-                  Registrar pagamento
-                </div>
-                <div
-                  className="status-card-body-container-registrar-pagamento-input-container"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  <div className="status-card-body-registrar-pagamento-input-container input-prefix">
-                    <span>R$</span>
-                    <input
-                      type="text"
-                      className="input status-card-body-registrar-pagamento-input"
-                      placeholder="0,00"
-                      value={payment}
-                      onChange={handlePaymentOnChange}
-                    />
-                  </div>
-
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      style={{ flex: 1 }}
-                      onClick={handleAddPayment}
-                      disabled={saving || !payment}
-                    >
-                      Adicionar
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      style={{ flex: 1 }}
-                      onClick={handleSetPayment}
-                      disabled={saving || !payment}
-                    >
-                      Registrar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* AÇÕES */}
+        <div className="form-actions">
+          <button
+            className="btn btn-danger"
+            onClick={handleRemoveOrder}
+            disabled={saving}
+          >
+            Cancelar OS
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={saving}
+          >
+            {saving ? "Salvando..." : "Salvar Alterações"}
+          </button>
         </div>
       </div>
 
