@@ -165,7 +165,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ## Auditoria e Correção de Preços (Inputs)
 
-- **Padronização e validação de inputs de preço:** `refactor/price-inputs-decimal-validation`
+- ~~**Padronização e validação de inputs de preço:** `refactor/price-inputs-decimal-validation`~~
 
 ## Formulário de OS & UX
 
@@ -190,5 +190,5 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ## Paginação em Clientes e Ordens de Serviço
 
-- ~~**Clientes:** `feature/customers-list-pagination`~~
-- **Ordens de Serviço:** `feature/service-orders-list-pagination`
+- **Clientes:** `feature/customers-list-pagination`
+- ~~**Ordens de Serviço:** `feature/service-orders-list-pagination`~~
