@@ -9,10 +9,6 @@ const Pagination = ({
 }) => {
   return (
     <div className="pagination">
-      <div className="pagination-info" id="pgInfo">
-        Mostrando página {osPage} de {totalPages} ({totalItems} itens)
-      </div>
-
       <div className="pagination-wrapper">
         <div className="pagination-controls">
           {/* Botão Anterior */}
@@ -34,7 +30,7 @@ const Pagination = ({
           {/* Páginas Numéricas */}
           {pagesArray.map((p, index) =>
             p === "..." ? (
-              <span key={`ellipsis-${index}`} className="pg-ellipsis">
+              <span key={`ellipsis-${index}`} className="pg-ellipsis ">
                 …
               </span>
             ) : (

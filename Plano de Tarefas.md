@@ -18,10 +18,10 @@
   - ~~Botão/Modal de **Novo Cliente**.~~
   - ~~Botão/Modal de **Novo Veículo** (vinculado diretamente ao cliente selecionado).~~
 - **Passo 2 - Serviços e Materiais:**
-  - **Input de Mão de Obra:** Custo no topo da seção[cite: 2].
-  - **Botão "Registrar serviço":** Posicionado no topo do formulário[cite: 2].
-  - **Lista de serviços:** Renderização dos serviços adicionados com autocomplete[cite: 2].
-  - **Peças/Materiais:** Adição e listagem de peças associadas a cada serviço[cite: 2].
+  - **Input de Mão de Obra:** Custo no topo da seção.
+  - **Botão "Registrar serviço":** Posicionado no topo do formulário.
+  - **Lista de serviços:** Renderização dos serviços adicionados com autocomplete.
+  - **Peças/Materiais:** Adição e listagem de peças associadas a cada serviço.
   - Botão de acionamento do Modal de Cadastro Rápido de Peça e Serviço.
 - **Passo 3 - Informações da OS & Pagamento:**
   - Atribuição de profissional/mecânico responsável.
@@ -75,12 +75,12 @@
 - ~~**Objetivo:** Garantir que todos os inputs de valor monetário aceitem e tratem corretamente o formato decimal de 2 casas (`R$ 0,00` ou `float/number` com 2 casas), evitando inconsistências de parsing, NaN ou quebra de concatenação no estado.~~
 - ~~**Mapeamento de Locais para Auditoria/Ajuste:**~~
   - ~~**Criação de OS (`NewServiceOrder` / `NewOrderMaintenanceJob`):**~~
-    - ~~`value_unit` do material[cite: 2].~~
-    - ~~`labor_cost` / `labor_job`[cite: 2].~~
+    - ~~`value_unit` do material.~~
+    - ~~`labor_cost` / `labor_job`.~~
     - ~~Valores de pagamento.~~
-    - ~~Total acumulado de serviços[cite: 2].~~
-    - ~~Total acumulado de materiais[cite: 2].~~
-    - ~~Total geral da OS (`grand_total`)[cite: 2].~~
+    - ~~Total acumulado de serviços.~~
+    - ~~Total acumulado de materiais.~~
+    - ~~Total geral da OS (`grand_total`).~~
   - ~~**Edição de OS (`EditServiceOrder` / componentes correlatos):**~~
     - ~~`value_unit` do material.~~
     - ~~`labor_cost` / `labor_job`.~~
@@ -126,18 +126,18 @@
   - **HTTP 400 (Bad Request):** Dados de formulário/input inválidos (ex: validação de DTO, preço/valor em formato incorreto ou nome obrigatório não preenchido)[cite: 1, 2].
   - **HTTP 404 (Not Found):** Registro inexistente (ex: tentar carregar um cliente, peça ou OS pelo ID incorreto)[cite: 1, 2].
   - **HTTP 409 (Conflict):** Conflito de cadastro no banco (ex: tentativa de cadastrar um cliente com celular/CPF já em uso)[cite: 1, 2].
-  - **HTTP 401 / 403 (Unauthorized / Forbidden):** Sessão expirada ou sem permissão de acesso[cite: 2].
-  - **HTTP 500 (Internal Server Error):** Erro imprevisto no servidor ou banco de dados[cite: 2].
+  - **HTTP 401 / 403 (Unauthorized / Forbidden):** Sessão expirada ou sem permissão de acesso.
+  - **HTTP 500 (Internal Server Error):** Erro imprevisto no servidor ou banco de dados.
   - **Erro de Conexão/Rede:** Servidor indisponível ou queda de internet no cliente.
 
 ---
 
 ## 8. [Feature/Pagination] Paginação em Clientes e Ordens de Serviço
 
-- **Objetivo:** Adicionar paginação (API e Frontend) nas listagens das páginas de Clientes e Ordens de Serviço para otimizar a performance e evitar o carregamento excessivo de registros de uma só vez [cite: 2].
+- **Objetivo:** Adicionar paginação (API e Frontend) nas listagens das páginas de Clientes e Ordens de Serviço para otimizar a performance e evitar o carregamento excessivo de registros de uma só vez .
 - **Ações no Backend (NestJS / Prisma):**
-  - Atualizar as consultas `findAll` em `CustomersService` e `ServiceOrdersService` para aceitar os parâmetros `page` e `limit`[cite: 2].
-  - Implementar o uso de `skip` e `take` no Prisma, além de retornar a estrutura de metadados (`meta: { total, page, limit, totalPages }`) junto aos resultados[cite: 2].
+  - Atualizar as consultas `findAll` em `CustomersService` e `ServiceOrdersService` para aceitar os parâmetros `page` e `limit`.
+  - Implementar o uso de `skip` e `take` no Prisma, além de retornar a estrutura de metadados (`meta: { total, page, limit, totalPages }`) junto aos resultados.
 - **Ações no Frontend (React):**
   - Incluir controle de página atual (`page`) e limite por página (`limit`) nos estados das páginas de `Customers` e `ServiceOrderList`.
   - Adicionar componente/controles de navegação de página ("Anterior", "Próxima" e números de página) no rodapé das tabelas.
@@ -190,5 +190,5 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 ## Paginação em Clientes e Ordens de Serviço
 
-- **Clientes:** `feature/customers-list-pagination`
+- ~~**Clientes:** `feature/customers-list-pagination`~~
 - **Ordens de Serviço:** `feature/service-orders-list-pagination`

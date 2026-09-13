@@ -6,7 +6,11 @@ import { orderApi } from "../api/orders";
 import { convertPriority, convertStatus } from "../utils/convertPriorityStatus";
 import ServiceOrderDetailPanel from "../components/ServiceOrderDetailPanel.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
-import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
+import {
+  statusMap,
+  statusReverseMap,
+  statusReverseMapBadge,
+} from "../utils/statusMap";
 import {
   paymentStatusMap,
   paymentStatusReverseMap,
@@ -21,13 +25,13 @@ import { getNumberValue } from "../utils/parseValue";
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
   { id: 0, title: "Todas", status: null },
-  { id: 1, title: statusReverseMap[1], status: 1 },
-  { id: 2, title: statusReverseMap[2], status: 2 },
-  { id: 3, title: statusReverseMap[3], status: 3 },
-  { id: 4, title: statusReverseMap[4], status: 4 },
-  { id: 5, title: statusReverseMap[5], status: 5 },
-  { id: 6, title: statusReverseMap[6], status: 6 },
-  { id: 7, title: statusReverseMap[7], status: 7 },
+  { id: 1, title: statusReverseMap[1], status: statusMap["Pendente"] },
+  { id: 2, title: statusReverseMap[2], status: statusMap["Em andamento"] },
+  { id: 3, title: statusReverseMap[3], status: statusMap["Concluído"] },
+  { id: 4, title: statusReverseMap[4], status: statusMap["Aberta"] },
+  { id: 5, title: statusReverseMap[5], status: statusMap["Aguardando peças"] },
+  { id: 6, title: statusReverseMap[6], status: statusMap["Cancelada"] },
+  // { id: 7, title: statusReverseMap[7], status: statusMap["Pendente"] },
 ];
 
 const ServiceOrderList = () => {
@@ -59,7 +63,7 @@ const ServiceOrderList = () => {
   });
 
   // ========== FILTRAR ORDENS ==========
-  const filteredOrders = useMemo(() => {
+  /* const filteredOrders = useMemo(() => {
     return serviceOrdersPerPage.filter((order) => {
       // Filtrar por status (tab)
       const activeTabConfig = TABS.find((tab) => tab.id === activeTab);
@@ -75,7 +79,7 @@ const ServiceOrderList = () => {
 
       return matchesTab && matchesSearch;
     });
-  }, [serviceOrdersPerPage, activeTab, searchTerm]);
+  }, [serviceOrdersPerPage, activeTab, searchTerm]); */
 
   // ========== HANDLERS ==========
   const handleCardClick = (order) => {
@@ -123,6 +127,7 @@ const ServiceOrderList = () => {
         page,
         limit,
         search,
+        status,
       });
 
       setServiceOrdersPerPage(result.data); //
@@ -139,7 +144,12 @@ const ServiceOrderList = () => {
       const statusParam = activeTab === 0 ? null : activeTabConfig?.status;
 
       // Reseta para a página 1 e traz os dados novos filtrados do backend
-      fetchServiceOrdersPerPage(1, paginationMeta.perPage, searchTerm);
+      fetchServiceOrdersPerPage(
+        1,
+        paginationMeta.perPage,
+        searchTerm,
+        statusParam,
+      );
     }, 300);
 
     return () => clearTimeout(timer);
@@ -193,7 +203,21 @@ const ServiceOrderList = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
-            <button className="search-clear" onClick={() => setSearchTerm("")}>
+            <button
+              className="search-clear"
+              onClick={() => {
+                setSearchTerm("");
+                const activeTabConfig = TABS.find(
+                  (tab) => tab.id === activeTab,
+                );
+                fetchServiceOrdersPerPage(
+                  1,
+                  paginationMeta.perPage,
+                  "",
+                  activeTab === 0 ? null : activeTabConfig?.status,
+                );
+              }}
+            >
               ×
             </button>
           )}
@@ -204,22 +228,27 @@ const ServiceOrderList = () => {
             <div
               key={tab.id}
               className={`chip ${activeTab === tab.id ? "active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id); // 1. Atualiza a aba ativa na interface
+
+                const statusParam = tab.id === 0 ? null : tab.status; // 2. Pega o status diretamente da aba clicada
+
+                // 3. Busca imediatamente na API resetando para a página 1
+                fetchServiceOrdersPerPage(
+                  1,
+                  paginationMeta.perPage,
+                  searchTerm,
+                  statusParam,
+                );
+              }}
             >
-              {`${tab.title} (`}
-              {tab.id !== 0 ? (
+              {tab.title}
+              {tab.id === activeTab && (
                 <span className="chip-count">
-                  {
-                    serviceOrdersPerPage.filter((o) => o.status === tab.status)
-                      .length
-                  }
-                </span>
-              ) : (
-                <span className="chip-count">
-                  {serviceOrdersPerPage.length}
+                  {" "}
+                  ({paginationMeta.totalItems})
                 </span>
               )}
-              {`)`}
             </div>
           ))}
         </div>
@@ -239,6 +268,7 @@ const ServiceOrderList = () => {
             newPage,
             paginationMeta.perPage,
             searchTerm,
+            activeTabConfig?.status,
           );
         }}
       />
@@ -273,7 +303,6 @@ const ServiceOrderList = () => {
                     }}
                     className="os-row"
                   >
-                    {console.log(order)}
                     <td>
                       <span className="td-id">#{order.id}</span>
                     </td>
@@ -391,19 +420,9 @@ const ServiceOrderList = () => {
               <tr className="empty-row">
                 <td colSpan="7">
                   <div className="empty-state">
-                    {searchTerm ? (
-                      <>Nenhuma ordem encontrada para "{searchTerm}"</>
-                    ) : (
-                      <>
-                        Nenhuma ordem de serviço{" "}
-                        {activeTab > 0
-                          ? TABS.find(
-                              (t) => t.id === activeTab,
-                            )?.title.toLowerCase()
-                          : ""}{" "}
-                        encontrada
-                      </>
-                    )}
+                    {searchTerm
+                      ? `Nenhuma ordem encontrada para ${searchTerm}`
+                      : "Nenhuma ordem encontrada"}
                   </div>
                 </td>
               </tr>

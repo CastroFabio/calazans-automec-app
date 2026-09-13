@@ -8,6 +8,7 @@ import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from './dto/pagination.dto';
+import { Prisma } from 'generated/prisma/browser';
 
 @Injectable()
 export class ServiceOrderService {
@@ -18,37 +19,44 @@ export class ServiceOrderService {
   }
 
   async findAllPerPage(paginationDto: PaginationDto) {
+    // 1. Tratamento e garantia de conversão dos parâmetros
     const page = Number(paginationDto.page) || 1;
-    const limit = Number(paginationDto.limit) || 10;
+    const limit = Number(paginationDto.limit) || 5;
     const search = paginationDto.search?.trim() || '';
+    const status = paginationDto.status;
 
     const skip = (page - 1) * limit;
 
-    // Filtro condicional: busca por nome do cliente OU placa do veículo
-    const whereClause = search
-      ? {
-          OR: [
-            {
-              customer: {
-                name: {
-                  contains: search,
-                  mode: 'insensitive' as const, // Busca case-insensitive
-                },
-              },
-            },
-            {
-              vehicle: {
-                license_plate: {
-                  contains: search,
-                  mode: 'insensitive' as const,
-                },
-              },
-            },
-          ],
-        }
-      : {};
+    // 2. Construção dinâmica dos filtros para o Prisma (usando tipagem flexível/any para evitar conflitos de geradores)
+    const filters: any[] = [];
 
-    // Consulta transacional para buscar dados e total geral filtrado
+    // Filtro textual: Busca por nome do cliente ou placa do veículo
+    if (search) {
+      filters.push({
+        OR: [
+          {
+            customer: {
+              name: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            vehicle: {
+              license_plate: { contains: search, mode: 'insensitive' },
+            },
+          },
+        ],
+      });
+    }
+
+    // Filtro numérico: Status da Ordem de Serviço
+    if (status !== undefined && status !== null && !isNaN(Number(status))) {
+      filters.push({ status: Number(status) });
+    }
+
+    // Montagem da cláusula WHERE final
+    const whereClause: any = filters.length > 0 ? { AND: filters } : {};
+
+    // 3. Consulta transacionada (muda os registros e traz o total ao mesmo tempo)
     const [data, totalItems] = await this.prisma.$transaction([
       this.prisma.serviceOrder.findMany({
         where: whereClause,
@@ -59,13 +67,17 @@ export class ServiceOrderService {
           customer: true,
           vehicle: true,
           itemMaintenances: {
-            include: { maintenancejob: true },
+            include: { maintenancejob: { select: { id: true, name: true } } },
+          },
+          itemMaterials: {
+            include: { material: { select: { id: true, name: true } } },
           },
         },
       }),
       this.prisma.serviceOrder.count({ where: whereClause }),
     ]);
 
+    // 4. Cálculo e estruturação da resposta com metadados
     const totalPages = Math.ceil(totalItems / limit) || 1;
 
     return {

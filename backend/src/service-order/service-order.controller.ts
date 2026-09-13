@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   Query,
   ValidationPipe,
+  Logger,
 } from '@nestjs/common';
 import { ServiceOrderService } from './service-order.service';
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
@@ -37,6 +38,7 @@ import { PaginatedServiceOrderResponseDto } from './dto/paginated-service-order-
 export class ServiceOrderController {
   constructor(private readonly serviceOrderService: ServiceOrderService) {}
 
+  private readonly logger = new Logger(ServiceOrderController.name);
   @Post()
   @ApiOperation({
     summary: 'Criar uma nova ordem de serviço',
@@ -98,11 +100,22 @@ export class ServiceOrderController {
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   findAllPerPage(@Query() paginationDto: PaginationDto) {
-    // Garantimos a conversão explícita para evitar que venha string do Query Params
     const page = Number(paginationDto.page) || 1;
-    const limit = Number(paginationDto.limit) || 10;
+    const search = paginationDto.search?.trim() || '';
+    const limit = Number(paginationDto.limit) || 5;
+    const status =
+      paginationDto.status !== undefined &&
+      paginationDto.status !== null &&
+      paginationDto.status !== ('' as any)
+        ? Number(paginationDto.status)
+        : undefined;
 
-    return this.serviceOrderService.findAllPerPage({ page, limit });
+    return this.serviceOrderService.findAllPerPage({
+      page,
+      limit,
+      search,
+      status,
+    });
   }
 
   @Get(':id')

@@ -6,9 +6,9 @@ export const orderApi = {
   getAll: () => api.get(ENDPOINTS.orders.base),
 
   getAllPerPage: (params = {}) => {
-    const { page = 1, limit = 10, search = "" } = params;
+    const { page = 1, limit = 10, search = "", status = null } = params;
     return api.get(ENDPOINTS.orders.perPage, {
-      params: { page, limit, search },
+      params: { page, limit, search, status },
     });
   },
 

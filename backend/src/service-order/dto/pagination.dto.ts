@@ -18,14 +18,13 @@ export class PaginationDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  limit?: number = 10;
+  limit?: number = 5;
 
   // --- EXEMPLOS DE FILTROS QUE VOCÊ PODE ADICIONAR ---
-  @ApiPropertyOptional({ description: 'Filtrar por ID do cliente' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  customerId?: number;
+  status?: number;
 
   @ApiPropertyOptional({
     description: 'Filtrar por placa do veículo ou status',
