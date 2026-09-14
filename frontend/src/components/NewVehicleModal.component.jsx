@@ -11,6 +11,7 @@ const NewVehicleModal = ({
   onClose,
   selectedCustomer = null,
   setSelectedVehicleFromNewServiceOrder = null,
+  onSuccess = null,
 }) => {
   const [formData, setFormData] = useState({
     customer_id: selectedCustomer?.id || "",
@@ -96,6 +97,9 @@ const NewVehicleModal = ({
       if (setSelectedVehicleFromNewServiceOrder) {
         setSelectedVehicleFromNewServiceOrder(data);
       }
+
+      if (onSuccess) onSuccess();
+
       closeWindow();
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);

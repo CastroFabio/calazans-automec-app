@@ -21,6 +21,7 @@ import StatusBadge from "../components/StatusBadge.component";
 import VehicleBadge from "../components/VehicleBadge.component";
 import Pagination from "../components/Pagination.component";
 import { getNumberValue } from "../utils/parseValue";
+import { getPagesArray } from "../utils/getPagesArray";
 
 // ========== CONFIGURAÇÃO DAS TABS ==========
 const TABS = [
@@ -155,24 +156,6 @@ const ServiceOrderList = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, activeTab]);
 
-  const getPagesArray = (currentPage, totalPages) => {
-    const pages = [];
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - 1 && i <= currentPage + 1)
-      ) {
-        pages.push(i);
-      } else if (pages[pages.length - 1] !== "...") {
-        pages.push("...");
-      }
-    }
-
-    return pages;
-  };
-
   // ========== RENDER ==========
   if (loading) return <Loading />;
 
@@ -293,7 +276,9 @@ const ServiceOrderList = () => {
             {serviceOrdersPerPage.length > 0 ? (
               serviceOrdersPerPage.map((order) => {
                 const isPaid =
-                  getNumberValue(order.paid) >= getNumberValue(order.subtotal);
+                  getNumberValue(order.paid) >=
+                    getNumberValue(order.subtotal) &&
+                  getNumberValue(order.paid) !== 0;
                 return (
                   <tr
                     key={order.id}
@@ -398,6 +383,16 @@ const ServiceOrderList = () => {
                             if (selectedServiceOrder?.id === order.id) {
                               setSelectedServiceOrder(updatedOrder);
                             }
+
+                            const activeTabConfig = TABS.find(
+                              (tab) => tab.id === activeTab,
+                            );
+                            fetchServiceOrdersPerPage(
+                              paginationMeta.currentPage,
+                              paginationMeta.perPage,
+                              searchTerm,
+                              activeTabConfig?.status,
+                            );
                           } catch (err) {
                             console.error(
                               "Erro ao quitar pagamento da OS:",

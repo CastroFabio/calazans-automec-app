@@ -132,15 +132,15 @@
 
 ---
 
-## 8. [Feature/Pagination] Paginação em Clientes e Ordens de Serviço
+## ~~8. [Feature/Pagination] Paginação em Clientes e Ordens de Serviço~~
 
-- **Objetivo:** Adicionar paginação (API e Frontend) nas listagens das páginas de Clientes e Ordens de Serviço para otimizar a performance e evitar o carregamento excessivo de registros de uma só vez .
-- **Ações no Backend (NestJS / Prisma):**
-  - Atualizar as consultas `findAll` em `CustomersService` e `ServiceOrdersService` para aceitar os parâmetros `page` e `limit`.
-  - Implementar o uso de `skip` e `take` no Prisma, além de retornar a estrutura de metadados (`meta: { total, page, limit, totalPages }`) junto aos resultados.
-- **Ações no Frontend (React):**
-  - Incluir controle de página atual (`page`) e limite por página (`limit`) nos estados das páginas de `Customers` e `ServiceOrderList`.
-  - Adicionar componente/controles de navegação de página ("Anterior", "Próxima" e números de página) no rodapé das tabelas.
+- ~~**Objetivo:** Adicionar paginação (API e Frontend) nas listagens das páginas de Clientes e Ordens de Serviço para otimizar a performance e evitar o carregamento excessivo de registros de uma só vez .~~
+- ~~**Ações no Backend (NestJS / Prisma):**~~
+  - ~~Atualizar as consultas `findAll` em `CustomersService` e `ServiceOrdersService` para aceitar os parâmetros `page` e `limit`.~~
+  - ~~Implementar o uso de `skip` e `take` no Prisma, além de retornar a estrutura de metadados (`meta: { total, page, limit, totalPages }`) junto aos resultados.~~
+- ~~**Ações no Frontend (React):**~~
+  - ~~Incluir controle de página atual (`page`) e limite por página (`limit`) nos estados das páginas de `Customers` e `ServiceOrderList`.~~
+  - ~~Adicionar componente/controles de navegação de página ("Anterior", "Próxima" e números de página) no rodapé das tabelas.~~
 
 ---
 
@@ -188,7 +188,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
 - **Branch:** `feature/ui-global-error-handling-component`
 
-## Paginação em Clientes e Ordens de Serviço
+## ~~Paginação em Clientes e Ordens de Serviço~~
 
-- **Clientes:** `feature/customers-list-pagination`
+- ~~**Clientes:** `feature/customers-list-pagination`~~
 - ~~**Ordens de Serviço:** `feature/service-orders-list-pagination`~~

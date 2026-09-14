@@ -2,6 +2,7 @@ export const ENDPOINTS = {
   // Customers
   customers: {
     base: "/customers",
+    perPage: "/customers/page",
     byId: (id) => `/customers/${id}`,
     orders: (id) => `/customers/${id}/orders`,
     count: `/customers/count`,

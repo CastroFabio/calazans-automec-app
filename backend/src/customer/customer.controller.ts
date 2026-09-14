@@ -32,6 +32,8 @@ import { CustomersService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/response-customer.dto';
+import { PaginatedCustomerResponseDto } from './dto/paginated-customer-response.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @ApiTags('customers')
 @Controller('customers')
@@ -104,6 +106,29 @@ export class CustomersController {
   })
   findAll(): Promise<CustomerResponseDto[]> {
     return this.customersService.findAll();
+  }
+
+  @Get('page')
+  @ApiOperation({
+    summary: 'Listar todos os clientes paginados',
+    description:
+      'Retorna uma lista paginada com os clientes cadastradas e metadados de paginação',
+  })
+  @ApiOkResponse({
+    description: 'Lista paginada de clientes retornada com sucesso',
+    type: PaginatedCustomerResponseDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  findAllPerPage(@Query() paginationDto: PaginationDto) {
+    const page = Number(paginationDto.page) || 1;
+    const search = paginationDto.search?.trim() || '';
+    const limit = Number(paginationDto.limit) || 5;
+
+    return this.customersService.findAllPerPage({
+      page,
+      limit,
+      search,
+    });
   }
 
   @Get('search')
