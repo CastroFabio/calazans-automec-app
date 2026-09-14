@@ -101,7 +101,7 @@
 
 ---
 
-## 6. Módulo de Pagamentos, Recibos e Outros
+## ~~6. Módulo de Pagamentos, Recibos e Outros~~
 
 ### ~~[Financeiro] Status de Pagamento e Botão "Quitado"~~
 

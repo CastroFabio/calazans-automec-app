@@ -4311,8 +4311,7 @@
 }
 
 .home-page-body {
-  height: 100vh;
-  max-height: 100dvh; /* Garante ajuste perfeito em navegadores mobile */
+  max-height: calc(100vh - 52px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -4327,7 +4326,7 @@
   align-items: center;
   justify-content: flex-start;
   min-height: calc(100vh - 52px);
-  padding: 40px 24px 60px;
+  padding: 0 60px;
   background: var(--bg);
   height: 100%;
 }

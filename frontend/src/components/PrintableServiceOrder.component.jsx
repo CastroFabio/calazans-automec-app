@@ -380,7 +380,21 @@ export const PrintableServiceOrder = ({ data, componentRef }) => {
               return (
                 <tr key={mat.id || idx}>
                   <td className="text-center">{idx + 1}</td>
-                  <td>{mat.material.name}</td>
+                  <td>
+                    {mat.material?.name || mat.name || "Item sem nome"}
+                    {mat.isCustomerSupplier && (
+                      <span
+                        style={{
+                          fontSize: "8pt",
+                          fontStyle: "italic",
+                          color: "#555",
+                          marginLeft: "6px",
+                        }}
+                      >
+                        (Fornecido p/ Cliente)
+                      </span>
+                    )}
+                  </td>
                   <td className="text-center">{mat.quantity}</td>
                   <td className="text-right">
                     {formattedPrice(mat.value_unit)}
