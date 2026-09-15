@@ -79,6 +79,11 @@ const NewVehicleModal = ({
       return;
     }
 
+    if (String(formData.license_plate).length < 7) {
+      setError("Placa deve ter pelo menos 7 caracteres.");
+      return;
+    }
+
     const vehicleData = {
       customer_id: customerIdToSave,
       brand: formData.brand.trim(),
@@ -235,7 +240,7 @@ const NewVehicleModal = ({
           </button>
         </div>
         <div className="customer-error-message-container">
-          {error && <p>{error}</p>}
+          {error && <div className="login-error">{error}</div>}
         </div>
       </div>
     </div>

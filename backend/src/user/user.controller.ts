@@ -54,7 +54,7 @@ export class UserController {
     description: 'Erro interno do servidor',
   })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createUserDto: CreateUserDto): Promise<CreateUserDto> {
+  create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
 

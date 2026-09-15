@@ -8,6 +8,8 @@ import { statusReverseMap } from "../utils/statusMap";
 import { formattedPrice } from "../utils/convertPrice";
 import VehicleBadge from "../components/VehicleBadge.component";
 import { PATHS } from "../utils/paths";
+import { cleanPhoneNumber, formatarCelular } from "../utils/convertCel";
+import Loading from "./Loading";
 
 const EditCustomer = () => {
   const [customer, setCustomer] = useState(null);
@@ -72,29 +74,49 @@ const EditCustomer = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const errorList = [];
+
+    const cleanCell = cleanPhoneNumber(customer.cell);
+    const cleanTelephone = cleanPhoneNumber(customer.telephone);
+
     if (!customer) return;
 
     // Validação básica
     if (!customer.name?.trim()) {
-      setError("O nome é obrigatório");
-      return;
+      errorList.push("O nome é obrigatório");
     }
 
-    if (!customer.cell?.trim()) {
-      setError("O celular é obrigatório");
-      return;
+    if (!cleanCell) {
+      errorList.push("O celular é obrigatório");
+    } else {
+      if (cleanCell.length > 11) {
+        errorList.push("Número de celular muito longo.");
+      } else if (cleanCell.length < 8) {
+        errorList.push("Número de celular muito curto.");
+      }
     }
 
     // ✅ Verificar se há veículo em edição
     if (editingVehicleId !== null) {
-      setError("Salve ou cancele a edição do veículo primeiro");
+      errorList.push("Salve ou cancele a edição do veículo primeiro");
+    }
+
+    if (cleanTelephone && cleanTelephone.length > 11) {
+      errorList.push("Número de telefone muito longo.");
+    } else if (cleanTelephone && cleanTelephone.length < 8) {
+      errorList.push("Número de telefone muito curto.");
+    }
+
+    if (errorList.length > 0) {
+      alert(
+        `Verifique os erros antes de salvar:\n\n- ${errorList.join("\n- ")}`,
+      );
       return;
     }
 
     setSaving(true);
     setError(null);
     setSuccess(false);
-
     try {
       // 1. Dados para enviar
       const updateData = {
@@ -136,7 +158,10 @@ const EditCustomer = () => {
         errorMessage = "Servidor não respondeu";
       }
 
-      setError(errorMessage);
+      if (errorMessage) {
+        alert(`Verifique os erros antes de salvar:\n\n- ${errorMessage}`);
+        return;
+      }
     } finally {
       setSaving(false);
     }
@@ -281,8 +306,7 @@ const EditCustomer = () => {
     return selectedServiceOrder.itemMaintenances[0].maintenancejob.name;
   };
 
-  if (loading) return <div>Carregando cliente...</div>;
-  if (error) return <div>Erro: {error}</div>;
+  if (loading) return <Loading />;
   if (!customer) return <div>Cliente não encontrado</div>;
 
   return (
@@ -346,7 +370,7 @@ const EditCustomer = () => {
                     className="input"
                     id="ecPhone"
                     placeholder="(11) 0000-0000"
-                    value={customer.telephone}
+                    value={formatarCelular(customer.telephone)}
                     onChange={(e) =>
                       handleFormFieldChange("telephone", e.target.value)
                     }
@@ -359,7 +383,7 @@ const EditCustomer = () => {
                     className="input"
                     id="ecCel"
                     placeholder="(11) 00000-0000"
-                    value={customer.cell}
+                    value={formatarCelular(customer.cell)}
                     onChange={(e) =>
                       handleFormFieldChange("cell", e.target.value)
                     }

@@ -3,6 +3,7 @@ import { customerApi } from "../api/customers";
 import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
 import { PATHS } from "../utils/paths";
+import { cleanPhoneNumber, formatarCelular } from "../utils/convertCel";
 
 const NewCustomerModal = ({
   isOpen,
@@ -29,26 +30,37 @@ const NewCustomerModal = ({
   };
 
   const handleSaveCustomer = async () => {
+    const cleanCell = cleanPhoneNumber(formData.cell);
+    const cleanTelephone = cleanPhoneNumber(formData.telephone);
+
     if (!formData.name.trim()) {
       setError("Nome completo é obrigatório.");
       return;
     }
-    if (!formData.cell.trim()) {
+    if (!cleanCell) {
       setError("Celular é obrigatório.");
       return;
     }
-    if (formData.cell.trim().length > 11) {
+
+    if (cleanCell.length > 11) {
       setError("Número de celular muito longo.");
       return;
-    } else if (formData.cell.trim().length < 8) {
+    } else if (cleanCell.length < 8) {
       setError("Número de celular muito curto.");
+      return;
+    }
+    if (cleanTelephone && cleanTelephone.length > 11) {
+      setError("Número de telefone muito longo.");
+      return;
+    } else if (cleanTelephone && cleanTelephone.length < 8) {
+      setError("Número de telefone muito curto.");
       return;
     }
 
     const customerData = {
       name: formData.name.trim(),
-      cell: formData.cell.trim(),
-      telephone: formData.telephone.trim(),
+      cell: cleanCell,
+      telephone: cleanTelephone,
       observation: formData.observation.trim(),
     };
 
@@ -129,7 +141,7 @@ const NewCustomerModal = ({
                 className="input"
                 id="novoClienteTel"
                 placeholder="(00) 0000-0000"
-                value={formData.telephone}
+                value={formatarCelular(formData.telephone)}
                 onChange={(e) => {
                   handleFormFieldChange("telephone", e.target.value);
                 }}
@@ -142,7 +154,7 @@ const NewCustomerModal = ({
                 className="input"
                 id="novoClienteCel"
                 placeholder="(00) 00000-0000"
-                value={formData.cell}
+                value={formatarCelular(formData.cell)}
                 onChange={(e) => {
                   handleFormFieldChange("cell", e.target.value);
                 }}
@@ -179,7 +191,7 @@ const NewCustomerModal = ({
           </button>
         </div>
         <div className="customer-error-message-container">
-          {error && <p>{error}</p>}
+          {error && <div className="login-error">{error}</div>}
         </div>
       </div>
     </div>

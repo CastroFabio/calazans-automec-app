@@ -29,3 +29,9 @@ export function formatarCelular(numero) {
     return numeros;
   }
 }
+
+export const cleanPhoneNumber = (numero) => {
+  if (!numero) return "";
+  let cleanNumero = String(numero);
+  return cleanNumero.replace(/\D/g, "");
+};

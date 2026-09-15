@@ -27,12 +27,12 @@ const NewItemModal = ({
 
   const handleSaveItem = async () => {
     if (!formData.name.trim()) {
-      setError("Nome completo é obrigatório.");
+      setError("Nome é obrigatório.");
       return;
     }
 
     if (!selectedGroup) {
-      setError("Escolha um grupo");
+      setError("Escolha um grupo válido");
       return;
     }
 
@@ -135,10 +135,10 @@ const NewItemModal = ({
           </button>
         </div>
         <div className="customer-error-message-container">
-          {error && <p>{error}</p>}
+          {error && <div className="login-error">{error}</div>}
         </div>
       </div>
-      {onError && <p>{onError}</p>}
+      {onError && <div className="login-error">{onError}</div>}
     </div>
   );
 };

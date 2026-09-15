@@ -105,7 +105,7 @@ export class CustomersService {
         where: whereClause,
         skip,
         take: limit,
-        orderBy: { created_at: 'asc' },
+        orderBy: { created_at: 'desc' },
         include: {
           _count: { select: { serviceOrders: true, vehicles: true } },
           vehicles: true,
