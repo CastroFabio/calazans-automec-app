@@ -41,6 +41,7 @@ async function bootstrap() {
     .setDescription('API para gerenciamento de oficina mecânica')
     .setVersion('1.0')
     .addTag('customers', 'Gerenciamento de clientes')
+    .addTag('users', 'Gerenciamento de usuários')
     .addTag('vehicles', 'Gerenciamento de veículos')
     .addTag('service-order', 'Gerenciamento de ordens de serviço')
     .addTag('material', 'Gerenciamento de itens de material')

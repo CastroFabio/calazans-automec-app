@@ -12,6 +12,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
 import { MaterialItemModule } from './material-item/material-item.module';
 import { ServiceOrderModule } from './service-order/service-order.module';
 import { MaintenanceItemModule } from './maintenance-item/maintenance-item.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MaintenanceItemModule } from './maintenance-item/maintenance-item.modul
     MaterialItemModule,
     ServiceOrderModule,
     MaintenanceItemModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

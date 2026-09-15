@@ -11,12 +11,10 @@ import {
   HttpCode,
   ParseIntPipe,
   Query,
-  HttpException,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
