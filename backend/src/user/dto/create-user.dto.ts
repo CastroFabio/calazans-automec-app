@@ -22,6 +22,14 @@ export class CreateUserDto {
   name: string;
 
   @ApiProperty({
+    description: 'Email do usuário',
+    example: 'meuemail@email.com',
+  })
+  @IsNotEmpty({ message: 'Email é obrigatório' })
+  @IsString({ message: 'Email deve ser uma string' })
+  email: string;
+
+  @ApiProperty({
     description: 'Senha hasheada do usuário',
     example: 'mySecurePassword123',
     minLength: 8,

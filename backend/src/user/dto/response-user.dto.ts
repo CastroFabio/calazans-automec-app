@@ -23,6 +23,12 @@ export class UserResponseDto {
   name: string;
 
   @ApiProperty({
+    description: 'Email do usuário',
+    example: 'meuemail@email.com',
+  })
+  email: string;
+
+  @ApiProperty({
     description: 'Perfil de acesso do usuário no sistema',
     example: Role.ADMIN,
   })

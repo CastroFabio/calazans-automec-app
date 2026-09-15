@@ -13,6 +13,7 @@ import { MaterialItemModule } from './material-item/material-item.module';
 import { ServiceOrderModule } from './service-order/service-order.module';
 import { MaintenanceItemModule } from './maintenance-item/maintenance-item.module';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UserModule } from './user/user.module';
     ServiceOrderModule,
     MaintenanceItemModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

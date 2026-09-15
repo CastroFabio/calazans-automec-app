@@ -153,6 +153,7 @@ enum Role {
 model User {
   id            Int      @id @default(autoincrement())
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+  email         String   @unique @db.Text
   name          String   @db.Text
   password_hash String   @db.Text
   role          Role     @default(ADMIN)
