@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import NavBar from "./components/navBar";
+import IdleRedirectManager from "./components/IdleRedirectManager.component";
 import SideBar from "./components/sideBar";
 
 import Customers from "./pages/Customers";
@@ -11,24 +12,25 @@ import ServiceOrderList from "./pages/ServiceOrderList";
 import NewServiceOrder from "./pages/NewServiceOrder";
 import EditCustomer from "./pages/EditCustomer";
 import EditServiceOrder from "./pages/EditServiceOrder";
+import PrintServiceOrder from "./pages/PrintServiceOrder";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 
 import { CustomerProvider } from "./context/Customer.context";
 import { ServiceOrderProvider } from "./context/ServiceOrder.context";
-import PrintServiceOrder from "./pages/PrintServiceOrder";
-import Teste from "./pages/Teste";
-import Home from "./pages/Home";
+
 import { PATHS } from "./utils/paths";
-import IdleRedirectManager from "./components/IdleRedirectManager.component";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const isHomePage = location.pathname === PATHS.home;
+  const isLoginPage = location.pathname === PATHS.login;
 
   return (
     <>
       {/* Exibe a SideBar apenas se NÃO estiver na rota "/" */}
-      {!isHomePage && <SideBar />}
+      {!isHomePage && !isLoginPage && <SideBar />}
 
       <div className="main">
         <NavBar />
@@ -46,7 +48,7 @@ const MainLayout = () => {
               element={<EditServiceOrder />}
             />
             <Route path={PATHS.notFound} element={<NotFound />} />
-            <Route path="/teste" element={<Teste />} />
+            <Route path={PATHS.login} element={<Login />} />
             <Route
               path={PATHS.printServiceOrder}
               element={<PrintServiceOrder />}

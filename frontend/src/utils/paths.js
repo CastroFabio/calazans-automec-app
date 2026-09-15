@@ -2,6 +2,7 @@ export const PATHS = {
   home: "/",
   serviceOrder: "/service-order",
   customer: "/customers",
+  login: "/login",
   services: "/services",
   materials: "/materials",
   newServiceOrder: "/new-service-order",
