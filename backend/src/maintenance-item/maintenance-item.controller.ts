@@ -9,12 +9,14 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { MaintenanceItemService } from './maintenance-item.service';
 import { CreateMaintenanceItemDto } from './dto/create-maintenance-item.dto';
 import { UpdateMaintenanceItemDto } from './dto/update-maintenance-item.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -29,6 +31,7 @@ import {
 import { MaintenanceResponseDto } from 'src/maintenance/dto/response-maintenance.dto';
 import { MaintenanceItemResponseDto } from './dto/response-maintenance-item.dto';
 import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('maintenance-item')
 @Controller('maintenance-item')
@@ -58,6 +61,8 @@ export class MaintenanceItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaintenanceItemDto: CreateMaintenanceItemDto) {
     return this.maintenanceItemService.create(createMaintenanceItemDto);
@@ -78,6 +83,8 @@ export class MaintenanceItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   async createBatch(@Body() createBatchDto: CreateItemMaintenanceBatchDto) {
     return this.maintenanceItemService.createBatch(createBatchDto);
@@ -96,6 +103,8 @@ export class MaintenanceItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.maintenanceItemService.findAll();
   }
@@ -121,6 +130,8 @@ export class MaintenanceItemController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.maintenanceItemService.findOne(id);
   }
@@ -156,6 +167,8 @@ export class MaintenanceItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMaintenanceItemDto: UpdateMaintenanceItemDto,
@@ -183,6 +196,8 @@ export class MaintenanceItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.maintenanceItemService.remove(id);

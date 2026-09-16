@@ -11,6 +11,7 @@ import {
   HttpCode,
   ParseIntPipe,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,11 +27,13 @@ import {
   ApiNotFoundResponse,
   ApiConflictResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { VehicleResponseDto } from './dto/response-vehicle.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('vehicles')
 @Controller('vehicles')
@@ -58,6 +61,8 @@ export class VehicleController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createVehicleDto: CreateVehicleDto) {
     return this.vehicleService.create(createVehicleDto);
@@ -75,6 +80,8 @@ export class VehicleController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.vehicleService.findAll();
   }
@@ -101,6 +108,8 @@ export class VehicleController {
   @ApiBadRequestResponse({
     description: 'Placa não informada',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findByPlate(@Query('plate') plate: string) {
     return this.vehicleService.findByLicensePlate(plate);
   }
@@ -123,6 +132,8 @@ export class VehicleController {
   @ApiNotFoundResponse({
     description: 'Cliente não encontrado',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findByCustomer(@Param('customerId', ParseIntPipe) customerId: number) {
     return this.vehicleService.findByCustomer(customerId);
   }
@@ -148,6 +159,8 @@ export class VehicleController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.vehicleService.findOne(id);
   }
@@ -183,6 +196,8 @@ export class VehicleController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: UpdateVehicleDto,
@@ -210,6 +225,8 @@ export class VehicleController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.vehicleService.remove(id);

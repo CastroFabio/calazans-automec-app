@@ -5,14 +5,18 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
 import { AuthEntity } from './entities/auth.entity';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   async login(email: string, password: string): Promise<AuthEntity> {
@@ -28,8 +32,56 @@ export class AuthService {
       throw new UnauthorizedException('Invalid password');
     }
 
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user.id,
+      user.email,
+    );
+
     return {
-      accessToken: this.jwtService.sign({ userId: user.id }),
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     };
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.userService.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    // Oculta o hash da senha na resposta
+    const { password_hash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  async generateTokens(userId: number, email: string) {
+    const payload = { sub: userId, email };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret:
+          this.configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
+        expiresIn: '15m', // Access Token curto
+      }),
+      this.jwtService.signAsync(payload, {
+        secret:
+          this.configService.get<string>('JWT_REFRESH_SECRET') ||
+          'defaultRefreshSecret',
+        expiresIn: '7d', // Refresh Token longo
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
+
+  async refreshTokens(userId: number, email: string) {
+    return this.generateTokens(userId, email);
   }
 }

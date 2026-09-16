@@ -1,5 +1,9 @@
+import { useNavigate } from "react-router-dom";
+import { PATHS } from "../utils/paths";
 import logo from "../assets/LogoCalazansAutomec.png";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/Auth.context";
+import Loading from "./Loading";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -7,18 +11,45 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showError, setShowError] = useState(false);
 
+  const navigate = useNavigate();
+
+  const { isAuthenticated, loading } = useAuth();
+
+  useEffect(() => {
+    // Se o AuthContext já validou e o usuário ESTÁ autenticado, redireciona imediatamente
+    if (!loading && isAuthenticated) {
+      navigate(PATHS.home, { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
   const toggleLoginSenha = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const doLogin = () => {
+  const doLogin = async (e) => {
+    if (e) e.preventDefault();
+
     if (!email || !password) {
       setShowError(true);
       return;
     }
-    setShowError(false);
-    // Adicione aqui a chamada HTTP para autenticação backend (NestJS /auth/login)
+
+    try {
+      setShowError(false);
+      // Aguarda o login, gravação no localStorage e atualização de estado
+      await loginService(email, password);
+
+      // Navega para a home APÓS a autenticação confirmar
+      navigate(PATHS.home, { replace: true });
+    } catch (err) {
+      console.error("Erro no login:", err);
+      setShowError(true);
+    }
   };
+
+  if (loading || isAuthenticated) {
+    return <Loading />;
+  }
 
   return (
     <div id="login-page">
@@ -43,28 +74,19 @@ export default function Login() {
         </div>
 
         <div className="form-group-email">
-          <label className="login-label" htmlFor="loginEmail">
-            E-mail
-          </label>
+          <label className="login-label">E-mail</label>
           <input
             type="email"
-            className="input input-full"
+            className="input login-input input-full"
             id="loginEmail"
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                document.getElementById("loginSenha")?.focus();
-              }
-            }}
           />
         </div>
 
         <div className="form-group-password">
-          <label className="login-label" htmlFor="loginSenha">
-            Senha
-          </label>
+          <label className="login-label">Senha</label>
           <input
             type={showPassword ? "text" : "password"}
             className="input input-full input-password"
@@ -72,9 +94,6 @@ export default function Login() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") doLogin();
-            }}
           />
           <button
             type="button"
@@ -113,8 +132,8 @@ export default function Login() {
         </button>
 
         <div className="login-footer">
-          Para testar: <strong>admin@mecanicaos.com.br</strong> /{" "}
-          <strong>1234</strong>
+          Para testar: <strong>admin@calazans.com</strong> /{" "}
+          <strong>admin123</strong>
         </div>
       </div>
     </div>

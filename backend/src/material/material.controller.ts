@@ -9,12 +9,14 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -27,6 +29,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MaterialResponseDto } from './dto/response-material.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('material')
 @Controller('material')
@@ -55,6 +58,10 @@ export class MaterialController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaterialDto: CreateMaterialDto) {
     return this.materialService.create(createMaterialDto);
@@ -70,6 +77,8 @@ export class MaterialController {
     type: [MaterialResponseDto],
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.materialService.findAll();
   }
@@ -105,6 +114,8 @@ export class MaterialController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMaterialDto: UpdateMaterialDto,
@@ -132,6 +143,8 @@ export class MaterialController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.materialService.remove(id);

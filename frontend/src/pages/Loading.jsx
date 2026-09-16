@@ -1,5 +1,3 @@
-import React from "react";
-
 const Loading = ({ message = "Carregando..." }) => {
   return (
     <div className="loading-container">

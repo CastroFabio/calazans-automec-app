@@ -12,6 +12,7 @@ import { useCustomers } from "../context/Customer.context";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { PATHS } from "../utils/paths";
+import { useAuth } from "../context/Auth.context";
 
 const ICONS = {
   orders: (
@@ -97,6 +98,7 @@ const SideBar = () => {
   const currentPath = location.pathname;
   const { countAllCustomers } = useCustomers();
   const { countAllServiceOrders, setListMaintenanceJobs } = useServiceOrders();
+  const { logout } = useAuth();
 
   // Estados
   const [counts, setCounts] = useState({
@@ -262,6 +264,15 @@ const SideBar = () => {
 
       {/* Usuário */}
       <div className="sidebar-user">
+        <button
+          onClick={() => {
+            logout();
+            navigate(PATHS.login);
+          }}
+          className="btn btn-ghost"
+        >
+          Sair
+        </button>
         <div className="user-row">
           <div className="avatar">JC</div>
           <div>

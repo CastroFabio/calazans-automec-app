@@ -8,6 +8,11 @@ export const ENDPOINTS = {
     count: `/customers/count`,
   },
 
+  auth: {
+    fetchMe: "/auth/me",
+    login: "/auth/login",
+  },
+
   // Cars
   vehicles: {
     base: "/vehicles",

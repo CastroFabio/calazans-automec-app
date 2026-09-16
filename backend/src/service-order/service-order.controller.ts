@@ -10,14 +10,15 @@ import {
   HttpStatus,
   ParseIntPipe,
   Query,
-  ValidationPipe,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
 import { ServiceOrderService } from './service-order.service';
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -32,6 +33,7 @@ import {
 import { ServiceOrderResponseDto } from './dto/response-service-order.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedServiceOrderResponseDto } from './dto/paginated-service-order-response.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('service-order')
 @Controller('service-order')
@@ -60,6 +62,8 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createServiceOrderDto: CreateServiceOrderDto) {
     return this.serviceOrderService.create(createServiceOrderDto);
@@ -84,6 +88,8 @@ export class ServiceOrderController {
     type: [ServiceOrderResponseDto],
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.serviceOrderService.findAll();
   }
@@ -99,6 +105,8 @@ export class ServiceOrderController {
     type: PaginatedServiceOrderResponseDto,
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAllPerPage(@Query() paginationDto: PaginationDto) {
     const page = Number(paginationDto.page) || 1;
     const search = paginationDto.search?.trim() || '';
@@ -139,6 +147,8 @@ export class ServiceOrderController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.serviceOrderService.findOne(id);
   }
@@ -171,6 +181,8 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateServiceOrderDto: UpdateServiceOrderDto,
@@ -198,6 +210,8 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.serviceOrderService.remove(+id);

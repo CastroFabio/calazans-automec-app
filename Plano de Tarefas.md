@@ -91,13 +91,13 @@
 
 ---
 
-## 5. Bugs Urgentes de UX/UI
+## ~~5. Bugs Urgentes de UX/UI~~
 
-### [Bug] Desbloquear clique do Autocomplete
+### ~~[Bug] Desbloquear clique do Autocomplete~~
 
-- **Problema:** O clique nos itens do Autocomplete não está sendo registrado.
-- **Causa provável:** Sobreposição do botão/container de fundo ao menu popover (z-index ou evento bloqueado).
-- **Ação:** Ajustar z-index e manipuladores de evento do menu dropdown.
+- ~~**Problema:** O clique nos itens do Autocomplete não está sendo registrado.~~
+- ~~**Causa provável:** Sobreposição do botão/container de fundo ao menu popover (z-index ou evento bloqueado).~~
+- ~~**Ação:** Ajustar z-index e manipuladores de evento do menu dropdown.~~
 
 ---
 

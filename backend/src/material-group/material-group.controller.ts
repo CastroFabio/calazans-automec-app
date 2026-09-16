@@ -10,9 +10,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -29,6 +31,7 @@ import { MaterialGroupService } from './material-group.service';
 import { MaterialGroupResponseDto } from './dto/response-material-group.dto';
 import { CreateMaterialGroupDto } from './dto/create-material-group.dto';
 import { UpdateMaterialGroupDto } from './dto/update-material-group.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('material-group')
 @Controller('material-group')
@@ -57,6 +60,8 @@ export class MaterialGroupController {
     description: 'Grupo de materiais criado com sucesso',
     type: MaterialGroupResponseDto,
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaterialGroupDto: CreateMaterialGroupDto) {
     return this.materialGroupService.create(createMaterialGroupDto);
@@ -67,6 +72,8 @@ export class MaterialGroupController {
     summary: 'Contar quantidade total de grupos de material',
     description: 'Retorna a quantidade total de grupos de material cadastrados',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   count() {
     return this.materialGroupService.countAll();
   }
@@ -84,6 +91,8 @@ export class MaterialGroupController {
     description: 'Lista de grupos de materiais retornada com sucesso',
     type: [MaterialGroupResponseDto],
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.materialGroupService.findAll();
   }
@@ -106,6 +115,8 @@ export class MaterialGroupController {
   @ApiBadRequestResponse({
     description: 'Nome do grupo não informado',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findByGroupName(@Query('group') groupName: string) {
     return this.materialGroupService.findByName(groupName);
   }
@@ -131,6 +142,8 @@ export class MaterialGroupController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.materialGroupService.findOne(id);
   }
@@ -162,6 +175,8 @@ export class MaterialGroupController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMaterialGroupDto: UpdateMaterialGroupDto,
@@ -189,6 +204,8 @@ export class MaterialGroupController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.materialGroupService.remove(id);

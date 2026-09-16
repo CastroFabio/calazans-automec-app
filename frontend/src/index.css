@@ -5506,7 +5506,7 @@
 }
 .login-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
   padding: 40px 36px 36px;
@@ -5575,7 +5575,7 @@
 
 .login-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
   padding: 40px 36px 36px;
@@ -5650,8 +5650,8 @@
   transition: border-color 0.2s;
 }
 
-.input:focus {
-  border-color: var(--primary);
+.login-input:focus {
+  border: 1px solid var(--accent);
 }
 
 .input-full {

@@ -20,6 +20,8 @@ import { CustomerProvider } from "./context/Customer.context";
 import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 
 import { PATHS } from "./utils/paths";
+import { AuthProvider } from "./context/Auth.context";
+import { ProtectedRoute } from "./components/ProtectedRoute.component";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
@@ -36,23 +38,31 @@ const MainLayout = () => {
         <NavBar />
         <div className="content">
           <Routes>
-            <Route path={PATHS.home} element={<Home />} />
-            <Route path={PATHS.serviceOrder} element={<ServiceOrderList />} />
-            <Route path={PATHS.customer} element={<Customers />} />
-            <Route path={PATHS.services} element={<MaintenanceJobs />} />
-            <Route path={PATHS.materials} element={<Materials />} />
-            <Route path={PATHS.newServiceOrder} element={<NewServiceOrder />} />
-            <Route path={PATHS.editCustomer} element={<EditCustomer />} />
-            <Route
-              path={PATHS.editServiceOrder}
-              element={<EditServiceOrder />}
-            />
-            <Route path={PATHS.notFound} element={<NotFound />} />
+            {/* --- ROTAS PÚBLICAS --- */}
             <Route path={PATHS.login} element={<Login />} />
-            <Route
-              path={PATHS.printServiceOrder}
-              element={<PrintServiceOrder />}
-            />
+            <Route path={PATHS.notFound} element={<NotFound />} />
+
+            {/* --- ROTAS PROTEGIDAS (Exigem Token) --- */}
+            <Route element={<ProtectedRoute />}>
+              <Route path={PATHS.home} element={<Home />} />
+              <Route path={PATHS.serviceOrder} element={<ServiceOrderList />} />
+              <Route path={PATHS.customer} element={<Customers />} />
+              <Route path={PATHS.services} element={<MaintenanceJobs />} />
+              <Route path={PATHS.materials} element={<Materials />} />
+              <Route
+                path={PATHS.newServiceOrder}
+                element={<NewServiceOrder />}
+              />
+              <Route path={PATHS.editCustomer} element={<EditCustomer />} />
+              <Route
+                path={PATHS.editServiceOrder}
+                element={<EditServiceOrder />}
+              />
+              <Route
+                path={PATHS.printServiceOrder}
+                element={<PrintServiceOrder />}
+              />
+            </Route>
           </Routes>
         </div>
       </div>
@@ -62,15 +72,17 @@ const MainLayout = () => {
 
 const App = () => {
   return (
-    <ServiceOrderProvider>
-      <CustomerProvider>
-        <BrowserRouter>
-          <IdleRedirectManager>
-            <MainLayout />
-          </IdleRedirectManager>
-        </BrowserRouter>
-      </CustomerProvider>
-    </ServiceOrderProvider>
+    <AuthProvider>
+      <ServiceOrderProvider>
+        <CustomerProvider>
+          <BrowserRouter>
+            <IdleRedirectManager>
+              <MainLayout />
+            </IdleRedirectManager>
+          </BrowserRouter>
+        </CustomerProvider>
+      </ServiceOrderProvider>
+    </AuthProvider>
   );
 };
 
