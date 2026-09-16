@@ -13,14 +13,17 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, loginService } = useAuth();
 
   useEffect(() => {
-    // Se o AuthContext já validou e o usuário ESTÁ autenticado, redireciona imediatamente
     if (!loading && isAuthenticated) {
       navigate(PATHS.home, { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
+
+  if (loading || isAuthenticated) {
+    return null;
+  }
 
   const toggleLoginSenha = () => {
     setShowPassword((prev) => !prev);
@@ -48,7 +51,7 @@ export default function Login() {
   };
 
   if (loading || isAuthenticated) {
-    return <Loading />;
+    return null;
   }
 
   return (

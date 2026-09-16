@@ -39,17 +39,25 @@ api.interceptors.response.use(
         // Chama o endpoint de refresh enviando o refreshToken no header
         const res = await authApi.refreshToken(refreshToken);
 
+        // ATENÇÃO AQUI: O backend NestJS retorna accessToken e refreshToken
         const { accessToken, refreshToken: newRefreshToken } = res.data;
 
-        // Salva os novos tokens no localStorage
+        if (!accessToken) {
+          throw new Error("Token de acesso não retornado pelo servidor.");
+        }
+
+        // Salva com a chave correta no localStorage
         localStorage.setItem("access_token", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
+
+        if (newRefreshToken) {
+          localStorage.setItem("refreshToken", newRefreshToken);
+        }
 
         // Atualiza o cabeçalho e reexecuta a requisição original
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Se a renovação falhar (Refresh Token expirado), desloga o usuário
+        // Limpa o storage e redireciona caso o refresh falhe
         localStorage.removeItem("access_token");
         localStorage.removeItem("refreshToken");
         window.location.href = PATHS.login;

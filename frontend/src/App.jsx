@@ -20,19 +20,23 @@ import { CustomerProvider } from "./context/Customer.context";
 import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 
 import { PATHS } from "./utils/paths";
-import { AuthProvider } from "./context/Auth.context";
+import { AuthProvider, useAuth } from "./context/Auth.context";
 import { ProtectedRoute } from "./components/ProtectedRoute.component";
+import Loading from "./pages/Loading";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
+  const { loading, isAuthenticated } = useAuth();
   const location = useLocation();
   const isHomePage = location.pathname === PATHS.home;
   const isLoginPage = location.pathname === PATHS.login;
-
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <>
       {/* Exibe a SideBar apenas se NÃO estiver na rota "/" */}
-      {!isHomePage && !isLoginPage && <SideBar />}
+      {isAuthenticated && !isHomePage && !isLoginPage && <SideBar />}
 
       <div className="main">
         <NavBar />

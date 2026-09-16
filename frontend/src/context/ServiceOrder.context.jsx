@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { orderApi } from "../api/orders";
+import { useAuth } from "./Auth.context";
 
 const ServiceOrderContext = createContext();
 
 export const ServiceOrderProvider = ({ children }) => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [serviceOrders, setServiceOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -361,8 +363,10 @@ export const ServiceOrderProvider = ({ children }) => {
 
   // ========== CARREGAR ORDENS AO INICIAR ==========
   useEffect(() => {
-    fetchServiceOrders();
-  }, []);
+    if (isAuthenticated && !authLoading) {
+      fetchServiceOrders();
+    }
+  }, [isAuthenticated, authLoading]);
 
   return (
     <ServiceOrderContext.Provider

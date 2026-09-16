@@ -1,11 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { customerApi } from "../api/customers";
+import { useAuth } from "./Auth.context";
 
 // Criar o Contexto
 const CustomerContext = createContext();
 
 // Provider do Contexto
 export const CustomerProvider = ({ children }) => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [customerID, setCustomerID] = useState(null);
   const [customerCount, setCustomerCount] = useState(0);
@@ -272,8 +274,10 @@ export const CustomerProvider = ({ children }) => {
 
   // Carregar clientes ao iniciar
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    if (isAuthenticated && !authLoading) {
+      fetchCustomers();
+    }
+  }, [isAuthenticated, authLoading]);
 
   return (
     <CustomerContext.Provider
