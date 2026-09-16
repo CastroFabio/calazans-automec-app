@@ -144,30 +144,30 @@
 
 ---
 
-## 9. Módulo de Autenticação e Segurança (JWT)
+## ~~9. Módulo de Autenticação e Segurança (JWT)~~
 
-### [Backend/NestJS] Infraestrutura de Autenticação JWT
+### ~~[Backend/NestJS] Infraestrutura de Autenticação JWT~~
 
-- **Ação:** Implementar o módulo `@nestjs/jwt` e `passport-jwt` no backend[cite: 1].
-- **Entidades & Banco de Dados:**
-  - Tabela `User` no Prisma com `email`, `password` (hash via `bcrypt`), `name` e `role` (enum: `ADMIN`, `CLIENT`).
-- **Estratégia de Tokens (Access & Refresh Token):**
-  - **Payload do Access Token:** `{ sub: userId, email, role }`.
-  - Rota `POST /auth/login`: Autentica credenciais e retorna o Access Token + Refresh Token.
-  - Rota `POST /auth/refresh`: Valida o Refresh Token e gera um novo Access Token sem exigir novo login.
-- **Guards & Middlewares:**
-  - Criar `JwtAuthGuard` global para proteger todas as rotas da API, liberando apenas a rota de login pública.
-  - Criar `RolesGuard` para garantir restrições de permissão por perfil de acesso no futuro.
+- ~~**Ação:** Implementar o módulo `@nestjs/jwt` e `passport-jwt` no backend[cite: 1].~~
+- ~~**Entidades & Banco de Dados:**~~
+  - ~~Tabela `User` no Prisma com `email`, `password` (hash via `bcrypt`), `name` e `role` (enum: `ADMIN`, `CLIENT`).~~
+- ~~**Estratégia de Tokens (Access & Refresh Token):**~~
+  - ~~**Payload do Access Token:** `{ sub: userId, email, role }`.~~
+  - ~~Rota `POST /auth/login`: Autentica credenciais e retorna o Access Token + Refresh Token.~~
+  - ~~Rota `POST /auth/refresh`: Valida o Refresh Token e gera um novo Access Token sem exigir novo login.~~
+- ~~**Guards & Middlewares:**~~
+  - ~~Criar `JwtAuthGuard` global para proteger todas as rotas da API, liberando apenas a rota de login pública.~~
+  - ~~Criar `RolesGuard` para garantir restrições de permissão por perfil de acesso no futuro.~~
 
-### [Frontend/React] Interface de Login e Proteção de Rotas
+### ~~[Frontend/React] Interface de Login e Proteção de Rotas~~
 
-- **Tela de Login (`/login`):**
-  - Criar interface simples com campos de e-mail e senha.
-- **Gerenciamento de Sessão & Interceptors:**
-  - Configurar interceptor de requisições (Axios/Fetch) para anexar o cabeçalho `Authorization: Bearer <token>` em todas as chamadas.
-  - Configurar interceptor de resposta para tratar erro HTTP 401: tentar a renovação silenciosa via `/auth/refresh` ou redirecionar automaticamente para a tela de login se a sessão expirar.
-- **Proteção de Interface (`<ProtectedRoute />`):**
-  - Envolver todas as rotas da aplicação em um componente guardião de rota que redireciona usuários não autenticados para `/login`.
+- ~~**Tela de Login (`/login`):**~~
+  - ~~Criar interface simples com campos de e-mail e senha.~~
+- ~~**Gerenciamento de Sessão & Interceptors:**~~
+  - ~~Configurar interceptor de requisições (Axios/Fetch) para anexar o cabeçalho `Authorization: Bearer <token>` em todas as chamadas.~~
+  - ~~Configurar interceptor de resposta para tratar erro HTTP 401: tentar a renovação silenciosa via `/auth/refresh` ou redirecionar automaticamente para a tela de login se a sessão expirar.~~
+- ~~**Proteção de Interface (`<ProtectedRoute />`):**~~
+  - ~~Envolver todas as rotas da aplicação em um componente guardião de rota que redireciona usuários não autenticados para `/login`.~~
 
 ---
 
@@ -175,11 +175,9 @@
 
 Padrão: `<tipo>/<escopo>-<descrição-curta>`
 
-## Módulo de Peças e Serviços
+## ~~Módulo de Peças e Serviços~~
 
-- **Autocomplete de busca em Peças/Serviços:** `feature/parts-services-autocomplete-search`
 - ~~**Scroll e limitação de altura da lista:** `refactor/parts-services-list-scroll`~~
-- **Novo modal/fluxo de edição de itens:** `refactor/parts-services-edit-modal-flow`
 
 ## Wizard de OS & Modais de Criação
 
@@ -190,11 +188,11 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - **Botão "Registrar Serviço" no topo:** `refactor/os-register-service-btn-top`
 - ~~**Atalho "Criar OS" no Card do Veículo do Cliente:** `feature/customer-vehicle-card-create-os-shortcut`~~
 
-## Auditoria e Correção de Preços (Inputs)
+## ~~Auditoria e Correção de Preços (Inputs)~~
 
 - ~~**Padronização e validação de inputs de preço:** `refactor/price-inputs-decimal-validation`~~
 
-## Formulário de OS & UX
+## ~~Formulário de OS & UX~~
 
 - ~~**Auto-foco no valor unitário:** `feature/autocomplete-autofocus-unit-price`~~
 - ~~**Marcação "Fornecido pelo cliente":** `feature/os-item-supplied-by-client`~~
@@ -220,7 +218,7 @@ Padrão: `<tipo>/<escopo>-<descrição-curta>`
 - ~~**Clientes:** `feature/customers-list-pagination`~~
 - ~~**Ordens de Serviço:** `feature/service-orders-list-pagination`~~
 
-## Módulo de Autenticação JWT
+## ~~Módulo de Autenticação JWT~~
 
-- **Backend (NestJS + Prisma):** `feature/backend-jwt-auth-guard`
-- **Frontend (React + Protection):** `feature/frontend-login-protected-routes`
+- ~~**Backend (NestJS + Prisma):** `feature/backend-jwt-auth-guard`~~
+- ~~**Frontend (React + Protection):** `feature/frontend-login-protected-routes`~~
