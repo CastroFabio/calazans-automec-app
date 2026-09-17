@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import NavBar from "./components/navBar";
-import IdleRedirectManager from "./components/IdleRedirectManager.component";
 import SideBar from "./components/sideBar";
 
 import Customers from "./pages/Customers";
@@ -80,9 +79,7 @@ const App = () => {
       <ServiceOrderProvider>
         <CustomerProvider>
           <BrowserRouter>
-            <IdleRedirectManager>
-              <MainLayout />
-            </IdleRedirectManager>
+            <MainLayout />
           </BrowserRouter>
         </CustomerProvider>
       </ServiceOrderProvider>
