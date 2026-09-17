@@ -9,12 +9,14 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { MaterialItemService } from './material-item.service';
 import { CreateMaterialItemDto } from './dto/create-material-item.dto';
 import { UpdateMaterialItemDto } from './dto/update-material-item.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -32,6 +34,7 @@ import {
   CreateItemMaterialBatchDto,
   CreateItemMaterialBatchItemDto,
 } from './dto/create-item-material-batch.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('material-item')
 @Controller('material-item')
@@ -59,6 +62,8 @@ export class MaterialItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaterialItemDto: CreateMaterialItemDto) {
     return this.materialItemService.create(createMaterialItemDto);
@@ -79,6 +84,8 @@ export class MaterialItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   async createBatch(@Body() createBatchDto: CreateItemMaterialBatchDto) {
     return this.materialItemService.createBatch(createBatchDto);
@@ -96,6 +103,8 @@ export class MaterialItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.materialItemService.findAll();
   }
@@ -121,6 +130,8 @@ export class MaterialItemController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.materialItemService.findOne(id);
   }
@@ -156,6 +167,8 @@ export class MaterialItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMaterialItemDto: UpdateMaterialItemDto,
@@ -183,6 +196,8 @@ export class MaterialItemController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.materialItemService.remove(id);

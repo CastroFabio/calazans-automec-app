@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
@@ -10,6 +10,7 @@ import {
   Min,
   MaxLength,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 
 export class CreateItemMaterialBatchItemDto {
@@ -87,6 +88,16 @@ export class CreateItemMaterialBatchItemDto {
     message: 'ID do serviço de manutenção deve ser um número positivo',
   })
   itemMaintenance_id?: number;
+
+  @ApiPropertyOptional({
+    description: 'Indica se o cliente é o fornecedor  (opcional)',
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean({ message: 'O campo deve ser um valor booleano' })
+  isCustomerSupplier?: boolean;
 }
 
 export class CreateItemMaterialBatchDto {

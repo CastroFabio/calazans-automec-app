@@ -9,12 +9,14 @@ import {
   HttpCode,
   HttpStatus,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -27,6 +29,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MaintenanceResponseDto } from './dto/response-maintenance.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('maintenance')
 @Controller('maintenance')
@@ -55,6 +58,8 @@ export class MaintenanceController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createMaintenanceDto: CreateMaintenanceDto) {
     return this.maintenanceService.create(createMaintenanceDto);
@@ -70,6 +75,8 @@ export class MaintenanceController {
     type: [MaintenanceResponseDto],
   })
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll() {
     return this.maintenanceService.findAll();
   }
@@ -105,6 +112,8 @@ export class MaintenanceController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMaterialDto: UpdateMaintenanceDto,
@@ -132,6 +141,8 @@ export class MaintenanceController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.maintenanceService.remove(id);

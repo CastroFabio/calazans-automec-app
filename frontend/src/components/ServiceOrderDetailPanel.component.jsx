@@ -1,6 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { statusMap } from "../utils/statusMap";
+import {
+  statusMap,
+  statusReverseMap,
+  statusReverseMapBadge,
+} from "../utils/statusMap";
 import { priorityReverseMap } from "../utils/priorityMap";
 import { formattedPrice } from "../utils/convertPrice";
 import { formatLocalDateTimeStringISO } from "../utils/convertDateTime";
@@ -8,6 +12,12 @@ import { orderApi } from "../api/orders";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import StatusBadge from "./StatusBadge.component";
 import VehicleBadge from "./VehicleBadge.component";
+import {
+  paymentStatusReverseMap,
+  paymentStatusReverseMapBadge,
+} from "../utils/paymentStatusMap";
+import { PATHS } from "../utils/paths";
+import { getNumberValue } from "../utils/parseValue";
 
 // ========== FUNÇÕES AUXILIARES ==========
 
@@ -64,14 +74,19 @@ const ServiceOrderDetailPanel = ({
   // Garantir que os arrays existem
   const itemMaintenances = safeArray(order.itemMaintenances);
   const itemMaterials = safeArray(order.itemMaterials);
-
+  const isClear = order.paid >= order.subtotal;
   // ========== AGRUPAMENTO COM USEMEMO ==========
   const groupedMaterials = useMemo(() => {
     if (!itemMaterials || itemMaterials.length === 0) return [];
 
     const groups = itemMaterials.reduce((acc, item) => {
       // Normalização de chaves para evitar duplicações por espaços ou maiúsculas/minúsculas
-      const supplierStr = (item.supplier || "Sem Fornecedor").trim();
+
+      const supplierStr = String(
+        item.isCustomerSupplier
+          ? "Fornecido pelo cliente"
+          : item.supplier || "Sem Fornecedor",
+      ).trim();
       const receiptStr = (item.receipt || "Sem Recibo").trim();
       const groupKey = `${supplierStr.toLowerCase()}_${receiptStr.toLowerCase()}`;
 
@@ -115,12 +130,12 @@ const ServiceOrderDetailPanel = ({
 
   // ========== HANDLERS ==========
   const handleEditOrder = () => {
-    navigate(`/service-order/edit/${order.id}`);
+    navigate(PATHS.editServiceOrderFN(order.id));
     if (onClose) onClose();
   };
 
   const handlePrintOrder = () => {
-    navigate(`/service-order/print/${order.id}`);
+    navigate(PATHS.printServiceOrderFN(order.id));
     if (onClose) onClose();
   };
 
@@ -169,7 +184,16 @@ const ServiceOrderDetailPanel = ({
               {formatServiceOrderTitle(order)}
             </div>
             <div className="sp-header-badges" id="spBadges">
-              <StatusBadge status={order.status} />
+              <StatusBadge
+                reverseMapBadge={statusReverseMapBadge[order.status]}
+                reverseMap={statusReverseMap[order.status]}
+              />{" "}
+              <StatusBadge
+                reverseMapBadge={
+                  paymentStatusReverseMapBadge[order.paymentStatus]
+                }
+                reverseMap={paymentStatusReverseMap[order.paymentStatus]}
+              />
             </div>
           </div>
           <button className="sp-close" onClick={onClose}>
@@ -212,11 +236,60 @@ const ServiceOrderDetailPanel = ({
               <div className="sp-value">{order.professional || "—"}</div>
             </div>
             <div className="sp-section">
-              <div className="sp-label">Valor Total</div>
+              <div className="sp-label">Data de Entrada</div>
               <div className="sp-value">
-                <span className="sp-subtotal">
-                  {formattedPrice(order.subtotal)}
-                </span>
+                {formatLocalDateTimeStringISO(order.arrived_at) || "—"}
+              </div>
+            </div>
+          </div>
+          {/* ===== DIAGNÓSTICO ===== */}
+          <div className="sp-section">
+            <div className="sp-label">Diagnóstico</div>
+            <div className="sp-value sp-value-diagnostic" id="spDesc">
+              {order.diagnosis || "Sem diagnóstico"}
+            </div>
+          </div>
+
+          <div className="sp-section" id="spPaymentSection">
+            <div className="sp-label sp-payment-label">Pagamento</div>
+            <div id="spPaymentRows" className="sp-payment-rows">
+              <div className="payment-summary-grid">
+                {/* Total */}
+                <div className="summary-card">
+                  <div className="card-label">Total</div>
+                  <div className="card-value">
+                    {formattedPrice(order.subtotal)}
+                  </div>
+                </div>
+
+                {/* Pago */}
+                <div className="summary-card">
+                  <div className="card-label label-paid">Pago</div>
+                  <div className="card-value value-paid">
+                    {formattedPrice(order.paid)}
+                  </div>
+                </div>
+
+                {/* Saldo */}
+                <div
+                  className={`summary-card ${isClear ? "card-cleared" : "card-pending"}`}
+                >
+                  <div
+                    className={`card-label ${isClear ? "" : "label-pending"}`}
+                  >
+                    Saldo
+                  </div>
+                  <div
+                    className={`card-value ${isClear ? "value-paid" : "value-pending"}`}
+                  >
+                    {isClear
+                      ? "Quitado"
+                      : formattedPrice(
+                          getNumberValue(order.subtotal) -
+                            getNumberValue(order.paid),
+                        )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -259,64 +332,62 @@ const ServiceOrderDetailPanel = ({
                     key={groupKey}
                     className="detail-panel-service-order-material-fieldset"
                   >
-                    <legend className="detail-panel-service-order-material-legend">
-                      <span className="detail-panel-service-order-supplier">
-                        {group.supplier}
-                      </span>{" "}
-                      ·{" "}
-                      <span className="detail-panel-service-order-receipt">
-                        Recibo {group.receipt}
-                      </span>
-                    </legend>
+                    {group.supplier === "Fornecido pelo cliente" ? (
+                      <legend className="detail-panel-service-order-material-legend">
+                        <span className="detail-panel-service-order-supplier">
+                          {group.supplier}
+                        </span>
+                      </legend>
+                    ) : (
+                      <legend className="detail-panel-service-order-material-legend">
+                        <span className="detail-panel-service-order-supplier">
+                          {group.supplier}
+                        </span>{" "}
+                        ·{" "}
+                        <span className="detail-panel-service-order-receipt">
+                          Recibo {group.receipt}
+                        </span>
+                      </legend>
+                    )}
 
-                    {group.items.map((element, itemIdx) => (
-                      <div
-                        key={element.id || itemIdx}
-                        className="detail-panel-service-order-material-container"
-                      >
-                        <span className="detail-panel-service-order-material-name">
-                          · {element.material?.name || "Material sem nome"}
-                        </span>
-                        <span className="detail-panel-service-order-material-price">
-                          {`${Number(element.quantity || 1)}x ${parseFloat(
-                            element.value_unit || 0,
-                          ).toFixed(2)} (${formattedPrice(
-                            parseFloat(element.value_unit || 0) *
-                              Number(element.quantity || 1),
-                          )})`}
-                        </span>
-                      </div>
-                    ))}
+                    {group.supplier === "Fornecido pelo cliente"
+                      ? group.items.map((element, itemIdx) => (
+                          <div
+                            key={element.id || itemIdx}
+                            className="detail-panel-service-order-material-container"
+                          >
+                            <span className="detail-panel-service-order-material-name">
+                              · {element.material?.name || "Material sem nome"}
+                            </span>
+                            <span className="detail-panel-service-order-material-price">
+                              {`${Number(element.quantity || 1)}x`}
+                            </span>
+                          </div>
+                        ))
+                      : group.items.map((element, itemIdx) => (
+                          <div
+                            key={element.id || itemIdx}
+                            className="detail-panel-service-order-material-container"
+                          >
+                            <span className="detail-panel-service-order-material-name">
+                              · {element.material?.name || "Material sem nome"}
+                            </span>
+                            <span className="detail-panel-service-order-material-price">
+                              {`${Number(element.quantity || 1)}x ${parseFloat(
+                                element.value_unit || 0,
+                              ).toFixed(2)} (${formattedPrice(
+                                parseFloat(element.value_unit || 0) *
+                                  Number(element.quantity || 1),
+                              )})`}
+                            </span>
+                          </div>
+                        ))}
                   </fieldset>
                 );
               })
             ) : (
               <div className="empty-text">Nenhum material registrado</div>
             )}
-          </div>
-
-          {/* ===== DIAGNÓSTICO ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Diagnóstico</div>
-            <div className="sp-value sp-value-diagnostic" id="spDesc">
-              {order.diagnosis || "Sem diagnóstico"}
-            </div>
-          </div>
-
-          {/* ===== OBSERVAÇÕES ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Observações</div>
-            <div className="sp-value sp-value-observation" id="spObservation">
-              {order.observation || "Sem observações"}
-            </div>
-          </div>
-
-          {/* ===== DATA DE ENTRADA ===== */}
-          <div className="sp-section">
-            <div className="sp-label">Data de Entrada</div>
-            <div className="sp-value">
-              {formatLocalDateTimeStringISO(order.arrived_at) || "—"}
-            </div>
           </div>
         </div>
 

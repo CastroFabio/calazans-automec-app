@@ -11,12 +11,11 @@ import {
   HttpCode,
   ParseIntPipe,
   Query,
-  HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,
@@ -27,11 +26,15 @@ import {
   ApiNotFoundResponse,
   ApiConflictResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CustomersService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { CustomerResponseDto } from './dto/response-customer.dto';
+import { PaginatedCustomerResponseDto } from './dto/paginated-customer-response.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('customers')
 @Controller('customers')
@@ -75,6 +78,8 @@ export class CustomersController {
     description: 'Erro interno do servidor',
   })
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
@@ -86,6 +91,8 @@ export class CustomersController {
     summary: 'Contar clientes',
     description: 'Retorna a quantidade total de clientes cadastrados',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   count() {
     return this.customersService.countAll();
   }
@@ -102,8 +109,35 @@ export class CustomersController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findAll(): Promise<CustomerResponseDto[]> {
     return this.customersService.findAll();
+  }
+
+  @Get('page')
+  @ApiOperation({
+    summary: 'Listar todos os clientes paginados',
+    description:
+      'Retorna uma lista paginada com os clientes cadastradas e metadados de paginação',
+  })
+  @ApiOkResponse({
+    description: 'Lista paginada de clientes retornada com sucesso',
+    type: PaginatedCustomerResponseDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  findAllPerPage(@Query() paginationDto: PaginationDto) {
+    const page = Number(paginationDto.page) || 1;
+    const search = paginationDto.search?.trim() || '';
+    const limit = Number(paginationDto.limit) || 5;
+
+    return this.customersService.findAllPerPage({
+      page,
+      limit,
+      search,
+    });
   }
 
   @Get('search')
@@ -135,6 +169,8 @@ export class CustomersController {
   @ApiBadRequestResponse({
     description: 'Celular não informado',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findByCell(@Query('cell') cell: string): Promise<CustomerResponseDto | null> {
     return this.customersService.findByCell(cell);
   }
@@ -167,6 +203,8 @@ export class CustomersController {
   @ApiBadRequestResponse({
     description: 'ID inválido',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto | null> {
@@ -204,6 +242,8 @@ export class CustomersController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -242,6 +282,8 @@ export class CustomersController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor',
   })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.customersService.remove(id);

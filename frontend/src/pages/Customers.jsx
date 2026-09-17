@@ -11,9 +11,13 @@ import NewVehicleModal from "../components/NewVehicleModal.component";
 import VehicleBadge from "../components/VehicleBadge.component";
 import CustomerDetailPanel from "../components/CustomerDetailPanel.component";
 import { getCustomerNameInitials } from "../utils/CustomerInitials";
+import Loading from "./Loading";
+import { PATHS } from "../utils/paths";
+import { getPagesArray } from "../utils/getPagesArray";
+import Pagination from "../components/Pagination.component";
+import { getNumberValue } from "../utils/parseValue";
 
 const Customers = () => {
-  const [itemColors, setItemColors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,17 +25,26 @@ const Customers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedCustomerModal, setSelectedCustomerModal] = useState(null);
+  const [customerPerPage, setCustomerPerPage] = useState([]);
+  const [paginationMeta, setPaginationMeta] = useState({
+    currentPage: 1,
+    perPage: 6,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
 
-  const { customers, removeCustomer, fetchCustomerById } = useCustomers();
+  const { removeCustomer, fetchCustomerById } = useCustomers();
 
-  const filteredData = useMemo(() => {
+  /* const filteredData = useMemo(() => {
     if (!searchTerm) {
-      return customers;
+      return customerPerPage;
     }
 
     const lowerCaseSearch = searchTerm.toLowerCase();
 
-    return customers.filter((element) => {
+    return customerPerPage.filter((element) => {
       if (element.name.toLowerCase().includes(lowerCaseSearch)) {
         return true;
       }
@@ -42,16 +55,12 @@ const Customers = () => {
 
       return vehicleMatch;
     });
-  }, [customers, searchTerm]);
+  }, [customers, searchTerm]); */
 
   const navigate = useNavigate();
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-  };
-
-  const handleCardClick = () => {
-    setSidebarOpen(true);
   };
 
   const closeSidebar = () => {
@@ -62,10 +71,10 @@ const Customers = () => {
     setIsModalOpen(false);
   };
 
-  const handleFetchSelectedCustomer = async (customerID) => {
+  const handleFetchSelectedCustomer = async (data) => {
     // const { data } = await customerApi.getById(customerID);
-    const data = await fetchCustomerById(customerID);
     setSelectedCustomer(data);
+    setSidebarOpen(true);
   };
 
   const handleOpenModal = (event, customer) => {
@@ -82,8 +91,14 @@ const Customers = () => {
     setIsModalOpen(true);
   };
 
-  const handleRemoveCustomer = async (customerID, event) => {
-    event.stopPropagation(); // Impede abrir o sidebar
+  const handleRemoveCustomer = async (customerID, event, customer) => {
+    event.stopPropagation();
+
+    if (customer.vehicles.length > 0) {
+      setError("Não é possível deletar cliente que possui carros");
+      alert(error);
+      return;
+    }
 
     if (!window.confirm("Tem certeza que deseja remover este cliente?")) {
       return;
@@ -93,13 +108,13 @@ const Customers = () => {
       setLoading(true);
       setError(null);
 
-      // 1. Remover no backend
       await customerApi.delete(customerID);
-
-      // 2. Remover da lista local (usando o contexto)
       removeCustomer(customerID);
 
-      // 3. Se o cliente removido estava selecionado, fechar sidebar
+      setCustomerPerPage((prev) =>
+        prev.filter((item) => item.id !== customerID),
+      );
+
       if (selectedCustomer?.id === customerID) {
         setSidebarOpen(false);
         setSelectedCustomer(null);
@@ -116,11 +131,47 @@ const Customers = () => {
   };
 
   const handleEditCustomerClick = async (customerID) => {
-    navigate(`/customers/edit/${customerID}`);
+    navigate(PATHS.editCustomerFN(customerID));
   };
 
-  if (loading) return <div>Carregando clientes...</div>;
-  if (error) return <div>Erro: {error}</div>;
+  const getRandomNumberBackground = (customerID) => {
+    return (getNumberValue(customerID) % 5) + 1;
+  };
+
+  const handleFetchCustomersPerPage = async (
+    page = 1,
+    limit = 5,
+    search = "",
+  ) => {
+    try {
+      const { data: result } = await customerApi.getAllPerPage({
+        page,
+        limit,
+        search,
+      });
+
+      const dataWithColor = result.data.map((element) => ({
+        ...element,
+        color: getRandomNumberBackground(element.id),
+      }));
+
+      setCustomerPerPage(dataWithColor); //
+      setPaginationMeta(result.meta); //
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço."); //
+      console.error("Erro ao buscar ordens:", err); //
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFetchCustomersPerPage(1, paginationMeta.perPage, searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="page" id="page-clientes">
@@ -148,33 +199,52 @@ const Customers = () => {
           />
         </div>
       </div>
+
+      <Pagination
+        osPage={paginationMeta.currentPage}
+        totalPages={paginationMeta.totalPages}
+        totalItems={paginationMeta.totalItems}
+        pagesArray={getPagesArray(
+          paginationMeta.currentPage,
+          paginationMeta.totalPages,
+        )}
+        onPageChange={(newPage) => {
+          handleFetchCustomersPerPage(
+            newPage,
+            paginationMeta.perPage,
+            searchTerm,
+          );
+        }}
+      />
+
       <div className="clients-grid" id="clientsGrid">
-        {filteredData && filteredData.length > 0 ? (
-          filteredData.map((element) => (
+        {customerPerPage && customerPerPage.length > 0 ? (
+          customerPerPage.map((element) => (
             <div
               className="client-card"
               key={element.id}
               onClick={() => {
-                handleCardClick();
-                handleFetchSelectedCustomer(element.id);
+                handleFetchSelectedCustomer(element);
               }}
             >
-              <button
-                className="sp-close "
-                onClick={(e) => handleRemoveCustomer(element.id, e)}
-              >
-                ×
-              </button>
-              <div className="client-card-header">
-                <div className={`client-avatar-lg bg-${element.color}`}>
-                  {getCustomerNameInitials(element.name)}
-                </div>
-                <div>
-                  <div className="client-name">{element.name}</div>
-                  <div className="client-sub">
-                    {`${element._count.serviceOrders} OS · ${element._count.vehicles} veículo(s)`}
+              <div style={{ display: "flex" }}>
+                <div className="client-card-header">
+                  <div className={`client-avatar-lg bg-${element.color}`}>
+                    {getCustomerNameInitials(element.name)}
+                  </div>
+                  <div>
+                    <div className="client-name">{element.name}</div>
+                    <div className="client-sub">
+                      {`${element._count.serviceOrders} OS · ${element._count.vehicles} veículo(s)`}
+                    </div>
                   </div>
                 </div>
+                <button
+                  className="sp-close "
+                  onClick={(e) => handleRemoveCustomer(element.id, e, element)}
+                >
+                  ×
+                </button>
               </div>
               {element.telephone ? (
                 <div className="client-info-row ">
@@ -233,7 +303,9 @@ const Customers = () => {
                 </div>
                 <button
                   className="btn btn-sm btn-secondary client-btn-add-vehicle"
-                  onClick={(e) => handleOpenModal(e, element)}
+                  onClick={(e) => {
+                    handleOpenModal(e, element);
+                  }}
                 >
                   + Veículo
                 </button>
@@ -265,6 +337,13 @@ const Customers = () => {
           onClose={closeModal}
           isModalOpen={isModalOpen}
           selectedCustomer={selectedCustomerModal}
+          onSuccess={() => {
+            handleFetchCustomersPerPage(
+              paginationMeta.currentPage,
+              paginationMeta.perPage,
+              searchTerm,
+            );
+          }}
         />
       )}
     </div>

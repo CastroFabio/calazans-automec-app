@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 
 const AutoComplete = ({
   label = "",
@@ -14,8 +14,8 @@ const AutoComplete = ({
   renderOption,
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef(null);
 
-  // Cálculo derivado com useMemo em vez de useEffect + setState
   const filteredSuggestions = useMemo(() => {
     if (!value || !value.trim()) {
       return [];
@@ -49,6 +49,12 @@ const AutoComplete = ({
     }
   };
 
+  useEffect(() => {
+    if (inputRef.current && typeof inputRef.current.focus === "function") {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="field">
       {label && <label>{label}</label>}
@@ -78,6 +84,7 @@ const AutoComplete = ({
                 type="text"
                 placeholder={placeholder}
                 value={value}
+                ref={inputRef}
                 onChange={handleInputChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}

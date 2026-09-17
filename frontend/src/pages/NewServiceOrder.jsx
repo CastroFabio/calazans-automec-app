@@ -1,62 +1,140 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatLocalDateTime } from "../utils/convertDateTime";
-import AutoComplete from "../components/AutoComplete.component";
-import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
-import NewOrderMaterial from "../components/NewOrderMaterial";
-import NewOrderInfo from "../components/NewOrderInfo";
-import NewOrderCustomerVehicle from "../components/NewOrderCustomerVehicle";
 
-import { customerApi } from "../api/customers";
+import NewOrderMaintenanceJob from "../components/NewOrderMaintenanceJob";
+import NewCustomerModal from "../components/NewCustomerModal.component";
+import NewVehicleModal from "../components/NewVehicleModal.component";
+import NewItemModal from "../components/NewItemModal.component";
+import PaymentStatusForm from "../components/PaymentStatusForm.component";
+import ServiceOrderDetailsForm from "../components/ServiceOrderDetailsForm.component";
+import CustomerAndVehicleForm from "../components/CustomerAndVehicleForm.component";
+
 import { maintenanceGroupApi } from "../api/maintenanceGroups";
-import { formattedPrice } from "../utils/convertPrice";
-import { materialApi } from "../api/materials";
-import { materialGroupApi } from "../api/materialGroups";
-import { priorityMap, priorityReverseMap } from "../utils/priorityMap";
-import { statusMap, statusReverseMap } from "../utils/statusMap";
 import { orderApi } from "../api/orders";
 import { itemMaterialApi } from "../api/itemMaterial";
 import { itemMaintenanceApi } from "../api/itemMaintenance";
-import { useServiceOrders } from "../context/ServiceOrder.context";
-import NewCustomerModal from "../components/NewCustomerModal.component";
-import NewVehicleModal from "../components/NewVehicleModal.component";
+import { maintenanceJobApi } from "../api/maintenanceJobs";
+
 import { useCustomers } from "../context/Customer.context";
-import InputPriceValue from "../components/InputPriceValue";
-import AddMaterialInMaintenace from "../components/AddMaterialInMaintenace";
-import { formatarCelular } from "../utils/convertCel";
-import ProfessionalSelect from "../components/ProfessionalSelect.component";
+import { useServiceOrders } from "../context/ServiceOrder.context";
+
+import { formatLocalDateTime } from "../utils/convertDateTime";
+import { statusMap } from "../utils/statusMap";
 import { PATHS } from "../utils/paths";
+import { paymentStatusMap } from "../utils/paymentStatusMap";
+import { getNumberValue, parseInputValue } from "../utils/parseValue";
+import { formatarCelular } from "../utils/convertCel";
+
+const CATEGORIES = {
+  customer: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Cliente & Veículo",
+  },
+  service: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Serviços & Materiais",
+  },
+  payment: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
+    title: "Pagamento",
+  },
+  details: {
+    icon: (
+      <svg
+        className="fs-header-svg"
+        fill="none"
+        stroke="black"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+    title: "DETALHES OS",
+  },
+};
 
 const NewServiceOrder = () => {
-  const [materialsData, setMaterialsData] = useState([]);
   const [customerData, setCustomerData] = useState([]);
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
-  const [materialsGroupData, setMaterialsGroupData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
   const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
+  const [payment, setPayment] = useState("");
 
-  // NewOrderCustomerVehicle
   const [selectedCustomerInfo, setSelectedCustomerInfo] = useState(null);
   const [selectedVehicleInfo, setSelectedVehicleInfo] = useState({});
   const [dateTimeValue, setDateTimeValue] = useState(
     formatLocalDateTime(new Date()),
   );
 
+  const [selectedCustomerFromModal, setSelectedCustomerFromModal] = useState(
+    {},
+  );
+  const [selectedVehicleFromModal, setSelectedVehicleFromModal] = useState({});
+
   const [inputValue, setInputValue] = useState("");
 
   // State for form fields
   const [formData, setFormData] = useState({
     professional: "",
-    priority: 1,
     status: 1,
+    paymentStatus: 1,
     arrived_at: new Date().toISOString(),
     entry_km: "",
     diagnosis: "",
-    labor_cost: "",
+    labor_cost: 0,
     observation: "",
-    subtotal: null,
+    subtotal: 0,
+    paid: 0,
     customer_id: "",
     vehicle_id: "",
   });
@@ -76,7 +154,13 @@ const NewServiceOrder = () => {
     setMaterialsList,
     materialsList,
   } = useServiceOrders();
-  const { getCustomerById, customers } = useCustomers();
+  const {
+    getCustomerById,
+    customers,
+    selectedCustomerFromDetailPanel,
+    setSelectedCustomerFromDetailPanel,
+    addServiceOrderToCustomer,
+  } = useCustomers();
 
   // FETCH
   const handleFetchCustomers = async () => {
@@ -93,16 +177,6 @@ const NewServiceOrder = () => {
     handleFetchCustomers();
   }, [customers]);
 
-  const handleFetchMaterialsGroup = async () => {
-    const { data } = await materialGroupApi.getAll();
-
-    setMaterialsGroupData(data);
-  };
-
-  useEffect(() => {
-    handleFetchMaterialsGroup();
-  }, []);
-
   const handleFetchGroupMaintenanceJobData = async () => {
     const { data } = await maintenanceGroupApi.getAll();
 
@@ -113,13 +187,42 @@ const NewServiceOrder = () => {
     handleFetchGroupMaintenanceJobData();
   }, []);
 
-  // Função específica para prioridade
-  const handlePriorityChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      priority: priorityMap[value] || 1, // ← Converte texto para ID
-    }));
-  };
+  useEffect(() => {
+    if (Object.keys(selectedCustomerFromDetailPanel).length !== 0) {
+      setSelectedCustomerInfo(selectedCustomerFromDetailPanel);
+      handleSelectedVehicle(selectedCustomerFromDetailPanel.vehicles[0]);
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: selectedCustomerFromDetailPanel.id,
+        vehicle_id: selectedCustomerFromDetailPanel.vehicles[0].id,
+      }));
+    }
+  }, [selectedCustomerFromDetailPanel]);
+
+  useEffect(() => {
+    if (Object.keys(selectedCustomerFromModal).length !== 0) {
+      setSelectedCustomerInfo(selectedCustomerFromModal);
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: selectedCustomerFromModal.id,
+      }));
+    }
+    if (Object.keys(selectedVehicleFromModal).length !== 0) {
+      handleSelectedVehicle(selectedVehicleFromModal);
+      setSelectedCustomerInfo((prev) => ({
+        ...prev,
+        vehicles: [selectedVehicleFromModal],
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        vehicle_id: selectedVehicleFromModal.id,
+      }));
+    }
+  }, [
+    selectedCustomerFromModal,
+    selectedVehicleInfo,
+    selectedVehicleFromModal,
+  ]);
 
   // Função específica para status
   const handleStatusChange = (value) => {
@@ -179,20 +282,37 @@ const NewServiceOrder = () => {
       (job.materialsList || []).map((mat) => ({
         ...mat,
         parentJobId: job.id, // ID local temporário do serviço para mapeamento posterior
+        maintenanceName: job.name, // ID local temporário do serviço para mapeamento posterior
       })),
     );
 
-    const invalidMaterials = allMaterials.filter((item) => {
+    const invalidMaterialsID = allMaterials.filter((item) => {
       if (!item.material_id) return true;
-      const quantity = parseFloat(item.quantity) || 0;
-      const value = parseValue(item.value_unit);
-      return quantity <= 0 || value <= 0;
     });
 
-    if (invalidMaterials.length > 0) {
-      errorList.push(
-        "Existem materiais cadastrados sem preenchimento correto (Material, Quantidade ou Valor).",
-      );
+    if (invalidMaterialsID.length > 0) {
+      invalidMaterialsID.forEach((material) => {
+        errorList.push(
+          `A peça do serviço ${material.maintenanceName} não foi corretamente registrada.`,
+        );
+      });
+    }
+
+    const invalidMaterialsValueAndQty = allMaterials.filter((item) => {
+      const quantity = parseFloat(item.quantity) || 0;
+      const value = getNumberValue(item.value_unit);
+
+      return (quantity <= 0 || value <= 0) && !item.customerSupplierCheck;
+    });
+
+    if (invalidMaterialsValueAndQty.length > 0) {
+      invalidMaterialsValueAndQty.forEach((material) => {
+        if (!material.isCustomerSupplier) {
+          errorList.push(
+            `O material ${material.name} no serviço de ${material.maintenanceName} precisa ser o preenchida corretamente (Material, Quantidade ou Valor).`,
+          );
+        }
+      });
     }
 
     // Se houver erros nas validações, interrompe a execução
@@ -204,19 +324,22 @@ const NewServiceOrder = () => {
     }
 
     // ========== 3. PREPARAR DADOS PRINCIPAIS DA OS ==========
+
     const serviceOrderData = {
       customer_id: formData.customer_id,
       vehicle_id: formData.vehicle_id,
       professional: formData.professional || null,
-      priority: formData.priority,
       status: formData.status,
+      paymentStatus: formData.paymentStatus,
       arrived_at: formData.arrived_at,
       entry_km:
         parseFloat(String(formData.entry_km).replace(/[^0-9.]/g, "")) || 0,
-      labor_cost: parseValue(formData.labor_cost),
       diagnosis: formData.diagnosis.trim(),
       observation: formData.observation?.trim() || null,
-      subtotal: calculateGrandTotal(),
+      subtotal: getNumberValue(calculateGrandTotal()),
+      paid: getNumberValue(formData.paid),
+      labor_cost: getNumberValue(formData.labor_cost),
+      isCustomerSupplier: formData.isCustomerSupplier,
     };
 
     try {
@@ -226,6 +349,9 @@ const NewServiceOrder = () => {
       // 1. Criar a Ordem de Serviço Principal
       const { data: createdServiceOrder } =
         await orderApi.create(serviceOrderData);
+
+      addServiceOrderToCustomer(formData.customer_id, createdServiceOrder);
+
       const serviceOrderId = createdServiceOrder.id;
 
       let savedMaintenances = [];
@@ -263,9 +389,10 @@ const NewServiceOrder = () => {
           material_id: item.material_id,
           itemMaintenance_id: localToBackendJobIdMap[item.parentJobId] || null,
           quantity: parseFloat(item.quantity) || 1,
-          value_unit: parseValue(item.value_unit),
+          value_unit: getNumberValue(item.value_unit),
           receipt: item.receipt?.trim() || "",
           supplier: item.supplier?.trim() || "",
+          isCustomerSupplier: item.isCustomerSupplier || false,
         }));
 
         const { data: createdMaterials } =
@@ -285,6 +412,20 @@ const NewServiceOrder = () => {
       // Reseta listas do formulário
       setListMaintenanceJobs([]);
       setMaterialsList([]);
+      setFormData({
+        professional: "",
+        status: 1,
+        paymentStatus: 1,
+        arrived_at: new Date().toISOString(),
+        entry_km: "",
+        diagnosis: "",
+        labor_cost: "",
+        observation: "",
+        subtotal: null,
+        customer_id: "",
+        vehicle_id: "",
+      });
+      setSelectedCustomerFromDetailPanel({});
 
       // Navega para a listagem
       navigate(PATHS.serviceOrder);
@@ -307,20 +448,22 @@ const NewServiceOrder = () => {
 
   // HANDLES
   const handleFormFieldChange = (field, value) => {
+    if (field === "labor_cost" || field === "subtotal") {
+      const cleanValue = parseInputValue(value);
+
+      setFormData((prev) => ({
+        ...prev,
+        [field]: cleanValue,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const handleFormFieldChangeMaintenance = (field, value) => {
-    setFormDataItemMaintenance((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // NewOrderCustomerVehicle
   const handleSelectedVehicle = (vehicle) => {
     setSelectedVehicleInfo(vehicle);
     handleFormFieldChange("vehicle_id", vehicle.id);
@@ -395,51 +538,43 @@ const NewServiceOrder = () => {
     setMaterialsList(materialsList.filter((material) => material.id !== id));
   };
 
-  const findMaterialById = (id) => {
-    if (!id) return null;
-    for (const group of materialsGroupData) {
-      const found = group.materials.find((item) => item.id === id);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  const parseValue = (value) => {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === "number") return +value.toFixed(2);
-
-    if (typeof value === "string") {
-      let clean = value;
-
-      if (clean.includes(",") && clean.includes(".")) {
-        clean = clean.split(".").join("");
-      }
-
-      clean = clean.replace(",", ".");
-      clean = clean.replace(/[^0-9.]/g, "");
-
-      // Faz o parse e força a limitação de 2 casas decimais
-      const parsed = parseFloat(clean);
-      return parsed ? +parsed.toFixed(2) : 0;
-    }
-
-    return 0;
-  };
-
-  const calculateTotalMaintenanceJob = () =>
-    parseValue(formData.labor_cost || 0);
-
   const calculateTotalMaterials = () => {
     return (listMaintenanceJobs || []).reduce((total, material) => {
-      return parseFloat(total + material.totalPrice);
-      /* const unitValue = parseValue(material?.materialsList.value_unit);
-      const quantity = parseFloat(material?.materialsList.quantity) || 0; 
-      return total + unitValue * quantity;*/
+      const totalParsed = parseInputValue(total);
+      const materialItemTotalPriceParsed = parseInputValue(material.totalPrice);
+
+      const totalNumber = getNumberValue(totalParsed);
+      const materialItemTotalPriceNumber = getNumberValue(
+        materialItemTotalPriceParsed,
+      );
+
+      const grandTotalPrice = totalNumber + materialItemTotalPriceNumber;
+
+      return grandTotalPrice;
     }, 0);
   };
 
-  const calculateGrandTotal = () =>
-    calculateTotalMaintenanceJob() + calculateTotalMaterials();
+  const calculateGrandTotal = () => {
+    const laborCostParsed = parseInputValue(formData.labor_cost);
+    const calculatedTotalMaterialParsed = parseInputValue(
+      calculateTotalMaterials(),
+    );
+
+    const laborCostNumber = getNumberValue(laborCostParsed);
+    const calculatedTotalMaterialNumber = getNumberValue(
+      calculatedTotalMaterialParsed,
+    );
+
+    const grandTotalMaintenanceMaterialParsed = parseInputValue(
+      laborCostNumber + calculatedTotalMaterialNumber,
+    );
+
+    const grandTotalMaintenanceMaterialNumber = getNumberValue(
+      grandTotalMaintenanceMaterialParsed,
+    );
+
+    return grandTotalMaintenanceMaterialNumber;
+  };
 
   // SELECT MAINTENANCE
   // Função para encontrar serviço por ID
@@ -452,14 +587,59 @@ const NewServiceOrder = () => {
     return null;
   };
 
-  // Função para encontrar serviço por Nome
-  const findMaintenanceJobByName = (name) => {
-    if (!name) return null;
-    for (const group of maintenanceJobsGroupData) {
-      const found = group.maintenanceJobs.find((item) => item.name === name);
-      if (found) return found;
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    if (!payment) {
+      alert("Valor de pagamento é obrigatório");
+      return;
     }
-    return null;
+
+    try {
+      const currentPaidParsed = parseInputValue(formData.paid);
+      const addedValueParsed = parseInputValue(payment);
+
+      const currentPaidNumber = getNumberValue(currentPaidParsed);
+      const addedValueNumber = getNumberValue(addedValueParsed);
+
+      const totalPaidParsed = parseInputValue(
+        currentPaidNumber + addedValueNumber,
+      );
+
+      const totalPaidNumber = getNumberValue(totalPaidParsed);
+
+      handleFormFieldChange("paid", totalPaidNumber);
+      handleFormFieldChange(
+        "paymentStatus",
+        paymentStatusMap["Pago Parcialmente"],
+      );
+
+      setPayment("");
+    } catch (err) {
+      setError("Erro ao adicionar pagamento");
+    }
+  };
+
+  const handlePayFully = async (e) => {
+    e.preventDefault();
+    try {
+      const grandTotal = calculateGrandTotal();
+      const parsedTotal = parseInputValue(grandTotal);
+
+      handleFormFieldChange("paid", parsedTotal);
+      handleFormFieldChange(
+        "paymentStatus",
+        paymentStatusMap["Pago Integralmente"],
+      );
+      setPayment("");
+    } catch (err) {
+      setError("Erro ao quitar pagamento");
+    }
+  };
+
+  const handlePaymentOnChange = (e) => {
+    const cleanValue = parseInputValue(e.target.value);
+
+    setPayment(cleanValue);
   };
 
   const closeCustomerModal = () => {
@@ -478,6 +658,14 @@ const NewServiceOrder = () => {
     setVehicleIsModalOpen(true);
   };
 
+  const closeMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(false);
+  };
+
+  const handleOpenMaintenanceModal = () => {
+    setMaintenanceIsModalOpen(true);
+  };
+
   return (
     <div className="page">
       {/* ============== */}
@@ -487,180 +675,61 @@ const NewServiceOrder = () => {
         <div>
           <div className="ph-sub">Preencha os dados para registrar</div>
         </div>
-        {/* <div className="os-num-badge">#OS-2025-0143</div> */}
       </div>
 
       <div className="form-wrap">
         {/* ========================= */}
         {/* === CLIENTE E VEÍCULO === */}
         {/* ========================= */}
-        <div className="form-section">
-          <div className="fs-header">
-            <svg
-              className="fs-header-svg"
-              fill="none"
-              stroke="black"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-            <span className="fs-title">Cliente & Veículo</span>
-          </div>
-          <div className="fs-body">
-            <div className="form-grid">
-              <AutoComplete
-                label="Cliente *"
-                placeholder="Digite o nome do cliente..."
-                items={customers}
-                filterKey="name"
-                value={inputValue}
-                selectedItem={selectedCustomerInfo}
-                onInputChange={(val) => setInputValue(val)}
-                onSelect={(customer) => {
-                  setInputValue(customer.name);
-                  setSelectedCustomerInfo(customer);
+        <CustomerAndVehicleForm
+          title={CATEGORIES.customer.title}
+          icon={CATEGORIES.customer.icon}
+          isAutocompleteDisabled={false}
+          customers={customers}
+          inputValue={inputValue}
+          selectedCustomerInfo={selectedCustomerInfo}
+          selectedVehicleInfo={selectedVehicleInfo}
+          onInputChange={(val) => setInputValue(val)}
+          onSelect={(customer) => {
+            setInputValue(customer.name);
+            setSelectedCustomerInfo(customer);
 
-                  // Atualiza o ID do cliente no formData
-                  handleFormFieldChange("customer_id", customer.id);
+            // Atualiza o ID do cliente no formData
+            handleFormFieldChange("customer_id", customer.id);
 
-                  // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
-                  if (customer.vehicles?.length === 1) {
-                    handleSelectedVehicle(customer.vehicles[0]);
-                  } else {
-                    // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
-                    setSelectedVehicleInfo(null);
-                    handleFormFieldChange("vehicle_id", "");
-                  }
-                }}
-                onClear={() => {
-                  setInputValue("");
-                  setSelectedCustomerInfo(null);
-                  setSelectedVehicleInfo(null);
-                  handleFormFieldChange("customer_id", "");
-                  handleFormFieldChange("vehicle_id", "");
-                }}
-                onCreateNew={(term) => {
-                  console.log("Abrir modal para criar cliente:", term);
-                }}
-                renderOption={(customer) => (
-                  <>
-                    <div className="ac-option-name">{customer.name}</div>
-                    <div className="ac-option-sub">
-                      {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
-                    </div>
-                  </>
-                )}
-              />
-
-              <div className="field">
-                <label>Veículo *</label>
-                <div className="car-badge-row">
-                  {selectedCustomerInfo ? (
-                    selectedCustomerInfo?.vehicles?.length > 0 ? (
-                      selectedCustomerInfo?.vehicles?.length === 1 ? (
-                        <div
-                          className={`car-badge ${selectedVehicleInfo?.id === selectedCustomerInfo.vehicles[0].id ? "selected" : ""}`}
-                          onClick={() =>
-                            handleSelectedVehicle(
-                              selectedCustomerInfo.vehicles[0],
-                            )
-                          }
-                        >
-                          <svg
-                            className="car-badge-svg"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
-                            />
-                          </svg>
-                          {`${selectedCustomerInfo?.vehicles[0].license_plate} · ${selectedCustomerInfo?.vehicles[0].brand} ${selectedCustomerInfo?.vehicles[0].model}`}
-                        </div>
-                      ) : (
-                        selectedCustomerInfo.vehicles.map((element, index) => (
-                          <div
-                            className={`car-badge ${selectedVehicleInfo?.id === element.id ? "selected" : ""}`}
-                            key={element.id || index}
-                            onClick={() => handleSelectedVehicle(element)}
-                          >
-                            <svg
-                              className="car-badge-svg"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zm12 0a2 2 0 11-4 0 2 2 0 014 0zm-1-9l-3-6H7l-3 6H1v4h22v-4h-3z"
-                              />
-                            </svg>
-                            {`${element.license_plate} · ${element.brand} ${element.model}`}
-                          </div>
-                        ))
-                      )
-                    ) : (
-                      <>
-                        <span className="car-badge-row-text-no-car">
-                          Nenhum veículo cadastrado
-                        </span>
-                        <button
-                          className="add-row-btn add-row-btn-car-badge"
-                          onClick={handleOpenVehicleModal}
-                        >
-                          + Cadastrar veículo
-                        </button>
-                      </>
-                    )
-                  ) : (
-                    <span className="car-badge-row-text">
-                      Selecione o cliente primeiro
-                    </span>
-                  )}
-                </div>
+            // Se o cliente possuir exatamente 1 veículo, seleciona-o automaticamente
+            if (customer.vehicles?.length === 1) {
+              handleSelectedVehicle(customer.vehicles[0]);
+            } else {
+              // Se tiver múltiplos veículos ou nenhum, limpa o veículo selecionado anteriormente
+              setSelectedVehicleInfo(null);
+              handleFormFieldChange("vehicle_id", "");
+            }
+          }}
+          onClear={() => {
+            setInputValue("");
+            setSelectedCustomerInfo(null);
+            setSelectedVehicleInfo(null);
+            handleFormFieldChange("customer_id", "");
+            handleFormFieldChange("vehicle_id", "");
+            setSelectedCustomerFromDetailPanel({});
+          }}
+          renderOption={(customer) => (
+            <>
+              <div className="ac-option-name">{customer.name}</div>
+              <div className="ac-option-sub">
+                {`${formatarCelular(customer.cell)} · ${customer.vehicles?.length || 0} veículo(s)`}
               </div>
-              <div className="field">
-                <label>Km na entrada</label>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Ex: 52.300 km"
-                  value={formData.entry_km}
-                  onChange={(e) => {
-                    handleFormFieldChange("entry_km", e.target.value);
-                  }}
-                />
-              </div>
-              <div className="field">
-                <label>Data / Hora de Entrada</label>
-                <input
-                  type="datetime-local"
-                  className="input"
-                  value={dateTimeValue}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* <!-- Cliente & Veículo --> 
-        <NewOrderCustomerVehicle
+            </>
+          )}
+          handleOpenCustomerModal={handleOpenCustomerModal}
+          handleOpenVehicleModal={handleOpenVehicleModal}
+          formDataEntryKm={formData.entry_km}
+          dateTimeValue={dateTimeValue}
+          handleChange={handleChange}
+          handleSelectedVehicle={(element) => handleSelectedVehicle(element)}
           handleFormFieldChange={handleFormFieldChange}
-          customerData={customerData}
-          formData={formData}
-        />*/}
+        />
 
         {/* =============== */}
         {/* === SERVIÇO === */}
@@ -677,112 +746,47 @@ const NewServiceOrder = () => {
           handleAddMaterial={handleAddMaterial}
           materialsList={materialsList}
           handleMaterialInputChange={handleMaterialInputChange}
-          materialsGroupData={materialsGroupData}
           handleRemoveMaterial={handleRemoveMaterial}
-          findMaterialById={findMaterialById}
           handleAddMaintenanceJob={handleAddMaintenanceJob}
-          calculateTotalMaintenanceJob={calculateTotalMaintenanceJob}
+          formDataLaborCost={formData.labor_cost}
           calculateTotalMaterials={calculateTotalMaterials}
           calculateGrandTotal={calculateGrandTotal}
+          openMaintenanceModal={handleOpenMaintenanceModal}
+        />
+
+        {/* =================== */}
+        {/* ==== PAGAMENTO ==== */}
+        {/* =================== */}
+        <PaymentStatusForm
+          headerTitle={CATEGORIES.payment.title}
+          headerIcon={CATEGORIES.payment.icon}
+          formDataPaymentStatus={formData.paymentStatus}
+          calculateGrandTotal={calculateGrandTotal}
+          formDataPaid={parseInputValue(formData.paid || "")}
+          payment={payment}
+          handlePaymentOnChange={handlePaymentOnChange}
+          handleAddPayment={handleAddPayment}
+          handlePayFully={handlePayFully}
+          handleFormFieldChange={handleFormFieldChange}
         />
 
         {/* =================== */}
         {/* === DETALHES OS === */}
         {/* =================== */}
-        <div className="form-section">
-          <div className="fs-header">
-            <svg
-              className="fs-header-svg"
-              fill="none"
-              stroke="black"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="fs-title">Informações da OS</span>
-          </div>
-          <div className="fs-body">
-            <div className="form-grid g3">
-              <ProfessionalSelect
-                handleFormFieldChange={handleFormFieldChange}
-                professional={formData.professional}
-              />
-              {/* <div className="field">
-                <label>Prioridade</label>
-                <select
-                  className="select"
-                  value={priorityReverseMap[formData.priority] || "Normal"} // ← Mostra texto
-                  onChange={(e) => handlePriorityChange(e.target.value)} // ← Salva ID
-                >
-                  <option value="Normal">Normal</option>
-                  <option value="Baixa">Baixa</option>
-                  <option value="Alta">Alta</option>
-                  <option value="Urgente">Urgente</option>
-                </select>
-              </div> */}
-
-              <div className="field">
-                <label>Status Inicial</label>
-                <select
-                  className="select"
-                  value={statusReverseMap[formData.status] || "Pendente"} // ← Mostra texto
-                  onChange={(e) => handleStatusChange(e.target.value)} // ← Salva ID
-                >
-                  <option value="Pendente">Pendente</option>
-                  <option value="Em andamento">Em andamento</option>
-                  <option value="Concluído">Concluído</option>
-                  <option value="Aberta">Aberta</option>
-                  <option value="Aguardando peças">Aguardando peças</option>
-                  <option value="Cancelada">Cancelada</option>
-                </select>
-              </div>
-              <div className="field col-full">
-                <label>Diagnóstico / Problema</label>
-                <textarea
-                  className="textarea"
-                  placeholder="Descreva o problema relatado pelo cliente e o diagnóstico realizado..."
-                  value={formData.diagnosis}
-                  onChange={(e) =>
-                    handleFormFieldChange("diagnosis", e.target.value)
-                  }
-                />
-              </div>
-              {/* <div className="field col-full">
-                <label>Observações Internas</label>
-                <textarea
-                  className="textarea form-textarea-obs"
-                  placeholder="Notas internas da equipe..."
-                  value={formData.observation}
-                  onChange={(e) =>
-                    handleFormFieldChange("observation", e.target.value)
-                  }
-                />
-              </div> */}
-            </div>
-          </div>
-        </div>
+        <ServiceOrderDetailsForm
+          title={CATEGORIES.details.title}
+          subtitle={CATEGORIES.details.icon}
+          handleFormFieldChange={handleFormFieldChange}
+          formDataProfessional={formData.professional}
+          formDataStatus={formData.status}
+          handleStatusChange={(e) => handleStatusChange(e.target.value)}
+          formDataDiagnosis={formData.diagnosis}
+        />
 
         {/* =================== */}
         {/* === FINALIZAÇÃO === */}
         {/* =================== */}
         <div className="form-actions">
-          {/* <button className="btn btn-ghost">Cancelar</button> */}
-          {/* <button className="btn btn-secondary">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z"
-              />
-            </svg>
-            Imprimir
-          </button> */}
           <button
             className="btn btn-primary"
             onClick={handleSaveOS}
@@ -805,6 +809,7 @@ const NewServiceOrder = () => {
           isOpen={isCustomerModalOpen}
           onClose={closeCustomerModal}
           customerName={inputValue}
+          setSelectedCustomerFromNewServiceOrder={setSelectedCustomerFromModal}
         />
       )}
       {isVehicleModalOpen && (
@@ -812,6 +817,56 @@ const NewServiceOrder = () => {
           isModalOpen={isVehicleModalOpen}
           onClose={closeVehicleModal}
           selectedCustomer={getCustomerById(selectedCustomerInfo.id)}
+          setSelectedVehicleFromNewServiceOrder={setSelectedVehicleFromModal}
+        />
+      )}
+
+      {/* Modal para Serviços de Manutenção */}
+      {isMaintenanceModalOpen && (
+        <NewItemModal
+          title="Novo Serviço"
+          placeholder="Digite o novo serviço..."
+          buttonLabel="Salvar e cadastrar serviço"
+          closeModal={closeMaintenanceModal}
+          isModalOpen={isMaintenanceModalOpen}
+          items={maintenanceJobsGroupData}
+          createItem={async (groupIndex, newItemName) => {
+            if (!newItemName.trim() || !groupIndex) return;
+
+            try {
+              const newItem = {
+                name: newItemName.trim(),
+                group_id: groupIndex,
+              };
+
+              // 1. Chamada de API (ajuste para a rota correta da sua API se necessário)
+              const response = await maintenanceJobApi.create(newItem);
+              const createdItem = response.data || response;
+
+              // 2. Atualiza o estado local maintenanceJobsGroupData
+              setMaintenanceJobsGroupData((prevData) =>
+                prevData.map((group) => {
+                  if (group.id === groupIndex) {
+                    return {
+                      ...group,
+                      maintenanceJobs: [
+                        ...(group.maintenanceJobs || []),
+                        createdItem,
+                      ],
+                    };
+                  }
+                  return group;
+                }),
+              );
+
+              closeMaintenanceModal();
+            } catch (err) {
+              console.error("Erro ao adicionar serviço:", err);
+              alert(
+                err.response?.data?.message || "Erro ao adicionar serviço.",
+              );
+            }
+          }}
         />
       )}
     </div>

@@ -6,7 +6,13 @@ import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
 import { formatarCelular } from "../utils/convertCel";
 
-const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
+const NewVehicleModal = ({
+  isModalOpen,
+  onClose,
+  selectedCustomer = null,
+  setSelectedVehicleFromNewServiceOrder = null,
+  onSuccess = null,
+}) => {
   const [formData, setFormData] = useState({
     customer_id: selectedCustomer?.id || "",
     brand: "",
@@ -73,6 +79,11 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
       return;
     }
 
+    if (String(formData.license_plate).length < 7) {
+      setError("Placa deve ter pelo menos 7 caracteres.");
+      return;
+    }
+
     const vehicleData = {
       customer_id: customerIdToSave,
       brand: formData.brand.trim(),
@@ -88,9 +99,13 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
       const { data } = await vehicleApi.create(vehicleData);
 
       addVehicleToCustomer(customerIdToSave, data);
+      if (setSelectedVehicleFromNewServiceOrder) {
+        setSelectedVehicleFromNewServiceOrder(data);
+      }
+
+      if (onSuccess) onSuccess();
 
       closeWindow();
-      navigate(PATHS.customer);
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);
 
@@ -225,7 +240,7 @@ const NewVehicleModal = ({ isModalOpen, onClose, selectedCustomer = null }) => {
           </button>
         </div>
         <div className="customer-error-message-container">
-          {error && <p>{error}</p>}
+          {error && <div className="login-error">{error}</div>}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class CustomersService {
@@ -66,6 +67,73 @@ export class CustomersService {
         created_at: 'desc',
       },
     });
+  }
+
+  async findAllPerPage(paginationDto: PaginationDto) {
+    // 1. Tratamento e garantia de conversão dos parâmetros
+    const page = Number(paginationDto.page) || 1;
+    const limit = Number(paginationDto.limit) || 5;
+    const search = paginationDto.search?.trim() || '';
+
+    const skip = (page - 1) * limit;
+
+    // 2. Construção dinâmica dos filtros para o Prisma
+    const filters: any[] = [];
+
+    if (search) {
+      filters.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { cell: { contains: search, mode: 'insensitive' } },
+          {
+            vehicles: {
+              some: {
+                license_plate: { contains: search, mode: 'insensitive' },
+              },
+            },
+          },
+        ],
+      });
+    }
+
+    // Montagem da cláusula WHERE final
+    const whereClause: any = filters.length > 0 ? { AND: filters } : {};
+
+    // 3. Consulta transacionada
+    const [data, totalItems] = await this.prisma.$transaction([
+      this.prisma.customer.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.customer.count({ where: whereClause }),
+    ]);
+
+    // 4. Cálculo e estruturação da resposta com metadados
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+
+    return {
+      data,
+      meta: {
+        currentPage: page,
+        perPage: limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   // READ - Buscar um cliente por ID

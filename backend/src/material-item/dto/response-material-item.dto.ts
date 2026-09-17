@@ -51,4 +51,11 @@ export class MaterialItemResponseDto {
     type: String,
   })
   receipt: string;
+
+  @ApiPropertyOptional({
+    description: 'Indica se o cliente é o fornecedor',
+    example: true,
+    type: Boolean,
+  })
+  isCustomerSupplier: Boolean;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import SideBarList from "../components/sideBarList";
+import logo from "../assets/LogoCalazansAutomec.png";
 
 import { customerApi } from "../api/customers";
 import { orderApi } from "../api/orders";
@@ -11,6 +12,7 @@ import { useCustomers } from "../context/Customer.context";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useServiceOrders } from "../context/ServiceOrder.context";
 import { PATHS } from "../utils/paths";
+import { useAuth } from "../context/Auth.context";
 
 const ICONS = {
   orders: (
@@ -96,6 +98,7 @@ const SideBar = () => {
   const currentPath = location.pathname;
   const { countAllCustomers } = useCustomers();
   const { countAllServiceOrders, setListMaintenanceJobs } = useServiceOrders();
+  const { logout } = useAuth();
 
   // Estados
   const [counts, setCounts] = useState({
@@ -217,14 +220,25 @@ const SideBar = () => {
   return (
     <aside className="sidebar" id="sidebar">
       {/* Logo */}
-      <div className="sidebar-logo" onClick={() => navigate("/")}>
-        <div className="logo-wrap">
-          <div className="logo-icon">{ICONS.logo}</div>
-          <div className="logo-text">
-            Calazans<span className="home-greeting-accent"> Auto</span>mec
-            <small>Gestão de oficina</small>
+      <div className="sidebar-logo" onClick={() => navigate(PATHS.home)}>
+        {logo ? (
+          <div className="logo-wrap">
+            <img
+              src={logo}
+              alt="Logo Oficina"
+              className="print-header-logo-image"
+            />
           </div>
-        </div>
+        ) : (
+          <div className="logo-wrap">
+            <div className="logo-icon">{ICONS.logo}</div>
+
+            <div className="logo-text">
+              Calazans<span className="home-greeting-accent"> Auto</span>mec
+              <small>Gestão de oficina</small>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Navegação */}
@@ -250,6 +264,15 @@ const SideBar = () => {
 
       {/* Usuário */}
       <div className="sidebar-user">
+        <button
+          onClick={() => {
+            logout();
+            navigate(PATHS.login);
+          }}
+          className="btn btn-ghost"
+        >
+          Sair
+        </button>
         <div className="user-row">
           <div className="avatar">JC</div>
           <div>

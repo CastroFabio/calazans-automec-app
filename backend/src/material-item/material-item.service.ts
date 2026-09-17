@@ -63,6 +63,7 @@ export class MaterialItemService {
           supplier: createMaterialItemDto.supplier,
           receipt: createMaterialItemDto.receipt,
           itemMaintenance_id: createMaterialItemDto.itemMaintenance_id,
+          isCustomerSupplier: createMaterialItemDto.isCustomerSupplier,
         },
         include: { material: true },
       });
@@ -131,6 +132,7 @@ export class MaterialItemService {
         receipt: item.receipt || null,
         serviceorder_id: item.serviceorder_id,
         itemMaintenance_id: item.itemMaintenance_id,
+        isCustomerSupplier: item.isCustomerSupplier,
       }));
 
       // Criar todos de uma vez com createMany
@@ -243,6 +245,7 @@ export class MaterialItemService {
           material_id: updateMaterialItemDto.material_id,
           receipt: updateMaterialItemDto.receipt,
           supplier: updateMaterialItemDto.supplier,
+          isCustomerSupplier: updateMaterialItemDto.isCustomerSupplier,
         },
         include: {
           material: true,

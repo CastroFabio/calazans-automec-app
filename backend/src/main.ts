@@ -32,6 +32,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      transformOptions: { enableImplicitConversion: true },
     }),
   );
 
@@ -40,6 +41,8 @@ async function bootstrap() {
     .setDescription('API para gerenciamento de oficina mecânica')
     .setVersion('1.0')
     .addTag('customers', 'Gerenciamento de clientes')
+    .addTag('users', 'Gerenciamento de usuários')
+    .addTag('auth', 'Autenticação do usuário')
     .addTag('vehicles', 'Gerenciamento de veículos')
     .addTag('service-order', 'Gerenciamento de ordens de serviço')
     .addTag('material', 'Gerenciamento de itens de material')
@@ -57,7 +60,7 @@ async function bootstrap() {
       'material-item',
       'Gerenciamento de grupos de itens de material dentro da ordem de serviço',
     )
-    .addBearerAuth() // Se usar autenticação JWT
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

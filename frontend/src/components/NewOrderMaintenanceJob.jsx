@@ -1,9 +1,13 @@
-import React, { useState, useMemo } from "react";
-import InputPriceValue from "./InputPriceValue";
+import { useState, useMemo, useEffect } from "react";
+import CurrencyInput from "./CurrencyInput.component";
 import AddMaterialInMaintenace from "./AddMaterialInMaintenace";
 import AutoComplete from "./AutoComplete.component";
 import SvcRegistradosList from "./SvcRegistradosList.component";
 import { useServiceOrders } from "../context/ServiceOrder.context";
+import WizardBtn from "./WizardBtn.component";
+import { materialGroupApi } from "../api/materialGroups";
+import { getNumberValue, parseInputValue } from "../utils/parseValue";
+import { formattedPrice } from "../utils/convertPrice";
 
 const NewOrderMaintenanceJob = ({
   formData,
@@ -12,19 +16,28 @@ const NewOrderMaintenanceJob = ({
   handleRemoveMaintenanceJob,
   setListMaintenanceJobs,
   maintenanceJobsGroupData = [],
-  materialsGroupData,
-  findMaterialById,
   handleAddMaintenanceJob,
-  calculateTotalMaintenanceJob,
+  formDataLaborCost,
   calculateTotalMaterials,
   calculateGrandTotal,
+  openMaintenanceModal,
 }) => {
   const [svcNome, setSvcNome] = useState("");
   const [selectedService, setSelectedService] = useState(null);
   const [svcObs, setSvcObs] = useState("");
   const [editingJobId, setEditingJobId] = useState(null);
+  const [materialsGroupData, setMaterialsGroupData] = useState([]);
+  const [materialsList, setMaterialsList] = useState([]);
 
-  const { setMaterialsList, materialsList } = useServiceOrders();
+  const handleFetchMaterialsGroup = async () => {
+    const { data } = await materialGroupApi.getAll();
+
+    setMaterialsGroupData(data);
+  };
+
+  useEffect(() => {
+    handleFetchMaterialsGroup();
+  }, []);
 
   const flatMaintenanceJobs = useMemo(() => {
     if (!maintenanceJobsGroupData || maintenanceJobsGroupData.length === 0)
@@ -62,6 +75,22 @@ const NewOrderMaintenanceJob = ({
       prev.map((item) => {
         if (item.id !== matId) return item;
 
+        // Trata a alteração do checkbox de fornecedor cliente
+        if (field === "isCustomerSupplier") {
+          return {
+            ...item,
+            isCustomerSupplier: value,
+            // Se for marcado como true, já zera os campos dependentes de uma vez só
+            ...(value
+              ? {
+                  value_unit: 0,
+                  supplier: "",
+                  receipt: "",
+                }
+              : {}),
+          };
+        }
+
         if (field === "material_id") {
           if (!value) return { ...item, material_id: null, value_unit: "" };
           const found = findMaterialById(value);
@@ -74,6 +103,21 @@ const NewOrderMaintenanceJob = ({
             };
           }
         }
+
+        if (field === "value_unit") {
+          if (!value) return { ...item, value_unit: "" };
+          const found = findMaterialListById(matId);
+
+          const valueUnitParsed = parseInputValue(value);
+
+          if (found) {
+            return {
+              ...item,
+              value_unit: valueUnitParsed,
+            };
+          }
+        }
+
         return { ...item, [field]: value };
       }),
     );
@@ -109,6 +153,7 @@ const NewOrderMaintenanceJob = ({
       return {
         ...mat,
         name: mat.name || foundMat?.name || "Peça",
+        isCustomerSupplier: !!mat.isCustomerSupplier,
       };
     });
 
@@ -138,6 +183,22 @@ const NewOrderMaintenanceJob = ({
     ),
   }));
 
+  const findMaterialById = (id) => {
+    if (!id) return null;
+    for (const group of materialsGroupData) {
+      const found = group.materials.find((item) => item.id === id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  const findMaterialListById = (id) => {
+    if (!id) return null;
+    const found = materialsList.find((item) => item.id === id);
+    if (found) return found;
+    return null;
+  };
+
   return (
     <div className="form-section">
       <div className="fs-header">
@@ -164,9 +225,12 @@ const NewOrderMaintenanceJob = ({
       </div>
 
       <div className="fs-body fs-body-new-service-order">
-        <InputPriceValue
-          labor_cost={formData.labor_cost}
-          handleFormFieldChange={handleFormFieldChange}
+        <CurrencyInput
+          value={formData.labor_cost}
+          handleFormFieldChange={(e) =>
+            handleFormFieldChange("labor_cost", e.target.value)
+          }
+          label={"Mão de obra"}
         />
 
         {(listMaintenanceJobs?.length || []) > 0 && (
@@ -237,6 +301,12 @@ const NewOrderMaintenanceJob = ({
               />
             </div>
           </div>
+          {true && (
+            <WizardBtn
+              label={"Novo serviço"}
+              openModal={openMaintenanceModal}
+            />
+          )}
 
           <AddMaterialInMaintenace
             handleAddMaterial={handleAddLocalMaterial}
@@ -244,9 +314,9 @@ const NewOrderMaintenanceJob = ({
             handleMaterialInputChange={handleLocalMaterialInputChange}
             materialsGroupData={materialsGroupData}
             handleRemoveMaterial={handleRemoveLocalMaterial}
-            findMaterialById={findMaterialById}
             itemMaintenance_id={editingJobId}
             listMaintenanceJobs={listMaintenanceJobs}
+            setMaterialsGroupData={setMaterialsGroupData}
           />
 
           <div className="svc-actions">
@@ -276,19 +346,17 @@ const NewOrderMaintenanceJob = ({
         <div className="total-row">
           <div className="total-item">
             Mão de obra:
-            <strong>R$ {calculateTotalMaintenanceJob().toFixed(2)}</strong>
+            <strong>{` ${formattedPrice(formDataLaborCost)}`}</strong>
           </div>
           <div className="total-row-divider"></div>
           <div className="total-item">
             Peças:
-            <strong>R$ {calculateTotalMaterials().toFixed(2)}</strong>
+            <strong>{` ${formattedPrice(calculateTotalMaterials())}`}</strong>
           </div>
           <div className="total-row-divider"></div>
           <div className="total-item">
             Total:
-            <span className="grand-total">
-              R$ {calculateGrandTotal().toFixed(2)}
-            </span>
+            <span className="grand-total">{` ${formattedPrice(calculateGrandTotal())}`}</span>
           </div>
         </div>
       </div>

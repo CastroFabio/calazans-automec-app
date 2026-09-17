@@ -1,16 +1,20 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { customerApi } from "../api/customers";
+import { useAuth } from "./Auth.context";
 
 // Criar o Contexto
 const CustomerContext = createContext();
 
 // Provider do Contexto
 export const CustomerProvider = ({ children }) => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [customers, setCustomers] = useState([]);
   const [customerID, setCustomerID] = useState(null);
   const [customerCount, setCustomerCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedCustomerFromDetailPanel, setSelectedCustomerFromDetailPanel] =
+    useState({});
 
   // Função para buscar clientes
   const fetchCustomers = async () => {
@@ -206,6 +210,26 @@ export const CustomerProvider = ({ children }) => {
     );
   };
 
+  const addServiceOrderToCustomer = (customerId, newServiceOrder) => {
+    setCustomers((prev) =>
+      prev.map((customer) => {
+        if (customer.id !== customerId) return customer;
+
+        // Atualizar o cliente com o novo veículo
+        const updatedCustomer = {
+          ...customer,
+          serviceOrders: [...(customer.serviceOrders || []), newServiceOrder],
+          _count: {
+            ...customer._count,
+            serviceOrders: (customer._count?.serviceOrders || 0) + 1,
+          },
+        };
+
+        return updatedCustomer;
+      }),
+    );
+  };
+
   const removeVehicleFromCustomer = (customerId, vehicleId) => {
     setCustomers((prev) =>
       prev.map((customer) => {
@@ -250,8 +274,10 @@ export const CustomerProvider = ({ children }) => {
 
   // Carregar clientes ao iniciar
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    if (isAuthenticated && !authLoading) {
+      fetchCustomers();
+    }
+  }, [isAuthenticated, authLoading]);
 
   return (
     <CustomerContext.Provider
@@ -266,6 +292,7 @@ export const CustomerProvider = ({ children }) => {
         updateCustomer,
         countAllCustomers,
         addVehicleToCustomer,
+        addServiceOrderToCustomer,
         removeVehicleFromCustomer,
         updateVehicleFromCustomer,
         fetchCustomerById,
@@ -275,6 +302,8 @@ export const CustomerProvider = ({ children }) => {
         getFirstCustomer,
         customerID,
         setCustomerID,
+        selectedCustomerFromDetailPanel,
+        setSelectedCustomerFromDetailPanel,
       }}
     >
       {children}

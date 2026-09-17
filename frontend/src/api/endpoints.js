@@ -2,9 +2,15 @@ export const ENDPOINTS = {
   // Customers
   customers: {
     base: "/customers",
+    perPage: "/customers/page",
     byId: (id) => `/customers/${id}`,
     orders: (id) => `/customers/${id}/orders`,
     count: `/customers/count`,
+  },
+
+  auth: {
+    fetchMe: "/auth/me",
+    login: "/auth/login",
   },
 
   // Cars
@@ -17,6 +23,7 @@ export const ENDPOINTS = {
   // Orders (Service Orders)
   orders: {
     base: "/service-order",
+    perPage: "/service-order/page",
     byId: (id) => `/service-order/${id}`,
     status: (id) => `/service-order/${id}/status`,
     byCustomer: (customerId) => `/service-order/customer/${customerId}`,

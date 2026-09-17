@@ -3,6 +3,9 @@ import { maintenanceGroupApi } from "../api/maintenanceGroups";
 import { maintenanceJobApi } from "../api/maintenanceJobs";
 import MaintenanceGroupList from "../components/MaintenanceGroupList.component";
 import MaintenanceActiveGroupItemList from "../components/MaintenanceActiveGroupItemList.component";
+import ActiveGroupItemList from "../components/ActiveGroupItemList.component";
+import ItemGroupList from "../components/ItemGroupList.component";
+import ItemGroupHeader from "../components/ItemGroupHeader.component";
 
 const MaintenanceJobs = () => {
   const [activeTab, setActiveTab] = useState({
@@ -282,29 +285,25 @@ const MaintenanceJobs = () => {
     }
   };
 
+  // ========== DEIXAR GRUPO UNIFORME ==========
+
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <div className="ph-sub">
-            Catálogo de serviços de manutenação disponíveis na oficina
-          </div>
-        </div>
-      </div>
+      <ItemGroupHeader category={"manutenção"} />
       <div className="cad-layout">
-        <MaintenanceGroupList
+        <ItemGroupList
           setIsCreatingGroup={setIsCreatingGroup}
           isCreatingGroup={isCreatingGroup}
           handleClickCreatingGroup={handleClickCreatingGroup}
           creatingGroupName={creatingGroupName}
           handleChangeCreatingGroup={handleChangeCreatingGroup}
           handleCancelCreatingGroup={handleCancelCreatingGroup}
-          maintenanceGroupData={maintenanceGroupData}
+          itemGroupData={maintenanceGroupData}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
         />
 
-        <MaintenanceActiveGroupItemList
+        <ActiveGroupItemList
           editingItem={editingItem}
           setEditingItem={setEditingItem}
           activeTab={activeTab}

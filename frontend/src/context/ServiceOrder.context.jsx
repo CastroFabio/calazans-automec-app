@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { orderApi } from "../api/orders";
+import { useAuth } from "./Auth.context";
 
 const ServiceOrderContext = createContext();
 
 export const ServiceOrderProvider = ({ children }) => {
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [serviceOrders, setServiceOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -283,10 +285,88 @@ export const ServiceOrderProvider = ({ children }) => {
   // ========== LIMPAR ERRO ==========
   const clearError = () => setError(null);
 
+  // ========== ADICIONAR / ATUALIZAR SERVIÇO DE MANUTENÇÃO ==========
+  const handleAddMaintenanceJob = (itemService, customId = null) => {
+    // Calcula o valor total incluindo os materiais/peças vinculados ao serviço
+    const totalPrice = (itemService.materialsList || []).reduce(
+      (acc, cur) =>
+        parseFloat(cur.value_unit || 0) * parseFloat(cur.quantity || 0) + acc,
+      0,
+    );
+
+    const updatedJob = {
+      id: customId || Date.now(),
+      maintenance_id: itemService.service?.id || itemService.maintenance_id,
+      name: itemService.service?.name || itemService.name,
+      description: itemService.description || "",
+      materialsList: itemService.materialsList || [],
+      totalPrice,
+    };
+
+    setListMaintenanceJobs((prev) => {
+      // Se o customId existir na lista, atualiza o item (modo edição)
+      const exists = prev.some((job) => job.id === customId);
+      if (exists) {
+        return prev.map((job) => (job.id === customId ? updatedJob : job));
+      }
+      // Caso contrário, adiciona o novo serviço à lista (modo criação)
+      return [...prev, updatedJob];
+    });
+  };
+
+  const transformBackendToUIJob = (rawJob, allMaterials = []) => {
+    // 1. Identifica o nome do serviço no objeto do backend
+    const jobName =
+      rawJob.maintenancejob?.name || rawJob.maintenance?.name || "";
+
+    // 2. Filtra os materiais associados especificamente a este serviço
+    const linkedMaterials = allMaterials
+      .filter((mat) => Number(mat.itemMaintenance_id) === Number(rawJob.id))
+      .map((mat) => ({
+        id: mat.id,
+        created_at: mat.created_at,
+        quantity: mat.quantity,
+        value_unit: String(mat.value_unit ?? ""),
+        serviceorder_id: mat.serviceorder_id,
+        itemMaintenance_id: mat.itemMaintenance_id,
+        material_id: mat.material_id,
+        receipt: mat.receipt ?? null,
+        supplier: mat.supplier ?? null,
+        isCustomerSupplier: !!mat.isCustomerSupplier,
+        material: mat.material || null,
+        name: mat.material?.name || mat.name || "Peça",
+      }));
+
+    // 3. Calcula o subtotal das peças vinculadas ao serviço
+    const totalPrice = linkedMaterials.reduce((sum, mat) => {
+      if (mat.isCustomerSupplier) return sum;
+      const qty = parseFloat(mat.quantity) || 0;
+      const val = parseFloat(mat.value_unit) || 0;
+      return sum + qty * val;
+    }, 0);
+
+    // 4. Retorna a nova estrutura desejada
+    return {
+      id: rawJob.id,
+      maintenance_id: rawJob.maintenance_id,
+      name: jobName,
+      description: rawJob.description || "",
+      materialsList: linkedMaterials,
+      totalPrice: totalPrice,
+      maintenance: {
+        id: rawJob.maintenance_id,
+        name: jobName,
+      },
+      isOpen: true,
+    };
+  };
+
   // ========== CARREGAR ORDENS AO INICIAR ==========
   useEffect(() => {
-    fetchServiceOrders();
-  }, []);
+    if (isAuthenticated && !authLoading) {
+      fetchServiceOrders();
+    }
+  }, [isAuthenticated, authLoading]);
 
   return (
     <ServiceOrderContext.Provider
@@ -311,6 +391,7 @@ export const ServiceOrderProvider = ({ children }) => {
         materialsList,
         handleEditMaterialInputChange,
         handleEditMaintenanceJobChange,
+        handleAddMaintenanceJob,
       }}
     >
       {children}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { materialGroupApi } from "../api/materialGroups";
 import { materialApi } from "../api/materials";
-import MaterialGroupList from "../components/MaterialGroupList.component";
-import MaterialActiveGroupItemList from "../components/MaterialActiveGroupItemList.component";
+import ActiveGroupItemList from "../components/ActiveGroupItemList.component";
+import ItemGroupList from "../components/ItemGroupList.component";
+import ItemGroupHeader from "../components/ItemGroupHeader.component";
 
 const Materials = () => {
   const [activeTab, setActiveTab] = useState({
@@ -16,7 +17,7 @@ const Materials = () => {
   });
   const [creatingGroupName, setCreatingGroupName] = useState("");
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
-  const [newItemName, setNewItemName] = useState("");
+  const [newItem, setNewItem] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -223,15 +224,18 @@ const Materials = () => {
   };
 
   // ========== ADICIONAR ITEM ==========
-  const handleAddItem = async (groupIndex, newItemName) => {
-    if (!newItemName.trim()) return;
+  const handleAddItem = async (groupIndex, newItemname) => {
+    if (!newItemname.trim()) {
+      setError("Nome completo é obrigatório.");
+      return;
+    }
 
     setIsAdding(true);
     setError(null);
 
     try {
       const newItem = {
-        name: newItemName.trim(),
+        name: newItemname.trim(),
         group_id: groupIndex,
       };
 
@@ -251,7 +255,7 @@ const Materials = () => {
       });
 
       // Limpar o campo
-      setNewItemName("");
+      setNewItem("");
     } catch (error) {
       console.error("Erro ao adicionar material:", error);
       const message =
@@ -290,33 +294,27 @@ const Materials = () => {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <div>
-          <div className="ph-sub">
-            Catálogo de materiais disponíveis na oficina
-          </div>
-        </div>
-      </div>
+      <ItemGroupHeader category={"material"} />
       <div className="cad-layout">
-        <MaterialGroupList
+        <ItemGroupList
           setIsCreatingGroup={setIsCreatingGroup}
           isCreatingGroup={isCreatingGroup}
           handleClickCreatingGroup={handleClickCreatingGroup}
           creatingGroupName={creatingGroupName}
           handleChangeCreatingGroup={handleChangeCreatingGroup}
           handleCancelCreatingGroup={handleCancelCreatingGroup}
-          materialsGroupData={materialsGroupData}
+          itemGroupData={materialsGroupData}
           setActiveTab={setActiveTab}
           activeTab={activeTab}
         />
 
-        <MaterialActiveGroupItemList
+        <ActiveGroupItemList
           editingItem={editingItem}
           setEditingItem={setEditingItem}
           activeTab={activeTab}
           activeGroup={activeGroup}
-          newItemName={newItemName}
-          setNewItemName={setNewItemName}
+          newItem={newItem}
+          setNewItem={setNewItem}
           handleEditSaveGroup={handleEditSaveGroup}
           handleEditSave={handleEditSave}
           handleEditKeyPress={handleEditKeyPress}

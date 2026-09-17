@@ -24,19 +24,6 @@ export class CreateServiceOrderDto {
 
   @ApiProperty({
     description:
-      'Prioridade da ordem de serviço (normal [1], baixa [2], alta [3], urgente [4])',
-    example: 1,
-    type: Number,
-  })
-  @IsInt({ message: 'O número que representa a prioridade deve ser inteiro' })
-  @IsOptional()
-  @IsPositive({
-    message: 'O número que representa a prioridade deve ser um número positivo',
-  })
-  priority: number;
-
-  @ApiProperty({
-    description:
       'Status da ordem de serviço (pendente [1], em andamento [2], concluído [3], aberta [4], aguardando peças [5], cancelada [6])',
     example: 1,
     type: Number,
@@ -44,7 +31,24 @@ export class CreateServiceOrderDto {
   @IsInt({ message: 'O número que representa a status deve ser inteiro' })
   @IsNotEmpty({ message: 'O número que representa a status obrigatório' })
   @IsPositive({ message: 'O número que representa a status deve ser positivo' })
-  status: number;
+  status?: number;
+
+  @ApiProperty({
+    description:
+      'Status de pagamento da ordem de serviço (Aguardando Pagamento [1], Pago Parcialmente [2], Pago Integralmente [3], Sem Pagamento [4])',
+    example: 1,
+    type: Number,
+  })
+  @IsInt({
+    message: 'O número que representa o status de pagamento deve ser inteiro',
+  })
+  @IsNotEmpty({
+    message: 'O número que representa o status de pagamento obrigatório',
+  })
+  @IsPositive({
+    message: 'O número que representa o status de pagamento deve ser positivo',
+  })
+  paymentStatus?: number;
 
   @ApiProperty({
     description: 'Data em que o carro chegou',

@@ -1,13 +1,5 @@
-import { statusReverseMap, statusReverseMapBadge } from "../utils/statusMap";
-
-const StatusBadge = ({ status }) => {
-  return (
-    <span
-      className={`badge badge-${statusReverseMapBadge[status] || "default"}`}
-    >
-      {statusReverseMap[status]}
-    </span>
-  );
+const StatusBadge = ({ reverseMapBadge, reverseMap }) => {
+  return <span className={`badge badge-${reverseMapBadge}`}>{reverseMap}</span>;
 };
 
 export default StatusBadge;
