@@ -1,0 +1,5 @@
+# Variaveis de ambiente do docker compose (use .env.example como modelo)
+.env
+.env.local
+
+node_modules

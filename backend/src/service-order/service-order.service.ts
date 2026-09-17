@@ -8,7 +8,6 @@ import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from './dto/pagination.dto';
-import { Prisma } from 'generated/prisma/browser';
 
 @Injectable()
 export class ServiceOrderService {

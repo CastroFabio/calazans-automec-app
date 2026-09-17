@@ -1,0 +1,121 @@
+# Os valores ${VAR:-default} vem do .env da raiz (veja .env.example)
+services:
+  # ---------------------------------------------------------------------------
+  # Banco de dados
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:18-alpine
+    container_name: calazans-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-calazans_automec_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-calazans_automec_db}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - calazans-net
+
+  # ---------------------------------------------------------------------------
+  # Migrations: roda uma vez, encerra, e so entao o backend sobe.
+  # Rodar so as migrations:  docker compose up migrate
+  # ---------------------------------------------------------------------------
+  migrate:
+    image: calazans-automec-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calazans_automec_db}?schema=public
+    command: ["npx", "prisma", "migrate", "deploy"]
+    networks:
+      - calazans-net
+
+  # ---------------------------------------------------------------------------
+  # Seed sob demanda - nao sobe no "docker compose up":
+  #   docker compose run --rm seed
+  # ATENCAO: o seed apaga todas as tabelas antes de inserir os dados.
+  # ---------------------------------------------------------------------------
+  seed:
+    image: calazans-automec-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: "no"
+    profiles:
+      - seed
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calazans_automec_db}?schema=public
+    command: ["npx", "prisma", "db", "seed"]
+    networks:
+      - calazans-net
+
+  # ---------------------------------------------------------------------------
+  # API NestJS
+  # ---------------------------------------------------------------------------
+  backend:
+    image: calazans-automec-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: calazans-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calazans_automec_db}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-defaultSecretKey}
+      PORT: 3000
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    networks:
+      - calazans-net
+
+  # ---------------------------------------------------------------------------
+  # Frontend React/Vite servido por nginx
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: calazans-automec-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/}
+    container_name: calazans-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      # 5173 no host porque essa origem ja esta liberada no CORS do backend
+      - "${FRONTEND_PORT:-5173}:80"
+    networks:
+      - calazans-net
+
+volumes:
+  postgres_data:
+
+networks:
+  calazans-net:
+    driver: bridge
