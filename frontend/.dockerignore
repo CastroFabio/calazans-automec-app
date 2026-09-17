@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+build
+.git
+.gitignore
+# O .env local e ignorado de proposito: a URL da API vem do build arg VITE_API_URL
+.env
+.env.*
+*.local
+*.log
+.vscode
+.idea
+mock
+Dockerfile
+.dockerignore
+README.md
