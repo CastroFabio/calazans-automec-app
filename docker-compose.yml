@@ -14,7 +14,9 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # postgres 18+: o PGDATA padrao e /var/lib/postgresql/18/docker e a imagem recusa
+      # volume em /var/lib/postgresql/data (caminho do 17). Montar o pai e o recomendado.
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test:
         [
@@ -33,10 +35,9 @@ services:
   # Rodar so as migrations:  docker compose up migrate
   # ---------------------------------------------------------------------------
   migrate:
+    # Sem build: usa a imagem que o servico backend gera (o compose builda antes de subir
+    # qualquer container). Tres builds da mesma tag em paralelo colidem no export.
     image: calazans-automec-backend:latest
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     restart: "no"
     depends_on:
       db:
@@ -53,10 +54,9 @@ services:
   # ATENCAO: o seed apaga todas as tabelas antes de inserir os dados.
   # ---------------------------------------------------------------------------
   seed:
+    # Sem build: usa a imagem que o servico backend gera (o compose builda antes de subir
+    # qualquer container). Tres builds da mesma tag em paralelo colidem no export.
     image: calazans-automec-backend:latest
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     restart: "no"
     profiles:
       - seed
@@ -65,7 +65,7 @@ services:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calazans_automec_db}?schema=public
-    command: ["npx", "prisma", "db", "seed"]
+    command: ["node", "dist/prisma/seed.js"]
     networks:
       - calazans-net
 
