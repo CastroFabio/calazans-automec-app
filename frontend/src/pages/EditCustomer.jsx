@@ -196,21 +196,39 @@ const EditCustomer = () => {
 
   // ========== SALVAR EDIÇÃO DE VEÍCULO ==========
   const handleSaveVehicle = async (vehicleId) => {
-    // Validação
-    if (!editingVehicleData.license_plate.trim()) {
-      setError("A placa é obrigatória");
-      return;
+    const errorList = [];
+
+    if (editingVehicleData.year && !Number(editingVehicleData.year)) {
+      errorList.push("O ano deve ser um número");
+    }
+
+    if (!editingVehicleData.license_plate) {
+      errorList.push("A placa é obrigatória");
+    }
+
+    if (editingVehicleData.license_plate.trim().length < 7) {
+      errorList.push("A placa deve ter pelo menos 7 caracteres");
+    }
+
+    if (editingVehicleData.license_plate.trim().length >= 8) {
+      errorList.push("A placa deve ter no máximo 8 caracteres");
     }
 
     setVehicleSaving(true);
     setError(null);
-
+    if (errorList.length > 0) {
+      alert(
+        `Verifique os erros antes de salvar:\n\n- ${errorList.join("\n- ")}`,
+      );
+      setVehicleSaving(false);
+      return;
+    }
     try {
       const updateData = {
         license_plate: editingVehicleData.license_plate.trim().toUpperCase(),
         brand: editingVehicleData.brand.trim() || null,
         model: editingVehicleData.model.trim() || null,
-        year: Number(editingVehicleData.year.trim()) || null,
+        year: Number(editingVehicleData.year) || null,
         color: editingVehicleData.color.trim() || null,
         customer_id: customer.id,
       };
@@ -267,7 +285,22 @@ const EditCustomer = () => {
       }));
     } catch (err) {
       console.error("❌ Erro ao remover veículo:", err);
-      setError("Erro ao remover veículo");
+
+      let errorMessage = "Erro ao remover veículo";
+      if (err.response) {
+        if (err.response.status === 404) {
+          errorMessage = "Veículo não encontrado";
+        } else {
+          errorMessage = err.response.data?.message || errorMessage;
+        }
+      } else if (err.request) {
+        errorMessage = "Servidor não respondeu";
+      }
+      if (errorMessage) {
+        alert(`Verifique os erros antes de salvar:\n\n- ${errorMessage}`);
+        return;
+      }
+      setError(errorMessage);
     }
   };
 
@@ -551,10 +584,7 @@ const EditCustomer = () => {
                           <button
                             className="btn btn-primary"
                             onClick={() => handleSaveVehicle(element.id)}
-                            disabled={
-                              vehicleSaving ||
-                              !editingVehicleData.license_plate.trim()
-                            }
+                            disabled={vehicleSaving}
                           >
                             {vehicleSaving ? (
                               "Salvando..."

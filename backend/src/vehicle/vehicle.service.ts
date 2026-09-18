@@ -4,6 +4,7 @@ import {
   ConflictException,
   BadRequestException,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -196,17 +197,24 @@ export class VehicleService {
     try {
       const vehicle = await this.prisma.vehicle.findUnique({
         where: { id },
+        include: { serviceOrders: true },
       });
 
       if (!vehicle) {
         throw new NotFoundException('Veículo não encontrado');
       }
 
+      if (vehicle.serviceOrders.length > 0) {
+        throw new BadRequestException(
+          'Não é possível excluir um veículo que possui ordens de serviço',
+        );
+      }
+
       await this.prisma.vehicle.delete({
         where: { id },
       });
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao remover veículo');
