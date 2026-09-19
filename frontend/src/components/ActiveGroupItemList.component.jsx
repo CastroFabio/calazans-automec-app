@@ -32,9 +32,8 @@ const ActiveGroupItemList = ({
         <button
           className="btn btn-primary btn-sm"
           onClick={() => {
-            if (activeTab.groupName && newItemName.trim()) {
+            if (activeTab.groupName && newItemName?.trim()) {
               handleAddItem(activeTab.groupIndex, newItemName);
-              setNewItemName("");
             }
           }}
         >
