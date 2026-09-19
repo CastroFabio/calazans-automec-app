@@ -70,6 +70,11 @@ const NewVehicleModal = ({
       return;
     }
 
+    if (!Number(customerIdToSave)) {
+      setError("O cliente deve ser um número válido.");
+      return;
+    }
+
     if (!formData.license_plate.trim()) {
       setError("Placa é obrigatória.");
       return;
@@ -86,11 +91,11 @@ const NewVehicleModal = ({
     }
 
     const vehicleData = {
-      customer_id: customerIdToSave,
+      customer_id: Number(customerIdToSave),
       brand: formData.brand.trim(),
       model: formData.model.trim(),
       color: formData.color.trim(),
-      year: Number(formData.year.trim()),
+      year: Number(formData.year.trim()) || null,
       license_plate: formData.license_plate.trim(),
     };
 

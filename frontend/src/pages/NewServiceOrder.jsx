@@ -714,6 +714,8 @@ const NewServiceOrder = () => {
             handleFormFieldChange("customer_id", "");
             handleFormFieldChange("vehicle_id", "");
             setSelectedCustomerFromDetailPanel({});
+            setSelectedCustomerFromModal({});
+            setSelectedVehicleFromModal({});
           }}
           renderOption={(customer) => (
             <>
