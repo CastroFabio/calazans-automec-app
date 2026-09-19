@@ -105,6 +105,7 @@ const NewServiceOrder = () => {
   const [maintenanceJobsGroupData, setMaintenanceJobsGroupData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [errorOnCreateItem, setErrorOnCreateItem] = useState(false);
   const [isCustomerModalOpen, setCustomerIsModalOpen] = useState(false);
   const [isVehicleModalOpen, setVehicleIsModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setMaintenanceIsModalOpen] = useState(false);
@@ -839,11 +840,9 @@ const NewServiceOrder = () => {
                 group_id: groupIndex,
               };
 
-              // 1. Chamada de API (ajuste para a rota correta da sua API se necessário)
               const response = await maintenanceJobApi.create(newItem);
               const createdItem = response.data || response;
 
-              // 2. Atualiza o estado local maintenanceJobsGroupData
               setMaintenanceJobsGroupData((prevData) =>
                 prevData.map((group) => {
                   if (group.id === groupIndex) {
@@ -862,11 +861,15 @@ const NewServiceOrder = () => {
               closeMaintenanceModal();
             } catch (err) {
               console.error("Erro ao adicionar serviço:", err);
-              alert(
+              setErrorOnCreateItem(
                 err.response?.data?.message || "Erro ao adicionar serviço.",
               );
+
+              // REPASSA O ERRO PARA O TRY/CATCH DA MODAL
+              throw err;
             }
           }}
+          onError={errorOnCreateItem}
         />
       )}
     </div>

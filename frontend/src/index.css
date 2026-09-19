@@ -3750,6 +3750,7 @@
   place-items: center;
   color: var(--accent);
   font-weight: bold;
+  padding: 16px 0;
 }
 
 .texto-riscado {

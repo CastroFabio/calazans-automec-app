@@ -464,9 +464,7 @@ const AddMaterialInMaintenace = ({
               setError(
                 err.response?.data?.message || "Erro ao adicionar material.",
               );
-              /* alert(
-                err.response?.data?.message || "Erro ao adicionar material.",
-              ); */
+              throw err;
             }
           }}
           onError={error}
