@@ -3863,7 +3863,7 @@
   color: var(--accent);
 }
 .print-header-logo-image {
-  width: 100px;
+  width: 100%;
 }
 .home-header-logo-image {
   width: 260px;
