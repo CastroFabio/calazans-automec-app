@@ -190,9 +190,7 @@ const NewCustomerModal = ({
             Salvar e Cadastrar Cliente
           </button>
         </div>
-        <div className="customer-error-message-container">
-          {error && <div className="login-error">{error}</div>}
-        </div>
+        <ErrorMessage errorMessage={error} />
       </div>
     </div>
   );

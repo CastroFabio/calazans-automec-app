@@ -5,6 +5,7 @@ import AutoComplete from "./AutoComplete.component";
 import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
 import { formatarCelular } from "../utils/convertCel";
+import ErrorMessage from "./ErrorMessage.component";
 
 const NewVehicleModal = ({
   isModalOpen,
@@ -74,7 +75,7 @@ const NewVehicleModal = ({
       return;
     }
 
-    if (!Number(formData.year.trim())) {
+    if (formData.year && !Number(formData.year.trim())) {
       setError("Ano deve ser um número válido.");
       return;
     }
@@ -239,9 +240,7 @@ const NewVehicleModal = ({
             Salvar Veículo
           </button>
         </div>
-        <div className="customer-error-message-container">
-          {error && <div className="login-error">{error}</div>}
-        </div>
+        <ErrorMessage errorMessage={error} />
       </div>
     </div>
   );
