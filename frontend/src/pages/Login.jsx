@@ -133,11 +133,6 @@ export default function Login() {
         >
           Entrar
         </button>
-
-        <div className="login-footer">
-          Para testar: <strong>admin@calazans.com</strong> /{" "}
-          <strong>admin123</strong>
-        </div>
       </div>
     </div>
   );

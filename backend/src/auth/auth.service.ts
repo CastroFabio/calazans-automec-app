@@ -62,19 +62,22 @@ export class AuthService {
   }
 
   async generateTokens(userId: number, email: string) {
-    const payload = { userId, email, sub: userId };
+    // Define o payload base sem exp/iat
+    const getPayload = () => ({ userId, email, sub: userId });
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
+      this.jwtService.signAsync(getPayload(), {
         secret:
           this.configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
-        expiresIn: '15m', // Access Token curto
+        expiresIn: (this.configService.get<string>('JWT_EXPIRES_IN') ||
+          '15m') as any,
       }),
-      this.jwtService.signAsync(payload, {
+      this.jwtService.signAsync(getPayload(), {
         secret:
           this.configService.get<string>('JWT_REFRESH_SECRET') ||
           'defaultRefreshSecret',
-        expiresIn: '7d', // Refresh Token longo
+        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ||
+          '7d') as any,
       }),
     ]);
 

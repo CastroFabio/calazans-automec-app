@@ -1,6 +1,6 @@
 import axios from "axios";
 import { PATHS } from "../utils/paths";
-import { authApi } from "./auth";
+import { JWT_TOKENS } from "../utils/jwtConstant";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/";
 
@@ -13,7 +13,7 @@ const api = axios.create({
 // Injeta o Access Token em todas as requisições
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem(JWT_TOKENS.accessToken);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,18 +28,33 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Evita loop se a própria requisição que falhou for a de refresh ou login
+    if (
+      originalRequest.url?.includes("/auth/refresh") ||
+      originalRequest.url?.includes("/auth/login")
+    ) {
+      return Promise.reject(error);
+    }
+
     // Se o erro for 401 e a requisição ainda não foi reexecutada
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
+        const refreshToken = localStorage.getItem(JWT_TOKENS.refreshToken);
         if (!refreshToken) throw new Error("Sem refresh token");
 
-        // Chama o endpoint de refresh enviando o refreshToken no header
-        const res = await authApi.refreshToken(refreshToken);
+        // IMPORTANTE: Faz a chamada com a instância pura do axios para não cair no interceptor
+        const res = await axios.post(
+          `${API_BASE_URL}auth/refresh`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          },
+        );
 
-        // ATENÇÃO AQUI: O backend NestJS retorna accessToken e refreshToken
         const { accessToken, refreshToken: newRefreshToken } = res.data;
 
         if (!accessToken) {
@@ -47,10 +62,10 @@ api.interceptors.response.use(
         }
 
         // Salva com a chave correta no localStorage
-        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem(JWT_TOKENS.accessToken, accessToken);
 
         if (newRefreshToken) {
-          localStorage.setItem("refreshToken", newRefreshToken);
+          localStorage.setItem(JWT_TOKENS.refreshToken, newRefreshToken);
         }
 
         // Atualiza o cabeçalho e reexecuta a requisição original
@@ -58,8 +73,8 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Limpa o storage e redireciona caso o refresh falhe
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refreshToken");
+        localStorage.removeItem(JWT_TOKENS.accessToken);
+        localStorage.removeItem(JWT_TOKENS.refreshToken);
         window.location.href = PATHS.login;
         return Promise.reject(refreshError);
       }

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { authApi } from "../api/auth";
+import { JWT_TOKENS } from "../utils/jwtConstant";
 
 // Criar o Contexto
 const AuthContext = createContext();
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadStorageData() {
-      const token = localStorage.getItem("access_token"); //
+      const token = localStorage.getItem(JWT_TOKENS.accessToken); //
 
       if (token) {
         try {
@@ -22,8 +23,8 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(true); //
         } catch (err) {
           // Token inválido/expirado
-          localStorage.removeItem("access_token"); //
-          localStorage.removeItem("refreshToken"); //
+          localStorage.removeItem(JWT_TOKENS.accessToken); //
+          localStorage.removeItem(JWT_TOKENS.refreshToken); //
           setUser(null); //
           setIsAuthenticated(false); //
         }
@@ -39,8 +40,9 @@ export const AuthProvider = ({ children }) => {
     const response = await authApi.login({ email, password });
     const { accessToken, refreshToken, user: userData } = response.data;
 
-    localStorage.setItem("access_token", accessToken);
-    if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem(JWT_TOKENS.accessToken, accessToken);
+    if (refreshToken)
+      localStorage.setItem(JWT_TOKENS.refreshToken, refreshToken);
 
     setUser(userData);
     setIsAuthenticated(true);
@@ -49,8 +51,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem(JWT_TOKENS.accessToken);
+    localStorage.removeItem(JWT_TOKENS.refreshToken);
     setUser(null);
     setIsAuthenticated(false);
   };
