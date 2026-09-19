@@ -468,7 +468,7 @@ const EditServiceOrder = () => {
       // 2. Atualizar OS principal
       const updateData = {
         professional: serviceOrder.professional,
-        priority: serviceOrder.priority,
+        paymentStatus: serviceOrder.paymentStatus,
         status: serviceOrder.status,
         diagnosis: serviceOrder.diagnosis,
         observation: serviceOrder.observation,
