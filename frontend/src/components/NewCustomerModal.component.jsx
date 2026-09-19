@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { customerApi } from "../api/customers";
-import { useNavigate } from "react-router-dom";
 import { useCustomers } from "../context/Customer.context";
-import { PATHS } from "../utils/paths";
 import { cleanPhoneNumber, formatarCelular } from "../utils/convertCel";
+import ErrorMessage from "./ErrorMessage.component";
 
 const NewCustomerModal = ({
   isOpen,
@@ -20,7 +19,6 @@ const NewCustomerModal = ({
   const [error, setError] = useState(false);
 
   const { addCustomer } = useCustomers();
-  const navigate = useNavigate();
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({

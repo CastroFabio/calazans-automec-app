@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AutoComplete from "./AutoComplete.component";
+import ErrorMessage from "./ErrorMessage.component";
 
 const NewItemModal = ({
   closeModal,
@@ -26,20 +27,15 @@ const NewItemModal = ({
   };
 
   const handleSaveItem = async () => {
-    if (!formData.name.trim()) {
-      setError("Nome é obrigatório.");
-      return;
-    }
-
     if (!selectedGroup) {
       setError("Escolha um grupo válido");
       return;
     }
 
-    /* if (!formData.groupName.trim()) {
-      setError("Nome do grupo é obrigatório.");
+    if (!formData.name.trim()) {
+      setError("Nome é obrigatório.");
       return;
-    } */
+    }
 
     const itemData = {
       name: formData.name.trim(),
@@ -49,20 +45,15 @@ const NewItemModal = ({
     try {
       setError(null);
 
-      createItem(itemData.group_id, itemData.name);
+      await createItem(itemData.group_id, itemData.name);
 
-      setFormData({
-        name: "",
-      });
-
+      setFormData({ name: "" });
       closeModal();
     } catch (err) {
-      console.error("Erro ao salvar item:", err);
+      console.error("Erro ao salvar item capturado no Modal:", err);
 
       let errorMessage = "Erro ao salvar item";
       if (err.response) {
-        console.error("Status:", err.response.status);
-        console.error("Dados:", err.response.data);
         errorMessage = err.response.data?.message || errorMessage;
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
@@ -134,11 +125,8 @@ const NewItemModal = ({
             {buttonLabel}
           </button>
         </div>
-        <div className="customer-error-message-container">
-          {error && <div className="login-error">{error}</div>}
-        </div>
+        <ErrorMessage errorMessage={error} />
       </div>
-      {onError && <div className="login-error">{onError}</div>}
     </div>
   );
 };
