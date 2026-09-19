@@ -5,11 +5,22 @@ import {
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
+  HttpException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationDto } from './dto/pagination.dto';
+
+const trimOrUndefined = (value?: string | null) =>
+  typeof value === 'string' ? value.trim() : undefined;
+
+// Mantém null apenas para campos opcionais que ACEITAM null no banco (ex: telephone, observation)
+const trimOrNull = (value?: string | null) =>
+  typeof value === 'string' ? value.trim() : value;
+
+const sanitizePhone = (value?: string | null) =>
+  typeof value === 'string' ? value.replace(/\D/g, '') : value;
 
 @Injectable()
 export class CustomersService {
@@ -22,6 +33,35 @@ export class CustomersService {
   // CREATE - Criar um novo cliente
   async create(createCustomerDto: CreateCustomerDto) {
     try {
+      if (!createCustomerDto.name || createCustomerDto.name.trim() === '')
+        throw new BadRequestException('O nome do cliente é obrigatório');
+
+      if (
+        createCustomerDto.cell === null ||
+        createCustomerDto.cell === undefined
+      ) {
+        throw new BadRequestException('O celular é obrigatório');
+      }
+
+      if (typeof createCustomerDto.cell !== 'string')
+        throw new BadRequestException('O celular deve ser uma string');
+
+      if (
+        createCustomerDto.telephone &&
+        typeof createCustomerDto.telephone !== 'string'
+      )
+        throw new BadRequestException('O telefone deve ser uma string');
+
+      if (
+        createCustomerDto.observation &&
+        typeof createCustomerDto.observation !== 'string'
+      )
+        throw new BadRequestException('A observação deve ser uma string');
+
+      if (createCustomerDto.cell.trim() === '') {
+        throw new BadRequestException('O celular é obrigatório');
+      }
+
       // Verifica se o celular já existe
       const existingCustomer = await this.prisma.customer.findUnique({
         where: { cell: createCustomerDto.cell },
@@ -34,7 +74,7 @@ export class CustomersService {
       // Cria o cliente
       const customer = await this.prisma.customer.create({
         data: {
-          name: createCustomerDto.name,
+          name: createCustomerDto.name.trim(),
           cell: createCustomerDto.cell,
           telephone: createCustomerDto.telephone || null,
           observation: createCustomerDto.observation || null,
@@ -43,7 +83,7 @@ export class CustomersService {
 
       return customer;
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao criar cliente');
@@ -52,21 +92,28 @@ export class CustomersService {
 
   // READ - Buscar todos os clientes
   async findAll() {
-    return this.prisma.customer.findMany({
-      include: {
-        _count: { select: { serviceOrders: true, vehicles: true } },
-        vehicles: true,
-        serviceOrders: {
-          include: {
-            vehicle: true,
-            itemMaintenances: { include: { maintenancejob: true } },
+    try {
+      return this.prisma.customer.findMany({
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
           },
         },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Erro ao criar cliente');
+    }
   }
 
   async findAllPerPage(paginationDto: PaginationDto) {
@@ -138,18 +185,37 @@ export class CustomersService {
 
   // READ - Buscar um cliente por ID
   async findOne(id: number) {
-    return this.prisma.customer.findUnique({
-      where: { id },
-      include: {
-        vehicles: true,
-        serviceOrders: {
-          include: {
-            vehicle: true,
-            itemMaintenances: { include: { maintenancejob: true } },
+    try {
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
+      const customer = await this.prisma.customer.findUnique({
+        where: { id },
+        include: {
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
           },
         },
-      },
-    });
+      });
+
+      if (!customer) {
+        throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
+      }
+
+      return customer;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`);
+    }
   }
 
   // READ - Buscar cliente por celular
@@ -163,21 +229,75 @@ export class CustomersService {
   }
 
   // UPDATE - Atualizar um cliente
+  // Helper functions fora do método
+  trimOrUndefined = (value?: string | null) =>
+    typeof value === 'string' ? value.trim() : undefined;
+
+  trimOrNull = (value?: string | null) =>
+    typeof value === 'string' ? value.trim() : value;
+
+  sanitizePhone = (value?: string | null) =>
+    typeof value === 'string' ? value.replace(/\D/g, '') : value;
+
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
     try {
-      // Verifica se o cliente existe
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
+      if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0) {
+        throw new BadRequestException('Nenhum corpo na requisição');
+      }
+
+      // 1. Verifica se o cliente existe
       const customer = await this.prisma.customer.findUnique({
         where: { id },
       });
 
       if (!customer) {
-        throw new Error('Cliente não encontrado');
+        throw new NotFoundException('Cliente não encontrado');
       }
 
-      // Verifica se o novo celular já existe (se estiver sendo alterado)
-      if (updateCustomerDto.cell && updateCustomerDto.cell !== customer.cell) {
+      // 2. Validações de Tipo
+      if (
+        updateCustomerDto.name &&
+        typeof updateCustomerDto.name !== 'string'
+      ) {
+        throw new BadRequestException('O nome do cliente deve ser string');
+      }
+
+      if (
+        updateCustomerDto.cell &&
+        typeof updateCustomerDto.cell !== 'string'
+      ) {
+        throw new BadRequestException('O celular do cliente deve ser string');
+      }
+
+      if (
+        updateCustomerDto.telephone &&
+        typeof updateCustomerDto.telephone !== 'string'
+      ) {
+        throw new BadRequestException('O telefone do cliente deve ser string');
+      }
+
+      if (
+        updateCustomerDto.observation &&
+        typeof updateCustomerDto.observation !== 'string'
+      ) {
+        throw new BadRequestException(
+          'A observação do cliente deve ser string',
+        );
+      }
+
+      // 3. Sanitização do Celular para verificação de duplicidade
+      const sanitizedCellInput = sanitizePhone(updateCustomerDto.cell);
+
+      // 4. Verifica unicidade do Celular
+      if (sanitizedCellInput && sanitizedCellInput !== customer.cell) {
         const existingCustomer = await this.prisma.customer.findUnique({
-          where: { cell: updateCustomerDto.cell },
+          where: { cell: sanitizedCellInput },
         });
 
         if (existingCustomer) {
@@ -185,18 +305,26 @@ export class CustomersService {
         }
       }
 
-      // Atualiza o cliente
-      return this.prisma.customer.update({
+      // 5. Atualização
+      return await this.prisma.customer.update({
         where: { id },
         data: {
-          name: updateCustomerDto.name,
-          cell: updateCustomerDto.cell,
-          telephone: updateCustomerDto.telephone,
-          observation: updateCustomerDto.observation,
+          ...(updateCustomerDto.name !== undefined && {
+            name: trimOrUndefined(updateCustomerDto.name),
+          }),
+          ...(updateCustomerDto.cell !== undefined && {
+            cell: trimOrUndefined(sanitizedCellInput),
+          }),
+          ...(updateCustomerDto.telephone !== undefined && {
+            telephone: trimOrNull(sanitizePhone(updateCustomerDto.telephone)),
+          }),
+          ...(updateCustomerDto.observation !== undefined && {
+            observation: trimOrNull(updateCustomerDto.observation),
+          }),
         },
       });
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao atualizar cliente');
@@ -206,10 +334,20 @@ export class CustomersService {
   // DELETE - Remover um cliente
   async remove(id: number): Promise<void> {
     try {
+      if (id === undefined || id === null)
+        throw new BadRequestException('O ID é obrigatório');
+
+      if (isNaN(Number(id)) || typeof id !== 'number')
+        throw new BadRequestException('O ID deve ser um número');
+
+      if (Number(id) <= 0)
+        throw new BadRequestException('O ID deve maior do que zero');
+
       const customer = await this.prisma.customer.findUnique({
         where: { id },
         include: {
           vehicles: true,
+          serviceOrders: true,
         },
       });
 
@@ -220,6 +358,21 @@ export class CustomersService {
       if (customer.vehicles.length > 0) {
         throw new BadRequestException(
           'Não é possível excluir um cliente que possui veículos',
+        );
+      }
+
+      const listDebitoPendete = (customer.serviceOrders || []).filter(
+        (order) => Number(order.paid) < Number(order.subtotal),
+      );
+
+      if (listDebitoPendete.length > 0)
+        throw new BadRequestException(
+          'Cliente ainda possui ordens de serviço pendente',
+        );
+
+      if (customer.serviceOrders.length > 0) {
+        throw new BadRequestException(
+          'Não é possível excluir um cliente que possui ordem de serviço',
         );
       }
 
@@ -235,6 +388,7 @@ export class CustomersService {
       ) {
         throw error;
       }
+
       throw new InternalServerErrorException('Erro ao remover cliente');
     }
   }
