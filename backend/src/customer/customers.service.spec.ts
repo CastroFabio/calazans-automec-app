@@ -8,6 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CustomerHasPendingDebtsException } from './exceptions';
+import { Customer } from '@prisma/client';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
@@ -540,12 +541,6 @@ describe('CustomersService (Unitario)', () => {
         ...existingCustomer,
         ...customerInput,
       };
-      const expectedData = {
-        name: updatedCustomer.name,
-        cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
-      };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
@@ -577,12 +572,6 @@ describe('CustomersService (Unitario)', () => {
       const updatedCustomer = {
         ...existingCustomer,
         ...customerInput,
-      };
-      const expectedData = {
-        name: updatedCustomer.name,
-        cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
       };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
@@ -616,12 +605,6 @@ describe('CustomersService (Unitario)', () => {
         ...existingCustomer,
         ...customerInput,
       };
-      const expectedData = {
-        name: updatedCustomer.name,
-        cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
-      };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
@@ -653,12 +636,6 @@ describe('CustomersService (Unitario)', () => {
       const updatedCustomer = {
         ...existingCustomer,
         ...customerInput,
-      };
-      const expectedData = {
-        name: updatedCustomer.name,
-        cell: updatedCustomer.cell,
-        telephone: null,
-        observation: null,
       };
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
@@ -846,18 +823,20 @@ describe('CustomersService (Unitario)', () => {
   describe('delete', () => {
     it('deve remover um cliente com sucesso', async () => {
       const customerID = 1;
-      const mockCustomer = {
-        id: customerID,
-        name: 'João da Silva',
-        cell: '212329994',
-        telephone: null,
-        observation: '',
-        vehicles: [],
-        serviceOrders: [],
-      };
+      const mockCustomer: Customer & { vehicles: any[]; serviceOrders: any[] } =
+        {
+          id: customerID,
+          name: 'João da Silva',
+          cell: '212329994',
+          telephone: null,
+          observation: '',
+          created_at: new Date(),
+          vehicles: [],
+          serviceOrders: [],
+        };
 
-      prismaMock.customer.findUnique.mockResolvedValue(mockCustomer as any);
-      prismaMock.customer.delete.mockResolvedValue(mockCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValue(mockCustomer);
+      prismaMock.customer.delete.mockResolvedValue(mockCustomer);
 
       const result = await service.remove(customerID);
 

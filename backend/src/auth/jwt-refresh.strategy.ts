@@ -20,7 +20,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: { sub: number; email: string }) {
+  validate(req: Request, payload: { sub: number; email: string }) {
     const refreshToken = req.get('Authorization')?.replace('Bearer', '').trim();
     if (!refreshToken)
       throw new UnauthorizedException('Refresh token não fornecido');

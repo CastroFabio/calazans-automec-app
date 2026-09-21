@@ -6,8 +6,6 @@ import { CreateCustomerDto } from './customer/dto/create-customer.dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  create(data: CreateCustomerDto) {}
-
   @Get()
   getHello(): string {
     return this.appService.getHello();

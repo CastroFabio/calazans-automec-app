@@ -57,7 +57,7 @@ export class AuthService {
     }
 
     // Oculta o hash da senha na resposta
-    const { password_hash, ...userWithoutPassword } = user;
+    const { password_hash: _password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
 
