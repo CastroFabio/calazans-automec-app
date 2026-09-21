@@ -17,7 +17,7 @@ const Materials = () => {
   });
   const [creatingGroupName, setCreatingGroupName] = useState("");
   const [materialsGroupData, setMaterialsGroupData] = useState([]);
-  const [newItem, setNewItem] = useState("");
+  const [newItemName, setNewItemName] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -255,7 +255,7 @@ const Materials = () => {
       });
 
       // Limpar o campo
-      setNewItem("");
+      setNewItemName("");
     } catch (error) {
       console.error("Erro ao adicionar material:", error);
       const message =
@@ -313,8 +313,8 @@ const Materials = () => {
           setEditingItem={setEditingItem}
           activeTab={activeTab}
           activeGroup={activeGroup}
-          newItem={newItem}
-          setNewItem={setNewItem}
+          newItemName={newItemName}
+          setNewItemName={setNewItemName}
           handleEditSaveGroup={handleEditSaveGroup}
           handleEditSave={handleEditSave}
           handleEditKeyPress={handleEditKeyPress}

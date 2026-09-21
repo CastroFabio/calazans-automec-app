@@ -54,7 +54,7 @@ export class CreateVehicleDto {
     type: Number,
   })
   @IsOptional()
-  @IsPositive({ message: 'ID do cliente deve ser um número positivo' })
+  @IsPositive({ message: 'Ano do veículo deve ser um número positivo' })
   @IsInt({ message: 'Ano deve ser uma string' })
   year?: number;
 

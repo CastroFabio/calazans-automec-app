@@ -5,6 +5,7 @@ import AutoComplete from "./AutoComplete.component";
 import { PATHS } from "../utils/paths";
 import { useNavigate } from "react-router-dom";
 import { formatarCelular } from "../utils/convertCel";
+import ErrorMessage from "./ErrorMessage.component";
 
 const NewVehicleModal = ({
   isModalOpen,
@@ -69,12 +70,17 @@ const NewVehicleModal = ({
       return;
     }
 
+    if (!Number(customerIdToSave)) {
+      setError("O cliente deve ser um número válido.");
+      return;
+    }
+
     if (!formData.license_plate.trim()) {
       setError("Placa é obrigatória.");
       return;
     }
 
-    if (!Number(formData.year.trim())) {
+    if (formData.year && !Number(formData.year.trim())) {
       setError("Ano deve ser um número válido.");
       return;
     }
@@ -85,11 +91,11 @@ const NewVehicleModal = ({
     }
 
     const vehicleData = {
-      customer_id: customerIdToSave,
+      customer_id: Number(customerIdToSave),
       brand: formData.brand.trim(),
       model: formData.model.trim(),
       color: formData.color.trim(),
-      year: Number(formData.year.trim()),
+      year: Number(formData.year.trim()) || null,
       license_plate: formData.license_plate.trim(),
     };
 
@@ -239,9 +245,7 @@ const NewVehicleModal = ({
             Salvar Veículo
           </button>
         </div>
-        <div className="customer-error-message-container">
-          {error && <div className="login-error">{error}</div>}
-        </div>
+        <ErrorMessage errorMessage={error} />
       </div>
     </div>
   );
