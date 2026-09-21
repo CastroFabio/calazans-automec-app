@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateMaintenanceItemDto } from './dto/create-maintenance-item.dto';
-import { UpdateMaintenanceDto } from 'src/maintenance/dto/update-maintenance.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateMaintenanceItemDto } from './dto/update-maintenance-item.dto';
 import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';
@@ -137,7 +136,6 @@ export class MaintenanceItemService {
         );
       }
 
-      // 🟢 PREPARAR DADOS TRATANDO NULL -> UNDEFINED
       const data = items.map((item) => ({
         serviceorder_id: item.serviceorder_id,
         maintenance_id: item.maintenance_id
@@ -182,8 +180,12 @@ export class MaintenanceItemService {
       ) {
         throw error;
       }
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       throw new InternalServerErrorException(
-        'Erro ao criar itens de manutenção: ' + error.message,
+        'Erro ao criar itens de manutenção: ' + errorMessage,
       );
     }
   }

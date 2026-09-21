@@ -10,13 +10,11 @@ import {
   HttpStatus,
   HttpCode,
   ParseIntPipe,
-  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiParam,
   ApiQuery,
   ApiBody,

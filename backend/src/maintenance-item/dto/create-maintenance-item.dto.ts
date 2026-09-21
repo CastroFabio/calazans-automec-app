@@ -2,11 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsInt,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
-  Min,
 } from 'class-validator';
 
 export class CreateMaintenanceItemDto {

@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
 import { UserModule } from 'src/user/user.module';
 import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+import { StringValue } from 'ms';
 
 @Module({
   imports: [
@@ -15,13 +16,17 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
-        signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRES_IN') ||
-            '1d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = (configService.get<string>('JWT_EXPIRES_IN') ||
+          '1d') as StringValue;
+
+        return {
+          secret: configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
+          signOptions: {
+            expiresIn, // Sem 'as any', utilizando a string tipada
+          },
+        };
+      },
     }),
     PrismaModule,
     UserModule,

@@ -1,10 +1,5 @@
 // src/customers/dto/create-customer.dto.ts
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsPhoneNumber,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCustomerDto {
@@ -38,7 +33,7 @@ export class CreateCustomerDto {
   })
   @IsOptional()
   @IsString({ message: 'Telefone deve ser uma string' })
-  telephone?: string;
+  telephone?: string | null;
 
   @ApiPropertyOptional({
     description: 'Observações sobre o cliente',
@@ -47,5 +42,5 @@ export class CreateCustomerDto {
   })
   @IsOptional()
   @IsString({ message: 'Observação deve ser uma string' })
-  observation?: string;
+  observation?: string | null;
 }

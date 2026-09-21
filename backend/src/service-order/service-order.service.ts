@@ -8,6 +8,7 @@ import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from './dto/pagination.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ServiceOrderService {
@@ -26,8 +27,8 @@ export class ServiceOrderService {
 
     const skip = (page - 1) * limit;
 
-    // 2. Construção dinâmica dos filtros para o Prisma (usando tipagem flexível/any para evitar conflitos de geradores)
-    const filters: any[] = [];
+    // 2. Construção dinâmica dos filtros usando a interface forte do Prisma
+    const filters: Prisma.ServiceOrderWhereInput[] = [];
 
     // Filtro textual: Busca por nome do cliente ou placa do veículo
     if (search) {
@@ -52,10 +53,11 @@ export class ServiceOrderService {
       filters.push({ status: Number(status) });
     }
 
-    // Montagem da cláusula WHERE final
-    const whereClause: any = filters.length > 0 ? { AND: filters } : {};
+    // Montagem da cláusula WHERE final tipada corretamente
+    const whereClause: Prisma.ServiceOrderWhereInput =
+      filters.length > 0 ? { AND: filters } : {};
 
-    // 3. Consulta transacionada (muda os registros e traz o total ao mesmo tempo)
+    // 3. Consulta transacionada
     const [data, totalItems] = await this.prisma.$transaction([
       this.prisma.serviceOrder.findMany({
         where: whereClause,
