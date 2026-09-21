@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationDto } from './dto/pagination.dto';
+import { CustomerHasPendingDebtsException } from './exceptions';
 
 const trimOrUndefined = (value?: string | null) =>
   typeof value === 'string' ? value.trim() : undefined;
@@ -366,9 +367,7 @@ export class CustomersService {
       );
 
       if (listDebitoPendete.length > 0)
-        throw new BadRequestException(
-          'Cliente ainda possui ordens de serviço pendente',
-        );
+        throw new CustomerHasPendingDebtsException();
 
       if (customer.serviceOrders.length > 0) {
         throw new BadRequestException(

@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { CustomerHasPendingDebtsException } from './exceptions';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
@@ -992,7 +993,7 @@ describe('CustomersService (Unitario)', () => {
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o cliente esteja vinculado a uma ordem de serviço', async () => {
+    it('deve retornar CustomerHasPendingDebtsException caso o cliente esteja vinculado a uma ordem de serviço em débito', async () => {
       const customerID = 1;
 
       const existingCustomer = {
@@ -1024,9 +1025,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
 
       await expect(service.remove(customerID)).rejects.toThrow(
-        new BadRequestException(
-          'Cliente ainda possui ordens de serviço pendente',
-        ),
+        new CustomerHasPendingDebtsException(),
       );
 
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();
