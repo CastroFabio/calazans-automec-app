@@ -136,7 +136,6 @@ export class MaintenanceItemService {
         );
       }
 
-      // 🟢 PREPARAR DADOS TRATANDO NULL -> UNDEFINED
       const data = items.map((item) => ({
         serviceorder_id: item.serviceorder_id,
         maintenance_id: item.maintenance_id
@@ -181,8 +180,12 @@ export class MaintenanceItemService {
       ) {
         throw error;
       }
+
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
       throw new InternalServerErrorException(
-        'Erro ao criar itens de manutenção: ' + error.message,
+        'Erro ao criar itens de manutenção: ' + errorMessage,
       );
     }
   }
