@@ -9,6 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { AuthEntity } from './entities/auth.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { StringValue } from 'ms';
 
 @Injectable()
 export class AuthService {
@@ -61,30 +62,38 @@ export class AuthService {
     return userCopy;
   }
 
-  async generateTokens(userId: number, email: string) {
-    // Define o payload base sem exp/iat
-    const getPayload = () => ({ userId, email, sub: userId });
+  async generateTokens(
+    userId: number,
+    email: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const payload = { userId, email, sub: userId };
+
+    const accessExpiresIn = (this.configService.get<string>('JWT_EXPIRES_IN') ||
+      '15m') as StringValue;
+    const refreshExpiresIn = (this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+    ) || '7d') as StringValue;
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(getPayload(), {
+      this.jwtService.signAsync(payload, {
         secret:
           this.configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
-        expiresIn: (this.configService.get<string>('JWT_EXPIRES_IN') ||
-          '15m') as any,
+        expiresIn: accessExpiresIn,
       }),
-      this.jwtService.signAsync(getPayload(), {
+      this.jwtService.signAsync(payload, {
         secret:
           this.configService.get<string>('JWT_REFRESH_SECRET') ||
           'defaultRefreshSecret',
-        expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') ||
-          '7d') as any,
+        expiresIn: refreshExpiresIn,
       }),
     ]);
 
     return { accessToken, refreshToken };
   }
-
-  async refreshTokens(userId: number, email: string) {
+  async refreshTokens(
+    userId: number,
+    email: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return this.generateTokens(userId, email);
   }
 }

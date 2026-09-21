@@ -4,10 +4,8 @@ import {
   IsArray,
   IsInt,
   IsPositive,
-  IsNumber,
   IsOptional,
   IsString,
-  Min,
   MaxLength,
   ValidateNested,
 } from 'class-validator';

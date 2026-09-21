@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateMaintenanceItemDto } from './dto/create-maintenance-item.dto';
-import { UpdateMaintenanceDto } from 'src/maintenance/dto/update-maintenance.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateMaintenanceItemDto } from './dto/update-maintenance-item.dto';
 import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';

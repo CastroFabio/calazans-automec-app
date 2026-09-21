@@ -28,7 +28,6 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { MaintenanceResponseDto } from 'src/maintenance/dto/response-maintenance.dto';
 import { MaintenanceItemResponseDto } from './dto/response-maintenance-item.dto';
 import { CreateItemMaintenanceBatchDto } from './dto/create-item-maintenance-batch.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';

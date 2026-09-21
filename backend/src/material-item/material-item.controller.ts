@@ -30,10 +30,7 @@ import {
 } from '@nestjs/swagger';
 import { MaterialResponseDto } from 'src/material/dto/response-material.dto';
 import { MaterialItemResponseDto } from './dto/response-material-item.dto';
-import {
-  CreateItemMaterialBatchDto,
-  CreateItemMaterialBatchItemDto,
-} from './dto/create-item-material-batch.dto';
+import { CreateItemMaterialBatchDto } from './dto/create-item-material-batch.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('material-item')
