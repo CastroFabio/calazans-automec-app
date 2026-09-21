@@ -33,7 +33,7 @@ export class CreateCustomerDto {
   })
   @IsOptional()
   @IsString({ message: 'Telefone deve ser uma string' })
-  telephone?: string;
+  telephone?: string | null;
 
   @ApiPropertyOptional({
     description: 'Observações sobre o cliente',
@@ -42,5 +42,5 @@ export class CreateCustomerDto {
   })
   @IsOptional()
   @IsString({ message: 'Observação deve ser uma string' })
-  observation?: string;
+  observation?: string | null;
 }

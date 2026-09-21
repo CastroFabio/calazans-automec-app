@@ -56,9 +56,9 @@ export class AuthService {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    // Oculta o hash da senha na resposta
-    const { password_hash: _password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const userCopy = { ...user };
+    delete (userCopy as { password_hash?: string }).password_hash;
+    return userCopy;
   }
 
   async generateTokens(userId: number, email: string) {

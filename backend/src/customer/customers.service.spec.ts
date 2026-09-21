@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { CustomerHasPendingDebtsException } from './exceptions';
 import { Customer } from '@prisma/client';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
@@ -120,7 +122,10 @@ describe('CustomersService (Unitario)', () => {
 
     it('deve lancar BadRequestException se o nome for null', async () => {
       // Arrange
-      const customerInput = { name: null as any, cell: '212329994' };
+      const customerInput = {
+        name: null,
+        cell: '212329994',
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       // Act & Assert
@@ -143,7 +148,10 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve lancar BadRequestException se o celular não for string', async () => {
-      const customerInput = { name: 'João da Silva', cell: 212329999 as any };
+      const customerInput = {
+        name: 'João da Silva',
+        cell: 212329999,
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
@@ -165,7 +173,10 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve lancar BadRequestException se o celular for null', async () => {
-      const customerInput = { name: 'João da Silva', cell: null as any };
+      const customerInput = {
+        name: 'João da Silva',
+        cell: null,
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
@@ -176,7 +187,10 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve lancar BadRequestException se o celular for undefined', async () => {
-      const customerInput = { name: 'João da Silva', cell: undefined as any };
+      const customerInput = {
+        name: 'João da Silva',
+        cell: undefined,
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
@@ -190,8 +204,8 @@ describe('CustomersService (Unitario)', () => {
       const customerInput = {
         name: 'João da Silva',
         cell: '212329999',
-        telephone: 212329999 as any,
-      };
+        telephone: 212329999,
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
@@ -205,8 +219,8 @@ describe('CustomersService (Unitario)', () => {
       const customerInput = {
         name: 'João da Silva',
         cell: '212329999',
-        observation: 3232 as any,
-      };
+        observation: 3232,
+      } as unknown as CreateCustomerDto;
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
@@ -269,9 +283,16 @@ describe('CustomersService (Unitario)', () => {
     it('deve buscar o cliente incluindo todos os seus relacionamentos', async () => {
       // 1. ARRANGE
       const customerID = 1;
-      const mockCustomer = { id: customerID, name: 'João da Silva' };
+      const mockCustomer = {
+        id: customerID,
+        name: 'João da Silva',
+        cell: '212329994',
+        telephone: null,
+        observation: null,
+        created_at: new Date(),
+      } as unknown as CreateCustomerDto;
 
-      prismaMock.customer.findUnique.mockResolvedValue(mockCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValue(mockCustomer);
 
       // 2. ACT
       await service.findOne(customerID);
@@ -295,7 +316,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID não seja um número', async () => {
-      const invalidID = 'n' as any;
+      const invalidID = 'n' as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
         new BadRequestException('O ID deve ser um número'),
       );
@@ -303,7 +324,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID seja null', async () => {
-      const invalidID = null as any;
+      const invalidID = null as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
         new BadRequestException('O ID é obrigatório'),
       );
@@ -311,7 +332,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID seja undefined', async () => {
-      const invalidID = undefined as any;
+      const invalidID = undefined as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
         new BadRequestException('O ID é obrigatório'),
       );
@@ -414,7 +435,7 @@ describe('CustomersService (Unitario)', () => {
         cell: '21999999999',
         telephone: '21999999999',
         observation: null,
-      };
+      } as unknown as CreateCustomerDto;
       const customerID = 1;
       const existingCustomer = {
         id: customerID,
@@ -423,22 +444,22 @@ describe('CustomersService (Unitario)', () => {
         cell: '21999999999',
         telephone: null,
         observation: null,
-      };
+      } as unknown as CreateCustomerDto;
       const updatedCustomer = {
         ...existingCustomer,
         ...customerInput,
-      };
+      } as unknown as CreateCustomerDto;
       const expectedData = {
         name: updatedCustomer.name,
         cell: updatedCustomer.cell,
         telephone: updatedCustomer.telephone,
         observation: updatedCustomer.observation,
-      };
+      } as unknown as CreateCustomerDto;
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
-      const result = await service.update(customerID, customerInput as any);
+      const result = await service.update(customerID, customerInput);
 
       expect(result).toEqual(updatedCustomer);
       expect(prismaMock.customer.update).toHaveBeenCalledWith({
@@ -449,7 +470,7 @@ describe('CustomersService (Unitario)', () => {
 
     it('deve atualizar um cliente com sucesso e retornar o cliente incluindo todos os relacionamentos', async () => {
       const customerID = 1;
-      const customerInput = {
+      const customerInput: UpdateCustomerDto = {
         name: 'João Silva',
         cell: '21999999999',
         telephone: null,
@@ -463,21 +484,21 @@ describe('CustomersService (Unitario)', () => {
         cell: '21999999999',
         telephone: null,
         observation: null,
-      };
+      } as unknown as Customer;
 
       const updatedCustomerWithRelations = {
         ...existingCustomer,
         ...customerInput,
         vehicles: [],
         serviceOrders: [],
-      };
+      } as unknown as Customer;
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(
-        updatedCustomerWithRelations as any,
+        updatedCustomerWithRelations,
       );
 
-      const result = await service.update(customerID, customerInput as any);
+      const result = await service.update(customerID, customerInput);
 
       expect(result).toEqual(updatedCustomerWithRelations);
     });
@@ -490,12 +511,10 @@ describe('CustomersService (Unitario)', () => {
         cell: '21999999999',
         telephone: null,
         observation: null,
-      };
+      } as unknown as Customer;
 
-      prismaMock.customer.findUnique.mockResolvedValueOnce(
-        existingCustomer as any,
-      );
-      prismaMock.customer.update.mockResolvedValue(existingCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValueOnce(existingCustomer);
+      prismaMock.customer.update.mockResolvedValue(existingCustomer);
 
       // Enviando o mesmo celular sanitizado
       await service.update(customerID, { cell: '21999999999' });
@@ -506,7 +525,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar um NotFoundException se o ID não for encontrado', async () => {
-      const customerInput = {
+      const customerInput: UpdateCustomerDto = {
         name: 'João Silva',
         cell: '21999999999',
         telephone: null,
@@ -515,7 +534,7 @@ describe('CustomersService (Unitario)', () => {
 
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(999, customerInput as any)).rejects.toThrow(
+      await expect(service.update(999, customerInput)).rejects.toThrow(
         new NotFoundException('Cliente não encontrado'),
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -524,11 +543,11 @@ describe('CustomersService (Unitario)', () => {
     it('deve lancar BadRequestException se o nome não for string', async () => {
       const customerID = 1;
       const customerInput = {
-        name: 23232 as any,
+        name: 23232,
         cell: '21999999999',
         telephone: null,
         observation: null,
-      };
+      } as unknown as UpdateCustomerDto;
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -545,9 +564,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
         new BadRequestException('O nome do cliente deve ser string'),
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -555,12 +572,14 @@ describe('CustomersService (Unitario)', () => {
 
     it('deve lancar BadRequestException se o celular não for string', async () => {
       const customerID = 1;
+
       const customerInput = {
         name: 'João Silva',
-        cell: 21999999999 as any,
+        cell: 21999999999,
         telephone: null,
         observation: null,
-      };
+      } as unknown as UpdateCustomerDto;
+
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -569,6 +588,7 @@ describe('CustomersService (Unitario)', () => {
         telephone: null,
         observation: null,
       };
+
       const updatedCustomer = {
         ...existingCustomer,
         ...customerInput,
@@ -577,9 +597,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
         new BadRequestException('O celular do cliente deve ser string'),
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -590,9 +608,9 @@ describe('CustomersService (Unitario)', () => {
       const customerInput = {
         name: 'João Silva',
         cell: '21999999999',
-        telephone: 213 as any,
+        telephone: 213,
         observation: null,
-      };
+      } as unknown as UpdateCustomerDto;
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -609,9 +627,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
         new BadRequestException('O telefone do cliente deve ser string'),
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -623,8 +639,8 @@ describe('CustomersService (Unitario)', () => {
         name: 'João Silva',
         cell: '21999999999',
         telephone: null,
-        observation: 23232 as any,
-      };
+        observation: 23232,
+      } as unknown as UpdateCustomerDto;
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -641,9 +657,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
         new BadRequestException('A observação do cliente deve ser string'),
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -654,7 +668,7 @@ describe('CustomersService (Unitario)', () => {
       const customerID = 1;
       const customerInput = {
         cell: '21999999999', // Novo celular desejado
-      };
+      } as unknown as UpdateCustomerDto;
 
       const existingCustomer = {
         id: customerID,
@@ -681,9 +695,9 @@ describe('CustomersService (Unitario)', () => {
         .mockResolvedValueOnce(anotherCustomerWithSameCell); // 2ª chamada: busca por cell
 
       // 2. ACT & ASSERT
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(new ConflictException('Este celular já está em uso'));
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        new ConflictException('Este celular já está em uso'),
+      );
 
       // Garante que a atualização no banco não foi executada
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
@@ -691,7 +705,7 @@ describe('CustomersService (Unitario)', () => {
 
     it('deve lancar BadRequestException se o body veio vazio', async () => {
       const customerID = 1;
-      const customerInput = {};
+      const customerInput = {} as unknown as UpdateCustomerDto;
       const existingCustomer = {
         id: customerID,
         created_at: new Date(),
@@ -703,9 +717,9 @@ describe('CustomersService (Unitario)', () => {
 
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
-      await expect(
-        service.update(customerID, customerInput as any),
-      ).rejects.toThrow(new BadRequestException('Nenhum corpo na requisição'));
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        new BadRequestException('Nenhum corpo na requisição'),
+      );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
@@ -717,7 +731,7 @@ describe('CustomersService (Unitario)', () => {
         cell: '(21)99999-9998',
         telephone: '(21)88888-8888',
         observation: null,
-      };
+      } as unknown as UpdateCustomerDto;
 
       const existingCustomer = {
         id: customerID,
@@ -751,7 +765,7 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
       // 2. ACT
-      const result = await service.update(customerID, customerInput as any);
+      const result = await service.update(customerID, customerInput);
 
       // 3. ASSERT
       expect(result).toEqual(updatedCustomer);
@@ -762,44 +776,45 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID não seja um número', async () => {
-      const invalidID = 'n' as any;
+      const invalidID = 'n' as unknown as number;
       const customerInput = {
         name: 'João Silva',
         cell: '(21)99999-9998',
         telephone: '(21)88888-8888',
         observation: null,
-      };
-      await expect(
-        service.update(invalidID, customerInput as any),
-      ).rejects.toThrow(new BadRequestException('O ID deve ser um número'));
+      } as unknown as UpdateCustomerDto;
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        new BadRequestException('O ID deve ser um número'),
+      );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
     it('deve retornar BadRequestException caso o ID seja null', async () => {
-      const invalidID = null as any;
+      const invalidID = null as unknown as number;
       const customerInput = {
         name: 'João Silva',
         cell: '(21)99999-9998',
         telephone: '(21)88888-8888',
         observation: null,
-      };
-      await expect(
-        service.update(invalidID, customerInput as any),
-      ).rejects.toThrow(new BadRequestException('O ID é obrigatório'));
+      } as unknown as UpdateCustomerDto;
+
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        new BadRequestException('O ID é obrigatório'),
+      );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
     it('deve retornar BadRequestException caso o ID seja undefined', async () => {
-      const invalidID = undefined as any;
+      const invalidID = undefined as unknown as number;
       const customerInput = {
         name: 'João Silva',
         cell: '(21)99999-9998',
         telephone: '(21)88888-8888',
         observation: null,
-      };
-      await expect(
-        service.update(invalidID, customerInput as any),
-      ).rejects.toThrow(new BadRequestException('O ID é obrigatório'));
+      } as unknown as UpdateCustomerDto;
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        new BadRequestException('O ID é obrigatório'),
+      );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
@@ -809,12 +824,12 @@ describe('CustomersService (Unitario)', () => {
         cell: '(21)99999-9998',
         telephone: '(21)88888-8888',
         observation: null,
-      };
+      } as unknown as UpdateCustomerDto;
       prismaMock.customer.findUnique.mockRejectedValue(
         new Error('Database offline'),
       );
 
-      await expect(service.update(1, customerInput as any)).rejects.toThrow(
+      await expect(service.update(1, customerInput)).rejects.toThrow(
         new InternalServerErrorException('Erro ao atualizar cliente'),
       );
     });
@@ -863,7 +878,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID não seja um número', async () => {
-      const invalidID = 'n' as any;
+      const invalidID = 'n' as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
         new BadRequestException('O ID deve ser um número'),
       );
@@ -887,7 +902,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID seja null', async () => {
-      const invalidID = null as any;
+      const invalidID = null as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
         new BadRequestException('O ID é obrigatório'),
       );
@@ -895,7 +910,7 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve retornar BadRequestException caso o ID seja undefined', async () => {
-      const invalidID = undefined as any;
+      const invalidID = undefined as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
         new BadRequestException('O ID é obrigatório'),
       );
@@ -922,9 +937,9 @@ describe('CustomersService (Unitario)', () => {
           },
         ],
         serviceOrders: [],
-      };
+      } as unknown as Customer;
 
-      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.remove(customerID)).rejects.toThrow(
         new BadRequestException(
@@ -959,9 +974,9 @@ describe('CustomersService (Unitario)', () => {
             observation: 'a',
           },
         ],
-      };
+      } as unknown as Customer;
 
-      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.remove(customerID)).rejects.toThrow(
         new BadRequestException(
@@ -999,9 +1014,9 @@ describe('CustomersService (Unitario)', () => {
             paid: 1.55,
           },
         ],
-      };
+      } as unknown as Customer;
 
-      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer as any);
+      prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.remove(customerID)).rejects.toThrow(
         new CustomerHasPendingDebtsException(),

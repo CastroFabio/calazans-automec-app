@@ -12,6 +12,7 @@ import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { CustomerHasPendingDebtsException } from './exceptions';
+import { Prisma } from '@prisma/client';
 
 const trimOrUndefined = (value?: string | null) =>
   typeof value === 'string' ? value.trim() : undefined;
@@ -126,7 +127,7 @@ export class CustomersService {
     const skip = (page - 1) * limit;
 
     // 2. Construção dinâmica dos filtros para o Prisma
-    const filters: any[] = [];
+    const filters: Prisma.CustomerWhereInput[] = [];
 
     if (search) {
       filters.push({
@@ -145,7 +146,8 @@ export class CustomersService {
     }
 
     // Montagem da cláusula WHERE final
-    const whereClause: any = filters.length > 0 ? { AND: filters } : {};
+    const whereClause: Prisma.CustomerWhereInput =
+      filters.length > 0 ? { AND: filters } : {};
 
     // 3. Consulta transacionada
     const [data, totalItems] = await this.prisma.$transaction([
