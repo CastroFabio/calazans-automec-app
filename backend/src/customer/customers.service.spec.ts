@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CustomersService } from './customer.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  BadRequestException,
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
@@ -11,6 +10,15 @@ import { CustomerHasPendingDebtsException } from './exceptions';
 import { Customer } from '@prisma/client';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import {
+  InvalidNumberPropertyException,
+  InvalidStringPropertyException,
+  NullOrUndefinedValueException,
+  RequiredBodyException,
+  RequiredFieldException,
+  ResourceHasDependenciesException,
+  ValueMustBeGreaterThanZeroException,
+} from '../common/exceptions';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
@@ -106,21 +114,19 @@ describe('CustomersService (Unitario)', () => {
     });
 
     it('deve lancar ConflictException se o celular ja estiver cadastrado', async () => {
-      // Arrange
       const customerInput = { name: 'João Silva', cell: '21999999999' };
       prismaMock.customer.findUnique.mockResolvedValue({
         id: 2,
         ...customerInput,
-      }); // Já existe
+      });
 
-      // Act & Assert
       await expect(service.create(customerInput)).rejects.toThrow(
         new ConflictException('Já existe um cliente com este celular'),
       );
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o nome for null', async () => {
+    it('deve lancar NullOrUndefinedValueException se o nome for null', async () => {
       // Arrange
       const customerInput = {
         name: null,
@@ -129,25 +135,36 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       // Act & Assert
+
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O nome do cliente é obrigatório'),
+        new NullOrUndefinedValueException('name'),
       );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'name' não pode ser nula ou indefinida.",
+      );
+
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o nome for vazio', async () => {
+    it('deve lancar RequiredFieldException se o nome for vazio', async () => {
       // Arrange
       const customerInput = { name: '', cell: '212329994' };
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O nome do cliente é obrigatório'),
+        new RequiredFieldException('name'),
       );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "O campo 'name' é obrigatório e não foi fornecido.",
+      );
+
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o celular não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se o celular não for string', async () => {
       const customerInput = {
         name: 'João da Silva',
         cell: 212329999,
@@ -155,24 +172,32 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O celular deve ser uma string'),
+        new InvalidStringPropertyException('cell'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'cell' precisa ser uma string válida.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o celular for vazio', async () => {
+    it('deve lancar RequiredFieldException se o celular for vazio', async () => {
       const customerInput = { name: 'João da Silva', cell: '' };
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O celular é obrigatório'),
+        new RequiredFieldException('cell'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "O campo 'cell' é obrigatório e não foi fornecido.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o celular for null', async () => {
+    it('deve lancar NullOrUndefinedValueException se o celular for null', async () => {
       const customerInput = {
         name: 'João da Silva',
         cell: null,
@@ -180,13 +205,17 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O celular é obrigatório'),
+        new NullOrUndefinedValueException('cell'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'cell' não pode ser nula ou indefinida.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o celular for undefined', async () => {
+    it('deve lancar NullOrUndefinedValueException se o celular for undefined', async () => {
       const customerInput = {
         name: 'João da Silva',
         cell: undefined,
@@ -194,13 +223,17 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O celular é obrigatório'),
+        new NullOrUndefinedValueException('cell'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'cell' não pode ser nula ou indefinida.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o telefone não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se o telefone não for string', async () => {
       const customerInput = {
         name: 'João da Silva',
         cell: '212329999',
@@ -209,13 +242,17 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('O telefone deve ser uma string'),
+        new InvalidStringPropertyException('telephone'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'telephone' precisa ser uma string válida.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se a observação não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se a observação não for string', async () => {
       const customerInput = {
         name: 'João da Silva',
         cell: '212329999',
@@ -224,7 +261,11 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(null);
 
       await expect(service.create(customerInput)).rejects.toThrow(
-        new BadRequestException('A observação deve ser uma string'),
+        new InvalidStringPropertyException('observation'),
+      );
+
+      await expect(service.create(customerInput)).rejects.toThrow(
+        "A propriedade 'observation' precisa ser uma string válida.",
       );
 
       expect(prismaMock.customer.create).not.toHaveBeenCalled();
@@ -233,7 +274,6 @@ describe('CustomersService (Unitario)', () => {
 
   describe('findOne', () => {
     it('deve achar e enviar os dados do cliente com seus relacionamentos se o cliente for encontrado', async () => {
-      // 1. ARRANGE
       const customerID = 1;
       const mockCustomer = {
         id: customerID,
@@ -315,26 +355,35 @@ describe('CustomersService (Unitario)', () => {
       });
     });
 
-    it('deve retornar BadRequestException caso o ID não seja um número', async () => {
+    it('deve retornar InvalidNumberPropertyException caso o ID não seja um número', async () => {
       const invalidID = 'n' as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID deve ser um número'),
+        new InvalidNumberPropertyException('id'),
+      );
+      await expect(service.findOne(invalidID)).rejects.toThrow(
+        "A propriedade 'id' precisa ser um number válido.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja null', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja null', async () => {
       const invalidID = null as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
+      );
+      await expect(service.findOne(invalidID)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja undefined', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja undefined', async () => {
       const invalidID = undefined as unknown as number;
       await expect(service.findOne(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
+      );
+      await expect(service.findOne(invalidID)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
@@ -540,7 +589,7 @@ describe('CustomersService (Unitario)', () => {
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o nome não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se o nome não for string', async () => {
       const customerID = 1;
       const customerInput = {
         name: 23232,
@@ -565,12 +614,15 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
       await expect(service.update(customerID, customerInput)).rejects.toThrow(
-        new BadRequestException('O nome do cliente deve ser string'),
+        new InvalidStringPropertyException('name'),
+      );
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        "A propriedade 'name' precisa ser uma string válida.",
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o celular não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se o celular não for string', async () => {
       const customerID = 1;
 
       const customerInput = {
@@ -598,12 +650,15 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
       await expect(service.update(customerID, customerInput)).rejects.toThrow(
-        new BadRequestException('O celular do cliente deve ser string'),
+        new InvalidStringPropertyException('cell'),
+      );
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        "A propriedade 'cell' precisa ser uma string válida.",
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o telefone não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se o telefone não for string', async () => {
       const customerID = 1;
       const customerInput = {
         name: 'João Silva',
@@ -628,12 +683,15 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
       await expect(service.update(customerID, customerInput)).rejects.toThrow(
-        new BadRequestException('O telefone do cliente deve ser string'),
+        new InvalidStringPropertyException('telephone'),
+      );
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        "A propriedade 'telephone' precisa ser uma string válida.",
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se a observação não for string', async () => {
+    it('deve lancar InvalidStringPropertyException se a observação não for string', async () => {
       const customerID = 1;
       const customerInput = {
         name: 'João Silva',
@@ -658,7 +716,10 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.update.mockResolvedValue(updatedCustomer);
 
       await expect(service.update(customerID, customerInput)).rejects.toThrow(
-        new BadRequestException('A observação do cliente deve ser string'),
+        new InvalidStringPropertyException('observation'),
+      );
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        "A propriedade 'observation' precisa ser uma string válida.",
       );
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
@@ -703,7 +764,7 @@ describe('CustomersService (Unitario)', () => {
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
-    it('deve lancar BadRequestException se o body veio vazio', async () => {
+    it('deve lancar RequiredBodyException se o body veio vazio', async () => {
       const customerID = 1;
       const customerInput = {} as unknown as UpdateCustomerDto;
       const existingCustomer = {
@@ -718,8 +779,13 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.update(customerID, customerInput)).rejects.toThrow(
-        new BadRequestException('Nenhum corpo na requisição'),
+        new RequiredBodyException(),
       );
+
+      await expect(service.update(customerID, customerInput)).rejects.toThrow(
+        'O corpo da requisição é obrigatório e não foi fornecido.',
+      );
+
       expect(prismaMock.customer.update).not.toHaveBeenCalled();
     });
 
@@ -775,7 +841,7 @@ describe('CustomersService (Unitario)', () => {
       });
     });
 
-    it('deve retornar BadRequestException caso o ID não seja um número', async () => {
+    it('deve retornar InvalidNumberPropertyException caso o ID não seja um número', async () => {
       const invalidID = 'n' as unknown as number;
       const customerInput = {
         name: 'João Silva',
@@ -783,13 +849,18 @@ describe('CustomersService (Unitario)', () => {
         telephone: '(21)88888-8888',
         observation: null,
       } as unknown as UpdateCustomerDto;
+
       await expect(service.update(invalidID, customerInput)).rejects.toThrow(
-        new BadRequestException('O ID deve ser um número'),
+        new InvalidNumberPropertyException('id'),
       );
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        "A propriedade 'id' precisa ser um number válido.",
+      );
+
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja null', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja null', async () => {
       const invalidID = null as unknown as number;
       const customerInput = {
         name: 'João Silva',
@@ -799,12 +870,15 @@ describe('CustomersService (Unitario)', () => {
       } as unknown as UpdateCustomerDto;
 
       await expect(service.update(invalidID, customerInput)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
+      );
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja undefined', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja undefined', async () => {
       const invalidID = undefined as unknown as number;
       const customerInput = {
         name: 'João Silva',
@@ -813,7 +887,10 @@ describe('CustomersService (Unitario)', () => {
         observation: null,
       } as unknown as UpdateCustomerDto;
       await expect(service.update(invalidID, customerInput)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
+      );
+      await expect(service.update(invalidID, customerInput)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
@@ -877,47 +954,63 @@ describe('CustomersService (Unitario)', () => {
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID não seja um número', async () => {
+    it('deve retornar InvalidNumberPropertyException caso o ID não seja um número', async () => {
       const invalidID = 'n' as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID deve ser um número'),
+        new InvalidNumberPropertyException('id'),
+      );
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        "A propriedade 'id' precisa ser um number válido.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja menor do que zero', async () => {
+    it('deve retornar ValueMustBeGreaterThanZeroException caso o ID seja menor do que zero', async () => {
       const invalidID = -1;
       await expect(service.remove(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID deve maior do que zero'),
+        new ValueMustBeGreaterThanZeroException('id'),
+      );
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        "O campo 'id' deve ser um valor maior que zero.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja igual a zero', async () => {
+    it('deve retornar ValueMustBeGreaterThanZeroException caso o ID seja igual a zero', async () => {
       const invalidID = 0;
       await expect(service.remove(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID deve maior do que zero'),
+        new ValueMustBeGreaterThanZeroException('id'),
+      );
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        "O campo 'id' deve ser um valor maior que zero.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja null', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja null', async () => {
       const invalidID = null as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
       );
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
+      );
+
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o ID seja undefined', async () => {
+    it('deve retornar NullOrUndefinedValueException caso o ID seja undefined', async () => {
       const invalidID = undefined as unknown as number;
       await expect(service.remove(invalidID)).rejects.toThrow(
-        new BadRequestException('O ID é obrigatório'),
+        new NullOrUndefinedValueException('id'),
+      );
+      await expect(service.remove(invalidID)).rejects.toThrow(
+        "A propriedade 'id' não pode ser nula ou indefinida.",
       );
       expect(prismaMock.customer.findUnique).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o cliente esteja vinculado a um veículo', async () => {
+    it('deve retornar ResourceHasDependenciesException caso o cliente esteja vinculado a um veículo', async () => {
       const customerID = 1;
 
       const existingCustomer = {
@@ -942,15 +1035,16 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.remove(customerID)).rejects.toThrow(
-        new BadRequestException(
-          'Não é possível excluir um cliente que possui veículos',
-        ),
+        new ResourceHasDependenciesException('cliente', 'veículos'),
+      );
+      await expect(service.remove(customerID)).rejects.toThrow(
+        'Não é possível excluir o(a) cliente pois existem veículos vinculados(as).',
       );
 
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();
     });
 
-    it('deve retornar BadRequestException caso o cliente esteja vinculado a uma ordem de serviço', async () => {
+    it('deve retornar ResourceHasDependenciesException caso o cliente esteja vinculado a uma ordem de serviço', async () => {
       const customerID = 1;
 
       const existingCustomer = {
@@ -979,9 +1073,10 @@ describe('CustomersService (Unitario)', () => {
       prismaMock.customer.findUnique.mockResolvedValue(existingCustomer);
 
       await expect(service.remove(customerID)).rejects.toThrow(
-        new BadRequestException(
-          'Não é possível excluir um cliente que possui ordem de serviço',
-        ),
+        new ResourceHasDependenciesException('cliente', 'ordens de serviço'),
+      );
+      await expect(service.remove(customerID)).rejects.toThrow(
+        'Não é possível excluir o(a) cliente pois existem ordens de serviço vinculados(as).',
       );
 
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();
@@ -1020,6 +1115,9 @@ describe('CustomersService (Unitario)', () => {
 
       await expect(service.remove(customerID)).rejects.toThrow(
         new CustomerHasPendingDebtsException(),
+      );
+      await expect(service.remove(customerID)).rejects.toThrow(
+        'Cliente ainda possui ordens de serviço pendentes de pagamento',
       );
 
       expect(prismaMock.customer.delete).not.toHaveBeenCalled();

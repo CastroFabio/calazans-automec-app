@@ -3,7 +3,6 @@ import {
   Injectable,
   ConflictException,
   InternalServerErrorException,
-  BadRequestException,
   NotFoundException,
   HttpException,
 } from '@nestjs/common';
@@ -13,6 +12,15 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { CustomerHasPendingDebtsException } from './exceptions';
 import { Prisma } from '@prisma/client';
+import {
+  InvalidNumberPropertyException,
+  InvalidStringPropertyException,
+  NullOrUndefinedValueException,
+  RequiredBodyException,
+  RequiredFieldException,
+  ValueMustBeGreaterThanZeroException,
+} from 'src/common/exceptions';
+import { ResourceHasDependenciesException } from 'src/common/exceptions/resource-has-dependencies.exception';
 
 const trimOrUndefined = (value?: string | null) =>
   typeof value === 'string' ? value.trim() : undefined;
@@ -35,33 +43,40 @@ export class CustomersService {
   // CREATE - Criar um novo cliente
   async create(createCustomerDto: CreateCustomerDto) {
     try {
-      if (!createCustomerDto.name || createCustomerDto.name.trim() === '')
-        throw new BadRequestException('O nome do cliente é obrigatório');
+      if (
+        createCustomerDto.name === null ||
+        createCustomerDto.name === undefined
+      ) {
+        throw new NullOrUndefinedValueException('name');
+      }
+
+      if (createCustomerDto.name.trim() === '')
+        throw new RequiredFieldException('name');
 
       if (
         createCustomerDto.cell === null ||
         createCustomerDto.cell === undefined
       ) {
-        throw new BadRequestException('O celular é obrigatório');
+        throw new NullOrUndefinedValueException('cell');
       }
 
       if (typeof createCustomerDto.cell !== 'string')
-        throw new BadRequestException('O celular deve ser uma string');
+        throw new InvalidStringPropertyException('cell');
 
       if (
         createCustomerDto.telephone &&
         typeof createCustomerDto.telephone !== 'string'
       )
-        throw new BadRequestException('O telefone deve ser uma string');
+        throw new InvalidStringPropertyException('telephone');
 
       if (
         createCustomerDto.observation &&
         typeof createCustomerDto.observation !== 'string'
       )
-        throw new BadRequestException('A observação deve ser uma string');
+        throw new InvalidStringPropertyException('observation');
 
       if (createCustomerDto.cell.trim() === '') {
-        throw new BadRequestException('O celular é obrigatório');
+        throw new RequiredFieldException('cell');
       }
 
       // Verifica se o celular já existe
@@ -114,7 +129,7 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException('Erro ao achar todos os clientes');
     }
   }
 
@@ -190,10 +205,10 @@ export class CustomersService {
   async findOne(id: number) {
     try {
       if (id === undefined || id === null)
-        throw new BadRequestException('O ID é obrigatório');
+        throw new NullOrUndefinedValueException('id');
 
       if (isNaN(Number(id)) || typeof id !== 'number')
-        throw new BadRequestException('O ID deve ser um número');
+        throw new InvalidNumberPropertyException('id');
 
       const customer = await this.prisma.customer.findUnique({
         where: { id },
@@ -223,12 +238,21 @@ export class CustomersService {
 
   // READ - Buscar cliente por celular
   async findByCell(cell: string) {
-    return this.prisma.customer.findUnique({
-      where: { cell },
-      include: {
-        vehicles: true,
-      },
-    });
+    try {
+      return this.prisma.customer.findUnique({
+        where: { cell },
+        include: {
+          vehicles: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Erro ao achar o cliente com celular: ${cell}`,
+      );
+    }
   }
 
   // UPDATE - Atualizar um cliente
@@ -245,13 +269,13 @@ export class CustomersService {
   async update(id: number, updateCustomerDto: UpdateCustomerDto) {
     try {
       if (id === undefined || id === null)
-        throw new BadRequestException('O ID é obrigatório');
+        throw new NullOrUndefinedValueException('id');
 
       if (isNaN(Number(id)) || typeof id !== 'number')
-        throw new BadRequestException('O ID deve ser um número');
+        throw new InvalidNumberPropertyException('id');
 
       if (!updateCustomerDto || Object.keys(updateCustomerDto).length === 0) {
-        throw new BadRequestException('Nenhum corpo na requisição');
+        throw new RequiredBodyException();
       }
 
       // 1. Verifica se o cliente existe
@@ -268,30 +292,28 @@ export class CustomersService {
         updateCustomerDto.name &&
         typeof updateCustomerDto.name !== 'string'
       ) {
-        throw new BadRequestException('O nome do cliente deve ser string');
+        throw new InvalidStringPropertyException('name');
       }
 
       if (
         updateCustomerDto.cell &&
         typeof updateCustomerDto.cell !== 'string'
       ) {
-        throw new BadRequestException('O celular do cliente deve ser string');
+        throw new InvalidStringPropertyException('cell');
       }
 
       if (
         updateCustomerDto.telephone &&
         typeof updateCustomerDto.telephone !== 'string'
       ) {
-        throw new BadRequestException('O telefone do cliente deve ser string');
+        throw new InvalidStringPropertyException('telephone');
       }
 
       if (
         updateCustomerDto.observation &&
         typeof updateCustomerDto.observation !== 'string'
       ) {
-        throw new BadRequestException(
-          'A observação do cliente deve ser string',
-        );
+        throw new InvalidStringPropertyException('observation');
       }
 
       // 3. Sanitização do Celular para verificação de duplicidade
@@ -338,13 +360,12 @@ export class CustomersService {
   async remove(id: number): Promise<void> {
     try {
       if (id === undefined || id === null)
-        throw new BadRequestException('O ID é obrigatório');
+        throw new NullOrUndefinedValueException('id');
 
       if (isNaN(Number(id)) || typeof id !== 'number')
-        throw new BadRequestException('O ID deve ser um número');
+        throw new InvalidNumberPropertyException('id');
 
-      if (Number(id) <= 0)
-        throw new BadRequestException('O ID deve maior do que zero');
+      if (Number(id) <= 0) throw new ValueMustBeGreaterThanZeroException('id');
 
       const customer = await this.prisma.customer.findUnique({
         where: { id },
@@ -354,15 +375,10 @@ export class CustomersService {
         },
       });
 
-      if (!customer) {
-        throw new NotFoundException('Cliente não encontrado');
-      }
+      if (!customer) throw new NotFoundException('Cliente não encontrado');
 
-      if (customer.vehicles.length > 0) {
-        throw new BadRequestException(
-          'Não é possível excluir um cliente que possui veículos',
-        );
-      }
+      if (customer.vehicles.length > 0)
+        throw new ResourceHasDependenciesException('cliente', 'veículos');
 
       const listDebitoPendete = (customer.serviceOrders || []).filter(
         (order) => Number(order.paid) < Number(order.subtotal),
@@ -372,8 +388,9 @@ export class CustomersService {
         throw new CustomerHasPendingDebtsException();
 
       if (customer.serviceOrders.length > 0) {
-        throw new BadRequestException(
-          'Não é possível excluir um cliente que possui ordem de serviço',
+        throw new ResourceHasDependenciesException(
+          'cliente',
+          'ordens de serviço',
         );
       }
 
@@ -383,10 +400,7 @@ export class CustomersService {
 
       // Não retorna nada (void)
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
 
