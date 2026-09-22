@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CustomerHasPendingDebtsException } from './exceptions';
-import { Customer } from '@prisma/client';
+import { Customer, Prisma } from '@prisma/client';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import {
@@ -19,28 +19,33 @@ import {
   ResourceHasDependenciesException,
   ValueMustBeGreaterThanZeroException,
 } from '../common/exceptions';
+import { PaginationDto } from './dto/pagination.dto';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
   let prismaMock: {
+    $transaction: jest.Mock;
     customer: {
       create: jest.Mock;
       findUnique: jest.Mock;
       findMany: jest.Mock;
       update: jest.Mock;
       delete: jest.Mock;
+      count: jest.Mock;
     };
   };
 
   beforeEach(async () => {
     // 1. Criamos os mocks para as funções do Prisma usadas pelo Service
     prismaMock = {
+      $transaction: jest.fn(),
       customer: {
         create: jest.fn(),
         findUnique: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
         delete: jest.fn(),
+        count: jest.fn(),
       },
     };
 
@@ -473,6 +478,106 @@ describe('CustomersService (Unitario)', () => {
         orderBy: {
           created_at: 'desc',
         },
+      });
+    });
+  });
+
+  describe('findAllPerPage', () => {
+    it('deve retornar uma lista paginada de clientes com sucesso', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 1;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: 'João Silva',
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: 'João Silva', mode: 'insensitive' } },
+              { cell: { contains: 'João Silva', mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: 'João Silva',
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
       });
     });
   });
