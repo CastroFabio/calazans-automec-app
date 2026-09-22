@@ -1,4 +1,5 @@
 export * from './invalid-number.exception';
+export * from './invalid-page-number.exception';
 export * from './invalid-string.exception';
 export * from './null-or-undefined-value.exception';
 export * from './required-body.exception';

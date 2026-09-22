@@ -14,6 +14,7 @@ import { CustomerHasPendingDebtsException } from './exceptions';
 import { Prisma } from '@prisma/client';
 import {
   InvalidNumberPropertyException,
+  InvalidPageNumberException,
   InvalidStringPropertyException,
   NullOrUndefinedValueException,
   RequiredBodyException,
@@ -135,7 +136,7 @@ export class CustomersService {
 
   async findAllPerPage(paginationDto: PaginationDto) {
     // 1. Tratamento e garantia de conversão dos parâmetros
-    const page = Number(paginationDto.page) || 1;
+    const page = Math.max(1, Number(paginationDto.page) || 1);
     const limit = Number(paginationDto.limit) || 5;
     const search = paginationDto.search?.trim() || '';
 

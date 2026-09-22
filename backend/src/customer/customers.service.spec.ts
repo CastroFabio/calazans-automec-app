@@ -20,6 +20,7 @@ import {
   ValueMustBeGreaterThanZeroException,
 } from '../common/exceptions';
 import { PaginationDto } from './dto/pagination.dto';
+import { CustomerResponseDto } from './dto/response-customer.dto';
 
 describe('CustomersService (Unitario)', () => {
   let service: CustomersService;
@@ -489,10 +490,12 @@ describe('CustomersService (Unitario)', () => {
       const totalItems = 1;
       const totalPages = Math.ceil(totalItems / limit) || 1;
 
+      const searchTerm = 'João Silva';
+
       const paginationInput: PaginationDto = {
         page,
         limit,
-        search: 'João Silva',
+        search: searchTerm,
       };
 
       // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
@@ -514,13 +517,13 @@ describe('CustomersService (Unitario)', () => {
         AND: [
           {
             OR: [
-              { name: { contains: 'João Silva', mode: 'insensitive' } },
-              { cell: { contains: 'João Silva', mode: 'insensitive' } },
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
               {
                 vehicles: {
                   some: {
                     license_plate: {
-                      contains: 'João Silva',
+                      contains: searchTerm,
                       mode: 'insensitive',
                     },
                   },
@@ -575,6 +578,1027 @@ describe('CustomersService (Unitario)', () => {
           },
         },
       });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve retornar uma lista paginada ordenada de forma decrescente pela data de criação de clientes com sucesso', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 2;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          created_at: new Date('2026-09-22T16:00:00-03:00'),
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+        {
+          id: 2,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          created_at: new Date('2026-09-21T16:00:00-03:00'),
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve executar findMany e count atomicamente dentro de uma única $transaction', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 1;
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+      };
+
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          created_at: new Date('2026-09-22T16:00:00-03:00'),
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      // Configura os mocks das consultas internas para retornarem Promises/Valores válidos
+      prismaMock.customer.findMany.mockResolvedValue(mockCustomerRecords);
+      prismaMock.customer.count.mockResolvedValue(totalItems);
+
+      // Mock do $transaction
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      await service.findAllPerPage(paginationInput);
+
+      // 1. Valida se o $transaction foi invocado exatamente uma vez
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 2. Valida se $transaction recebeu um Array com 2 elementos
+      expect(prismaMock.$transaction).toHaveBeenCalledWith(
+        expect.arrayContaining([expect.anything(), expect.anything()]),
+      );
+
+      // 3. Valida se as consultas foram acionadas
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {},
+          skip: 0,
+          take: limit,
+          orderBy: { created_at: 'desc' },
+        }),
+      );
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: {},
+      });
+    });
+
+    it('deve aplicar a paginação padronizada na página 1 quando o parâmetro page for inválido', async () => {
+      const page = null as unknown as number;
+      const limit = 5;
+      const totalItems = 1;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedPage = 1;
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: expectedPage,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve aplicar a paginação padronizada na página 1 quando o parâmetro page for menor que 1', async () => {
+      const page = -1 as unknown as number;
+      const limit = 5;
+      const totalItems = 1;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedPage = 1;
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: expectedPage,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve aplicar a paginação padronizada no limite 5 quando o parâmetro limit for inválido', async () => {
+      const page = 1;
+      const limit = null as unknown as number;
+      const totalItems = 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedLimit = 5;
+      const expectedTotalPages = Math.ceil(totalItems / expectedLimit);
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: expectedLimit,
+          totalItems,
+          totalPages: expectedTotalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: expectedLimit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve aplicar a paginação padronizada no limite 5 quando o parâmetro limit for vazio', async () => {
+      const page = 1;
+      const limit = '' as unknown as number;
+      const totalItems = 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedLimit = 5;
+      const expectedTotalPages = Math.ceil(totalItems / expectedLimit);
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: expectedLimit,
+          totalItems,
+          totalPages: expectedTotalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: expectedLimit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve ignorar o filtro de busca quando o parâmetro search contiver apenas espaços em branco', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 1;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const searchTerm = ' ' as unknown as string;
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedWhereClause: Prisma.CustomerWhereInput = {};
+
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      const result = await service.findAllPerPage(paginationInput);
+
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve ignorar o filtro de busca quando o parâmetro search for vazio', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 1;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+
+      const searchTerm = '' as unknown as string;
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      const mockCustomerRecords = [
+        {
+          id: 1,
+          name: 'João Silva',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      const expectedWhereClause: Prisma.CustomerWhereInput = {};
+
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      const result = await service.findAllPerPage(paginationInput);
+
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve calcular o deslocamento correto (skip) com base na página e no limite informados', async () => {
+      const page = 3;
+      const limit = 5;
+      const totalItems = 15;
+      const expectedSkip = (page - 1) * limit;
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+      };
+
+      const mockCustomerRecords = [
+        {
+          id: 11,
+          name: 'Cliente Página 3',
+          cell: '21999999999',
+          telephone: null,
+          observation: null,
+          vehicles: [],
+          serviceOrders: [],
+          _count: { serviceOrders: 0, vehicles: 0 },
+        },
+      ];
+
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      const result = await service.findAllPerPage(paginationInput);
+
+      expect(result.meta.currentPage).toBe(page);
+      expect(result.meta.perPage).toBe(limit);
+
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: expectedSkip,
+          take: limit,
+        }),
+      );
+    });
+
+    it('deve calcular totalPages corretamente e retornar no mínimo 1 quando totalItems for igual a 0', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 0;
+      const expectedTotalPages = 1;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      // 1. Mock do Array de registros que o Prisma realmente retorna no findMany
+      const mockCustomerRecords: never[] = [];
+
+      // 2. Cláusula WHERE esperada para a busca 'João Silva'
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      // 3. Mock do $transaction (retorna a tupla [data, totalItems])
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      // 4. Execução do método no service
+      const result = await service.findAllPerPage(paginationInput);
+
+      // 5. Validação da estrutura de retorno da paginação
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages: expectedTotalPages,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+      // 6. Validação do $transaction com as promessas do Prisma
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      // 7. Validação das chamadas com os filtros corretos (where, skip, take, include, orderBy)
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+        skip: 0,
+        take: limit,
+        orderBy: {
+          created_at: 'desc',
+        },
+        include: {
+          _count: { select: { serviceOrders: true, vehicles: true } },
+          vehicles: true,
+          serviceOrders: {
+            include: {
+              vehicle: true,
+              itemMaintenances: { include: { maintenancejob: true } },
+            },
+          },
+        },
+      });
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve retornar hasNextPage como true quando a página atual for menor que o total de páginas', async () => {
+      const page = 1;
+      const limit = 5;
+      const totalItems = 20;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const expectedHasNextPage = true;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      const mockCustomerRecords = Array.from({ length: limit }, (_, index) => ({
+        id: index + 1,
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        vehicles: [],
+        serviceOrders: [],
+        _count: { serviceOrders: 0, vehicles: 0 },
+      }));
+
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      const result = await service.findAllPerPage(paginationInput);
+
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: expectedHasNextPage,
+          hasPreviousPage: false,
+        },
+      });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expectedWhereClause,
+          take: limit,
+          skip: 0,
+        }),
+      );
+
+      expect(prismaMock.customer.count).toHaveBeenCalledWith({
+        where: expectedWhereClause,
+      });
+    });
+
+    it('deve retornar hasPreviousPage como true quando a página atual for maior que 1', async () => {
+      const page = 2;
+      const limit = 5;
+      const totalItems = 20;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
+      const expectedHasPreviousPage = true;
+      const expectedSkip = (page - 1) * limit;
+
+      const searchTerm = 'João Silva';
+
+      const paginationInput: PaginationDto = {
+        page,
+        limit,
+        search: searchTerm,
+      };
+
+      const mockCustomerRecords = Array.from({ length: limit }, (_, index) => ({
+        id: index + 1,
+        name: 'João Silva',
+        cell: '21999999999',
+        telephone: null,
+        observation: null,
+        vehicles: [],
+        serviceOrders: [],
+        _count: { serviceOrders: 0, vehicles: 0 },
+      }));
+
+      const expectedWhereClause: Prisma.CustomerWhereInput = {
+        AND: [
+          {
+            OR: [
+              { name: { contains: searchTerm, mode: 'insensitive' } },
+              { cell: { contains: searchTerm, mode: 'insensitive' } },
+              {
+                vehicles: {
+                  some: {
+                    license_plate: {
+                      contains: searchTerm,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      prismaMock.$transaction.mockResolvedValue([
+        mockCustomerRecords,
+        totalItems,
+      ]);
+
+      const result = await service.findAllPerPage(paginationInput);
+
+      expect(result).toEqual({
+        data: mockCustomerRecords,
+        meta: {
+          currentPage: page,
+          perPage: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: true,
+          hasPreviousPage: expectedHasPreviousPage,
+        },
+      });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+      expect(prismaMock.customer.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expectedWhereClause,
+          take: limit,
+          skip: expectedSkip,
+        }),
+      );
 
       expect(prismaMock.customer.count).toHaveBeenCalledWith({
         where: expectedWhereClause,
