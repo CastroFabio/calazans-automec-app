@@ -22,6 +22,7 @@ import { PATHS } from "./utils/paths";
 import { AuthProvider, useAuth } from "./context/Auth.context";
 import { ProtectedRoute } from "./components/ProtectedRoute.component";
 import Loading from "./pages/Loading";
+import Dashboard from "./pages/Dashboard";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
@@ -65,6 +66,7 @@ const MainLayout = () => {
                 path={PATHS.printServiceOrder}
                 element={<PrintServiceOrder />}
               />
+              <Route path={PATHS.dashboard} element={<Dashboard />} />
             </Route>
           </Routes>
         </div>
