@@ -90,21 +90,16 @@ export class CustomersController {
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
     this.logger.log(
-      `Recebida requisição para cadastrar cliente do celular: ${createCustomerDto.cell}`,
+      `[HTTP POST /customers] Request recebida`,
       CustomersController.name,
     );
 
     try {
-      const result = await this.customersService.create(createCustomerDto);
-      this.logger.log(
-        `Cliente ${createCustomerDto.name} criado com sucesso. ID: ${result.id}`,
-        CustomersController.name,
-      );
-      return result;
+      return await this.customersService.create(createCustomerDto);
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao criar cliente ${createCustomerDto.name}`,
+        `[HTTP POST /customers] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );
@@ -139,21 +134,16 @@ export class CustomersController {
   @ApiBearerAuth()
   async findAll(): Promise<CustomerResponseDto[]> {
     this.logger.log(
-      `Recebida requisição para listar todos os clientes`,
+      `[HTTP GET /customers] Request recebida`,
       CustomersController.name,
     );
 
     try {
-      const result = await this.customersService.findAll();
-      this.logger.log(
-        `Listagem de clientes concluída com sucesso. Total retornado: ${result.length}`,
-        CustomersController.name,
-      );
-      return result;
+      return await this.customersService.findAll();
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao buscar lista de clientes`,
+        `[HTTP GET /customers] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );
@@ -180,26 +170,20 @@ export class CustomersController {
     const limit = Number(paginationDto.limit) || 5;
 
     this.logger.log(
-      `Recebida requisição para listar clientes paginados (Página: ${page}, Limite: ${limit}, Busca: "${search}")`,
+      `[HTTP GET /customers/page] Request recebida - Query: ${JSON.stringify(paginationDto)}`,
       CustomersController.name,
     );
+
     try {
-      const result = await this.customersService.findAllPerPage({
+      return await this.customersService.findAllPerPage({
         page,
         limit,
         search,
       });
-
-      this.logger.log(
-        `Listagem paginada concluída com sucesso. Retornados ${result.data?.length || 0} de ${result.meta.totalItems || 0} clientes.`,
-        CustomersController.name,
-      );
-
-      return result;
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao buscar lista paginada de clientes (Página: ${page}, Busca: "${search}")`,
+        `[HTTP GET /customers/page] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );
@@ -276,26 +260,22 @@ export class CustomersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto | null> {
     this.logger.log(
-      `Recebida requisição para buscar cliente por ID: ${id}`,
+      `[HTTP GET /customers/:id] Request recebida - ID: ${id}`,
       CustomersController.name,
     );
 
     try {
       const result = await this.customersService.findOne(id);
 
-      this.logger.log(
-        `Cliente ID ${id} retornado com sucesso`,
-        CustomersController.name,
-      );
-
       return result;
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao buscar cliente por ID: ${id}`,
+        `[HTTP GET /customers/:id] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );
+
       throw error;
     }
   }
@@ -338,23 +318,15 @@ export class CustomersController {
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
     this.logger.log(
-      `Recebida requisição para atualizar cliente ID: ${id}`,
+      `[HTTP PATCH /customers/:id] Request recebida - ID: ${id}`,
       CustomersController.name,
     );
-
     try {
-      const result = await this.customersService.update(id, updateCustomerDto);
-
-      this.logger.log(
-        `Cliente ID ${id} atualizado com sucesso`,
-        CustomersController.name,
-      );
-
-      return result;
+      return await this.customersService.update(id, updateCustomerDto);
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao atualizar cliente ID: ${id}`,
+        `[HTTP PATCH /customers/:id] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );
@@ -398,21 +370,16 @@ export class CustomersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     this.logger.log(
-      `Recebida requisição para remover cliente ID: ${id}`,
+      `[HTTP DELETE /customers/:id] Request recebida - ID: ${id}`,
       CustomersController.name,
     );
 
     try {
       await this.customersService.remove(id);
-
-      this.logger.log(
-        `Cliente ID ${id} removido com sucesso`,
-        CustomersController.name,
-      );
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `Erro ao remover cliente ID: ${id}`,
+        `[HTTP DELETE /customers/:id] Falha ao processar requisição`,
         stack,
         CustomersController.name,
       );

@@ -85,11 +85,18 @@ export class CustomersService {
         },
       });
 
-      this.logger.log(`Cliente ID ${customer.id} criado com sucesso.`);
+      this.logger.log(
+        `Criação de cliente finalizada: cliente "${customer.name}" com ID (${customer.id}) criado com sucesso.`,
+        CustomersService.name,
+      );
       return customer;
     } catch (error) {
       const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Falha ao criar o cliente`, stack);
+      this.logger.error(
+        `Falha ao criar o cliente`,
+        stack,
+        CustomersService.name,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -100,6 +107,10 @@ export class CustomersService {
   // READ - Buscar todos os clientes
   async findAll() {
     try {
+      this.logger.log(
+        `Busca de clientes finalizada: listagem de clientes concluída com sucesso.`,
+        CustomersService.name,
+      );
       return this.prisma.customer.findMany({
         include: {
           _count: { select: { serviceOrders: true, vehicles: true } },
@@ -116,6 +127,12 @@ export class CustomersService {
         },
       });
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao listar todos os clientes`,
+        stack,
+        CustomersService.name,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -128,7 +145,10 @@ export class CustomersService {
     const page = Number(paginationDto.page) || 1;
     const limit = Number(paginationDto.limit) || 5;
     const search = paginationDto.search?.trim() || '';
-
+    this.logger.debug(
+      `Executando query de paginação: offset=${(page - 1) * limit}, limit=${limit}, search="${search}"`,
+      CustomersService.name,
+    );
     const skip = (page - 1) * limit;
 
     // 2. Construção dinâmica dos filtros para o Prisma
@@ -178,6 +198,10 @@ export class CustomersService {
     // 4. Cálculo e estruturação da resposta com metadados
     const totalPages = Math.ceil(totalItems / limit) || 1;
 
+    this.logger.log(
+      `Busca de clientes finalizada: ${data.length} de ${totalItems} registros recuperados com sucesso.`,
+      CustomersService.name,
+    );
     return {
       data,
       meta: {
@@ -216,9 +240,18 @@ export class CustomersService {
       if (!customer) {
         throw new NotFoundException(`Cliente com ID ${id} não encontrado`);
       }
-
+      this.logger.log(
+        `Busca de cliente finalizada: cliente "${customer.name}" com ID (${customer.id}) recuperado com sucesso.`,
+        CustomersService.name,
+      );
       return customer;
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao buscar o cliente`,
+        stack,
+        CustomersService.name,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -313,7 +346,11 @@ export class CustomersService {
         }
       }
 
-      // 5. Atualização
+      this.logger.log(
+        `Atualização de cliente finalizada: "${updateCustomerDto.name || 'Cliente'}" com ID (${id}) atualizado com sucesso.`,
+        CustomersService.name,
+      );
+
       return await this.prisma.customer.update({
         where: { id },
         data: {
@@ -332,6 +369,12 @@ export class CustomersService {
         },
       });
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao atualizar o cliente`,
+        stack,
+        CustomersService.name,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
@@ -382,12 +425,23 @@ export class CustomersService {
         );
       }
 
+      this.logger.log(
+        `Deletar de cliente finalizado: cliente "${customer.name}" com ID (${id}) deletado com sucesso.`,
+        CustomersService.name,
+      );
+
       await this.prisma.customer.delete({
         where: { id },
       });
 
       // Não retorna nada (void)
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao remover o cliente`,
+        stack,
+        CustomersService.name,
+      );
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException
