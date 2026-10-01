@@ -216,8 +216,6 @@ export class CustomersService {
 
       return customer;
     } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-
       if (error instanceof HttpException) {
         throw error;
       }
