@@ -12,10 +12,7 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
-  Inject,
-  Logger,
 } from '@nestjs/common';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import {
   ApiTags,
   ApiOperation,
@@ -42,10 +39,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @ApiTags('customers')
 @Controller('customers')
 export class CustomersController {
-  constructor(
-    private readonly customersService: CustomersService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: Logger,
-  ) {}
+  constructor(private readonly customersService: CustomersService) {}
 
   @Post()
   @ApiOperation({
@@ -89,22 +83,7 @@ export class CustomersController {
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    this.logger.log(
-      `[HTTP POST /customers] Request recebida`,
-      CustomersController.name,
-    );
-
-    try {
-      return await this.customersService.create(createCustomerDto);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP POST /customers] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-      throw error;
-    }
+    return await this.customersService.create(createCustomerDto);
   }
 
   @Get('count')
@@ -133,22 +112,7 @@ export class CustomersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async findAll(): Promise<CustomerResponseDto[]> {
-    this.logger.log(
-      `[HTTP GET /customers] Request recebida`,
-      CustomersController.name,
-    );
-
-    try {
-      return await this.customersService.findAll();
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP GET /customers] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-      throw error;
-    }
+    return await this.customersService.findAll();
   }
 
   @Get('page')
@@ -169,26 +133,11 @@ export class CustomersController {
     const search = paginationDto.search?.trim() || '';
     const limit = Number(paginationDto.limit) || 5;
 
-    this.logger.log(
-      `[HTTP GET /customers/page] Request recebida - Query: ${JSON.stringify(paginationDto)}`,
-      CustomersController.name,
-    );
-
-    try {
-      return await this.customersService.findAllPerPage({
-        page,
-        limit,
-        search,
-      });
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP GET /customers/page] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-      throw error;
-    }
+    return await this.customersService.findAllPerPage({
+      page,
+      limit,
+      search,
+    });
   }
 
   @Get('search')
@@ -259,25 +208,7 @@ export class CustomersController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto | null> {
-    this.logger.log(
-      `[HTTP GET /customers/:id] Request recebida - ID: ${id}`,
-      CustomersController.name,
-    );
-
-    try {
-      const result = await this.customersService.findOne(id);
-
-      return result;
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP GET /customers/:id] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-
-      throw error;
-    }
+    return await this.customersService.findOne(id);
   }
 
   @Patch(':id')
@@ -317,21 +248,7 @@ export class CustomersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    this.logger.log(
-      `[HTTP PATCH /customers/:id] Request recebida - ID: ${id}`,
-      CustomersController.name,
-    );
-    try {
-      return await this.customersService.update(id, updateCustomerDto);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP PATCH /customers/:id] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-      throw error;
-    }
+    return await this.customersService.update(id, updateCustomerDto);
   }
 
   @Delete(':id')
@@ -369,21 +286,6 @@ export class CustomersController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    this.logger.log(
-      `[HTTP DELETE /customers/:id] Request recebida - ID: ${id}`,
-      CustomersController.name,
-    );
-
-    try {
-      await this.customersService.remove(id);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP DELETE /customers/:id] Falha ao processar requisição`,
-        stack,
-        CustomersController.name,
-      );
-      throw error;
-    }
+    await this.customersService.remove(id);
   }
 }

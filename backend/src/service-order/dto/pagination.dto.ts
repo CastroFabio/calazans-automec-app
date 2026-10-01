@@ -21,6 +21,9 @@ export class PaginationDto {
   limit?: number = 5;
 
   // --- EXEMPLOS DE FILTROS QUE VOCÊ PODE ADICIONAR ---
+  @ApiPropertyOptional({
+    description: 'Filtrar por status',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

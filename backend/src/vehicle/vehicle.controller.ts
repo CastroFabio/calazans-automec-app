@@ -11,10 +11,7 @@ import {
   HttpCode,
   ParseIntPipe,
   UseGuards,
-  Logger,
-  Inject,
 } from '@nestjs/common';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import {
   ApiTags,
   ApiOperation,
@@ -39,10 +36,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @ApiTags('vehicles')
 @Controller('vehicles')
 export class VehicleController {
-  constructor(
-    private readonly vehicleService: VehicleService,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: Logger,
-  ) {}
+  constructor(private readonly vehicleService: VehicleService) {}
 
   @Post()
   @ApiOperation({
@@ -69,22 +63,7 @@ export class VehicleController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createVehicleDto: CreateVehicleDto) {
-    this.logger.log(
-      `[HTTP POST /vehicles] Request recebida`,
-      VehicleController.name,
-    );
-
-    try {
-      return await this.vehicleService.create(createVehicleDto);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP POST /vehicles] Falha ao processar requisição`,
-        stack,
-        VehicleController.name,
-      );
-      throw error;
-    }
+    return await this.vehicleService.create(createVehicleDto);
   }
 
   @Get()
@@ -102,22 +81,7 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async findAll() {
-    this.logger.log(
-      `[HTTP GET /vehicles] Request recebida`,
-      VehicleController.name,
-    );
-
-    try {
-      return this.vehicleService.findAll();
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP GET /vehicles] Falha ao processar requisição`,
-        stack,
-        VehicleController.name,
-      );
-      throw error;
-    }
+    return this.vehicleService.findAll();
   }
 
   @Get('search')
@@ -196,25 +160,7 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    this.logger.log(
-      `[HTTP GET /vehicles/:id] Request recebida - ID: ${id}`,
-      VehicleController.name,
-    );
-
-    try {
-      const result = await this.vehicleService.findOne(id);
-
-      return result;
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP GET /vehicles/:id] Falha ao processar requisição`,
-        stack,
-        VehicleController.name,
-      );
-
-      throw error;
-    }
+    return await this.vehicleService.findOne(id);
   }
 
   @Patch(':id')
@@ -254,21 +200,7 @@ export class VehicleController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
-    this.logger.log(
-      `[HTTP PATCH /vehicles/:id] Request recebida - ID: ${id}`,
-      VehicleController.name,
-    );
-    try {
-      return await this.vehicleService.update(id, updateVehicleDto);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP PATCH /vehicles/:id] Falha ao processar requisição`,
-        stack,
-        VehicleController.name,
-      );
-      throw error;
-    }
+    return await this.vehicleService.update(id, updateVehicleDto);
   }
 
   @Delete(':id')
@@ -295,21 +227,6 @@ export class VehicleController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number) {
-    this.logger.log(
-      `[HTTP DELETE /vehicles/:id] Request recebida - ID: ${id}`,
-      VehicleController.name,
-    );
-
-    try {
-      await this.vehicleService.remove(id);
-    } catch (error) {
-      const stack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(
-        `[HTTP DELETE /vehicles/:id] Falha ao processar requisição`,
-        stack,
-        VehicleController.name,
-      );
-      throw error;
-    }
+    await this.vehicleService.remove(id);
   }
 }
