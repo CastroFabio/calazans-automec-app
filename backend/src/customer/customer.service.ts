@@ -114,7 +114,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os clientes',
+      );
     }
   }
 
@@ -308,7 +310,6 @@ export class CustomersService {
         }
       }
 
-      // 5. Atualização
       return await this.prisma.customer.update({
         where: { id },
         data: {
@@ -383,10 +384,7 @@ export class CustomersService {
 
       // Não retorna nada (void)
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
 

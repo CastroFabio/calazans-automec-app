@@ -10,7 +10,6 @@ import {
   HttpStatus,
   ParseIntPipe,
   Query,
-  Logger,
   UseGuards,
 } from '@nestjs/common';
 import { ServiceOrderService } from './service-order.service';
@@ -40,7 +39,6 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class ServiceOrderController {
   constructor(private readonly serviceOrderService: ServiceOrderService) {}
 
-  private readonly logger = new Logger(ServiceOrderController.name);
   @Post()
   @ApiOperation({
     summary: 'Criar uma nova ordem de serviço',
@@ -65,8 +63,8 @@ export class ServiceOrderController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createServiceOrderDto: CreateServiceOrderDto) {
-    return this.serviceOrderService.create(createServiceOrderDto);
+  async create(@Body() createServiceOrderDto: CreateServiceOrderDto) {
+    return await this.serviceOrderService.create(createServiceOrderDto);
   }
 
   @Get('count')
@@ -90,8 +88,8 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll() {
-    return this.serviceOrderService.findAll();
+  async findAll() {
+    return await this.serviceOrderService.findAll();
   }
 
   @Get('page')
@@ -107,7 +105,7 @@ export class ServiceOrderController {
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAllPerPage(@Query() paginationDto: PaginationDto) {
+  async findAllPerPage(@Query() paginationDto: PaginationDto) {
     const page = Number(paginationDto.page) || 1;
     const search = paginationDto.search?.trim() || '';
     const limit = Number(paginationDto.limit) || 5;
@@ -118,7 +116,7 @@ export class ServiceOrderController {
         ? Number(paginationDto.status)
         : undefined;
 
-    return this.serviceOrderService.findAllPerPage({
+    return await this.serviceOrderService.findAllPerPage({
       page,
       limit,
       search,
@@ -149,8 +147,8 @@ export class ServiceOrderController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.serviceOrderService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.serviceOrderService.findOne(id);
   }
 
   @Patch(':id')
@@ -183,11 +181,11 @@ export class ServiceOrderController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateServiceOrderDto: UpdateServiceOrderDto,
   ) {
-    return this.serviceOrderService.update(id, updateServiceOrderDto);
+    return await this.serviceOrderService.update(id, updateServiceOrderDto);
   }
 
   @Delete(':id')
@@ -213,7 +211,7 @@ export class ServiceOrderController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.serviceOrderService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.serviceOrderService.remove(+id);
   }
 }

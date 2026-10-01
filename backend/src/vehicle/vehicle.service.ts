@@ -66,30 +66,46 @@ export class VehicleService {
 
   // READ - Buscar todos os veículos
   async findAll() {
-    return this.prisma.vehicle.findMany({
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+    try {
+      return this.prisma.vehicle.findMany({
+        include: {
+          customer: true, // Inclui os dados do cliente
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os veículos',
+      );
+    }
   }
 
   // READ - Buscar um veículo por ID
   async findOne(id: number) {
-    const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-    });
+    try {
+      const vehicle = await this.prisma.vehicle.findUnique({
+        where: { id },
+        include: {
+          customer: true,
+        },
+      });
 
-    if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      if (!vehicle) {
+        throw new NotFoundException('Veículo não encontrado');
+      }
+
+      return vehicle;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Erro ao achar o veículo ${id}`);
     }
-
-    return vehicle;
   }
 
   // READ - Buscar veículos por cliente
@@ -182,10 +198,7 @@ export class VehicleService {
         },
       });
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao atualizar veículo');
