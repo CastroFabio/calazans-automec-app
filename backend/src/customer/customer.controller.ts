@@ -12,7 +12,10 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  Inject,
+  Logger,
 } from '@nestjs/common';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import {
   ApiTags,
   ApiOperation,
@@ -39,7 +42,10 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @ApiTags('customers')
 @Controller('customers')
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) {}
+  constructor(
+    private readonly customersService: CustomersService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -80,10 +86,30 @@ export class CustomersController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  create(
+  async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(createCustomerDto);
+    this.logger.log(
+      `Recebida requisição para cadastrar cliente do celular: ${createCustomerDto.cell}`,
+      CustomersController.name,
+    );
+
+    try {
+      const result = await this.customersService.create(createCustomerDto);
+      this.logger.log(
+        `Cliente ${createCustomerDto.name} criado com sucesso. ID: ${result.id}`,
+        CustomersController.name,
+      );
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao criar cliente ${createCustomerDto.name}`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 
   @Get('count')
@@ -111,8 +137,28 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll(): Promise<CustomerResponseDto[]> {
-    return this.customersService.findAll();
+  async findAll(): Promise<CustomerResponseDto[]> {
+    this.logger.log(
+      `Recebida requisição para listar todos os clientes`,
+      CustomersController.name,
+    );
+
+    try {
+      const result = await this.customersService.findAll();
+      this.logger.log(
+        `Listagem de clientes concluída com sucesso. Total retornado: ${result.length}`,
+        CustomersController.name,
+      );
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao buscar lista de clientes`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 
   @Get('page')
@@ -128,16 +174,37 @@ export class CustomersController {
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAllPerPage(@Query() paginationDto: PaginationDto) {
+  async findAllPerPage(@Query() paginationDto: PaginationDto) {
     const page = Number(paginationDto.page) || 1;
     const search = paginationDto.search?.trim() || '';
     const limit = Number(paginationDto.limit) || 5;
 
-    return this.customersService.findAllPerPage({
-      page,
-      limit,
-      search,
-    });
+    this.logger.log(
+      `Recebida requisição para listar clientes paginados (Página: ${page}, Limite: ${limit}, Busca: "${search}")`,
+      CustomersController.name,
+    );
+    try {
+      const result = await this.customersService.findAllPerPage({
+        page,
+        limit,
+        search,
+      });
+
+      this.logger.log(
+        `Listagem paginada concluída com sucesso. Retornados ${result.data?.length || 0} de ${result.meta.totalItems || 0} clientes.`,
+        CustomersController.name,
+      );
+
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao buscar lista paginada de clientes (Página: ${page}, Busca: "${search}")`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 
   @Get('search')
@@ -205,10 +272,32 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findOne(
+  async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto | null> {
-    return this.customersService.findOne(id);
+    this.logger.log(
+      `Recebida requisição para buscar cliente por ID: ${id}`,
+      CustomersController.name,
+    );
+
+    try {
+      const result = await this.customersService.findOne(id);
+
+      this.logger.log(
+        `Cliente ID ${id} retornado com sucesso`,
+        CustomersController.name,
+      );
+
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao buscar cliente por ID: ${id}`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 
   @Patch(':id')
@@ -244,11 +333,33 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.update(id, updateCustomerDto);
+    this.logger.log(
+      `Recebida requisição para atualizar cliente ID: ${id}`,
+      CustomersController.name,
+    );
+
+    try {
+      const result = await this.customersService.update(id, updateCustomerDto);
+
+      this.logger.log(
+        `Cliente ID ${id} atualizado com sucesso`,
+        CustomersController.name,
+      );
+
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao atualizar cliente ID: ${id}`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 
   @Delete(':id')
@@ -285,7 +396,27 @@ export class CustomersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.customersService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    this.logger.log(
+      `Recebida requisição para remover cliente ID: ${id}`,
+      CustomersController.name,
+    );
+
+    try {
+      await this.customersService.remove(id);
+
+      this.logger.log(
+        `Cliente ID ${id} removido com sucesso`,
+        CustomersController.name,
+      );
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Erro ao remover cliente ID: ${id}`,
+        stack,
+        CustomersController.name,
+      );
+      throw error;
+    }
   }
 }

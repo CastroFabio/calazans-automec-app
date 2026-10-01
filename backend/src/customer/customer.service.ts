@@ -6,6 +6,7 @@ import {
   BadRequestException,
   NotFoundException,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -27,6 +28,7 @@ const sanitizePhone = (value?: string | null) =>
 @Injectable()
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(CustomersService.name);
 
   async countAll() {
     return await this.prisma.customer.count();
@@ -83,8 +85,11 @@ export class CustomersService {
         },
       });
 
+      this.logger.log(`Cliente ID ${customer.id} criado com sucesso.`);
       return customer;
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Falha ao criar o cliente`, stack);
       if (error instanceof HttpException) {
         throw error;
       }
