@@ -226,7 +226,7 @@ const SideBar = () => {
             <img
               src={logo}
               alt="Logo Oficina"
-              className="print-header-logo-image"
+              className="sidebar-header-logo-image"
             />
           </div>
         ) : (

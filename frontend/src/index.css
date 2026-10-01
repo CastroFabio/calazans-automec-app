@@ -3863,6 +3863,9 @@
   color: var(--accent);
 }
 .print-header-logo-image {
+  width: 30%;
+}
+.sidebar-header-logo-image {
   width: 100%;
 }
 .home-header-logo-image {

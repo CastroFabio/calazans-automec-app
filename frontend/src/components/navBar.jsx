@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import ModalNewGroup from "./modalNewGroup";
 import NewCustomerModal from "./NewCustomerModal.component";
+import { PATHS } from "../utils/paths";
 
 // ========== CONFIGURAÇÃO DE ROTAS ==========
 const ROUTES_CONFIG = {
@@ -14,7 +14,7 @@ const ROUTES_CONFIG = {
     title: "Ordens de Serviço",
     btn: (navigate) => (
       <button
-        onClick={() => navigate("/new-service-order")}
+        onClick={() => navigate(PATHS.newServiceOrder)}
         className="btn btn-primary"
       >
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -15,27 +15,26 @@ import Loading from "./Loading";
 import { PATHS } from "../utils/paths";
 import { getPagesArray } from "../utils/getPagesArray";
 import Pagination from "../components/Pagination.component";
-import { getNumberValue } from "../utils/parseValue";
 
 const Customers = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedCustomerModal, setSelectedCustomerModal] = useState(null);
-  const [customerPerPage, setCustomerPerPage] = useState([]);
-  const [paginationMeta, setPaginationMeta] = useState({
-    currentPage: 1,
-    perPage: 6,
-    totalItems: 0,
-    totalPages: 1,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
 
-  const { removeCustomer, fetchCustomerById } = useCustomers();
+  const {
+    removeCustomer,
+    handleFetchCustomersPerPage,
+    searchTerm,
+    setSearchTerm,
+    customerPerPage,
+    setCustomerPerPage,
+    paginationMeta,
+    setPaginationMeta,
+    loading,
+    setLoading,
+  } = useCustomers();
 
   /* const filteredData = useMemo(() => {
     if (!searchTerm) {
@@ -134,11 +133,7 @@ const Customers = () => {
     navigate(PATHS.editCustomerFN(customerID));
   };
 
-  const getRandomNumberBackground = (customerID) => {
-    return (getNumberValue(customerID) % 5) + 1;
-  };
-
-  const handleFetchCustomersPerPage = async (
+  /*   const handleFetchCustomersPerPage = async (
     page = 1,
     limit = 5,
     search = "",
@@ -161,7 +156,7 @@ const Customers = () => {
       setError(err.message || "Erro ao carregar ordens de serviço."); //
       console.error("Erro ao buscar ordens:", err); //
     }
-  };
+  }; */
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -209,11 +204,14 @@ const Customers = () => {
           paginationMeta.totalPages,
         )}
         onPageChange={(newPage) => {
-          handleFetchCustomersPerPage(
-            newPage,
-            paginationMeta.perPage,
-            searchTerm,
-          );
+          const { dataWithColor, metaPaginationPerPage } =
+            handleFetchCustomersPerPage(
+              newPage,
+              paginationMeta.perPage,
+              searchTerm,
+            );
+          setCustomerPerPage(dataWithColor);
+          setPaginationMeta(metaPaginationPerPage);
         }}
       />
 
@@ -338,11 +336,14 @@ const Customers = () => {
           isModalOpen={isModalOpen}
           selectedCustomer={selectedCustomerModal}
           onSuccess={() => {
-            handleFetchCustomersPerPage(
-              paginationMeta.currentPage,
-              paginationMeta.perPage,
-              searchTerm,
-            );
+            const { dataWithColor, metaPaginationPerPage } =
+              handleFetchCustomersPerPage(
+                paginationMeta.currentPage,
+                paginationMeta.perPage,
+                searchTerm,
+              );
+            setCustomerPerPage(dataWithColor);
+            setPaginationMeta(metaPaginationPerPage);
           }}
         />
       )}

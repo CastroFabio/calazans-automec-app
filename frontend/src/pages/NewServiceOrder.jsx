@@ -734,9 +734,9 @@ const NewServiceOrder = () => {
           handleFormFieldChange={handleFormFieldChange}
         />
 
-        {/* =============== */}
-        {/* === SERVIÇO === */}
-        {/* =============== */}
+        {/* =========================== */}
+        {/* === SERVIÇO & MATERIAIS === */}
+        {/* =========================== */}
         <NewOrderMaintenanceJob
           formData={formData}
           handleFormFieldChange={handleFormFieldChange}

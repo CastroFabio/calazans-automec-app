@@ -18,7 +18,7 @@ const NewCustomerModal = ({
   });
   const [error, setError] = useState(false);
 
-  const { addCustomer } = useCustomers();
+  const { addCustomer, handleFetchCustomersPerPage } = useCustomers();
 
   const handleFormFieldChange = (field, value) => {
     setFormData((prev) => ({
@@ -87,6 +87,7 @@ const NewCustomerModal = ({
         setSelectedCustomerFromNewServiceOrder(newCustomerData);
       }
 
+      await handleFetchCustomersPerPage(1, 6, "");
       onClose();
     } catch (err) {
       console.error("Erro ao salvar cliente:", err);

@@ -28,8 +28,8 @@ const NewVehicleModal = ({
   const [selectedCustomerInfo, setSelectedCustomerInfo] =
     useState(selectedCustomer);
 
-  const { addVehicleToCustomer, customers } = useCustomers();
-  const navigate = useNavigate();
+  const { addVehicleToCustomer, customers, handleFetchCustomersPerPage } =
+    useCustomers();
 
   // Sincroniza o cliente caso a prop selectedCustomer mude
   useEffect(() => {
@@ -111,6 +111,7 @@ const NewVehicleModal = ({
 
       if (onSuccess) onSuccess();
 
+      await handleFetchCustomersPerPage(1, 6, "");
       closeWindow();
     } catch (err) {
       console.error("Erro ao salvar veículo no cliente:", err);
