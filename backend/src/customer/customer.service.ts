@@ -136,7 +136,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os clientes',
+      );
     }
   }
 

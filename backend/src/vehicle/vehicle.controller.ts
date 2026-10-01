@@ -11,7 +11,10 @@ import {
   HttpCode,
   ParseIntPipe,
   UseGuards,
+  Logger,
+  Inject,
 } from '@nestjs/common';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import {
   ApiTags,
   ApiOperation,
@@ -36,7 +39,10 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @ApiTags('vehicles')
 @Controller('vehicles')
 export class VehicleController {
-  constructor(private readonly vehicleService: VehicleService) {}
+  constructor(
+    private readonly vehicleService: VehicleService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -62,8 +68,23 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return this.vehicleService.create(createVehicleDto);
+  async create(@Body() createVehicleDto: CreateVehicleDto) {
+    this.logger.log(
+      `[HTTP POST /vehicles] Request recebida`,
+      VehicleController.name,
+    );
+
+    try {
+      return await this.vehicleService.create(createVehicleDto);
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `[HTTP POST /vehicles] Falha ao processar requisição`,
+        stack,
+        VehicleController.name,
+      );
+      throw error;
+    }
   }
 
   @Get()
@@ -80,8 +101,23 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll() {
-    return this.vehicleService.findAll();
+  async findAll() {
+    this.logger.log(
+      `[HTTP GET /vehicles] Request recebida`,
+      VehicleController.name,
+    );
+
+    try {
+      return this.vehicleService.findAll();
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `[HTTP GET /vehicles] Falha ao processar requisição`,
+        stack,
+        VehicleController.name,
+      );
+      throw error;
+    }
   }
 
   @Get('search')
@@ -159,8 +195,26 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.vehicleService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    this.logger.log(
+      `[HTTP GET /vehicles/:id] Request recebida - ID: ${id}`,
+      VehicleController.name,
+    );
+
+    try {
+      const result = await this.vehicleService.findOne(id);
+
+      return result;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `[HTTP GET /vehicles/:id] Falha ao processar requisição`,
+        stack,
+        VehicleController.name,
+      );
+
+      throw error;
+    }
   }
 
   @Patch(':id')
@@ -196,11 +250,25 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
-    return this.vehicleService.update(id, updateVehicleDto);
+    this.logger.log(
+      `[HTTP PATCH /vehicles/:id] Request recebida - ID: ${id}`,
+      VehicleController.name,
+    );
+    try {
+      return await this.vehicleService.update(id, updateVehicleDto);
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `[HTTP PATCH /vehicles/:id] Falha ao processar requisição`,
+        stack,
+        VehicleController.name,
+      );
+      throw error;
+    }
   }
 
   @Delete(':id')
@@ -226,7 +294,22 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.vehicleService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    this.logger.log(
+      `[HTTP DELETE /vehicles/:id] Request recebida - ID: ${id}`,
+      VehicleController.name,
+    );
+
+    try {
+      await this.vehicleService.remove(id);
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `[HTTP DELETE /vehicles/:id] Falha ao processar requisição`,
+        stack,
+        VehicleController.name,
+      );
+      throw error;
+    }
   }
 }

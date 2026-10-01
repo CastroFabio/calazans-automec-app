@@ -5,6 +5,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
@@ -13,6 +14,7 @@ import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 @Injectable()
 export class VehicleService {
   constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(VehicleService.name);
 
   // CREATE - Criar um novo veículo
   async create(createVehicleDto: CreateVehicleDto) {
@@ -52,8 +54,15 @@ export class VehicleService {
         },
       });
 
+      this.logger.log(
+        `Criação de veículo finalizada: veículo "${vehicle.license_plate}" com ID (${vehicle.id}) criado com sucesso.`,
+        VehicleService.name,
+      );
+
       return vehicle;
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Falha ao criar o veículo`, stack, VehicleService.name);
       if (
         error instanceof ConflictException ||
         error instanceof NotFoundException
@@ -66,30 +75,67 @@ export class VehicleService {
 
   // READ - Buscar todos os veículos
   async findAll() {
-    return this.prisma.vehicle.findMany({
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+    try {
+      this.logger.log(
+        `Busca de veículos finalizada: listagem de veículos concluída com sucesso.`,
+        VehicleService.name,
+      );
+      return this.prisma.vehicle.findMany({
+        include: {
+          customer: true, // Inclui os dados do cliente
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao listar todos os veículos`,
+        stack,
+        VehicleService.name,
+      );
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os veículos',
+      );
+    }
   }
 
   // READ - Buscar um veículo por ID
   async findOne(id: number) {
-    const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-    });
+    try {
+      const vehicle = await this.prisma.vehicle.findUnique({
+        where: { id },
+        include: {
+          customer: true,
+        },
+      });
 
-    if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      if (!vehicle) {
+        throw new NotFoundException('Veículo não encontrado');
+      }
+
+      this.logger.log(
+        `Busca de veículo finalizada: veículo "${vehicle.license_plate}" com ID (${vehicle.id}) recuperado com sucesso.`,
+        VehicleService.name,
+      );
+
+      return vehicle;
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao buscar o veículo`,
+        stack,
+        VehicleService.name,
+      );
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Erro ao achar o veículo ${id}`);
     }
-
-    return vehicle;
   }
 
   // READ - Buscar veículos por cliente
@@ -166,6 +212,11 @@ export class VehicleService {
         }
       }
 
+      this.logger.log(
+        `Atualização de veículo finalizada: "${updateVehicleDto.license_plate || '-'}" com ID (${id}) atualizado com sucesso.`,
+        VehicleService.name,
+      );
+
       // Atualiza o veículo
       return this.prisma.vehicle.update({
         where: { id },
@@ -182,10 +233,13 @@ export class VehicleService {
         },
       });
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao atualizar o veículo`,
+        stack,
+        VehicleService.name,
+      );
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException('Erro ao atualizar veículo');
@@ -210,10 +264,21 @@ export class VehicleService {
         );
       }
 
+      this.logger.log(
+        `Deletar de veículo finalizado: veículo "${vehicle.license_plate}" com ID (${id}) deletado com sucesso.`,
+        VehicleService.name,
+      );
+
       await this.prisma.vehicle.delete({
         where: { id },
       });
     } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Falha ao remover o veículo`,
+        stack,
+        VehicleService.name,
+      );
       if (error instanceof HttpException) {
         throw error;
       }
