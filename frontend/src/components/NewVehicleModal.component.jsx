@@ -118,7 +118,7 @@ const NewVehicleModal = ({
 
       let errorMessage = "Erro ao salvar veículo no cliente";
       if (err.response) {
-        errorMessage = err.response.data?.message || errorMessage;
+        errorMessage = err.response.data?.message.message || errorMessage;
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
       }
