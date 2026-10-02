@@ -1668,6 +1668,7 @@
   font-family: "Barlow Condensed", sans-serif;
   font-size: 17px;
   font-weight: 700;
+  color: var(--ink);
 }
 .modal-body {
   padding: 20px;

@@ -96,7 +96,7 @@ const NewCustomerModal = ({
       if (err.response) {
         console.error("Status:", err.response.status);
         console.error("Dados:", err.response.data);
-        errorMessage = err.response.data?.message || errorMessage;
+        errorMessage = err.response.data?.message.message || errorMessage;
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
       }
