@@ -75,6 +75,7 @@ export class MaintenanceItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao criar serviço de manutenção',
+        { cause: error },
       );
     }
   }
@@ -186,6 +187,7 @@ export class MaintenanceItemService {
 
       throw new InternalServerErrorException(
         'Erro ao criar itens de manutenção: ' + errorMessage,
+        { cause: error },
       );
     }
   }
@@ -272,6 +274,7 @@ export class MaintenanceItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao atualizar serviço de manutenção',
+        { cause: error },
       );
     }
   }
@@ -293,6 +296,7 @@ export class MaintenanceItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao remover serviço de manutenção',
+        { cause: error },
       );
     }
   }

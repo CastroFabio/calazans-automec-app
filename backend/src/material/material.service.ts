@@ -46,7 +46,9 @@ export class MaterialService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar material');
+      throw new InternalServerErrorException('Erro ao criar material', {
+        cause: error,
+      });
     }
   }
 
@@ -97,7 +99,9 @@ export class MaterialService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar material');
+      throw new InternalServerErrorException('Erro ao atualizar material', {
+        cause: error,
+      });
     }
   }
 
@@ -115,7 +119,9 @@ export class MaterialService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao remover material');
+      throw new InternalServerErrorException('Erro ao remover material', {
+        cause: error,
+      });
     }
   }
 }

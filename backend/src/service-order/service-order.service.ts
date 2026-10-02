@@ -166,7 +166,9 @@ export class ServiceOrderService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar ordem de serviço');
+      throw new InternalServerErrorException('Erro ao criar ordem de serviço', {
+        cause: error,
+      });
     }
   }
 
@@ -192,6 +194,7 @@ export class ServiceOrderService {
       }
       throw new InternalServerErrorException(
         'Erro ao buscar todos as ordens de serviço',
+        { cause: error },
       );
     }
   }
@@ -230,6 +233,7 @@ export class ServiceOrderService {
       }
       throw new InternalServerErrorException(
         `Erro ao buscar a ordem de serviço ${id}`,
+        { cause: error },
       );
     }
   }
@@ -292,6 +296,7 @@ export class ServiceOrderService {
       }
       throw new InternalServerErrorException(
         'Erro ao atualizar a ordem de serviço',
+        { cause: error },
       );
     }
   }
@@ -314,6 +319,7 @@ export class ServiceOrderService {
 
       throw new InternalServerErrorException(
         'Erro ao remover a ordem de serviço',
+        { cause: error },
       );
     }
   }

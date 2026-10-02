@@ -32,16 +32,22 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
     }),
     WinstonModule.forRoot({
       transports: [
-        // 1. Logs coloridos no Console (Ideal para desenvolvimento)
+        // 1. Console: colorido em desenvolvimento, JSON em produção (lido pelo Docker)
         new winston.transports.Console({
-          format: winston.format.combine(
-            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-            winston.format.ms(),
-            nestWinstonModuleUtilities.format.nestLike('CalazansAutomec', {
-              colors: true,
-              prettyPrint: true,
-            }),
-          ),
+          format:
+            process.env.NODE_ENV === 'production'
+              ? winston.format.combine(
+                  winston.format.timestamp(),
+                  winston.format.json(),
+                )
+              : winston.format.combine(
+                  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                  winston.format.ms(),
+                  nestWinstonModuleUtilities.format.nestLike(
+                    'CalazansAutomec',
+                    { colors: true, prettyPrint: true },
+                  ),
+                ),
         }),
 
         // 2. Arquivo de Log Diário para Erros

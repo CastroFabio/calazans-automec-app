@@ -47,7 +47,9 @@ export class MaintenanceService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar manutenção');
+      throw new InternalServerErrorException('Erro ao criar manutenção', {
+        cause: error,
+      });
     }
   }
 
@@ -105,7 +107,9 @@ export class MaintenanceService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar manutenção');
+      throw new InternalServerErrorException('Erro ao atualizar manutenção', {
+        cause: error,
+      });
     }
   }
 
@@ -124,7 +128,9 @@ export class MaintenanceService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao remover manutenção');
+      throw new InternalServerErrorException('Erro ao remover manutenção', {
+        cause: error,
+      });
     }
   }
 }

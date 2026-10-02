@@ -88,7 +88,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException('Erro ao criar cliente', {
+        cause: error,
+      });
     }
   }
 
@@ -116,6 +118,7 @@ export class CustomersService {
       }
       throw new InternalServerErrorException(
         'Erro ao buscar todos os clientes',
+        { cause: error },
       );
     }
   }
@@ -219,7 +222,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`);
+      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`, {
+        cause: error,
+      });
     }
   }
 
@@ -331,7 +336,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar cliente');
+      throw new InternalServerErrorException('Erro ao atualizar cliente', {
+        cause: error,
+      });
     }
   }
 
@@ -388,7 +395,9 @@ export class CustomersService {
         throw error;
       }
 
-      throw new InternalServerErrorException('Erro ao remover cliente');
+      throw new InternalServerErrorException('Erro ao remover cliente', {
+        cause: error,
+      });
     }
   }
 }

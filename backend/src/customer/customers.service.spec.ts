@@ -830,7 +830,9 @@ describe('CustomersService (Unitario)', () => {
       );
 
       await expect(service.update(1, customerInput)).rejects.toThrow(
-        new InternalServerErrorException('Erro ao atualizar cliente'),
+        new InternalServerErrorException('Erro ao atualizar cliente', {
+          cause: new Error('Database offline'),
+        }),
       );
     });
   });
@@ -1031,7 +1033,9 @@ describe('CustomersService (Unitario)', () => {
       );
 
       await expect(service.remove(1)).rejects.toThrow(
-        new InternalServerErrorException('Erro ao remover cliente'),
+        new InternalServerErrorException('Erro ao remover cliente', {
+          cause: new Error('Database offline'),
+        }),
       );
     });
   });

@@ -61,6 +61,9 @@ COPY --from=build --chown=node:node /app/prisma ./prisma
 COPY --from=build --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build --chown=node:node /app/package.json ./package.json
 
+# Pasta dos logs em arquivo do winston: /app pertence ao root e o usuario node nao conseguiria cria-la
+RUN mkdir -p /app/logs && chown node:node /app/logs
+
 USER node
 EXPOSE 3000
 
