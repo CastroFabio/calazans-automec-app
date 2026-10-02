@@ -80,10 +80,10 @@ export class CustomersController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  create(
+  async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.create(createCustomerDto);
+    return await this.customersService.create(createCustomerDto);
   }
 
   @Get('count')
@@ -111,8 +111,8 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll(): Promise<CustomerResponseDto[]> {
-    return this.customersService.findAll();
+  async findAll(): Promise<CustomerResponseDto[]> {
+    return await this.customersService.findAll();
   }
 
   @Get('page')
@@ -128,12 +128,12 @@ export class CustomersController {
   @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAllPerPage(@Query() paginationDto: PaginationDto) {
+  async findAllPerPage(@Query() paginationDto: PaginationDto) {
     const page = Number(paginationDto.page) || 1;
     const search = paginationDto.search?.trim() || '';
     const limit = Number(paginationDto.limit) || 5;
 
-    return this.customersService.findAllPerPage({
+    return await this.customersService.findAllPerPage({
       page,
       limit,
       search,
@@ -205,10 +205,10 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findOne(
+  async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<CustomerResponseDto | null> {
-    return this.customersService.findOne(id);
+    return await this.customersService.findOne(id);
   }
 
   @Patch(':id')
@@ -244,11 +244,11 @@ export class CustomersController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ): Promise<CustomerResponseDto> {
-    return this.customersService.update(id, updateCustomerDto);
+    return await this.customersService.update(id, updateCustomerDto);
   }
 
   @Delete(':id')
@@ -285,7 +285,7 @@ export class CustomersController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.customersService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.customersService.remove(id);
   }
 }

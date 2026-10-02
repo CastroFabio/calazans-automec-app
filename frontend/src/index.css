@@ -1668,6 +1668,7 @@
   font-family: "Barlow Condensed", sans-serif;
   font-size: 17px;
   font-weight: 700;
+  color: var(--ink);
 }
 .modal-body {
   padding: 20px;
@@ -3863,6 +3864,9 @@
   color: var(--accent);
 }
 .print-header-logo-image {
+  width: 30%;
+}
+.sidebar-header-logo-image {
   width: 100%;
 }
 .home-header-logo-image {

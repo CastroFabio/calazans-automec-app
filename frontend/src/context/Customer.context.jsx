@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { customerApi } from "../api/customers";
 import { useAuth } from "./Auth.context";
+import { getNumberValue } from "../utils/parseValue";
 
 // Criar o Contexto
 const CustomerContext = createContext();
@@ -11,10 +12,20 @@ export const CustomerProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
   const [customerID, setCustomerID] = useState(null);
   const [customerCount, setCustomerCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCustomerFromDetailPanel, setSelectedCustomerFromDetailPanel] =
     useState({});
+  const [customerPerPage, setCustomerPerPage] = useState([]);
+  const [paginationMeta, setPaginationMeta] = useState({
+    currentPage: 1,
+    perPage: 6,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
 
   // Função para buscar clientes
   const fetchCustomers = async () => {
@@ -25,7 +36,7 @@ export const CustomerProvider = ({ children }) => {
 
       const dataWithColor = data.map((element) => ({
         ...element,
-        color: getRandomNumberBackground(),
+        color: getRandomNumberBackground(data.id),
       }));
 
       setCustomers(dataWithColor);
@@ -40,8 +51,8 @@ export const CustomerProvider = ({ children }) => {
     return customers.length;
   };
 
-  const getRandomNumberBackground = () => {
-    return Math.floor(Math.random() * (5 - 1 + 1)) + 1;
+  const getRandomNumberBackground = (customerID) => {
+    return (getNumberValue(customerID) % 5) + 1;
   };
 
   // ========== ✅ BUSCAR CLIENTE POR ID NO BACKEND ==========
@@ -147,7 +158,7 @@ export const CustomerProvider = ({ children }) => {
   const addCustomer = (newCustomer) => {
     const newCustomerWithColor = {
       ...newCustomer,
-      color: getRandomNumberBackground(),
+      color: getRandomNumberBackground(newCustomer.id),
       vehicles: [],
       serviceOrders: [],
     };
@@ -272,6 +283,35 @@ export const CustomerProvider = ({ children }) => {
     );
   };
 
+  const handleFetchCustomersPerPage = async (
+    page = 1,
+    limit = 5,
+    search = "",
+  ) => {
+    setLoading(true);
+    try {
+      const { data: result } = await customerApi.getAllPerPage({
+        page,
+        limit,
+        search,
+      });
+
+      const dataWithColor = result.data.map((element) => ({
+        ...element,
+        color: getRandomNumberBackground(element.id),
+      }));
+
+      const metaPaginationPerPage = result.meta;
+
+      setCustomerPerPage(dataWithColor);
+      setPaginationMeta(metaPaginationPerPage);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message || "Erro ao carregar ordens de serviço."); //
+      console.error("Erro ao buscar ordens:", err); //
+    }
+  };
+
   // Carregar clientes ao iniciar
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
@@ -279,12 +319,21 @@ export const CustomerProvider = ({ children }) => {
     }
   }, [isAuthenticated, authLoading]);
 
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      await handleFetchCustomersPerPage(1, paginationMeta.perPage, searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   return (
     <CustomerContext.Provider
       value={{
         customers,
         setCustomers,
         loading,
+        setLoading,
         error,
         fetchCustomers,
         addCustomer,
@@ -304,6 +353,13 @@ export const CustomerProvider = ({ children }) => {
         setCustomerID,
         selectedCustomerFromDetailPanel,
         setSelectedCustomerFromDetailPanel,
+        handleFetchCustomersPerPage,
+        searchTerm,
+        setSearchTerm,
+        customerPerPage,
+        setCustomerPerPage,
+        paginationMeta,
+        setPaginationMeta,
       }}
     >
       {children}

@@ -88,7 +88,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException('Erro ao criar cliente', {
+        cause: error,
+      });
     }
   }
 
@@ -114,7 +116,10 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar cliente');
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os clientes',
+        { cause: error },
+      );
     }
   }
 
@@ -217,7 +222,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`);
+      throw new InternalServerErrorException(`Erro ao achar o cliente ${id}`, {
+        cause: error,
+      });
     }
   }
 
@@ -308,7 +315,6 @@ export class CustomersService {
         }
       }
 
-      // 5. Atualização
       return await this.prisma.customer.update({
         where: { id },
         data: {
@@ -330,7 +336,9 @@ export class CustomersService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar cliente');
+      throw new InternalServerErrorException('Erro ao atualizar cliente', {
+        cause: error,
+      });
     }
   }
 
@@ -383,14 +391,13 @@ export class CustomersService {
 
       // Não retorna nada (void)
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadRequestException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
 
-      throw new InternalServerErrorException('Erro ao remover cliente');
+      throw new InternalServerErrorException('Erro ao remover cliente', {
+        cause: error,
+      });
     }
   }
 }

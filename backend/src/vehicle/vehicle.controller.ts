@@ -62,8 +62,8 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createVehicleDto: CreateVehicleDto) {
-    return this.vehicleService.create(createVehicleDto);
+  async create(@Body() createVehicleDto: CreateVehicleDto) {
+    return await this.vehicleService.create(createVehicleDto);
   }
 
   @Get()
@@ -80,7 +80,7 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findAll() {
+  async findAll() {
     return this.vehicleService.findAll();
   }
 
@@ -159,8 +159,8 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.vehicleService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.vehicleService.findOne(id);
   }
 
   @Patch(':id')
@@ -196,11 +196,11 @@ export class VehicleController {
   })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVehicleDto: UpdateVehicleDto,
   ) {
-    return this.vehicleService.update(id, updateVehicleDto);
+    return await this.vehicleService.update(id, updateVehicleDto);
   }
 
   @Delete(':id')
@@ -226,7 +226,7 @@ export class VehicleController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.vehicleService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.vehicleService.remove(id);
   }
 }

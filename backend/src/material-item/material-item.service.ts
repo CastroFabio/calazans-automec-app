@@ -76,7 +76,9 @@ export class MaterialItemService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar item de material');
+      throw new InternalServerErrorException('Erro ao criar item de material', {
+        cause: error,
+      });
     }
   }
 
@@ -173,6 +175,7 @@ export class MaterialItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao criar itens de material: ',
+        { cause: error },
       );
     }
   }
@@ -261,6 +264,7 @@ export class MaterialItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao atualizar item de material',
+        { cause: error },
       );
     }
   }
@@ -282,6 +286,7 @@ export class MaterialItemService {
       }
       throw new InternalServerErrorException(
         'Erro ao remover item de material',
+        { cause: error },
       );
     }
   }

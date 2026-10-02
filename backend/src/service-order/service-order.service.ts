@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  HttpException,
 } from '@nestjs/common';
 import { CreateServiceOrderDto } from './dto/create-service-order.dto';
 import { UpdateServiceOrderDto } from './dto/update-service-order.dto';
@@ -162,60 +163,79 @@ export class ServiceOrderService {
 
       return serviceOrder;
     } catch (error) {
-      if (
-        error instanceof ConflictException ||
-        error instanceof NotFoundException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar ordem de serviço');
+      throw new InternalServerErrorException('Erro ao criar ordem de serviço', {
+        cause: error,
+      });
     }
   }
 
   // READ - Buscar todas as ordens de serviço
   async findAll() {
-    return this.prisma.serviceOrder.findMany({
-      orderBy: { created_at: 'desc' },
-      include: {
-        customer: { select: { id: true, name: true } },
-        vehicle: true,
-        itemMaintenances: {
-          include: { maintenancejob: { select: { id: true, name: true } } },
+    try {
+      return this.prisma.serviceOrder.findMany({
+        orderBy: { created_at: 'desc' },
+        include: {
+          customer: { select: { id: true, name: true } },
+          vehicle: true,
+          itemMaintenances: {
+            include: { maintenancejob: { select: { id: true, name: true } } },
+          },
+          itemMaterials: {
+            include: { material: { select: { id: true, name: true } } },
+          },
         },
-        itemMaterials: {
-          include: { material: { select: { id: true, name: true } } },
-        },
-      },
-    });
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos as ordens de serviço',
+        { cause: error },
+      );
+    }
   }
 
   // READ - Buscar ordem de serviço por ID
   async findOne(id: number) {
-    const serviceOrder = await this.prisma.serviceOrder.findUnique({
-      where: { id },
-      include: {
-        customer: { select: { id: true, name: true, cell: true } },
-        vehicle: {
-          select: {
-            id: true,
-            license_plate: true,
-            model: true,
-            brand: true,
+    try {
+      const serviceOrder = await this.prisma.serviceOrder.findUnique({
+        where: { id },
+        include: {
+          customer: { select: { id: true, name: true, cell: true } },
+          vehicle: {
+            select: {
+              id: true,
+              license_plate: true,
+              model: true,
+              brand: true,
+            },
+          },
+          itemMaintenances: {
+            include: { maintenancejob: { select: { id: true, name: true } } },
+          },
+          itemMaterials: {
+            include: { material: { select: { id: true, name: true } } },
           },
         },
-        itemMaintenances: {
-          include: { maintenancejob: { select: { id: true, name: true } } },
-        },
-        itemMaterials: {
-          include: { material: { select: { id: true, name: true } } },
-        },
-      },
-    });
+      });
 
-    if (!serviceOrder)
-      throw new NotFoundException('Ordem de serviço não encontrada');
+      if (!serviceOrder)
+        throw new NotFoundException('Ordem de serviço não encontrada');
 
-    return serviceOrder;
+      return serviceOrder;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Erro ao buscar a ordem de serviço ${id}`,
+        { cause: error },
+      );
+    }
   }
 
   // UPDATE - Atualizar uma ordem de serviço
@@ -271,14 +291,12 @@ export class ServiceOrderService {
         },
       });
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException(
-        'Erro ao atualizar ordem de serviço',
+        'Erro ao atualizar a ordem de serviço',
+        { cause: error },
       );
     }
   }
@@ -295,11 +313,13 @@ export class ServiceOrderService {
 
       await this.prisma.serviceOrder.delete({ where: { id } });
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      if (error instanceof HttpException) {
         throw error;
       }
+
       throw new InternalServerErrorException(
-        'Erro ao remover ordem de serviço',
+        'Erro ao remover a ordem de serviço',
+        { cause: error },
       );
     }
   }

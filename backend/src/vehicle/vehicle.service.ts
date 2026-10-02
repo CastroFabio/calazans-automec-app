@@ -60,36 +60,57 @@ export class VehicleService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar veículo');
+      throw new InternalServerErrorException('Erro ao criar veículo', {
+        cause: error,
+      });
     }
   }
 
   // READ - Buscar todos os veículos
   async findAll() {
-    return this.prisma.vehicle.findMany({
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+    try {
+      return this.prisma.vehicle.findMany({
+        include: {
+          customer: true, // Inclui os dados do cliente
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Erro ao buscar todos os veículos',
+        { cause: error },
+      );
+    }
   }
 
   // READ - Buscar um veículo por ID
   async findOne(id: number) {
-    const vehicle = await this.prisma.vehicle.findUnique({
-      where: { id },
-      include: {
-        customer: true, // Inclui os dados do cliente
-      },
-    });
+    try {
+      const vehicle = await this.prisma.vehicle.findUnique({
+        where: { id },
+        include: {
+          customer: true,
+        },
+      });
 
-    if (!vehicle) {
-      throw new NotFoundException('Veículo não encontrado');
+      if (!vehicle) {
+        throw new NotFoundException('Veículo não encontrado');
+      }
+
+      return vehicle;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Erro ao achar o veículo ${id}`, {
+        cause: error,
+      });
     }
-
-    return vehicle;
   }
 
   // READ - Buscar veículos por cliente
@@ -182,13 +203,12 @@ export class VehicleService {
         },
       });
     } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ConflictException
-      ) {
+      if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar veículo');
+      throw new InternalServerErrorException('Erro ao atualizar veículo', {
+        cause: error,
+      });
     }
   }
 
@@ -217,7 +237,9 @@ export class VehicleService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao remover veículo');
+      throw new InternalServerErrorException('Erro ao remover veículo', {
+        cause: error,
+      });
     }
   }
 }

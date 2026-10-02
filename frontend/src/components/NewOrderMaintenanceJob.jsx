@@ -301,12 +301,7 @@ const NewOrderMaintenanceJob = ({
               />
             </div>
           </div>
-          {true && (
-            <WizardBtn
-              label={"Novo serviço"}
-              openModal={openMaintenanceModal}
-            />
-          )}
+          <WizardBtn label={"Novo serviço"} openModal={openMaintenanceModal} />
 
           <AddMaterialInMaintenace
             handleAddMaterial={handleAddLocalMaterial}

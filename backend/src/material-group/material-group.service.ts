@@ -46,6 +46,7 @@ export class MaterialGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao criar grupo de materiais',
+        { cause: error },
       );
     }
   }
@@ -127,6 +128,7 @@ export class MaterialGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao atualizar grupo de material.',
+        { cause: error },
       );
     }
   }
@@ -149,6 +151,7 @@ export class MaterialGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao remover grupo de material',
+        { cause: error },
       );
     }
   }

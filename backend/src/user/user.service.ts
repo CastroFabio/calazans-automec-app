@@ -49,14 +49,13 @@ export class UserService {
 
       return user;
     } catch (error) {
-      // ADICIONE ESTA LINHA PARA VER O ERRO REAL NO TERMINAL:
-      console.error('Erro detalhado ao criar usuário:', error);
-
       if (error instanceof HttpException) {
         throw error;
       }
 
-      throw new InternalServerErrorException('Erro ao criar usuário');
+      throw new InternalServerErrorException('Erro ao criar usuário', {
+        cause: error,
+      });
     }
   }
 

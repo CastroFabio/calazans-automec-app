@@ -47,6 +47,7 @@ export class MaintenanceGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao criar grupo de manutenção',
+        { cause: error },
       );
     }
   }
@@ -133,6 +134,7 @@ export class MaintenanceGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao atualizar grupo de manutenção.',
+        { cause: error },
       );
     }
   }
@@ -157,6 +159,7 @@ export class MaintenanceGroupService {
       }
       throw new InternalServerErrorException(
         'Erro ao remover grupo de manutenção',
+        { cause: error },
       );
     }
   }
