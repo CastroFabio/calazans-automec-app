@@ -9,7 +9,8 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import type { LoggerService } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { getRequestId } from '../middleware/request-id.middleware';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -19,15 +20,20 @@ export class LoggingInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<Request>();
-    const { method, url } = request;
+    const http = context.switchToHttp();
+    const request = http.getRequest<Request>();
+    const response = http.getResponse<Response>();
+    const { method } = request;
+    // Sem query string: evita gravar dados pessoais (celular, nome buscado) no log
+    const path = request.originalUrl.split('?')[0];
+    const requestId = getRequestId(response);
     const controllerName = context.getClass().name;
     const handlerName = context.getHandler().name;
     const now = Date.now();
 
     // Log de Entrada Genérico
     this.logger.log(
-      `[REQ] ${method} ${url} - Executando ${controllerName}.${handlerName}`,
+      `[REQ] [${requestId}] ${method} ${path} - Executando ${controllerName}.${handlerName}`,
       controllerName,
     );
 
@@ -36,7 +42,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const delay = Date.now() - now;
         // Log de Sucesso Genérico com Tempo de Resposta
         this.logger.log(
-          `[RES] ${method} ${url} - Sucesso (+${delay}ms)`,
+          `[RES] [${requestId}] ${method} ${path} - Sucesso (+${delay}ms)`,
           controllerName,
         );
       }),

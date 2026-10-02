@@ -3,6 +3,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import {
+  REQUEST_ID_HEADER,
+  requestIdMiddleware,
+} from './common/middleware/request-id.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -10,6 +14,7 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  app.use(requestIdMiddleware);
 
   app.enableCors({
     origin: [
@@ -28,6 +33,7 @@ async function bootstrap() {
       'Origin',
       'X-Requested-With',
     ],
+    exposedHeaders: [REQUEST_ID_HEADER],
     credentials: true,
   });
 

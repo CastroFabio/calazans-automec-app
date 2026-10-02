@@ -60,7 +60,9 @@ export class VehicleService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao criar veículo');
+      throw new InternalServerErrorException('Erro ao criar veículo', {
+        cause: error,
+      });
     }
   }
 
@@ -81,6 +83,7 @@ export class VehicleService {
       }
       throw new InternalServerErrorException(
         'Erro ao buscar todos os veículos',
+        { cause: error },
       );
     }
   }
@@ -104,7 +107,9 @@ export class VehicleService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException(`Erro ao achar o veículo ${id}`);
+      throw new InternalServerErrorException(`Erro ao achar o veículo ${id}`, {
+        cause: error,
+      });
     }
   }
 
@@ -201,7 +206,9 @@ export class VehicleService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao atualizar veículo');
+      throw new InternalServerErrorException('Erro ao atualizar veículo', {
+        cause: error,
+      });
     }
   }
 
@@ -230,7 +237,9 @@ export class VehicleService {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new InternalServerErrorException('Erro ao remover veículo');
+      throw new InternalServerErrorException('Erro ao remover veículo', {
+        cause: error,
+      });
     }
   }
 }
