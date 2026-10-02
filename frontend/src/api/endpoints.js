@@ -24,6 +24,7 @@ export const ENDPOINTS = {
   orders: {
     base: "/service-order",
     perPage: "/service-order/page",
+    metrics: "/service-order/dashboard/metrics",
     byId: (id) => `/service-order/${id}`,
     status: (id) => `/service-order/${id}/status`,
     byCustomer: (customerId) => `/service-order/customer/${customerId}`,

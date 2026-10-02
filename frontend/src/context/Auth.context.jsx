@@ -20,13 +20,10 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await authApi.getMe(); //
           setUser(response.data); //
+          setAccessToken(token);
           setIsAuthenticated(true); //
         } catch (err) {
-          // Token inválido/expirado
-          localStorage.removeItem(JWT_TOKENS.accessToken); //
-          localStorage.removeItem(JWT_TOKENS.refreshToken); //
-          setUser(null); //
-          setIsAuthenticated(false); //
+          logout();
         }
       }
 
@@ -34,16 +31,28 @@ export const AuthProvider = ({ children }) => {
     }
 
     loadStorageData();
+
+    const handleUnauthorized = () => logout();
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+
+    return () => {
+      window.removeEventListener("auth:unauthorized", handleUnauthorized);
+    };
   }, []);
 
   const loginService = async (email, password) => {
     const response = await authApi.login({ email, password });
-    const { accessToken, refreshToken, user: userData } = response.data;
+    const {
+      accessToken: newAccessToken,
+      refreshToken,
+      user: userData,
+    } = response.data;
 
-    localStorage.setItem(JWT_TOKENS.accessToken, accessToken);
+    localStorage.setItem(JWT_TOKENS.accessToken, newAccessToken);
     if (refreshToken)
       localStorage.setItem(JWT_TOKENS.refreshToken, refreshToken);
 
+    setAccessToken(newAccessToken);
     setUser(userData);
     setIsAuthenticated(true);
 

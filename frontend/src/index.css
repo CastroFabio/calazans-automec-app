@@ -5763,13 +5763,16 @@
 }
 
 .metric-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow);
   position: relative;
+  overflow: hidden;
 }
 
 .metric-card.green {
@@ -5786,22 +5789,25 @@
 }
 
 .metric-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--ink3);
 }
 
 .metric-value {
+  font-family: "JetBrains Mono", monospace;
   font-size: 22px;
-  font-weight: 700;
-  color: var(--ink1);
-  margin-top: 8px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
 }
 
 .metric-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--ink3);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .metric-delta {

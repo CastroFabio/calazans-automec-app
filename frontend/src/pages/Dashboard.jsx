@@ -1,3 +1,9 @@
+import { useEffect, useState } from "react";
+import { orderApi } from "../api/orders";
+import { useCustomers } from "../context/Customer.context";
+import Loading from "./Loading";
+import { formattedPrice } from "../utils/convertPrice";
+
 export default function Dashboard({ metricsData }) {
   const {
     faturamentoMes = "—",
@@ -8,10 +14,30 @@ export default function Dashboard({ metricsData }) {
     ticketSub = "",
     osAbertoSub = "",
     aReceberSub = "",
-    delta = null,
     greetingTitle = "MecânicaOS",
     greetingSub = "Carregando métricas…",
   } = metricsData || {};
+
+  const { loading, setLoading } = useCustomers();
+
+  const [dataMetrics, setDataMetrics] = useState();
+
+  const handleGetMetricsDashboard = async () => {
+    setLoading(true);
+    const { data } = await orderApi.getMetricsDashboard();
+    console.log(data);
+
+    setDataMetrics(data);
+    setLoading(false);
+  };
+
+  const delta = null;
+
+  useEffect(() => {
+    handleGetMetricsDashboard();
+  }, []);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="home-page">
@@ -23,7 +49,7 @@ export default function Dashboard({ metricsData }) {
           dangerouslySetInnerHTML={{ __html: greetingTitle }}
         />
         <div className="home-greeting-sub" id="homeGreetingSub">
-          {greetingSub}
+          {`${dataMetrics?.openServiceOrdersCount} OS em aberto · ${dataMetrics?.awaitingPaymentServiceOrdersCount} aguardando pagamento`}
         </div>
       </div>
 
@@ -34,10 +60,11 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-card green">
             <div className="metric-label">Faturamento este mês</div>
             <div className="metric-value" id="mFatMes">
-              {faturamentoMes}
+              {`${formattedPrice(dataMetrics?.monthlyRevenue)}`}
             </div>
             <div className="metric-sub" id="mFatMesSub">
-              {fatMesSub}
+              <strong></strong>
+              {`${dataMetrics?.completedServiceOrdersCount} orden(s) de serviço este mês`}
             </div>
             {delta !== null && (
               <div
@@ -53,30 +80,30 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-card blue">
             <div className="metric-label">Ticket médio / OS</div>
             <div className="metric-value" id="mTicket">
-              {ticketMedio}
+              {formattedPrice(dataMetrics?.averageTicket)}
             </div>
             <div className="metric-sub" id="mTicketSub">
-              {ticketSub}
+              {`sobre ${dataMetrics?.completedServiceOrdersCount} OS concluídas`}
             </div>
           </div>
 
           <div className="metric-card orange">
             <div className="metric-label">OS em aberto</div>
             <div className="metric-value" id="mOsAberto">
-              {osEmAberto}
+              {`${dataMetrics?.openServiceOrdersCount}`}
             </div>
             <div className="metric-sub" id="mOsAbertoSub">
-              {osAbertoSub}
+              {`${dataMetrics?.awaitingPaymentServiceOrdersCount} em andamento`}
             </div>
           </div>
 
           <div className="metric-card yellow">
             <div className="metric-label">A receber</div>
             <div className="metric-value" id="mAReceber">
-              {aReceber}
+              {formattedPrice(dataMetrics?.totalPendingAmount)}
             </div>
             <div className="metric-sub" id="mAReceberSub">
-              {aReceberSub}
+              {`${dataMetrics?.awaitingPaymentServiceOrdersCount} OS aguardando`}
             </div>
           </div>
         </div>
@@ -94,7 +121,7 @@ export default function Dashboard({ metricsData }) {
                 <div className="donut-bar-track">
                   <div className="donut-bar-fill">
                     <div
-                      class="donut-bar-fill"
+                      className="donut-bar-fill"
                       style={{ width: "82%", background: "rgb(34, 197, 94)" }}
                     ></div>
                   </div>
@@ -106,7 +133,7 @@ export default function Dashboard({ metricsData }) {
                 <div className="donut-bar-track">
                   <div className="donut-bar-fill">
                     <div
-                      class="donut-bar-fill"
+                      className="donut-bar-fill"
                       style={{ width: "82%", background: "rgb(34, 197, 94)" }}
                     ></div>
                   </div>
