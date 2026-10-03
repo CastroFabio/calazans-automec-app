@@ -95,4 +95,10 @@ export class DashboardMetricsDto {
       'Histórico de faturamento acumulado mês a mês dos últimos 6 meses',
   })
   revenueLast6Months!: RevenueByMonthDto[];
+
+  @ApiProperty({
+    example: 5200.0,
+    description: 'Total de ordens de serviço',
+  })
+  totalOrdersCount!: number;
 }

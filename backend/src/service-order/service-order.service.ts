@@ -58,6 +58,7 @@ export class ServiceOrderService {
       statusGroup,
       topMaintenancesResult,
       sixMonthsOrders,
+      totalOrdersCount,
     ] = await Promise.all([
       // 1. Faturamento este mês (OSs Concluídas - Status 3)
       this.prisma.serviceOrder.aggregate({
@@ -143,6 +144,8 @@ export class ServiceOrderService {
           created_at: true,
         },
       }),
+
+      this.prisma.serviceOrder.count({}),
     ]);
 
     // --- Processamento dos Resultados ---
@@ -228,6 +231,7 @@ export class ServiceOrderService {
       statusBreakdown,
       topServices,
       revenueLast6Months,
+      totalOrdersCount,
     };
   }
 

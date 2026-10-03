@@ -113,39 +113,63 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-donut-card">
             <div className="metric-header-flex">
               <div className="metric-label ">Status geral das OS</div>
-              <div className="metric-sub" id="mStatusTotal"></div>
+              <div className="metric-sub" id="mStatusTotal">
+                {`${dataMetrics?.totalOrdersCount} OS total`}
+              </div>
             </div>
             <div className="donut-bars" id="mStatusBars">
-              <div className="donut-bar-row">
-                <span className="donut-bar-label">label</span>
-                <div className="donut-bar-track">
-                  <div className="donut-bar-fill">
-                    <div
-                      className="donut-bar-fill"
-                      style={{ width: "82%", background: "rgb(34, 197, 94)" }}
-                    ></div>
-                  </div>
-                </div>
-                <span className="donut-bar-val">2</span>
-              </div>
-              <div className="donut-bar-row">
-                <span className="donut-bar-label">label</span>
-                <div className="donut-bar-track">
-                  <div className="donut-bar-fill">
-                    <div
-                      className="donut-bar-fill"
-                      style={{ width: "82%", background: "rgb(34, 197, 94)" }}
-                    ></div>
-                  </div>
-                </div>
-                <span className="donut-bar-val">2</span>
-              </div>
+              {dataMetrics && dataMetrics?.statusBreakdown.length > 0
+                ? dataMetrics.statusBreakdown.map((element, index) => {
+                    return (
+                      <div className="donut-bar-row" key={index}>
+                        <span className="donut-bar-label">
+                          {element.statusName}
+                        </span>
+                        <div className="donut-bar-track">
+                          <div className="donut-bar-fill">
+                            <div
+                              className="donut-bar-fill"
+                              style={{
+                                width: `${(element.count / dataMetrics?.totalOrdersCount) * 100}%`,
+                                background: "rgb(34, 197, 94)",
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                        <span className="donut-bar-val">{element.count}</span>
+                      </div>
+                    );
+                  })
+                : ""}
             </div>
           </div>
 
           <div className="metric-donut-card">
             <div className="metric-label">Serviços mais frequentes</div>
-            <div className="donut-bars" id="mSvcBars"></div>
+            <div className="donut-bars" id="mSvcBars">
+              {dataMetrics && dataMetrics?.topServices.length > 0
+                ? dataMetrics?.topServices.map((element, index) => (
+                    <div className="donut-bar-row" key={index}>
+                      <span
+                        className="donut-bar-label"
+                        title={`${element.name}`}
+                      >
+                        {element.name}
+                      </span>
+                      <div className="donut-bar-track">
+                        <div
+                          className="donut-bar-fill"
+                          style={{
+                            width: `${(element.count / dataMetrics?.topServices.length) * 100}%`,
+                            background: "rgb(34, 197, 94)",
+                          }}
+                        ></div>
+                      </div>
+                      <span className="donut-bar-val">{element.count}×</span>
+                    </div>
+                  ))
+                : ""}
+            </div>
           </div>
         </div>
 
@@ -155,8 +179,25 @@ export default function Dashboard({ metricsData }) {
             <div className="metric-label">Faturamento — últimos 6 meses</div>
             <div className="metric-sub" id="mSparkTotal"></div>
           </div>
-          <div id="mSparkline" className="sparkline-container"></div>
-          <div id="mSparkLabels" className="sparkline-labels"></div>
+
+          {/*
+          <div id="mSparkline" className="sparkline-container">
+            <div className="sparkline-container-info">
+              <span className={`sparkline-container-info-value`}>
+                ${v > 0 ? fmtBRL(v).replace("R$ ", "") : "—"}
+              </span>
+              <div
+                title="${tip}"
+                style="width:100%;height:${h}px;background:${barColors[i]};border-radius:3px 3px 0 0;min-height:4px;transition:height .5s;cursor:default;"
+              ></div>
+            </div>
+          </div>
+          <div id="mSparkLabels" className="sparkline-labels">
+            <div style="flex:1;text-align:center;font-size:10px;font-weight:${i===5?'700':'400'};color:${i===5?'var(--ink)':'var(--ink3)'};">
+              ${m.label}
+            </div>
+          </div>{" "}
+          */}
         </div>
       </div>
     </div>

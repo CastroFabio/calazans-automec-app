@@ -1,196 +1,285 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
-import * as bcrypt from 'bcrypt';
-import * as dotenv from 'dotenv';
 
-// Carrega as variáveis de ambiente do arquivo .env
-dotenv.config();
-
-// Configura o pool de conexão do PostgreSQL e o adaptador do Prisma v7
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Cria o pool de conexões utilizando a variável de ambiente DATABASE_URL
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
+
+// Instancia o PrismaClient passando o adapter configurado
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('🌱 Iniciando o processo de seed...');
+  console.log('🌱 Iniciando o povoamento (seed) de Ordens de Serviço...');
 
-  // 1. Limpeza do banco de dados (respeitando a ordem de exclusão)
-  await prisma.itemMaterial.deleteMany();
-  await prisma.itemMaintenance.deleteMany();
-  await prisma.serviceOrder.deleteMany();
-  await prisma.material.deleteMany();
-  await prisma.materialGroup.deleteMany();
-  await prisma.maintenanceJob.deleteMany();
-  await prisma.maintenanceJobGroup.deleteMany();
-  await prisma.vehicle.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.customer.deleteMany();
-
-  console.log('🧹 Banco limpo com sucesso.');
-
-  // 2. Hash da senha para o Usuário Admin
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-
-  // 3. Criar Clientes (Customer)
-  const customer1 = await prisma.customer.create({
-    data: {
-      name: 'João Silva',
-      cell: '21999998888',
-      telephone: '2133334444',
-      observation: 'Cliente preferencial de sábado',
-    },
+  // 1. Garantir Grupos e Cadastros Base
+  const materialGroup = await prisma.materialGroup.upsert({
+    where: { group: 'Peças e Lubrificantes' },
+    update: {},
+    create: { group: 'Peças e Lubrificantes' },
   });
 
-  const customer2 = await prisma.customer.create({
-    data: {
-      name: 'Maria Oliveira',
-      cell: '21988887777',
-      observation: 'Frota da empresa',
-    },
+  const jobGroup = await prisma.maintenanceJobGroup.upsert({
+    where: { group: 'Mecânica Geral' },
+    update: {},
+    create: { group: 'Mecânica Geral' },
   });
 
-  // 4. Criar Usuários (User)
-  await prisma.user.create({
-    data: {
-      name: 'Administrador System',
-      email: 'admin@calazans.com',
-      password_hash: hashedPassword,
-      role: Role.ADMIN,
-      is_active: true,
-    },
+  // 2. Criar Materiais (Peças)
+  const oil = await prisma.material.upsert({
+    where: { name: 'Óleo 5W30 Sintético' },
+    update: {},
+    create: { name: 'Óleo 5W30 Sintético', group_id: materialGroup.id },
   });
 
-  await prisma.user.create({
-    data: {
-      name: 'João Silva',
-      email: 'joao.silva@email.com',
-      password_hash: hashedPassword,
-      role: Role.CUSTOMER,
-      is_active: true,
-      customer_id: customer1.id,
-    },
+  const oilFilter = await prisma.material.upsert({
+    where: { name: 'Filtro de Óleo Engine' },
+    update: {},
+    create: { name: 'Filtro de Óleo Engine', group_id: materialGroup.id },
   });
 
-  // 5. Criar Veículos (Vehicle)
-  const vehicle1 = await prisma.vehicle.create({
-    data: {
-      license_plate: 'ABC1D23',
+  const brakePads = await prisma.material.upsert({
+    where: { name: 'Jogo de Pastilhas de Freio' },
+    update: {},
+    create: { name: 'Jogo de Pastilhas de Freio', group_id: materialGroup.id },
+  });
+
+  // 3. Criar Serviços (MaintenanceJobs)
+  const oilChangeJob = await prisma.maintenanceJob.upsert({
+    where: { name: 'Troca de Óleo e Filtros' },
+    update: {},
+    create: { name: 'Troca de Óleo e Filtros', group_id: jobGroup.id },
+  });
+
+  const brakeJob = await prisma.maintenanceJob.upsert({
+    where: { name: 'Manutenção do Sistema de Freios' },
+    update: {},
+    create: { name: 'Manutenção do Sistema de Freios', group_id: jobGroup.id },
+  });
+
+  const suspensionJob = await prisma.maintenanceJob.upsert({
+    where: { name: 'Revisão da Suspensão Dianteira' },
+    update: {},
+    create: { name: 'Revisão da Suspensão Dianteira', group_id: jobGroup.id },
+  });
+
+  // 4. Criar Clientes e Veículos
+  const customer1 = await prisma.customer.upsert({
+    where: { cell: '(21) 99999-1111' },
+    update: {},
+    create: { name: 'Carlos Eduardo Silva', cell: '(21) 99999-1111' },
+  });
+
+  const vehicle1 = await prisma.vehicle.upsert({
+    where: { license_plate: 'KLU-9821' },
+    update: {},
+    create: {
+      license_plate: 'KLU-9821',
       brand: 'Chevrolet',
-      model: 'Onix',
+      model: 'Onix 1.0',
       year: 2021,
       color: 'Prata',
       customer_id: customer1.id,
     },
   });
 
-  const vehicle2 = await prisma.vehicle.create({
-    data: {
-      license_plate: 'XYZ9876',
+  const customer2 = await prisma.customer.upsert({
+    where: { cell: '(21) 98888-2222' },
+    update: {},
+    create: { name: 'Mariana Costa', cell: '(21) 98888-2222' },
+  });
+
+  const vehicle2 = await prisma.vehicle.upsert({
+    where: { license_plate: 'RJA-4E12' },
+    update: {},
+    create: {
+      license_plate: 'RJA-4E12',
       brand: 'Volkswagen',
-      model: 'Gol',
-      year: 2018,
+      model: 'Polo Highline',
+      year: 2023,
       color: 'Preto',
       customer_id: customer2.id,
     },
   });
 
-  // 6. Grupo de Materiais e Materiais
-  const matGroup = await prisma.materialGroup.create({
-    data: {
-      group: 'Lubrificantes e Fluidos',
-    },
-  });
+  // 5. Mapeamento de Datas Retroativas para Teste de Dashboard (Últimos 6 meses)
+  const now = new Date();
+  const getPastDate = (monthsAgo: number, day = 15) => {
+    const d = new Date(
+      now.getFullYear(),
+      now.getMonth() - monthsAgo,
+      day,
+      10,
+      0,
+      0,
+    );
+    return d;
+  };
 
-  const material1 = await prisma.material.create({
-    data: {
-      name: 'Óleo Motor 5W30 Sintético',
-      group_id: matGroup.id,
-    },
-  });
+  // Status: 1: Pendente | 2: Em andamento | 3: Concluído | 4: Aberta | 5: Aguardando peças | 6: Cancelada | 7: Ainda a pagar
 
-  const material2 = await prisma.material.create({
-    data: {
-      name: 'Filtro de Óleo',
-      group_id: matGroup.id,
-    },
-  });
-
-  // 7. Grupo de Serviços de Manutenção e Serviços
-  const jobGroup = await prisma.maintenanceJobGroup.create({
-    data: {
-      group: 'Revisão Preventiva',
-    },
-  });
-
-  const job1 = await prisma.maintenanceJob.create({
-    data: {
-      name: 'Troca de Óleo e Filtros',
-      group_id: jobGroup.id,
-    },
-  });
-
-  // 8. Ordem de Serviço (ServiceOrder)
-  const serviceOrder1 = await prisma.serviceOrder.create({
+  // OS 1: Concluída neste mês
+  await prisma.serviceOrder.create({
     data: {
       customer_id: customer1.id,
       vehicle_id: vehicle1.id,
-      professional: 'Carlos Mecânico',
-      status: 1,
-      paymentStatus: 1,
-      entry_km: 45000.0,
-      diagnosis: 'Barulho no motor ao ligar de manhã',
-      observation: 'Cliente solicitou entrega até às 17h',
+      professional: 'Roberto Mecânico',
+      status: 3, // Concluído
+      paymentStatus: 2, // Pago
+      entry_km: 45000,
+      diagnosis: 'Revisão de rotina e barulho ao frear',
+      observation: 'Cliente solicitou checagem do nível de água',
       labor_cost: 150.0,
-      subtotal: 350.0,
+      subtotal: 380.0,
+      paid: 380.0,
+      created_at: getPastDate(0, 5),
+      itemMaintenances: {
+        create: [
+          {
+            maintenance_id: oilChangeJob.id,
+            description: 'Troca de óleo do motor e filtro',
+          },
+          {
+            maintenance_id: brakeJob.id,
+            description: 'Substituição das pastilhas de freio dianteiras',
+          },
+        ],
+      },
+      itemMaterials: {
+        create: [
+          {
+            material_id: oil.id,
+            quantity: 4,
+            value_unit: 45.0,
+          },
+          {
+            material_id: oilFilter.id,
+            quantity: 1,
+            value_unit: 50.0,
+          },
+        ],
+      },
+    },
+  });
+
+  // OS 2: Em andamento (Mês atual)
+  await prisma.serviceOrder.create({
+    data: {
+      customer_id: customer2.id,
+      vehicle_id: vehicle2.id,
+      professional: 'Lucas Técnico',
+      status: 2, // Em andamento
+      paymentStatus: 1, // Pendente
+      entry_km: 18500,
+      diagnosis: 'Barulho na suspensão lado esquerdo',
+      labor_cost: 250.0,
+      subtotal: 600.0,
       paid: 0.0,
+      created_at: getPastDate(0, 1),
+      itemMaintenances: {
+        create: [
+          {
+            maintenance_id: suspensionJob.id,
+            description: 'Troca do pivô e bieleta da suspensão',
+          },
+        ],
+      },
     },
   });
 
-  // 9. Itens da Ordem de Serviço
-  const itemMaintenance1 = await prisma.itemMaintenance.create({
+  // OS 3: Concluída - Mês Anterior (-1 mês)
+  await prisma.serviceOrder.create({
     data: {
-      serviceorder_id: serviceOrder1.id,
-      maintenance_id: job1.id,
-      description: 'Execução da troca de óleo completa',
+      customer_id: customer1.id,
+      vehicle_id: vehicle1.id,
+      professional: 'Roberto Mecânico',
+      status: 3, // Concluído
+      paymentStatus: 2,
+      entry_km: 41200,
+      diagnosis: 'Troca de pastilhas urgente',
+      labor_cost: 100.0,
+      subtotal: 280.0,
+      paid: 280.0,
+      created_at: getPastDate(1, 12),
+      itemMaintenances: {
+        create: [
+          {
+            maintenance_id: brakeJob.id,
+            description: 'Substituição de pastilhas e sangria do sistema',
+          },
+        ],
+      },
+      itemMaterials: {
+        create: [
+          {
+            material_id: brakePads.id,
+            quantity: 1,
+            value_unit: 180.0,
+          },
+        ],
+      },
     },
   });
 
-  await prisma.itemMaterial.create({
+  // OS 4: Concluída - Há 2 meses
+  await prisma.serviceOrder.create({
     data: {
-      serviceorder_id: serviceOrder1.id,
-      itemMaintenance_id: itemMaintenance1.id,
-      material_id: material1.id,
-      quantity: 4,
-      value_unit: 45.0,
-      supplier: 'Distribuidora AutoPeças',
-      isCustomerSupplier: false,
+      customer_id: customer2.id,
+      vehicle_id: vehicle2.id,
+      professional: 'Lucas Técnico',
+      status: 3, // Concluído
+      paymentStatus: 2,
+      entry_km: 12000,
+      diagnosis: 'Primeira revisão de 10.000km',
+      labor_cost: 200.0,
+      subtotal: 450.0,
+      paid: 450.0,
+      created_at: getPastDate(2, 20),
+      itemMaintenances: {
+        create: [
+          {
+            maintenance_id: oilChangeJob.id,
+            description: 'Troca de óleo e filtro preventiva',
+          },
+        ],
+      },
     },
   });
 
-  await prisma.itemMaterial.create({
+  // OS 5: Concluída - Há 3 meses
+  await prisma.serviceOrder.create({
     data: {
-      serviceorder_id: serviceOrder1.id,
-      itemMaintenance_id: itemMaintenance1.id,
-      material_id: material2.id,
-      quantity: 1,
-      value_unit: 20.0,
-      supplier: 'Distribuidora AutoPeças',
-      isCustomerSupplier: false,
+      customer_id: customer1.id,
+      vehicle_id: vehicle1.id,
+      professional: 'Roberto Mecânico',
+      status: 3, // Concluído
+      paymentStatus: 2,
+      entry_km: 35000,
+      diagnosis: 'Revisão periódica',
+      labor_cost: 180.0,
+      subtotal: 520.0,
+      paid: 520.0,
+      created_at: getPastDate(3, 10),
+      itemMaintenances: {
+        create: [
+          {
+            maintenance_id: oilChangeJob.id,
+            description: 'Troca de óleo e filtros',
+          },
+        ],
+      },
     },
   });
 
-  console.log('✅ Seed executado com sucesso!');
+  console.log('✅ Novas Ordens de Serviço inseridas com sucesso!');
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-    await pool.end();
-  })
-  .catch(async (e) => {
-    console.error('❌ Erro durante o seed:', e);
-    await prisma.$disconnect();
-    await pool.end();
+  .catch((e) => {
+    console.error('❌ Erro ao executar a seed:', e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
