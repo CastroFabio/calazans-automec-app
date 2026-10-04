@@ -18,7 +18,6 @@ const STATUS = {
   OPEN: 4,
   WAITING_PARTS: 5,
   CANCELED: 6,
-  WAITING_PAYMENT: 7,
 } as const;
 
 const PAYMENT_STATUS = {
@@ -47,38 +46,72 @@ export class ServiceOrderService {
       59,
       59,
     );
+    const startOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+    );
+    const endOfPreviousMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
-    const [
-      monthlyRevenueResult,
-      completedOrdersCount,
-      openOrdersCount,
-      awaitingPaymentOrdersCount,
-      pendingAmountResult,
-      statusGroup,
-      topMaintenancesResult,
-      sixMonthsOrders,
-      totalOrdersCount,
-    ] = await Promise.all([
-      // 1. Faturamento este mês (OSs Concluídas - Status 3)
+    const [currentMonthAggregate, previousMonthAggregate] = await Promise.all([
+      // Faturamento Mês Atual
       this.prisma.serviceOrder.aggregate({
         _sum: { subtotal: true },
         where: {
           status: STATUS.COMPLETED,
-          created_at: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
+          paymentStatus: PAYMENT_STATUS.AWAITING_PAYMENT,
+          arrived_at: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
         },
       }),
 
-      // Total de OSs concluídas no mês para Ticket Médio
+      // Faturamento Mês Anterior
+      this.prisma.serviceOrder.aggregate({
+        _sum: { subtotal: true },
+        where: {
+          status: STATUS.COMPLETED,
+          paymentStatus: PAYMENT_STATUS.AWAITING_PAYMENT,
+          arrived_at: { gte: startOfPreviousMonth, lte: endOfPreviousMonth },
+        },
+      }),
+    ]);
+
+    // 1. Métricas Financeiras e de Volume do Mês Atual
+    const [monthlyRevenueResult, completedOrdersCount] = await Promise.all([
+      this.prisma.serviceOrder.aggregate({
+        _sum: { subtotal: true },
+        where: {
+          paymentStatus: PAYMENT_STATUS.FULLY_PAID,
+          arrived_at: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
+        },
+      }),
+
+      // Total de OSs concluídas e totalmente pagas no mês
       this.prisma.serviceOrder.count({
         where: {
           status: STATUS.COMPLETED,
           paymentStatus: PAYMENT_STATUS.FULLY_PAID,
-          created_at: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
+          arrived_at: { gte: startOfCurrentMonth, lte: endOfCurrentMonth },
         },
       }),
+    ]);
 
-      // 2. OS em aberto (Pendente, Em andamento, Aberta, Aguardando peças)
+    // 2. Status e Valores Pendentes / A Receber
+    const [
+      openOrdersCount,
+      inProgressOrdersCount,
+      awaitingPaymentOrdersCount,
+      pendingAmountAggregate,
+    ] = await Promise.all([
+      // Total em aberto na oficina (Pendente, Em andamento, Aberta, Aguardando peças)
       this.prisma.serviceOrder.count({
         where: {
           status: {
@@ -92,71 +125,97 @@ export class ServiceOrderService {
         },
       }),
 
+      // Quantidade em andamento
       this.prisma.serviceOrder.count({
         where: {
-          paymentStatus: {
-            in: [PAYMENT_STATUS.AWAITING_PAYMENT],
-          },
+          status: STATUS.IN_PROGRESS,
         },
       }),
 
-      // 3. A receber (Soma do subtotal das OSs não concluídas/não pagas)
+      // Subtexto do 'A Receber': Quantas OS concluídas estão aguardando pagamento
+      this.prisma.serviceOrder.count({
+        where: {
+          status: STATUS.COMPLETED,
+          paymentStatus: PAYMENT_STATUS.AWAITING_PAYMENT,
+        },
+      }),
+
+      // Cálculo do saldo devedor de OSs entregues/concluídas (subtotal - paid)
       this.prisma.serviceOrder.aggregate({
-        _sum: { subtotal: true },
+        _sum: {
+          subtotal: true,
+          paid: true,
+        },
         where: {
-          status: {
-            in: [
-              STATUS.PENDING,
-              STATUS.IN_PROGRESS,
-              STATUS.OPEN,
-              STATUS.WAITING_PARTS,
-            ],
-          },
-          paymentStatus: { in: [PAYMENT_STATUS.AWAITING_PAYMENT] },
+          status: STATUS.COMPLETED,
+          paymentStatus: PAYMENT_STATUS.AWAITING_PAYMENT,
         },
       }),
+    ]);
 
-      // 4. Status geral das OS
+    // 3. Agrupamentos e Rankings
+    const [statusGroup, topMaintenancesGroup] = await Promise.all([
       this.prisma.serviceOrder.groupBy({
         by: ['status'],
         _count: { id: true },
       }),
 
-      // 5. Serviços mais frequentes (Top 5 em ItemMaintenance)
       this.prisma.itemMaintenance.groupBy({
         by: ['maintenance_id'],
         _count: { maintenance_id: true },
         where: {
           maintenance_id: { not: null },
         },
-        orderBy: { _count: { maintenance_id: 'desc' } },
-        take: 5,
+        orderBy: {
+          _count: { maintenance_id: 'desc' },
+        },
+        take: 6,
       }),
+    ]);
 
-      // 6. Faturamento — últimos 6 meses
+    // 4. Histórico dos Últimos 6 Meses e Totais Gerais
+    const [sixMonthsOrders, totalOrdersCount] = await Promise.all([
+      // Traz as OSs entregues/concluídas nos últimos 6 meses para agrupamento no gráfico
       this.prisma.serviceOrder.findMany({
         where: {
-          status: STATUS.COMPLETED,
-          created_at: { gte: sixMonthsAgo },
+          status: STATUS.COMPLETED, // Mesma regra do faturamento mensal
+          paymentStatus: PAYMENT_STATUS.AWAITING_PAYMENT,
+          arrived_at: { not: null, gte: sixMonthsAgo, lte: endOfCurrentMonth },
         },
         select: {
           subtotal: true,
-          created_at: true,
+          arrived_at: true,
         },
       }),
 
-      this.prisma.serviceOrder.count({}),
+      // Total geral de OSs registradas na base
+      this.prisma.serviceOrder.count(),
     ]);
 
+    // Ticket Médio / OS (Histórico Global)
+    const averageTicketResult = await this.prisma.serviceOrder.aggregate({
+      _avg: { subtotal: true },
+      _count: { id: true },
+      where: {
+        // OSs concluídas na manutenção
+        status: STATUS.COMPLETED,
+      },
+    });
     // --- Processamento dos Resultados ---
-
+    const currentRevenue = Number(currentMonthAggregate._sum.subtotal || 0);
+    const previousRevenue = Number(previousMonthAggregate._sum.subtotal || 0);
     const monthlyRevenue = Number(monthlyRevenueResult._sum.subtotal ?? 0);
-    const averageTicket =
-      completedOrdersCount > 0
-        ? Number((monthlyRevenue / completedOrdersCount).toFixed(2))
-        : 0;
-    const totalPendingAmount = Number(pendingAmountResult._sum.subtotal ?? 0);
-
+    const sixMonthRevenue = sixMonthsOrders.reduce(
+      (acc, order) => acc + Number(order.subtotal || 0),
+      0,
+    );
+    const averageTicket = averageTicketResult._avg.subtotal
+      ? Number(averageTicketResult._avg.subtotal)
+      : 0;
+    const totalCompletedOrders = averageTicketResult._count.id;
+    const totalPendingAmount =
+      Number(pendingAmountAggregate._sum.subtotal || 0) -
+      Number(pendingAmountAggregate._sum.paid || 0);
     const statusLabels: Record<number, string> = {
       1: 'Pendente',
       2: 'Em andamento',
@@ -166,6 +225,10 @@ export class ServiceOrderService {
       6: 'Cancelada',
       7: 'Ainda a pagar',
     };
+    const totalTop6JobsCount = topMaintenancesGroup.reduce(
+      (acc, item) => acc + item._count.maintenance_id,
+      0,
+    );
 
     const statusBreakdown = statusGroup.map((item) => ({
       statusId: item.status,
@@ -175,21 +238,21 @@ export class ServiceOrderService {
       count: item._count.id,
     }));
 
-    // Busca os nomes dos serviços/trabalhos de manutenção (MaintenanceJob)
-    const maintenanceIds = topMaintenancesResult
+    // Busca os nomes das manutenções do Top 6 para enviar ao front-end
+    const maintenanceIds = topMaintenancesGroup
       .map((item) => item.maintenance_id)
       .filter((id): id is number => id !== null);
 
-    const maintenanceJobs = await this.prisma.maintenanceJob.findMany({
+    const maintenances = await this.prisma.maintenanceJob.findMany({
       where: { id: { in: maintenanceIds } },
       select: { id: true, name: true },
     });
 
-    const topServices = topMaintenancesResult.map((item) => {
-      const job = maintenanceJobs.find((m) => m.id === item.maintenance_id);
+    const topServices = topMaintenancesGroup.map((item) => {
+      const job = maintenances.find((m) => m.id === item.maintenance_id);
       return {
-        serviceId: item.maintenance_id ?? 0,
-        name: job?.name ?? 'Serviço Personalizado',
+        serviceId: item.maintenance_id ?? 0, // Mapeia para serviceId e garante type 'number'
+        name: job?.name || 'Serviço não identificado',
         count: item._count.maintenance_id,
       };
     });
@@ -204,7 +267,9 @@ export class ServiceOrderService {
     }
 
     for (const order of sixMonthsOrders) {
-      const monthKey = `${order.created_at.getFullYear()}-${String(order.created_at.getMonth() + 1).padStart(2, '0')}`;
+      const date = order.arrived_at;
+      if (!date) continue;
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       if (revenueByMonthMap.has(monthKey)) {
         const currentSum = revenueByMonthMap.get(monthKey) ?? 0;
         revenueByMonthMap.set(
@@ -223,14 +288,20 @@ export class ServiceOrderService {
 
     return {
       monthlyRevenue,
+      currentRevenue,
+      previousRevenue,
       averageTicket,
+      totalCompletedOrders,
       openServiceOrdersCount: openOrdersCount,
       completedServiceOrdersCount: completedOrdersCount,
       awaitingPaymentServiceOrdersCount: awaitingPaymentOrdersCount,
+      inProgressServiceOrdersCount: inProgressOrdersCount,
       totalPendingAmount,
       statusBreakdown,
       topServices,
+      totalTop6JobsCount,
       revenueLast6Months,
+      sixMonthRevenue,
       totalOrdersCount,
     };
   }

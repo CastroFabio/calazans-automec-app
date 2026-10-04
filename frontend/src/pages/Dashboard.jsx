@@ -3,6 +3,7 @@ import { orderApi } from "../api/orders";
 import { useCustomers } from "../context/Customer.context";
 import Loading from "./Loading";
 import { formattedPrice } from "../utils/convertPrice";
+import { statusReverseMapBadge } from "../utils/statusMap";
 
 export default function Dashboard({ metricsData }) {
   const {
@@ -31,7 +32,36 @@ export default function Dashboard({ metricsData }) {
     setLoading(false);
   };
 
-  const delta = null;
+  const {
+    monthlyRevenue,
+    currentRevenue,
+    previousRevenue,
+    averageTicket,
+    totalCompletedOrders,
+    openServiceOrdersCount,
+    completedServiceOrdersCount,
+    awaitingPaymentServiceOrdersCount,
+    inProgressServiceOrdersCount,
+    totalPendingAmount,
+    statusBreakdown,
+    topServices,
+    totalTop6JobsCount,
+    revenueLast6Months,
+    sixMonthRevenue,
+    totalOrdersCount,
+  } = dataMetrics ? dataMetrics : {};
+
+  let revenueDeltaPercentage = 0;
+
+  if (previousRevenue > 0) {
+    revenueDeltaPercentage =
+      ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+  } else if (currentRevenue > 0) {
+    revenueDeltaPercentage = 100;
+  }
+  revenueDeltaPercentage = Number(revenueDeltaPercentage.toFixed(2));
+
+  const isPositiveDelta = revenueDeltaPercentage >= 0;
 
   useEffect(() => {
     handleGetMetricsDashboard();
@@ -49,7 +79,7 @@ export default function Dashboard({ metricsData }) {
           dangerouslySetInnerHTML={{ __html: greetingTitle }}
         />
         <div className="home-greeting-sub" id="homeGreetingSub">
-          {`${dataMetrics?.openServiceOrdersCount} OS em aberto · ${dataMetrics?.awaitingPaymentServiceOrdersCount} aguardando pagamento`}
+          {`${openServiceOrdersCount} OS em aberto · ${awaitingPaymentServiceOrdersCount} aguardando pagamento`}
         </div>
       </div>
 
@@ -60,19 +90,19 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-card green">
             <div className="metric-label">Faturamento este mês</div>
             <div className="metric-value" id="mFatMes">
-              {`${formattedPrice(dataMetrics?.monthlyRevenue)}`}
+              {`${formattedPrice(monthlyRevenue)}`}
             </div>
             <div className="metric-sub" id="mFatMesSub">
               <strong></strong>
-              {`${dataMetrics?.completedServiceOrdersCount} orden(s) de serviço este mês`}
+              {`${completedServiceOrdersCount} OS concluídas este mês`}
             </div>
-            {delta !== null && (
+            {revenueDeltaPercentage !== null && (
               <div
-                className={`metric-delta ${delta >= 0 ? "up" : "down"}`}
+                className={`metric-delta ${isPositiveDelta ? "up" : "down"}`}
                 id="mFatDelta"
               >
-                {delta >= 0 ? "▲ " : "▼ "}
-                {Math.abs(delta)}% vs mês anterior
+                {isPositiveDelta ? "▲ " : "▼ "}
+                {Math.abs(revenueDeltaPercentage)}% vs mês anterior
               </div>
             )}
           </div>
@@ -80,30 +110,30 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-card blue">
             <div className="metric-label">Ticket médio / OS</div>
             <div className="metric-value" id="mTicket">
-              {formattedPrice(dataMetrics?.averageTicket)}
+              {formattedPrice(averageTicket)}
             </div>
             <div className="metric-sub" id="mTicketSub">
-              {`sobre ${dataMetrics?.completedServiceOrdersCount} OS concluídas`}
+              {`sobre ${completedServiceOrdersCount} OS concluídas`}
             </div>
           </div>
 
           <div className="metric-card orange">
             <div className="metric-label">OS em aberto</div>
             <div className="metric-value" id="mOsAberto">
-              {`${dataMetrics?.openServiceOrdersCount}`}
+              {`${openServiceOrdersCount}`}
             </div>
             <div className="metric-sub" id="mOsAbertoSub">
-              {`${dataMetrics?.awaitingPaymentServiceOrdersCount} em andamento`}
+              {`${inProgressServiceOrdersCount} em andamento`}
             </div>
           </div>
 
           <div className="metric-card yellow">
             <div className="metric-label">A receber</div>
             <div className="metric-value" id="mAReceber">
-              {formattedPrice(dataMetrics?.totalPendingAmount)}
+              {formattedPrice(totalPendingAmount)}
             </div>
             <div className="metric-sub" id="mAReceberSub">
-              {`${dataMetrics?.awaitingPaymentServiceOrdersCount} OS aguardando`}
+              {`${awaitingPaymentServiceOrdersCount} OS aguardando receber`}
             </div>
           </div>
         </div>
@@ -114,12 +144,12 @@ export default function Dashboard({ metricsData }) {
             <div className="metric-header-flex">
               <div className="metric-label ">Status geral das OS</div>
               <div className="metric-sub" id="mStatusTotal">
-                {`${dataMetrics?.totalOrdersCount} OS total`}
+                {`${totalOrdersCount} OS total`}
               </div>
             </div>
             <div className="donut-bars" id="mStatusBars">
-              {dataMetrics && dataMetrics?.statusBreakdown.length > 0
-                ? dataMetrics.statusBreakdown.map((element, index) => {
+              {dataMetrics && statusBreakdown.length > 0
+                ? statusBreakdown.map((element, index) => {
                     return (
                       <div className="donut-bar-row" key={index}>
                         <span className="donut-bar-label">
@@ -128,10 +158,9 @@ export default function Dashboard({ metricsData }) {
                         <div className="donut-bar-track">
                           <div className="donut-bar-fill">
                             <div
-                              className="donut-bar-fill"
+                              className={`donut-bar-fill donut-bar-fill-${statusReverseMapBadge[element.statusId]}`}
                               style={{
-                                width: `${(element.count / dataMetrics?.totalOrdersCount) * 100}%`,
-                                background: "rgb(34, 197, 94)",
+                                width: `${(element.count / totalOrdersCount) * 100}%`,
                               }}
                             ></div>
                           </div>
@@ -147,9 +176,9 @@ export default function Dashboard({ metricsData }) {
           <div className="metric-donut-card">
             <div className="metric-label">Serviços mais frequentes</div>
             <div className="donut-bars" id="mSvcBars">
-              {dataMetrics && dataMetrics?.topServices.length > 0
-                ? dataMetrics?.topServices.map((element, index) => (
-                    <div className="donut-bar-row" key={index}>
+              {dataMetrics && topServices.length > 0
+                ? topServices.map((element, index) => (
+                    <div className="donut-bar-row" key={index + 1}>
                       <span
                         className="donut-bar-label"
                         title={`${element.name}`}
@@ -158,10 +187,11 @@ export default function Dashboard({ metricsData }) {
                       </span>
                       <div className="donut-bar-track">
                         <div
-                          className="donut-bar-fill"
+                          className={`donut-bar-fill donut-bar-fill-${index + 1}`}
                           style={{
-                            width: `${(element.count / dataMetrics?.topServices.length) * 100}%`,
-                            background: "rgb(34, 197, 94)",
+                            width: `${Math.round(
+                              (element.count / totalTop6JobsCount) * 100,
+                            )}%`,
                           }}
                         ></div>
                       </div>
@@ -177,27 +207,32 @@ export default function Dashboard({ metricsData }) {
         <div className="metric-donut-card sparkline-card">
           <div className="metric-header-flex" style={{ marginBottom: "12px" }}>
             <div className="metric-label">Faturamento — últimos 6 meses</div>
-            <div className="metric-sub" id="mSparkTotal"></div>
-          </div>
-
-          {/*
-          <div id="mSparkline" className="sparkline-container">
-            <div className="sparkline-container-info">
-              <span className={`sparkline-container-info-value`}>
-                ${v > 0 ? fmtBRL(v).replace("R$ ", "") : "—"}
-              </span>
+            <div
+              className="metric-sub"
+              id="mSparkTotal"
+            >{`${formattedPrice(100)} em 6 meses`}</div>
+            <div id="mSparkline" className="sparkline-container">
+              <div className="sparkline-container-info">
+                <span className={`sparkline-container-info-value`}>{100}</span>
+                <div
+                  title="${tip}"
+                  className="sparkline-container-info-label"
+                  style={{ height: `${12}px`, background: `green` }}
+                ></div>
+              </div>
+            </div>
+            <div id="mSparkLabels" className="sparkline-labels">
               <div
-                title="${tip}"
-                style="width:100%;height:${h}px;background:${barColors[i]};border-radius:3px 3px 0 0;min-height:4px;transition:height .5s;cursor:default;"
-              ></div>
+                className="sparkline-labels-value"
+                style={{
+                  fontWeight: `${5 === 5 ? "700" : "400"}`,
+                  color: `${5 === 5 ? "var(--ink)" : "var(--ink3)"}`,
+                }}
+              >
+                lable
+              </div>
             </div>
           </div>
-          <div id="mSparkLabels" className="sparkline-labels">
-            <div style="flex:1;text-align:center;font-size:10px;font-weight:${i===5?'700':'400'};color:${i===5?'var(--ink)':'var(--ink3)'};">
-              ${m.label}
-            </div>
-          </div>{" "}
-          */}
         </div>
       </div>
     </div>

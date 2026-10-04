@@ -5927,9 +5927,60 @@
   border-radius: 3px;
   transition: width 0.6s ease;
 }
-.donut-bar-fill-by-color {
-  width: 0%;
-  background-color: #0369a1;
+
+.donut-bar-fill-progress {
+  background-color: #3b82f6;
+}
+.donut-bar-fill-pending {
+  background-color: #f59e0b;
+}
+.donut-bar-fill-awaiting-payment {
+  background-color: #eab308;
+}
+.donut-bar-fill-done {
+  background-color: #22c55e;
+}
+.donut-bar-fill-cancelled {
+  background-color: #ef4444;
+}
+.donut-bar-fill-open {
+  background-color: #6366f1;
+}
+
+.donut-bar-fill-awaiting-material {
+  background-color: #8b5cf6;
+}
+
+.donut-bar-fill-1 {
+  background-color: #f59e0b;
+}
+
+.donut-bar-fill-2 {
+  background-color: #3b82f6;
+}
+
+.donut-bar-fill-3 {
+  background-color: #eab308;
+}
+
+.donut-bar-fill-4 {
+  background-color: #22c55e;
+}
+
+.donut-bar-fill-5 {
+  background-color: #ef4444;
+}
+
+.donut-bar-fill-6 {
+  background-color: #6366f1;
+}
+
+.sparkline-container-info-label {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: height 0.5s;
+  cursor: default;
 }
 .donut-bar-val {
   font-size: 11px;
@@ -5938,6 +5989,12 @@
   color: var(--ink);
   min-width: 36px;
   text-align: right;
+}
+
+.sparkline-labels-value {
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
 }
 
 /* Status rings */

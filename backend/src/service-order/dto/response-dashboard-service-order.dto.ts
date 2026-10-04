@@ -47,10 +47,28 @@ export class DashboardMetricsDto {
   monthlyRevenue!: number;
 
   @ApiProperty({
+    example: 18450.0,
+    description: 'Faturamento total das OSs concluídas no mês atual',
+  })
+  currentRevenue!: number;
+
+  @ApiProperty({
+    example: 18450.0,
+    description: 'Faturamento total das OSs concluídas no mês atual',
+  })
+  previousRevenue!: number;
+
+  @ApiProperty({
     example: 461.25,
     description: 'Ticket médio das OSs concluídas no mês atual',
   })
   averageTicket!: number;
+
+  @ApiProperty({
+    example: 5200,
+    description: 'Total de ordens de serviço concluídas',
+  })
+  totalCompletedOrders!: number;
 
   @ApiProperty({
     example: 12,
@@ -69,6 +87,12 @@ export class DashboardMetricsDto {
     description: 'Quantidade de OSs com atendimento pendente ou em andamento',
   })
   awaitingPaymentServiceOrdersCount!: number;
+
+  @ApiProperty({
+    example: 3,
+    description: 'Quantidade de OSs com atendimento pendente ou em andamento',
+  })
+  inProgressServiceOrdersCount!: number;
 
   @ApiProperty({
     example: 5200.0,
@@ -90,11 +114,23 @@ export class DashboardMetricsDto {
   topServices!: TopServiceItemDto[];
 
   @ApiProperty({
+    example: 3,
+    description: 'Quantidade de OSs com atendimento pendente ou em andamento',
+  })
+  totalTop6JobsCount!: number;
+
+  @ApiProperty({
     type: [RevenueByMonthDto],
     description:
       'Histórico de faturamento acumulado mês a mês dos últimos 6 meses',
   })
   revenueLast6Months!: RevenueByMonthDto[];
+
+  @ApiProperty({
+    example: 18450.0,
+    description: 'Faturamento total das OSs concluídas no mês atual',
+  })
+  sixMonthRevenue!: number;
 
   @ApiProperty({
     example: 5200.0,
