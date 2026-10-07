@@ -316,6 +316,12 @@
 }
 
 /* ── PAGES ── */
+.page-dashboard {
+  flex: 1; /* Ocupa todo o espaço vertical livre abaixo do navbar */
+  display: grid;
+  place-items: center;
+}
+
 .page {
   padding-bottom: 40px;
 }
@@ -5754,6 +5760,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 30px 24px;
 }
 
 .metrics-row {
@@ -5837,13 +5844,6 @@
   gap: 16px;
 }
 
-.metric-donut-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 16px;
-}
-
 .metric-header-flex {
   display: flex;
   align-items: center;
@@ -5891,10 +5891,11 @@
 .metric-donut-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: 12px var(--radius-lg);
   padding: 16px 18px;
   box-shadow: var(--shadow);
 }
+
 .donut-bars {
   display: flex;
   flex-direction: column;

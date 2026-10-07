@@ -5,20 +5,7 @@ import Loading from "./Loading";
 import { formattedPrice } from "../utils/convertPrice";
 import { statusReverseMapBadge } from "../utils/statusMap";
 
-export default function Dashboard({ metricsData }) {
-  const {
-    faturamentoMes = "—",
-    ticketMedio = "—",
-    osEmAberto = "—",
-    aReceber = "—",
-    fatMesSub = "",
-    ticketSub = "",
-    osAbertoSub = "",
-    aReceberSub = "",
-    greetingTitle = "MecânicaOS",
-    greetingSub = "Carregando métricas…",
-  } = metricsData || {};
-
+export default function Dashboard() {
   const { loading, setLoading } = useCustomers();
 
   const [dataMetrics, setDataMetrics] = useState();
@@ -26,7 +13,6 @@ export default function Dashboard({ metricsData }) {
   const handleGetMetricsDashboard = async () => {
     setLoading(true);
     const { data } = await orderApi.getMetricsDashboard();
-    console.log(data);
 
     setDataMetrics(data);
     setLoading(false);
@@ -70,19 +56,7 @@ export default function Dashboard({ metricsData }) {
   if (loading) return <Loading />;
 
   return (
-    <div className="home-page">
-      {/* Cabeçalho / Saudação */}
-      <div className="home-greeting">
-        <div
-          className="home-greeting-title"
-          id="homeGreetingTitle"
-          dangerouslySetInnerHTML={{ __html: greetingTitle }}
-        />
-        <div className="home-greeting-sub" id="homeGreetingSub">
-          {`${openServiceOrdersCount} OS em aberto · ${awaitingPaymentServiceOrdersCount} aguardando pagamento`}
-        </div>
-      </div>
-
+    <div className="page-dashboard">
       {/* Métricas e Indicadores */}
       <div className="home-metrics">
         {/* Linha 1: KPIs Principais */}
@@ -204,36 +178,47 @@ export default function Dashboard({ metricsData }) {
         </div>
 
         {/* Linha 3: Sparkline de Faturamento */}
-        <div className="metric-donut-card sparkline-card">
+        {/* <div className="metric-donut-card sparkline-card">
           <div className="metric-header-flex" style={{ marginBottom: "12px" }}>
             <div className="metric-label">Faturamento — últimos 6 meses</div>
             <div
               className="metric-sub"
               id="mSparkTotal"
             >{`${formattedPrice(100)} em 6 meses`}</div>
-            <div id="mSparkline" className="sparkline-container">
-              <div className="sparkline-container-info">
-                <span className={`sparkline-container-info-value`}>{100}</span>
-                <div
-                  title="${tip}"
-                  className="sparkline-container-info-label"
-                  style={{ height: `${12}px`, background: `green` }}
-                ></div>
-              </div>
-            </div>
-            <div id="mSparkLabels" className="sparkline-labels">
+          </div>
+          <div id="mSparkline" className="sparkline-container">
+            <div className="sparkline-container-info">
+              <span className={`sparkline-container-info-value`}>{100}</span>
               <div
-                className="sparkline-labels-value"
-                style={{
-                  fontWeight: `${5 === 5 ? "700" : "400"}`,
-                  color: `${5 === 5 ? "var(--ink)" : "var(--ink3)"}`,
-                }}
-              >
-                lable
-              </div>
+                title="${tip}"
+                className="sparkline-container-info-label"
+                style={{ height: `${12}px`, background: `green` }}
+              ></div>
             </div>
           </div>
-        </div>
+          <div id="mSparkLabels" className="sparkline-labels">
+            <div
+              className="sparkline-labels-value"
+              style={{
+                fontWeight: `${5 === 5 ? "700" : "400"}`,
+                color: `${5 === 5 ? "var(--ink)" : "var(--ink3)"}`,
+              }}
+            >
+              lable
+            </div>
+          </div>
+          <div id="mSparkLabels" className="sparkline-labels">
+            <div
+              className="sparkline-labels-value"
+              style={{
+                fontWeight: `${5 === 5 ? "700" : "400"}`,
+                color: `${5 === 5 ? "var(--ink)" : "var(--ink3)"}`,
+              }}
+            >
+              lable
+            </div>
+          </div>
+        </div> */}
       </div>
     </div>
   );

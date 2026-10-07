@@ -152,7 +152,7 @@ const EditCustomer = () => {
         } else if (err.response.status === 409) {
           errorMessage = "Este celular já está em uso";
         } else {
-          errorMessage = err.response.data?.message || errorMessage;
+          errorMessage = err.response.data?.message.message || errorMessage;
         }
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
@@ -198,6 +198,15 @@ const EditCustomer = () => {
   const handleSaveVehicle = async (vehicleId) => {
     const errorList = [];
 
+    const cleanLicensePlate = editingVehicleData.license_plate
+      .replace(/[^a-zA-Z0-9 ]/g, "")
+      .trim();
+
+    setEditingVehicleData((prev) => ({
+      ...prev,
+      license_plate: cleanLicensePlate,
+    }));
+
     if (editingVehicleData.year && !Number(editingVehicleData.year)) {
       errorList.push("O ano deve ser um número");
     }
@@ -206,11 +215,11 @@ const EditCustomer = () => {
       errorList.push("A placa é obrigatória");
     }
 
-    if (editingVehicleData.license_plate.trim().length < 7) {
+    if (cleanLicensePlate.length < 7) {
       errorList.push("A placa deve ter pelo menos 7 caracteres");
     }
 
-    if (editingVehicleData.license_plate.trim().length >= 8) {
+    if (cleanLicensePlate.length >= 8) {
       errorList.push("A placa deve ter no máximo 8 caracteres");
     }
 
@@ -225,7 +234,7 @@ const EditCustomer = () => {
     }
     try {
       const updateData = {
-        license_plate: editingVehicleData.license_plate.trim().toUpperCase(),
+        license_plate: cleanLicensePlate.toUpperCase(),
         brand: editingVehicleData.brand.trim() || null,
         model: editingVehicleData.model.trim() || null,
         year: Number(editingVehicleData.year) || null,
@@ -257,7 +266,7 @@ const EditCustomer = () => {
         } else if (err.response.status === 409) {
           errorMessage = "Esta placa já está em uso";
         } else {
-          errorMessage = err.response.data?.message || errorMessage;
+          errorMessage = err.response.data?.message.message || errorMessage;
         }
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";
@@ -291,7 +300,7 @@ const EditCustomer = () => {
         if (err.response.status === 404) {
           errorMessage = "Veículo não encontrado";
         } else {
-          errorMessage = err.response.data?.message || errorMessage;
+          errorMessage = err.response.data?.message.message || errorMessage;
         }
       } else if (err.request) {
         errorMessage = "Servidor não respondeu";

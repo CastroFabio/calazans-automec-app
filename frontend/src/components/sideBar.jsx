@@ -36,9 +36,9 @@ const ICONS = {
       <path
         d="M3 3v16a2 2 0 0 0 2 2h16"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
 
       <rect x="6" y="14" width="3" height="4" rx="1" fill="currentColor" />
@@ -50,9 +50,9 @@ const ICONS = {
       <path
         d="M6 13l4.5-3.5 4 2.5 4.5-5"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
 
       <circle cx="19" cy="7" r="2" fill="currentColor" />
