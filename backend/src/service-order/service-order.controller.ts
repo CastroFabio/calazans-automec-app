@@ -33,6 +33,7 @@ import { ServiceOrderResponseDto } from './dto/response-service-order.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedServiceOrderResponseDto } from './dto/paginated-service-order-response.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { DashboardMetricsDto } from './dto/response-dashboard-service-order.dto';
 
 @ApiTags('service-order')
 @Controller('service-order')
@@ -90,6 +91,24 @@ export class ServiceOrderController {
   @ApiBearerAuth()
   async findAll() {
     return await this.serviceOrderService.findAll();
+  }
+
+  @Get('dashboard/metrics')
+  @ApiOperation({
+    summary: 'Listar métricas para dashboard de ordens de serviço',
+    description:
+      'Retorna uma lista com todas as métricas para dashboard de ordens de serviço {monthlyRevenue, averageTicket, openServiceOrdersCount, totalPendingAmount, statusBreakdown, topServices, revenueLast6Months,}',
+  })
+  @ApiOkResponse({
+    description:
+      'Lista de métricas para dashboard de ordens de serviço retornada com sucesso',
+    type: DashboardMetricsDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Erro interno do servidor' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async getMetricsDashboard(): Promise<DashboardMetricsDto> {
+    return await this.serviceOrderService.getMetricsDashboard();
   }
 
   @Get('page')

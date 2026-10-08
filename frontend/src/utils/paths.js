@@ -4,6 +4,7 @@ export const PATHS = {
   customer: "/customers",
   login: "/login",
   services: "/services",
+  dashboard: "/dashboard",
   materials: "/materials",
   newServiceOrder: "/new-service-order",
   editCustomer: "/customers/edit/:id",

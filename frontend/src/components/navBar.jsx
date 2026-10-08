@@ -57,6 +57,10 @@ const ROUTES_CONFIG = {
     title: "Nova Ordem de Serviço",
     btn: null,
   },
+  "/dashboard": {
+    title: "Dashboard",
+    btn: null,
+  },
 
   // ========== ROTAS DINÂMICAS ==========
   "/customers/edit": {

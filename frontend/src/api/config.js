@@ -75,7 +75,7 @@ api.interceptors.response.use(
         // Limpa o storage e redireciona caso o refresh falhe
         localStorage.removeItem(JWT_TOKENS.accessToken);
         localStorage.removeItem(JWT_TOKENS.refreshToken);
-        window.location.href = PATHS.login;
+        window.dispatchEvent(new Event("auth:unauthorized"));
         return Promise.reject(refreshError);
       }
     }
