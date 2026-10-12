@@ -51,6 +51,8 @@ services:
   # ---------------------------------------------------------------------------
   # Seed sob demanda - nao sobe no "docker compose up":
   #   docker compose run --rm seed
+  # Seed sobe junto com o resto se:
+  #   docker compose --profile seed up
   # ATENCAO: o seed apaga todas as tabelas antes de inserir os dados.
   # ---------------------------------------------------------------------------
   seed:
@@ -87,6 +89,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-calazans_automec_db}?schema=public
       JWT_SECRET: ${JWT_SECRET:-defaultSecretKey}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-defaultSecretKey}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       PORT: 3000
     ports:
       - "${BACKEND_PORT:-3000}:3000"

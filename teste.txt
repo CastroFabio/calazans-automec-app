@@ -1,0 +1,7 @@
+   # backend
+   docker build -t pereirafabio/calazans-automec-backend:1.2.1 ./backend
+   docker push pereirafabio/calazans-automec-backend:1.2.1
+
+   # frontend — VITE_API_URL vai EMBUTIDA no bundle; aqui precisa ser o caminho relativo /api/
+   docker build --build-arg VITE_API_URL=/api/ -t pereirafabio/calazans-automec-frontend:1.2.1 ./frontend
+   docker push pereirafabio/calazans-automec-frontend:1.2.1
