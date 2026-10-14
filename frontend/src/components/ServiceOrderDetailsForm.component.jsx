@@ -17,11 +17,24 @@ const ServiceOrderDetailsForm = ({
       <FormSectionHeader title={title} icon={subtitle} />
       <div className="fs-body">
         <div className="form-grid g3">
+          <div className="field">
+            <label>Profissional</label>
+            <input
+              type="text"
+              className="input"
+              placeholder="João Calazans"
+              value={formDataProfessional}
+              onChange={(e) => {
+                handleFormFieldChange("professional", e.target.value);
+              }}
+            />
+          </div>
+          {/*
           <ProfessionalSelect
             handleFormFieldChange={handleFormFieldChange}
             professional={formDataProfessional}
           />
-          {/* <div className="field">
+          <div className="field">
                 <label>Prioridade</label>
                 <select
                   className="select"
@@ -33,7 +46,7 @@ const ServiceOrderDetailsForm = ({
                   <option value="Alta">Alta</option>
                   <option value="Urgente">Urgente</option>
                 </select>
-              </div> */}
+          </div> */}
 
           <div className="field">
             <label>Status Inicial</label>

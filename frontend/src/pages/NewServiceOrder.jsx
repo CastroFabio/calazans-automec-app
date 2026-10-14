@@ -269,6 +269,10 @@ const NewServiceOrder = () => {
       errorList.push("Selecione um veículo.");
     }
 
+    if (!formData.entry_km) {
+      errorList.push("Inserir quilometragem.");
+    }
+
     /*  if (!formData.diagnosis?.trim()) {
       errorList.push("Preencha o campo Diagnóstico / Problema.");
     } */
