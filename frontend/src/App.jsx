@@ -23,6 +23,7 @@ import { AuthProvider, useAuth } from "./context/Auth.context";
 import { ProtectedRoute } from "./components/ProtectedRoute.component";
 import Loading from "./pages/Loading";
 import Dashboard from "./pages/Dashboard";
+import NewServiceOrderWizard from "./pages/NewServiceOrderWizard";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
@@ -55,7 +56,7 @@ const MainLayout = () => {
               <Route path={PATHS.materials} element={<Materials />} />
               <Route
                 path={PATHS.newServiceOrder}
-                element={<NewServiceOrder />}
+                element={<NewServiceOrderWizard />}
               />
               <Route path={PATHS.editCustomer} element={<EditCustomer />} />
               <Route

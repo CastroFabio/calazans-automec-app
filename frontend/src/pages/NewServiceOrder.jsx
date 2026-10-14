@@ -323,7 +323,7 @@ const NewServiceOrder = () => {
     // Se houver erros nas validações, interrompe a execução
     if (errorList.length > 0) {
       alert(
-        `❌ Verifique os erros antes de salvar:\n\n- ${errorList.join("\n- ")}`,
+        `Verifique os erros antes de salvar:\n\n- ${errorList.join("\n- ")}`,
       );
       return;
     }
