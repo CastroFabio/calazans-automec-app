@@ -1,38 +1,38 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 
-import NavBar from "./components/navBar";
-import SideBar from "./components/sideBar";
+import NavBar from "./components/navBar"
+import SideBar from "./components/sideBar"
 
-import Customers from "./pages/Customers";
-import NotFound from "./pages/NotFound";
-import MaintenanceJobs from "./pages/MaintenanceJobs";
-import Materials from "./pages/Materials";
-import ServiceOrderList from "./pages/ServiceOrderList";
-import NewServiceOrder from "./pages/NewServiceOrder";
-import EditCustomer from "./pages/EditCustomer";
-import EditServiceOrder from "./pages/EditServiceOrder";
-import PrintServiceOrder from "./pages/PrintServiceOrder";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
+import Customers from "./pages/Customers"
+import NotFound from "./pages/NotFound"
+import MaintenanceJobs from "./pages/MaintenanceJobs"
+import Materials from "./pages/Materials"
+import ServiceOrderList from "./pages/ServiceOrderList"
+import NewServiceOrder from "./pages/NewServiceOrder"
+import EditCustomer from "./pages/EditCustomer"
+import EditServiceOrder from "./pages/EditServiceOrder"
+import PrintServiceOrder from "./pages/PrintServiceOrder"
+import Home from "./pages/Home"
+import Login from "./pages/Login"
 
-import { CustomerProvider } from "./context/Customer.context";
-import { ServiceOrderProvider } from "./context/ServiceOrder.context";
+import { CustomerProvider } from "./context/Customer.context"
+import { ServiceOrderProvider } from "./context/ServiceOrder.context"
 
-import { PATHS } from "./utils/paths";
-import { AuthProvider, useAuth } from "./context/Auth.context";
-import { ProtectedRoute } from "./components/ProtectedRoute.component";
-import Loading from "./pages/Loading";
-import Dashboard from "./pages/Dashboard";
-import NewServiceOrderWizard from "./pages/NewServiceOrderWizard";
+import { PATHS } from "./utils/paths"
+import { AuthProvider, useAuth } from "./context/Auth.context"
+import { ProtectedRoute } from "./components/ProtectedRoute.component"
+import Loading from "./pages/Loading"
+import Dashboard from "./pages/Dashboard"
+import NewServiceOrderWizard from "./pages/NewServiceOrderWizard"
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
-  const { loading, isAuthenticated } = useAuth();
-  const location = useLocation();
-  const isHomePage = location.pathname === PATHS.home;
-  const isLoginPage = location.pathname === PATHS.login;
+  const { loading, isAuthenticated } = useAuth()
+  const location = useLocation()
+  const isHomePage = location.pathname === PATHS.home
+  const isLoginPage = location.pathname === PATHS.login
   if (loading) {
-    return <Loading />;
+    return <Loading />
   }
   return (
     <>
@@ -73,8 +73,8 @@ const MainLayout = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
 const App = () => {
   return (
@@ -87,7 +87,7 @@ const App = () => {
         </CustomerProvider>
       </ServiceOrderProvider>
     </AuthProvider>
-  );
-};
+  )
+}
 
-export default App;
+export default App

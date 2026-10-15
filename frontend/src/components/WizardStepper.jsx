@@ -1,7 +1,7 @@
 const WizardStepper = () => {
   const wzGoto = (step) => {
-    return step;
-  };
+    return step
+  }
 
   return (
     <div className="wz-bar">
@@ -30,7 +30,7 @@ const WizardStepper = () => {
         <div className="wz-step-label">Resumo</div>
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default WizardStepper;
+export default WizardStepper
