@@ -8,7 +8,8 @@ import { formatLocalDateTime } from "../utils/convertDateTime";
 import ErrorAlert from "./ErrorAlert.component";
 
 const CustomerVehicleStep = ({
-  isCustomerVehicleOn,
+  currentStep,
+  setCurrentStep,
   setFormData,
   formData,
   inputValue,
@@ -26,7 +27,8 @@ const CustomerVehicleStep = ({
   onClear,
   renderOption,
 }) => {
-  const { customers, getCustomerById } = useCustomers();
+  const { selectedCustomerFromDetailPanel, customers, getCustomerById } =
+    useCustomers();
 
   const [dateTimeValue, setDateTimeValue] = useState(
     formatLocalDateTime(new Date()),
@@ -81,6 +83,18 @@ const CustomerVehicleStep = ({
       });
       return;
     }
+
+    if (isNaN(formData.entry_km) || formData.entry_km <= 0) {
+      setError({
+        title: "Quilometragem inválida",
+        sub: "Informe um número válido para a quilometragem.",
+        isErrorOn: true,
+      });
+      return;
+    }
+
+    setCurrentStep((prev) => prev + 1);
+    setError({ title: "", sub: "", isErrorOn: false });
   };
 
   useEffect(() => {
@@ -108,12 +122,23 @@ const CustomerVehicleStep = ({
     selectedVehicleFromModal,
   ]);
 
+  useEffect(() => {
+    if (Object.keys(selectedCustomerFromDetailPanel).length !== 0) {
+      setSelectedCustomerInfo(selectedCustomerFromDetailPanel);
+      handleSelectedVehicle(selectedCustomerFromDetailPanel.vehicles[0]);
+      setFormData((prev) => ({
+        ...prev,
+        customer_id: selectedCustomerFromDetailPanel.id,
+        vehicle_id: selectedCustomerFromDetailPanel.vehicles[0].id,
+      }));
+    }
+  }, [selectedCustomerFromDetailPanel]);
+
   return (
     <div
       className="wz-panel"
-      id="wzPanel0"
       style={{
-        display: `${isCustomerVehicleOn}:'flex'?'none'`,
+        display: `${currentStep === 0 ? "flex" : "none"}`,
       }}
     >
       <div className="wz-panel-inner">
@@ -239,7 +264,7 @@ const CustomerVehicleStep = ({
         <button className="btn btn-ghost" onClick={() => navigate("os", null)}>
           Cancelar
         </button>
-        <button className="btn btn-primary" onClick={() => wzNext(0)}>
+        <button className="btn btn-primary" onClick={wzNext}>
           Próximo — Serviços
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

@@ -5055,7 +5055,6 @@
 .wz-panel {
   max-width: 560px;
   margin: 20px auto 0;
-  display: flex;
   flex-direction: column;
   height: calc(100vh - 52px - 110px);
 }

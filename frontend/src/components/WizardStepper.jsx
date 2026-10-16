@@ -1,36 +1,39 @@
-const WizardStepper = () => {
+import React from "react";
+
+const WizardStepper = ({ currentStep, setCurrentStep }) => {
   const wzGoto = (step) => {
-    return step
-  }
+    setCurrentStep(step);
+  };
+
+  const STEPS = [
+    { num: 1, label: "Cliente" },
+    { num: 2, label: "Serviços" },
+    { num: 3, label: "Detalhes" },
+    { num: 4, label: "Pagamento" },
+    { num: 5, label: "Resumo" },
+  ];
 
   return (
     <div className="wz-bar">
-      <button className="wz-step active" id="wzBtn0" onClick={() => wzGoto(0)}>
-        <div className="wz-step-num">1</div>
-        <div className="wz-step-label">Cliente</div>
-      </button>
-      <div className="wz-connector"></div>
-      <button className="wz-step" id="wzBtn1" onClick={() => wzGoto(1)}>
-        <div className="wz-step-num">2</div>
-        <div className="wz-step-label">Serviços</div>
-      </button>
-      <div className="wz-connector"></div>
-      <button className="wz-step" id="wzBtn2" onClick={() => wzGoto(2)}>
-        <div className="wz-step-num">3</div>
-        <div className="wz-step-label">Detalhes</div>
-      </button>
-      <div className="wz-connector"></div>
-      <button className="wz-step" id="wzBtn3" onClick={() => wzGoto(3)}>
-        <div className="wz-step-num">4</div>
-        <div className="wz-step-label">Pagamento</div>
-      </button>
-      <div className="wz-connector"></div>
-      <button className="wz-step" id="wzBtn4" onClick={() => wzGoto(4)}>
-        <div className="wz-step-num">5</div>
-        <div className="wz-step-label">Resumo</div>
-      </button>
+      {STEPS.map((element, index) => (
+        <React.Fragment key={index}>
+          <button
+            className={`wz-step ${currentStep === element.num - 1 ? "active" : ""}`}
+            key={index}
+            onClick={() => wzGoto(index)}
+          >
+            <div className="wz-step-num">{element.num}</div>
+            <div className="wz-step-label">{element.label}</div>
+          </button>
+          {STEPS.length != index + 1 ? (
+            <div className="wz-connector"></div>
+          ) : (
+            ""
+          )}
+        </React.Fragment>
+      ))}
     </div>
-  )
-}
+  );
+};
 
-export default WizardStepper
+export default WizardStepper;
