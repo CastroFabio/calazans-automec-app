@@ -130,7 +130,7 @@ const Customers = () => {
   };
 
   const handleEditCustomerClick = async (customerID) => {
-    navigate(PATHS.editCustomerFN(customerID));
+    navigate(PATHS.CUSTOMERS.buildEdit(customerID));
   };
 
   /*   const handleFetchCustomersPerPage = async (

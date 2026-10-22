@@ -566,7 +566,7 @@ const EditServiceOrder = () => {
       };
 
       updateServiceOrder(updatedOrder);
-      navigate(PATHS.serviceOrder);
+      navigate(PATHS.SERVICE_ORDERS.ROOT);
     } catch (err) {
       console.error("❌ Erro ao atualizar OS:", err);
       setError(err.response?.data?.message || "Erro ao atualizar ordem");
@@ -666,7 +666,7 @@ const EditServiceOrder = () => {
     try {
       setSaving(true);
       await orderApi.delete(serviceOrder.id);
-      navigate(PATHS.serviceOrder);
+      navigate(PATHS.SERVICE_ORDERS.ROOT);
     } catch (err) {
       setError("Erro ao cancelar ordem");
     } finally {

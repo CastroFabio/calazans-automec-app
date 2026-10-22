@@ -190,14 +190,14 @@ const SideBar = () => {
           {
             id: "serviceOrdersTab",
             title: "Ordens de Serviço",
-            path: PATHS.serviceOrder,
+            path: PATHS.SERVICE_ORDERS.ROOT,
             count: countAllServiceOrders(),
             icon: ICONS.orders,
           },
           {
             id: "customersTab",
             title: "Clientes",
-            path: "/customers",
+            path: PATHS.CUSTOMERS.ROOT,
             count: countAllCustomers(),
             icon: ICONS.customers,
           },
@@ -209,14 +209,14 @@ const SideBar = () => {
           {
             id: "newServiceOrderTab",
             title: "Nova Ordem de Serviço",
-            path: PATHS.newServiceOrder,
+            path: PATHS.SERVICE_ORDERS.NEW,
             count: null,
             icon: ICONS.newOrder,
           },
           {
             id: "dashboard",
             title: "Dashboard",
-            path: PATHS.dashboard,
+            path: PATHS.DASHBOARD,
             count: null,
             icon: ICONS.dashboard,
           },
@@ -224,7 +224,7 @@ const SideBar = () => {
           {
             id: "editCustomerTab",
             title: "Editar Cliente",
-            path: PATHS.editCustomer,
+            path: PATHS.CUSTOMERS.EDIT,
             count: null,
             icon: ICONS.edit,
             hidden: true,
@@ -237,14 +237,14 @@ const SideBar = () => {
           {
             id: "maintenanceJobsTab",
             title: "Serviços",
-            path: PATHS.services,
+            path: PATHS.SERVICES,
             count: counts.maintenanceJobs,
             icon: ICONS.services,
           },
           {
             id: "materialsTab",
             title: "Materiais & Peças",
-            path: PATHS.materials,
+            path: PATHS.MATERIALS,
             count: counts.materials,
             icon: ICONS.materials,
           },
@@ -260,7 +260,7 @@ const SideBar = () => {
   return (
     <aside className="sidebar" id="sidebar">
       {/* Logo */}
-      <div className="sidebar-logo" onClick={() => navigate(PATHS.home)}>
+      <div className="sidebar-logo" onClick={() => navigate(PATHS.HOME)}>
         {logo ? (
           <div className="logo-wrap">
             <img
@@ -307,7 +307,7 @@ const SideBar = () => {
         <button
           onClick={() => {
             logout();
-            navigate(PATHS.login);
+            navigate(PATHS.LOGIN);
           }}
           className="btn btn-ghost"
         >

@@ -1296,6 +1296,21 @@
   font-size: 12px;
 }
 
+.mat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mat-card-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .total-row {
   display: flex;
   align-items: center;

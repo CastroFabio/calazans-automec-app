@@ -9,7 +9,7 @@ export const ProtectedRoute = () => {
   if (loading) return <Loading />;
 
   if (!isAuthenticated) {
-    return <Navigate to={PATHS.login} replace />;
+    return <Navigate to={PATHS.LOGIN} replace />;
   }
 
   return <Outlet />;

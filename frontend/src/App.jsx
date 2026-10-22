@@ -1,38 +1,38 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
-import NavBar from "./components/navBar"
-import SideBar from "./components/sideBar"
+import NavBar from "./components/navBar";
+import SideBar from "./components/sideBar";
 
-import Customers from "./pages/Customers"
-import NotFound from "./pages/NotFound"
-import MaintenanceJobs from "./pages/MaintenanceJobs"
-import Materials from "./pages/Materials"
-import ServiceOrderList from "./pages/ServiceOrderList"
-import NewServiceOrder from "./pages/NewServiceOrder"
-import EditCustomer from "./pages/EditCustomer"
-import EditServiceOrder from "./pages/EditServiceOrder"
-import PrintServiceOrder from "./pages/PrintServiceOrder"
-import Home from "./pages/Home"
-import Login from "./pages/Login"
+import Customers from "./pages/Customers";
+import NotFound from "./pages/NotFound";
+import MaintenanceJobs from "./pages/MaintenanceJobs";
+import Materials from "./pages/Materials";
+import ServiceOrderList from "./pages/ServiceOrderList";
+import NewServiceOrder from "./pages/NewServiceOrder";
+import EditCustomer from "./pages/EditCustomer";
+import EditServiceOrder from "./pages/EditServiceOrder";
+import PrintServiceOrder from "./pages/PrintServiceOrder";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 
-import { CustomerProvider } from "./context/Customer.context"
-import { ServiceOrderProvider } from "./context/ServiceOrder.context"
+import { CustomerProvider } from "./context/Customer.context";
+import { ServiceOrderProvider } from "./context/ServiceOrder.context";
 
-import { PATHS } from "./utils/paths"
-import { AuthProvider, useAuth } from "./context/Auth.context"
-import { ProtectedRoute } from "./components/ProtectedRoute.component"
-import Loading from "./pages/Loading"
-import Dashboard from "./pages/Dashboard"
-import NewServiceOrderWizard from "./pages/NewServiceOrderWizard"
+import { PATHS } from "./utils/paths";
+import { AuthProvider, useAuth } from "./context/Auth.context";
+import { ProtectedRoute } from "./components/ProtectedRoute.component";
+import Loading from "./pages/Loading";
+import Dashboard from "./pages/Dashboard";
+import NewServiceOrderWizard from "./pages/NewServiceOrderWizard";
 
 // Componente para controlar o Layout dinamicamente de acordo com a rota
 const MainLayout = () => {
-  const { loading, isAuthenticated } = useAuth()
-  const location = useLocation()
-  const isHomePage = location.pathname === PATHS.home
-  const isLoginPage = location.pathname === PATHS.login
+  const { loading, isAuthenticated } = useAuth();
+  const location = useLocation();
+  const isHomePage = location.pathname === PATHS.HOME;
+  const isLoginPage = location.pathname === PATHS.LOGIN;
   if (loading) {
-    return <Loading />
+    return <Loading />;
   }
   return (
     <>
@@ -44,37 +44,40 @@ const MainLayout = () => {
         <div className="content">
           <Routes>
             {/* --- ROTAS PÚBLICAS --- */}
-            <Route path={PATHS.login} element={<Login />} />
-            <Route path={PATHS.notFound} element={<NotFound />} />
+            <Route path={PATHS.LOGIN} element={<Login />} />
+            <Route path={PATHS.NOT_FOUND} element={<NotFound />} />
 
             {/* --- ROTAS PROTEGIDAS (Exigem Token) --- */}
             <Route element={<ProtectedRoute />}>
-              <Route path={PATHS.home} element={<Home />} />
-              <Route path={PATHS.serviceOrder} element={<ServiceOrderList />} />
-              <Route path={PATHS.customer} element={<Customers />} />
-              <Route path={PATHS.services} element={<MaintenanceJobs />} />
-              <Route path={PATHS.materials} element={<Materials />} />
+              <Route path={PATHS.HOME} element={<Home />} />
               <Route
-                path={PATHS.newServiceOrder}
+                path={PATHS.SERVICE_ORDERS.ROOT}
+                element={<ServiceOrderList />}
+              />
+              <Route path={PATHS.CUSTOMERS.ROOT} element={<Customers />} />
+              <Route path={PATHS.SERVICES} element={<MaintenanceJobs />} />
+              <Route path={PATHS.MATERIALS} element={<Materials />} />
+              <Route
+                path={PATHS.SERVICE_ORDERS.NEW}
                 element={<NewServiceOrderWizard />}
               />
-              <Route path={PATHS.editCustomer} element={<EditCustomer />} />
+              <Route path={PATHS.CUSTOMERS.EDIT} element={<EditCustomer />} />
               <Route
-                path={PATHS.editServiceOrder}
+                path={PATHS.SERVICE_ORDERS.EDIT}
                 element={<EditServiceOrder />}
               />
               <Route
-                path={PATHS.printServiceOrder}
+                path={PATHS.SERVICE_ORDERS.PRINT}
                 element={<PrintServiceOrder />}
               />
-              <Route path={PATHS.dashboard} element={<Dashboard />} />
+              <Route path={PATHS.DASHBOARD} element={<Dashboard />} />
             </Route>
           </Routes>
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 const App = () => {
   return (
@@ -87,7 +90,7 @@ const App = () => {
         </CustomerProvider>
       </ServiceOrderProvider>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

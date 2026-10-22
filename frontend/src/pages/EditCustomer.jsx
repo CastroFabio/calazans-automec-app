@@ -141,7 +141,7 @@ const EditCustomer = () => {
       setOriginalCustomer(JSON.parse(JSON.stringify(mergedCustomer)));
       setSuccess(true);
 
-      navigate(PATHS.customer);
+      navigate(PATHS.CUSTOMERS);
     } catch (err) {
       console.error("❌ Erro ao atualizar:", err);
 

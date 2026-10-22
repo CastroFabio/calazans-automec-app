@@ -433,7 +433,7 @@ const NewServiceOrder = () => {
       setSelectedCustomerFromDetailPanel({});
 
       // Navega para a listagem
-      navigate(PATHS.serviceOrder);
+      navigate(PATHS.SERVICE_ORDERS.ROOT);
     } catch (err) {
       console.error("❌ Erro ao salvar a Ordem de Serviço:", err);
 

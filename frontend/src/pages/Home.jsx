@@ -88,7 +88,7 @@ const Home = () => {
           {/* Card 1: Nova OS */}
           <div
             className="home-card-register home-card-primary"
-            onClick={() => navigate(PATHS.newServiceOrder)}
+            onClick={() => navigate(PATHS.SERVICE_ORDERS.NEW)}
           >
             <div className="home-card-icon home-card-icon-background">
               <svg
@@ -122,7 +122,7 @@ const Home = () => {
           {/* Outros cards da lista mantidos abaixo... */}
           <div
             className="home-card"
-            onClick={() => navigate(PATHS.serviceOrder)}
+            onClick={() => navigate(PATHS.SERVICE_ORDERS.ROOT)}
           >
             {/* <div className="home-card-count" id="homeCountOS">
               —
@@ -141,7 +141,10 @@ const Home = () => {
             <div className="home-card-sub">Ver e buscar todas as OS</div>
           </div>
 
-          <div className="home-card" onClick={() => navigate(PATHS.customer)}>
+          <div
+            className="home-card"
+            onClick={() => navigate(PATHS.CUSTOMERS.ROOT)}
+          >
             {/* <div className="home-card-count" id="homeCountClientes">
               —
             </div> */}
@@ -164,7 +167,7 @@ const Home = () => {
             onClick={(e) => {
               if (e.currentTarget.classList.contains("home-card-disabled"))
                 return;
-              navigate(PATHS.serviceOrder);
+              navigate(PATHS.SERVICE_ORDERS.ROOT);
             }}
           >
             {/* <div className="home-card-count" id="homeCountPending">
@@ -184,7 +187,7 @@ const Home = () => {
             <div className="home-card-sub">OS aguardando pagamento</div>
           </div>
 
-          <div className="home-card" onClick={() => navigate(PATHS.services)}>
+          <div className="home-card" onClick={() => navigate(PATHS.SERVICES)}>
             <div className="home-card-icon home-card-icon-background-services">
               <svg fill="none" stroke="#8b5cf6" viewBox="0 0 24 24">
                 <path
@@ -205,7 +208,7 @@ const Home = () => {
             <div className="home-card-sub">Catálogo da oficina</div>
           </div>
 
-          <div className="home-card" onClick={() => navigate(PATHS.materials)}>
+          <div className="home-card" onClick={() => navigate(PATHS.MATERIALS)}>
             <div className="home-card-icon home-card-icon-background-material">
               <svg fill="none" stroke="#0ea5e9" viewBox="0 0 24 24">
                 <path

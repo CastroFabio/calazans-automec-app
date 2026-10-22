@@ -14,7 +14,7 @@ const ROUTES_CONFIG = {
     title: "Ordens de Serviço",
     btn: (navigate) => (
       <button
-        onClick={() => navigate(PATHS.newServiceOrder)}
+        onClick={() => navigate(PATHS.SERVICE_ORDERS.NEW)}
         className="btn btn-primary"
       >
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -17,7 +17,7 @@ export default function Login() {
 
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      navigate(PATHS.home, { replace: true });
+      navigate(PATHS.HOME, { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
@@ -43,7 +43,7 @@ export default function Login() {
       await loginService(email, password);
 
       // Navega para a home APÓS a autenticação confirmar
-      navigate(PATHS.home, { replace: true });
+      navigate(PATHS.HOME, { replace: true });
     } catch (err) {
       console.error("Erro no login:", err);
       setShowError(true);

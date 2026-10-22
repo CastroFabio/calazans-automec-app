@@ -213,7 +213,7 @@ const CustomerDetailPanel = ({ onClose, sidebarOpen, selectedCustomer }) => {
                           selectedCustomerForNewOS,
                         );
 
-                        navigate(PATHS.newServiceOrder);
+                        navigate(PATHS.SERVICE_ORDERS.NEW);
                       }}
                     >
                       <svg

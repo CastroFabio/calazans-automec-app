@@ -27,7 +27,7 @@ const NotFound = () => {
           </button>
           <button
             className="btn btn-primary"
-            onClick={() => navigate(PATHS.home)}
+            onClick={() => navigate(PATHS.HOME)}
           >
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

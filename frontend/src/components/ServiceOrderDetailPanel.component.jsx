@@ -130,12 +130,12 @@ const ServiceOrderDetailPanel = ({
 
   // ========== HANDLERS ==========
   const handleEditOrder = () => {
-    navigate(PATHS.editServiceOrderFN(order.id));
+    navigate(PATHS.SERVICE_ORDERS.buildEdit(order.id));
     if (onClose) onClose();
   };
 
   const handlePrintOrder = () => {
-    navigate(PATHS.printServiceOrderFN(order.id));
+    navigate(PATHS.SERVICE_ORDERS.buildPrint(order.id));
     if (onClose) onClose();
   };
 
